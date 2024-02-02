@@ -1,9 +1,0 @@
-C:\Users\clepe\Source\Repos\EduardPetraeus\HealthReporting\Datawarehouse\Database LZDB\bin\Debug\LZDB.dacpac
-C:\Users\clepe\Source\Repos\EduardPetraeus\HealthReporting\Datawarehouse\Database LZDB\bin\Debug\LZDB.dll
-C:\Users\clepe\Source\Repos\EduardPetraeus\HealthReporting\Datawarehouse\Database LZDB\bin\Debug\LZDB.pdb
-C:\Users\clepe\Source\Repos\EduardPetraeus\HealthReporting\Datawarehouse\Database LZDB\obj\Debug\Model.xml
-C:\Users\clepe\Source\Repos\EduardPetraeus\HealthReporting\Datawarehouse\Database LZDB\obj\Debug\refactor.xml
-C:\Users\clepe\Source\Repos\EduardPetraeus\HealthReporting\Datawarehouse\Database LZDB\obj\Debug\postdeploy.sql
-C:\Users\clepe\Source\Repos\EduardPetraeus\HealthReporting\Datawarehouse\Database LZDB\obj\Debug\predeploy.sql
-C:\Users\clepe\Source\Repos\EduardPetraeus\HealthReporting\Datawarehouse\Database LZDB\obj\Debug\LZDB.dll
-C:\Users\clepe\Source\Repos\EduardPetraeus\HealthReporting\Datawarehouse\Database LZDB\obj\Debug\LZDB.pdb
