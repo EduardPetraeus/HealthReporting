@@ -1,0 +1,2211 @@
+﻿<?xml version="1.0"?>
+<DTS:Executable xmlns:DTS="www.microsoft.com/SqlServer/Dts"
+  DTS:refId="Package"
+  DTS:CreationDate="5/11/2020 9:36:52 PM"
+  DTS:CreationName="Microsoft.Package"
+  DTS:CreatorComputerName="PC0QGDKR"
+  DTS:CreatorName="NCLAN\cep"
+  DTS:DTSID="{253BEC7A-AF36-412D-AFAF-F7E6B5DCA0E9}"
+  DTS:ExecutableType="Microsoft.Package"
+  DTS:LastModifiedProductVersion="15.0.2000.71"
+  DTS:LocaleID="1030"
+  DTS:ObjectName="stg Oura_SmoothedLocation"
+  DTS:PackageType="5"
+  DTS:VersionBuild="72"
+  DTS:VersionGUID="{D06A6EB7-B879-41F8-B458-975178F17274}">
+  <DTS:Property
+    DTS:Name="PackageFormatVersion">8</DTS:Property>
+  <DTS:ConnectionManagers>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[Ailes data]"
+      DTS:CreationName="FLATFILE"
+      DTS:DTSID="{6EDD57FE-8FF9-4A51-AC57-2660BF3400DA}"
+      DTS:ObjectName="Ailes data">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:Format="Delimited"
+          DTS:LocaleID="1030"
+          DTS:HeaderRowDelimiter="_x000D__x000A_"
+          DTS:ColumnNamesInFirstDataRow="True"
+          DTS:RowDelimiter=""
+          DTS:TextQualifier="_x003C_none_x003E_"
+          DTS:CodePage="1252"
+          DTS:ConnectionString="C:\Users\cep\Documents\Data til Datavarehus\Ailes data.csv">
+          <DTS:FlatFileColumns>
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x003B_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="aisle_id"
+              DTS:DTSID="{4AE1FB28-D8D8-49D0-A4A0-4043ACE7337F}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x000D__x000A_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="aisle"
+              DTS:DTSID="{411C3706-1BEC-40F5-A02C-0086718A28E4}"
+              DTS:CreationName="" />
+          </DTS:FlatFileColumns>
+        </DTS:ConnectionManager>
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[Departments]"
+      DTS:CreationName="FLATFILE"
+      DTS:DTSID="{04214497-DD9C-4867-97C6-FE56781E98E4}"
+      DTS:ObjectName="Departments">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:Format="Delimited"
+          DTS:LocaleID="1030"
+          DTS:HeaderRowDelimiter="_x000D__x000A_"
+          DTS:ColumnNamesInFirstDataRow="True"
+          DTS:RowDelimiter=""
+          DTS:TextQualifier="_x003C_none_x003E_"
+          DTS:CodePage="1252"
+          DTS:ConnectionString="C:\Users\cep\Documents\Data til Datavarehus\Departments.csv">
+          <DTS:FlatFileColumns>
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x003B_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="department_id"
+              DTS:DTSID="{A04A6E24-E967-407B-B9F7-C07434571C7F}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x000D__x000A_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Department"
+              DTS:DTSID="{904E2ED4-EA76-4A59-8D44-863A900415BB}"
+              DTS:CreationName="" />
+          </DTS:FlatFileColumns>
+        </DTS:ConnectionManager>
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[Orders]"
+      DTS:CreationName="FLATFILE"
+      DTS:DTSID="{30927126-2F6A-4F52-A2B0-152CAB5B48F2}"
+      DTS:ObjectName="Orders">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:Format="Delimited"
+          DTS:LocaleID="1030"
+          DTS:HeaderRowDelimiter="_x000D__x000A_"
+          DTS:ColumnNamesInFirstDataRow="True"
+          DTS:RowDelimiter=""
+          DTS:TextQualifier="_x003C_none_x003E_"
+          DTS:CodePage="1252"
+          DTS:ConnectionString="C:\Users\cep\Documents\Data til Datavarehus\Orders.csv">
+          <DTS:FlatFileColumns>
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x003B_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="order_id"
+              DTS:DTSID="{5A234B69-3F16-489C-A2EC-5A4EF58E1319}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x003B_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="user_id"
+              DTS:DTSID="{35563515-5BA8-4BD4-A59F-CCEA3D2DF3D6}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x003B_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="eval_set"
+              DTS:DTSID="{9735E2FE-012A-40D4-B30A-B5E290745EC9}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x003B_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="order_number"
+              DTS:DTSID="{8A9E352C-3BBD-4B68-B6D4-1BED21DCDC2C}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x003B_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="order_dow"
+              DTS:DTSID="{2004845D-58D7-42A9-B39E-7429CC90D2C6}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x003B_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="order_hour_of_day"
+              DTS:DTSID="{4A1482F5-78FA-4F27-8FA2-2CA827D487AF}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x000D__x000A_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="days_since_prior_order"
+              DTS:DTSID="{EE8BBC7B-D473-4791-9576-D99884F48E3B}"
+              DTS:CreationName="" />
+          </DTS:FlatFileColumns>
+        </DTS:ConnectionManager>
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[Oura_BloodOxygenLevel]"
+      DTS:CreationName="FLATFILE"
+      DTS:DTSID="{E4725E76-6F88-4C45-BE55-E3E30380C5FD}"
+      DTS:ObjectName="Oura_BloodOxygenLevel">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:Format="Delimited"
+          DTS:LocaleID="1033"
+          DTS:HeaderRowDelimiter="_x000D__x000A_"
+          DTS:ColumnNamesInFirstDataRow="True"
+          DTS:RowDelimiter=""
+          DTS:TextQualifier="_x003C_none_x003E_"
+          DTS:CodePage="1252"
+          DTS:ConnectionString="C:\Users\clepe\OneDrive - Pandora\Documents\oura_daily-spo2_2023-12-22T19-56-22.csv">
+          <DTS:FlatFileColumns>
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="spo2_percentage"
+              DTS:DTSID="{54E1A0F8-5E9C-4594-8CDA-16D758406E50}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x000D__x000A_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="day"
+              DTS:DTSID="{64AD7D35-B832-47BF-B202-FF57BE54B69B}"
+              DTS:CreationName="" />
+          </DTS:FlatFileColumns>
+        </DTS:ConnectionManager>
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[Oura_DailySleep]"
+      DTS:CreationName="FLATFILE"
+      DTS:DTSID="{01BD2096-5C8F-4866-A696-28D6D3DE0D41}"
+      DTS:ObjectName="Oura_DailySleep">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:Format="Delimited"
+          DTS:LocaleID="1033"
+          DTS:HeaderRowDelimiter="_x000D__x000A_"
+          DTS:ColumnNamesInFirstDataRow="True"
+          DTS:RowDelimiter=""
+          DTS:TextQualifier="_x003C_none_x003E_"
+          DTS:CodePage="1252"
+          DTS:ConnectionString="C:\Users\clepe\OneDrive - Pandora\Documents\oura_daily-sleep_2023-12-22T22-08-17.csv">
+          <DTS:FlatFileColumns>
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="score"
+              DTS:DTSID="{769C1205-A6EB-434B-AEA5-709AC21F595E}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="day"
+              DTS:DTSID="{A444512F-BF16-4E1D-B585-893D4434B665}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="contributors_timing"
+              DTS:DTSID="{F41F97DD-DBD4-451D-A8C4-64AC5F22A6E7}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="contributors_deep_sleep"
+              DTS:DTSID="{3905051E-10DD-4E71-B428-6D2860955EEF}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="contributors_restfulness"
+              DTS:DTSID="{39310486-E817-4206-8D74-607414E53B5D}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="contributors_efficiency"
+              DTS:DTSID="{FDFA9E65-8AA8-4DD0-8CFC-9D49B5A72BEF}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="contributors_latency"
+              DTS:DTSID="{C2F6BBC1-5BA1-47E9-A4EC-A34DF2A89F45}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="contributors_rem_sleep"
+              DTS:DTSID="{7B4B0BF4-AD0E-43A0-9629-81413DAD7951}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x000D__x000A_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="contributors_total_sleep"
+              DTS:DTSID="{E984AFD2-D31C-4855-87B5-55FEB0A011BC}"
+              DTS:CreationName="" />
+          </DTS:FlatFileColumns>
+        </DTS:ConnectionManager>
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[Oura_HeartRate]"
+      DTS:CreationName="FLATFILE"
+      DTS:DTSID="{DCC912C5-95FA-45EE-97E5-D4C06E0F4D45}"
+      DTS:ObjectName="Oura_HeartRate">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:Format="Delimited"
+          DTS:LocaleID="1033"
+          DTS:HeaderRowDelimiter="_x000D__x000A_"
+          DTS:ColumnNamesInFirstDataRow="True"
+          DTS:RowDelimiter=""
+          DTS:TextQualifier="_x003C_none_x003E_"
+          DTS:CodePage="1252"
+          DTS:ConnectionString="C:\Users\clepe\OneDrive - Pandora\Documents\oura_heart-rate_2023-12-22T20-54-23.csv">
+          <DTS:FlatFileColumns>
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="timestamp"
+              DTS:DTSID="{AB0AC46A-9949-468D-ADA6-71211E05B5ED}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="bpm"
+              DTS:DTSID="{2C02790E-DDA5-4DAE-B19B-9FFBDA6FC0FF}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="quality"
+              DTS:DTSID="{29255856-FF73-49A6-90CB-1F25FF01F371}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="source"
+              DTS:DTSID="{8FF884A8-DC75-46D3-8156-E8412678D948}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x000D__x000A_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="restorative"
+              DTS:DTSID="{AEAA4D15-69C6-480C-B83E-1AC38249D9AE}"
+              DTS:CreationName="" />
+          </DTS:FlatFileColumns>
+        </DTS:ConnectionManager>
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[Oura_SmoothedLocation]"
+      DTS:CreationName="FLATFILE"
+      DTS:DTSID="{9629F49E-8B0E-4C8A-9925-0247451DBC04}"
+      DTS:ObjectName="Oura_SmoothedLocation">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:Format="Delimited"
+          DTS:LocaleID="1033"
+          DTS:HeaderRowDelimiter="_x000D__x000A_"
+          DTS:ColumnNamesInFirstDataRow="True"
+          DTS:RowDelimiter=""
+          DTS:TextQualifier="_x003C_none_x003E_"
+          DTS:CodePage="1252"
+          DTS:ConnectionString="C:\Users\clepe\OneDrive - Pandora\Documents\Oura health data\oura_smoothed-location.csv">
+          <DTS:FlatFileColumns>
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="timestamp"
+              DTS:DTSID="{8398566C-3864-4BCA-A208-04B5F2DED5B4}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="latitude"
+              DTS:DTSID="{F4E3570D-9738-4E10-BF26-2CDA0881010B}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="longitude"
+              DTS:DTSID="{F3C36D37-986B-4530-B12E-D10EE56E64C7}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="altitude"
+              DTS:DTSID="{09FD82BF-9CDF-468D-93A1-E2333B5B5A69}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="course"
+              DTS:DTSID="{9057E0FC-06F9-4C44-8F29-07215B7F2E7B}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="course_accuracy"
+              DTS:DTSID="{D1132592-563B-41A7-9637-324CC2E439D9}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="horizontal_accuracy"
+              DTS:DTSID="{A2FE84BA-C49F-4077-8089-FB2CF82ED7EE}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="vertical_accuracy"
+              DTS:DTSID="{F24927AE-3399-48C1-958E-9E8B86A869EE}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="speed"
+              DTS:DTSID="{85B93799-0D4A-4F2C-9BA8-9CE860A2A6E2}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x000D__x000A_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="speed_accuracy"
+              DTS:DTSID="{D3DA1FDC-BC01-483E-9039-CE2C80B1305F}"
+              DTS:CreationName="" />
+          </DTS:FlatFileColumns>
+        </DTS:ConnectionManager>
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[Products]"
+      DTS:CreationName="FLATFILE"
+      DTS:DTSID="{767C4F6A-C952-4D8B-8F4B-F2433CAF27CA}"
+      DTS:ObjectName="Products">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:Format="Delimited"
+          DTS:LocaleID="1030"
+          DTS:HeaderRowDelimiter="_x000D__x000A_"
+          DTS:ColumnNamesInFirstDataRow="True"
+          DTS:RowDelimiter=""
+          DTS:TextQualifier="_x003C_none_x003E_"
+          DTS:CodePage="1252"
+          DTS:ConnectionString="C:\Users\cpet\OneDrive - Inspari AS\Documents\Datavarehus data\Products.csv">
+          <DTS:FlatFileColumns>
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x003B_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="product_id"
+              DTS:DTSID="{8225396B-F8B3-4ADD-ADEE-6BE5A79E942D}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x003B_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="product_name"
+              DTS:DTSID="{66DCB0FA-37B2-416B-AFF3-CCAC072FF845}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x003B_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="aisle_id"
+              DTS:DTSID="{E7E4CE75-DCC9-4004-84D8-3B02EF6E9556}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x003B_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="department_id"
+              DTS:DTSID="{69DF6DD5-D36C-485C-88DF-E2F0FFA04C0C}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x000D__x000A_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Column 4"
+              DTS:DTSID="{0EEA9965-F2E3-47D9-9BB3-F319E662D5FA}"
+              DTS:CreationName="" />
+          </DTS:FlatFileColumns>
+        </DTS:ConnectionManager>
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+  </DTS:ConnectionManagers>
+  <DTS:PackageParameters>
+    <DTS:PackageParameter
+      DTS:CreationName=""
+      DTS:DataType="11"
+      DTS:DTSID="{AF05D521-1213-409C-A666-68BA4E25C50F}"
+      DTS:ObjectName="IsFullLoad">
+      <DTS:Property
+        DTS:DataType="11"
+        DTS:Name="ParameterValue">-1</DTS:Property>
+    </DTS:PackageParameter>
+  </DTS:PackageParameters>
+  <DTS:Variables>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{B16D8594-E1F0-40E8-8886-CC9741A88D1A}"
+      DTS:IncludeInDebugDump="6789"
+      DTS:Namespace="User"
+      DTS:ObjectName="ExecutionId">
+      <DTS:VariableValue
+        DTS:DataType="20">0</DTS:VariableValue>
+    </DTS:Variable>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{3D8F65B7-5CBE-4FF3-BD95-5FE36F1C590E}"
+      DTS:IncludeInDebugDump="6789"
+      DTS:Namespace="User"
+      DTS:ObjectName="ExtractId">
+      <DTS:VariableValue
+        DTS:DataType="20">0</DTS:VariableValue>
+    </DTS:Variable>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{1815554A-064F-46C0-82F0-315E48662C3E}"
+      DTS:IncludeInDebugDump="6789"
+      DTS:Namespace="User"
+      DTS:ObjectName="RecordsInserted">
+      <DTS:VariableValue
+        DTS:DataType="20">0</DTS:VariableValue>
+    </DTS:Variable>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{89A5395E-2F1C-448D-B491-C9597D32C7E9}"
+      DTS:IncludeInDebugDump="6789"
+      DTS:Namespace="User"
+      DTS:ObjectName="RecordsSelected">
+      <DTS:VariableValue
+        DTS:DataType="20">0</DTS:VariableValue>
+    </DTS:Variable>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{FFAC8A5D-ADB2-4F79-8D83-F77104B17CDF}"
+      DTS:IncludeInDebugDump="2345"
+      DTS:Namespace="User"
+      DTS:ObjectName="TableName">
+      <DTS:VariableValue
+        DTS:DataType="8">Oura_SmoothedLocation</DTS:VariableValue>
+    </DTS:Variable>
+  </DTS:Variables>
+  <DTS:Executables>
+    <DTS:Executable
+      DTS:refId="Package\Extract Products"
+      DTS:CreationName="STOCK:SEQUENCE"
+      DTS:Description="Sequence Container"
+      DTS:DTSID="{6030F3D2-4FAE-463C-89C7-5ADCB4CC3607}"
+      DTS:ExecutableType="STOCK:SEQUENCE"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="Extract Products">
+      <DTS:Variables />
+      <DTS:Executables>
+        <DTS:Executable
+          DTS:refId="Package\Extract Products\SQL ExtractEnd Failed"
+          DTS:CreationName="Microsoft.ExecuteSQLTask"
+          DTS:Description="Execute SQL Task"
+          DTS:DTSID="{5299100B-38A5-4FB9-8DD4-B9E80061786A}"
+          DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+          DTS:LocaleID="-1"
+          DTS:ObjectName="SQL ExtractEnd Failed"
+          DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+          DTS:ThreadHint="1">
+          <DTS:Variables />
+          <DTS:ObjectData>
+            <SQLTask:SqlTaskData
+              SQLTask:Connection="{B4D3DEFE-1F92-4C84-A98D-98DCB1F090F6}"
+              SQLTask:SqlStatementSource="EXEC Audit.ExtractEnd @ExtractId, 'Failed'" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="ExtractId"
+                SQLTask:DtsVariableName="User::ExtractId"
+                SQLTask:ParameterDirection="Input"
+                SQLTask:DataType="12"
+                SQLTask:ParameterSize="-1" />
+            </SQLTask:SqlTaskData>
+          </DTS:ObjectData>
+        </DTS:Executable>
+        <DTS:Executable
+          DTS:refId="Package\Extract Products\SQL ExtractEnd Succeeded"
+          DTS:CreationName="Microsoft.ExecuteSQLTask"
+          DTS:Description="Execute SQL Task"
+          DTS:DTSID="{4288E5AF-3C1F-4B4B-B27D-2316C329BDBC}"
+          DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+          DTS:LocaleID="-1"
+          DTS:ObjectName="SQL ExtractEnd Succeeded"
+          DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+          DTS:ThreadHint="0">
+          <DTS:Variables />
+          <DTS:ObjectData>
+            <SQLTask:SqlTaskData
+              SQLTask:Connection="{B4D3DEFE-1F92-4C84-A98D-98DCB1F090F6}"
+              SQLTask:IsStoredProc="True"
+              SQLTask:SqlStatementSource="Audit.ExtractEnd" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="ExtractId"
+                SQLTask:DtsVariableName="User::ExtractId"
+                SQLTask:ParameterDirection="Input"
+                SQLTask:DataType="12"
+                SQLTask:ParameterSize="-1" />
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="RecordsSelected"
+                SQLTask:DtsVariableName="User::RecordsSelected"
+                SQLTask:ParameterDirection="Input"
+                SQLTask:DataType="12"
+                SQLTask:ParameterSize="-1" />
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="RecordsInserted"
+                SQLTask:DtsVariableName="User::RecordsInserted"
+                SQLTask:ParameterDirection="Input"
+                SQLTask:DataType="12"
+                SQLTask:ParameterSize="-1" />
+            </SQLTask:SqlTaskData>
+          </DTS:ObjectData>
+        </DTS:Executable>
+        <DTS:Executable
+          DTS:refId="Package\Extract Products\SQL ExtractStart"
+          DTS:CreationName="Microsoft.ExecuteSQLTask"
+          DTS:Description="Execute SQL Task"
+          DTS:DTSID="{0A1FC500-73CE-47F1-BCF9-893DE8A5AAE1}"
+          DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+          DTS:LocaleID="-1"
+          DTS:ObjectName="SQL ExtractStart"
+          DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+          DTS:ThreadHint="0">
+          <DTS:Variables />
+          <DTS:ObjectData>
+            <SQLTask:SqlTaskData
+              SQLTask:Connection="{B4D3DEFE-1F92-4C84-A98D-98DCB1F090F6}"
+              SQLTask:IsStoredProc="True"
+              SQLTask:SqlStatementSource="Audit.ExtractStart" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="ExecutionId"
+                SQLTask:DtsVariableName="User::ExecutionId"
+                SQLTask:ParameterDirection="Input"
+                SQLTask:DataType="12"
+                SQLTask:ParameterSize="-1" />
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="ExtractId"
+                SQLTask:DtsVariableName="User::ExtractId"
+                SQLTask:ParameterDirection="Output"
+                SQLTask:DataType="12"
+                SQLTask:ParameterSize="-1" />
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="TableName"
+                SQLTask:DtsVariableName="User::TableName"
+                SQLTask:ParameterDirection="Input"
+                SQLTask:DataType="16"
+                SQLTask:ParameterSize="-1" />
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="Database"
+                SQLTask:DtsVariableName="$Project::Database"
+                SQLTask:ParameterDirection="Input"
+                SQLTask:DataType="16"
+                SQLTask:ParameterSize="-1" />
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="Schema"
+                SQLTask:DtsVariableName="$Project::Schema"
+                SQLTask:ParameterDirection="Input"
+                SQLTask:DataType="16"
+                SQLTask:ParameterSize="-1" />
+            </SQLTask:SqlTaskData>
+          </DTS:ObjectData>
+        </DTS:Executable>
+        <DTS:Executable
+          DTS:refId="Package\Extract Products\stg Oura_SmoothedLocation"
+          DTS:CreationName="Microsoft.Pipeline"
+          DTS:Description="Data Flow Task"
+          DTS:DTSID="{5B3A3D46-C915-48B8-B91C-214274A5AF2F}"
+          DTS:ExecutableType="Microsoft.Pipeline"
+          DTS:LocaleID="-1"
+          DTS:ObjectName="stg Oura_SmoothedLocation"
+          DTS:TaskContact="Performs high-performance data extraction, transformation and loading;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+          <DTS:Variables />
+          <DTS:ObjectData>
+            <pipeline
+              version="1">
+              <components>
+                <component
+                  refId="Package\Extract Products\stg Oura_SmoothedLocation\Derived Column"
+                  componentClassID="Microsoft.DerivedColumn"
+                  contactInfo="Derived Column;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved; http://www.microsoft.com/sql/support;0"
+                  description="Creates new column values by applying expressions to transformation input columns. Create new columns or overwrite existing ones. For example, concatenate the values from the 'first name' and 'last name' column to make a 'full name' column."
+                  name="Derived Column"
+                  usesDispositions="true">
+                  <inputs>
+                    <input
+                      refId="Package\Extract Products\stg Oura_SmoothedLocation\Derived Column.Inputs[Derived Column Input]"
+                      description="Input to the Derived Column Transformation"
+                      name="Derived Column Input">
+                      <externalMetadataColumns />
+                    </input>
+                  </inputs>
+                  <outputs>
+                    <output
+                      refId="Package\Extract Products\stg Oura_SmoothedLocation\Derived Column.Outputs[Derived Column Output]"
+                      description="Default Output of the Derived Column Transformation"
+                      exclusionGroup="1"
+                      name="Derived Column Output"
+                      synchronousInputId="Package\Extract Products\stg Oura_SmoothedLocation\Derived Column.Inputs[Derived Column Input]">
+                      <outputColumns>
+                        <outputColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\Derived Column.Outputs[Derived Column Output].Columns[Meta_CreateJob]"
+                          dataType="i8"
+                          errorOrTruncationOperation="Computation"
+                          errorRowDisposition="FailComponent"
+                          lineageId="Package\Extract Products\stg Oura_SmoothedLocation\Derived Column.Outputs[Derived Column Output].Columns[Meta_CreateJob]"
+                          name="Meta_CreateJob"
+                          truncationRowDisposition="FailComponent">
+                          <properties>
+                            <property
+                              containsID="true"
+                              dataType="System.String"
+                              description="Derived Column Expression"
+                              name="Expression">@[User::ExtractId]</property>
+                            <property
+                              containsID="true"
+                              dataType="System.String"
+                              description="Derived Column Friendly Expression"
+                              expressionType="Notify"
+                              name="FriendlyExpression">@[User::ExtractId]</property>
+                          </properties>
+                        </outputColumn>
+                      </outputColumns>
+                      <externalMetadataColumns />
+                    </output>
+                    <output
+                      refId="Package\Extract Products\stg Oura_SmoothedLocation\Derived Column.Outputs[Derived Column Error Output]"
+                      description="Error Output of the Derived Column Transformation"
+                      exclusionGroup="1"
+                      isErrorOut="true"
+                      name="Derived Column Error Output"
+                      synchronousInputId="Package\Extract Products\stg Oura_SmoothedLocation\Derived Column.Inputs[Derived Column Input]">
+                      <outputColumns>
+                        <outputColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\Derived Column.Outputs[Derived Column Error Output].Columns[ErrorCode]"
+                          dataType="i4"
+                          lineageId="Package\Extract Products\stg Oura_SmoothedLocation\Derived Column.Outputs[Derived Column Error Output].Columns[ErrorCode]"
+                          name="ErrorCode"
+                          specialFlags="1" />
+                        <outputColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\Derived Column.Outputs[Derived Column Error Output].Columns[ErrorColumn]"
+                          dataType="i4"
+                          lineageId="Package\Extract Products\stg Oura_SmoothedLocation\Derived Column.Outputs[Derived Column Error Output].Columns[ErrorColumn]"
+                          name="ErrorColumn"
+                          specialFlags="2" />
+                      </outputColumns>
+                      <externalMetadataColumns />
+                    </output>
+                  </outputs>
+                </component>
+                <component
+                  refId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source"
+                  componentClassID="Microsoft.FlatFileSource"
+                  contactInfo="Flat File Source;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved; http://www.microsoft.com/sql/support;1"
+                  description="Flat File Source"
+                  localeId="1033"
+                  name="Flat File Source"
+                  usesDispositions="true"
+                  version="1">
+                  <properties>
+                    <property
+                      dataType="System.Boolean"
+                      description="Specifies whether zero-length columns are treated as null."
+                      name="RetainNulls">false</property>
+                    <property
+                      dataType="System.String"
+                      description="Specifies the name of an output column containing the file name. If no name is specified, no output column containing the file name will be generated."
+                      name="FileNameColumnName"></property>
+                  </properties>
+                  <connections>
+                    <connection
+                      refId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Connections[FlatFileConnection]"
+                      connectionManagerID="Package.ConnectionManagers[Oura_SmoothedLocation]"
+                      connectionManagerRefId="Package.ConnectionManagers[Oura_SmoothedLocation]"
+                      name="FlatFileConnection" />
+                  </connections>
+                  <outputs>
+                    <output
+                      refId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output]"
+                      name="Flat File Source Output">
+                      <outputColumns>
+                        <outputColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].Columns[timestamp]"
+                          codePage="1252"
+                          dataType="str"
+                          errorOrTruncationOperation="Conversion"
+                          errorRowDisposition="FailComponent"
+                          externalMetadataColumnId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[timestamp]"
+                          length="50"
+                          lineageId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].Columns[timestamp]"
+                          name="timestamp"
+                          truncationRowDisposition="FailComponent">
+                          <properties>
+                            <property
+                              dataType="System.Boolean"
+                              description="Indicates whether the column uses the faster, locale-neutral parsing routines."
+                              name="FastParse">false</property>
+                            <property
+                              dataType="System.Boolean"
+                              description="Indicates whether the data is in binary format."
+                              name="UseBinaryFormat">false</property>
+                          </properties>
+                        </outputColumn>
+                        <outputColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].Columns[latitude]"
+                          codePage="1252"
+                          dataType="str"
+                          errorOrTruncationOperation="Conversion"
+                          errorRowDisposition="FailComponent"
+                          externalMetadataColumnId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[latitude]"
+                          length="50"
+                          lineageId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].Columns[latitude]"
+                          name="latitude"
+                          truncationRowDisposition="FailComponent">
+                          <properties>
+                            <property
+                              dataType="System.Boolean"
+                              description="Indicates whether the column uses the faster, locale-neutral parsing routines."
+                              name="FastParse">false</property>
+                            <property
+                              dataType="System.Boolean"
+                              description="Indicates whether the data is in binary format."
+                              name="UseBinaryFormat">false</property>
+                          </properties>
+                        </outputColumn>
+                        <outputColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].Columns[longitude]"
+                          codePage="1252"
+                          dataType="str"
+                          errorOrTruncationOperation="Conversion"
+                          errorRowDisposition="FailComponent"
+                          externalMetadataColumnId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[longitude]"
+                          length="50"
+                          lineageId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].Columns[longitude]"
+                          name="longitude"
+                          truncationRowDisposition="FailComponent">
+                          <properties>
+                            <property
+                              dataType="System.Boolean"
+                              description="Indicates whether the column uses the faster, locale-neutral parsing routines."
+                              name="FastParse">false</property>
+                            <property
+                              dataType="System.Boolean"
+                              description="Indicates whether the data is in binary format."
+                              name="UseBinaryFormat">false</property>
+                          </properties>
+                        </outputColumn>
+                        <outputColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].Columns[altitude]"
+                          codePage="1252"
+                          dataType="str"
+                          errorOrTruncationOperation="Conversion"
+                          errorRowDisposition="FailComponent"
+                          externalMetadataColumnId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[altitude]"
+                          length="50"
+                          lineageId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].Columns[altitude]"
+                          name="altitude"
+                          truncationRowDisposition="FailComponent">
+                          <properties>
+                            <property
+                              dataType="System.Boolean"
+                              description="Indicates whether the column uses the faster, locale-neutral parsing routines."
+                              name="FastParse">false</property>
+                            <property
+                              dataType="System.Boolean"
+                              description="Indicates whether the data is in binary format."
+                              name="UseBinaryFormat">false</property>
+                          </properties>
+                        </outputColumn>
+                        <outputColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].Columns[course]"
+                          codePage="1252"
+                          dataType="str"
+                          errorOrTruncationOperation="Conversion"
+                          errorRowDisposition="FailComponent"
+                          externalMetadataColumnId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[course]"
+                          length="50"
+                          lineageId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].Columns[course]"
+                          name="course"
+                          truncationRowDisposition="FailComponent">
+                          <properties>
+                            <property
+                              dataType="System.Boolean"
+                              description="Indicates whether the column uses the faster, locale-neutral parsing routines."
+                              name="FastParse">false</property>
+                            <property
+                              dataType="System.Boolean"
+                              description="Indicates whether the data is in binary format."
+                              name="UseBinaryFormat">false</property>
+                          </properties>
+                        </outputColumn>
+                        <outputColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].Columns[course_accuracy]"
+                          codePage="1252"
+                          dataType="str"
+                          errorOrTruncationOperation="Conversion"
+                          errorRowDisposition="FailComponent"
+                          externalMetadataColumnId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[course_accuracy]"
+                          length="50"
+                          lineageId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].Columns[course_accuracy]"
+                          name="course_accuracy"
+                          truncationRowDisposition="FailComponent">
+                          <properties>
+                            <property
+                              dataType="System.Boolean"
+                              description="Indicates whether the column uses the faster, locale-neutral parsing routines."
+                              name="FastParse">false</property>
+                            <property
+                              dataType="System.Boolean"
+                              description="Indicates whether the data is in binary format."
+                              name="UseBinaryFormat">false</property>
+                          </properties>
+                        </outputColumn>
+                        <outputColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].Columns[horizontal_accuracy]"
+                          codePage="1252"
+                          dataType="str"
+                          errorOrTruncationOperation="Conversion"
+                          errorRowDisposition="FailComponent"
+                          externalMetadataColumnId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[horizontal_accuracy]"
+                          length="50"
+                          lineageId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].Columns[horizontal_accuracy]"
+                          name="horizontal_accuracy"
+                          truncationRowDisposition="FailComponent">
+                          <properties>
+                            <property
+                              dataType="System.Boolean"
+                              description="Indicates whether the column uses the faster, locale-neutral parsing routines."
+                              name="FastParse">false</property>
+                            <property
+                              dataType="System.Boolean"
+                              description="Indicates whether the data is in binary format."
+                              name="UseBinaryFormat">false</property>
+                          </properties>
+                        </outputColumn>
+                        <outputColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].Columns[vertical_accuracy]"
+                          codePage="1252"
+                          dataType="str"
+                          errorOrTruncationOperation="Conversion"
+                          errorRowDisposition="FailComponent"
+                          externalMetadataColumnId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[vertical_accuracy]"
+                          length="50"
+                          lineageId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].Columns[vertical_accuracy]"
+                          name="vertical_accuracy"
+                          truncationRowDisposition="FailComponent">
+                          <properties>
+                            <property
+                              dataType="System.Boolean"
+                              description="Indicates whether the column uses the faster, locale-neutral parsing routines."
+                              name="FastParse">false</property>
+                            <property
+                              dataType="System.Boolean"
+                              description="Indicates whether the data is in binary format."
+                              name="UseBinaryFormat">false</property>
+                          </properties>
+                        </outputColumn>
+                        <outputColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].Columns[speed]"
+                          codePage="1252"
+                          dataType="str"
+                          errorOrTruncationOperation="Conversion"
+                          errorRowDisposition="FailComponent"
+                          externalMetadataColumnId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[speed]"
+                          length="50"
+                          lineageId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].Columns[speed]"
+                          name="speed"
+                          truncationRowDisposition="FailComponent">
+                          <properties>
+                            <property
+                              dataType="System.Boolean"
+                              description="Indicates whether the column uses the faster, locale-neutral parsing routines."
+                              name="FastParse">false</property>
+                            <property
+                              dataType="System.Boolean"
+                              description="Indicates whether the data is in binary format."
+                              name="UseBinaryFormat">false</property>
+                          </properties>
+                        </outputColumn>
+                        <outputColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].Columns[speed_accuracy]"
+                          codePage="1252"
+                          dataType="str"
+                          errorOrTruncationOperation="Conversion"
+                          errorRowDisposition="FailComponent"
+                          externalMetadataColumnId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[speed_accuracy]"
+                          length="50"
+                          lineageId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].Columns[speed_accuracy]"
+                          name="speed_accuracy"
+                          truncationRowDisposition="FailComponent">
+                          <properties>
+                            <property
+                              dataType="System.Boolean"
+                              description="Indicates whether the column uses the faster, locale-neutral parsing routines."
+                              name="FastParse">false</property>
+                            <property
+                              dataType="System.Boolean"
+                              description="Indicates whether the data is in binary format."
+                              name="UseBinaryFormat">false</property>
+                          </properties>
+                        </outputColumn>
+                      </outputColumns>
+                      <externalMetadataColumns
+                        isUsed="True">
+                        <externalMetadataColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[timestamp]"
+                          codePage="1252"
+                          dataType="str"
+                          length="50"
+                          name="timestamp" />
+                        <externalMetadataColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[latitude]"
+                          codePage="1252"
+                          dataType="str"
+                          length="50"
+                          name="latitude" />
+                        <externalMetadataColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[longitude]"
+                          codePage="1252"
+                          dataType="str"
+                          length="50"
+                          name="longitude" />
+                        <externalMetadataColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[altitude]"
+                          codePage="1252"
+                          dataType="str"
+                          length="50"
+                          name="altitude" />
+                        <externalMetadataColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[course]"
+                          codePage="1252"
+                          dataType="str"
+                          length="50"
+                          name="course" />
+                        <externalMetadataColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[course_accuracy]"
+                          codePage="1252"
+                          dataType="str"
+                          length="50"
+                          name="course_accuracy" />
+                        <externalMetadataColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[horizontal_accuracy]"
+                          codePage="1252"
+                          dataType="str"
+                          length="50"
+                          name="horizontal_accuracy" />
+                        <externalMetadataColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[vertical_accuracy]"
+                          codePage="1252"
+                          dataType="str"
+                          length="50"
+                          name="vertical_accuracy" />
+                        <externalMetadataColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[speed]"
+                          codePage="1252"
+                          dataType="str"
+                          length="50"
+                          name="speed" />
+                        <externalMetadataColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[speed_accuracy]"
+                          codePage="1252"
+                          dataType="str"
+                          length="50"
+                          name="speed_accuracy" />
+                      </externalMetadataColumns>
+                    </output>
+                    <output
+                      refId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Error Output]"
+                      isErrorOut="true"
+                      name="Flat File Source Error Output">
+                      <outputColumns>
+                        <outputColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Error Output].Columns[Flat File Source Error Output Column]"
+                          codePage="1252"
+                          dataType="text"
+                          description="Flat File Source Error Output Column"
+                          lineageId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Error Output].Columns[Flat File Source Error Output Column]"
+                          name="Flat File Source Error Output Column" />
+                        <outputColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Error Output].Columns[ErrorCode]"
+                          dataType="i4"
+                          lineageId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Error Output].Columns[ErrorCode]"
+                          name="ErrorCode"
+                          specialFlags="1" />
+                        <outputColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Error Output].Columns[ErrorColumn]"
+                          dataType="i4"
+                          lineageId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Error Output].Columns[ErrorColumn]"
+                          name="ErrorColumn"
+                          specialFlags="2" />
+                      </outputColumns>
+                      <externalMetadataColumns />
+                    </output>
+                  </outputs>
+                </component>
+                <component
+                  refId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination"
+                  componentClassID="Microsoft.OLEDBDestination"
+                  contactInfo="OLE DB Destination;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved; http://www.microsoft.com/sql/support;4"
+                  description="OLE DB Destination"
+                  name="OLE DB Destination"
+                  usesDispositions="true"
+                  version="4">
+                  <properties>
+                    <property
+                      dataType="System.Int32"
+                      description="The number of seconds before a command times out.  A value of 0 indicates an infinite time-out."
+                      name="CommandTimeout">0</property>
+                    <property
+                      dataType="System.String"
+                      description="Specifies the name of the database object used to open a rowset."
+                      name="OpenRowset">[stg].[Oura_SmoothedLocation]</property>
+                    <property
+                      dataType="System.String"
+                      description="Specifies the variable that contains the name of the database object used to open a rowset."
+                      name="OpenRowsetVariable"></property>
+                    <property
+                      dataType="System.String"
+                      description="The SQL command to be executed."
+                      name="SqlCommand"
+                      UITypeEditor="Microsoft.DataTransformationServices.Controls.ModalMultilineStringEditor"></property>
+                    <property
+                      dataType="System.Int32"
+                      description="Specifies the column code page to use when code page information is unavailable from the data source."
+                      name="DefaultCodePage">1252</property>
+                    <property
+                      dataType="System.Boolean"
+                      description="Forces the use of the DefaultCodePage property value when describing character data."
+                      name="AlwaysUseDefaultCodePage">false</property>
+                    <property
+                      dataType="System.Int32"
+                      description="Specifies the mode used to access the database."
+                      name="AccessMode"
+                      typeConverter="AccessMode">3</property>
+                    <property
+                      dataType="System.Boolean"
+                      description="Indicates whether the values supplied for identity columns will be copied to the destination. If false, values for identity columns will be auto-generated at the destination. Applies only if fast load is turned on."
+                      name="FastLoadKeepIdentity">false</property>
+                    <property
+                      dataType="System.Boolean"
+                      description="Indicates whether the columns containing null will have null inserted in the destination. If false, columns containing null will have their default values inserted at the destination. Applies only if fast load is turned on."
+                      name="FastLoadKeepNulls">false</property>
+                    <property
+                      dataType="System.String"
+                      description="Specifies options to be used with fast load.  Applies only if fast load is turned on."
+                      name="FastLoadOptions">TABLOCK,CHECK_CONSTRAINTS</property>
+                    <property
+                      dataType="System.Int32"
+                      description="Specifies when commits are issued during data insertion.  A value of 0 specifies that one commit will be issued at the end of data insertion.  Applies only if fast load is turned on."
+                      name="FastLoadMaxInsertCommitSize">2147483647</property>
+                  </properties>
+                  <connections>
+                    <connection
+                      refId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Connections[OleDbConnection]"
+                      connectionManagerID="{63CDF9AD-CF5A-4A3C-903A-3F8E8B3D16D3}:external"
+                      connectionManagerRefId="Project.ConnectionManagers[OLEDB HealthReporting]"
+                      description="The OLE DB runtime connection used to access the database."
+                      name="OleDbConnection" />
+                  </connections>
+                  <inputs>
+                    <input
+                      refId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input]"
+                      errorOrTruncationOperation="Insert"
+                      errorRowDisposition="FailComponent"
+                      hasSideEffects="true"
+                      name="OLE DB Destination Input">
+                      <inputColumns>
+                        <inputColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].Columns[Meta_CreateJob]"
+                          cachedDataType="i8"
+                          cachedName="Meta_CreateJob"
+                          externalMetadataColumnId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].ExternalColumns[Meta_CreateJob]"
+                          lineageId="Package\Extract Products\stg Oura_SmoothedLocation\Derived Column.Outputs[Derived Column Output].Columns[Meta_CreateJob]" />
+                        <inputColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].Columns[timestamp]"
+                          cachedCodepage="1252"
+                          cachedDataType="str"
+                          cachedLength="50"
+                          cachedName="timestamp"
+                          externalMetadataColumnId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].ExternalColumns[timestamp]"
+                          lineageId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].Columns[timestamp]" />
+                        <inputColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].Columns[latitude]"
+                          cachedCodepage="1252"
+                          cachedDataType="str"
+                          cachedLength="50"
+                          cachedName="latitude"
+                          externalMetadataColumnId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].ExternalColumns[latitude]"
+                          lineageId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].Columns[latitude]" />
+                        <inputColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].Columns[longitude]"
+                          cachedCodepage="1252"
+                          cachedDataType="str"
+                          cachedLength="50"
+                          cachedName="longitude"
+                          externalMetadataColumnId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].ExternalColumns[longitude]"
+                          lineageId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].Columns[longitude]" />
+                        <inputColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].Columns[altitude]"
+                          cachedCodepage="1252"
+                          cachedDataType="str"
+                          cachedLength="50"
+                          cachedName="altitude"
+                          externalMetadataColumnId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].ExternalColumns[altitude]"
+                          lineageId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].Columns[altitude]" />
+                        <inputColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].Columns[course]"
+                          cachedCodepage="1252"
+                          cachedDataType="str"
+                          cachedLength="50"
+                          cachedName="course"
+                          externalMetadataColumnId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].ExternalColumns[course]"
+                          lineageId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].Columns[course]" />
+                        <inputColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].Columns[course_accuracy]"
+                          cachedCodepage="1252"
+                          cachedDataType="str"
+                          cachedLength="50"
+                          cachedName="course_accuracy"
+                          externalMetadataColumnId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].ExternalColumns[course_accuracy]"
+                          lineageId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].Columns[course_accuracy]" />
+                        <inputColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].Columns[horizontal_accuracy]"
+                          cachedCodepage="1252"
+                          cachedDataType="str"
+                          cachedLength="50"
+                          cachedName="horizontal_accuracy"
+                          externalMetadataColumnId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].ExternalColumns[horizontal_accuracy]"
+                          lineageId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].Columns[horizontal_accuracy]" />
+                        <inputColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].Columns[vertical_accuracy]"
+                          cachedCodepage="1252"
+                          cachedDataType="str"
+                          cachedLength="50"
+                          cachedName="vertical_accuracy"
+                          externalMetadataColumnId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].ExternalColumns[vertical_accuracy]"
+                          lineageId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].Columns[vertical_accuracy]" />
+                        <inputColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].Columns[speed]"
+                          cachedCodepage="1252"
+                          cachedDataType="str"
+                          cachedLength="50"
+                          cachedName="speed"
+                          externalMetadataColumnId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].ExternalColumns[speed]"
+                          lineageId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].Columns[speed]" />
+                        <inputColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].Columns[speed_accuracy]"
+                          cachedCodepage="1252"
+                          cachedDataType="str"
+                          cachedLength="50"
+                          cachedName="speed_accuracy"
+                          externalMetadataColumnId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].ExternalColumns[speed_accuracy]"
+                          lineageId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output].Columns[speed_accuracy]" />
+                      </inputColumns>
+                      <externalMetadataColumns
+                        isUsed="True">
+                        <externalMetadataColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].ExternalColumns[Meta_Id]"
+                          dataType="i8"
+                          name="Meta_Id" />
+                        <externalMetadataColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].ExternalColumns[Meta_CreateTime]"
+                          dataType="dbTimeStamp"
+                          name="Meta_CreateTime" />
+                        <externalMetadataColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].ExternalColumns[Meta_CreateJob]"
+                          dataType="i8"
+                          name="Meta_CreateJob" />
+                        <externalMetadataColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].ExternalColumns[timestamp]"
+                          codePage="1252"
+                          dataType="str"
+                          length="200"
+                          name="timestamp" />
+                        <externalMetadataColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].ExternalColumns[latitude]"
+                          codePage="1252"
+                          dataType="str"
+                          length="200"
+                          name="latitude" />
+                        <externalMetadataColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].ExternalColumns[longitude]"
+                          codePage="1252"
+                          dataType="str"
+                          length="200"
+                          name="longitude" />
+                        <externalMetadataColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].ExternalColumns[altitude]"
+                          codePage="1252"
+                          dataType="str"
+                          length="200"
+                          name="altitude" />
+                        <externalMetadataColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].ExternalColumns[course]"
+                          codePage="1252"
+                          dataType="str"
+                          length="200"
+                          name="course" />
+                        <externalMetadataColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].ExternalColumns[course_accuracy]"
+                          codePage="1252"
+                          dataType="str"
+                          length="200"
+                          name="course_accuracy" />
+                        <externalMetadataColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].ExternalColumns[horizontal_accuracy]"
+                          codePage="1252"
+                          dataType="str"
+                          length="200"
+                          name="horizontal_accuracy" />
+                        <externalMetadataColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].ExternalColumns[vertical_accuracy]"
+                          codePage="1252"
+                          dataType="str"
+                          length="200"
+                          name="vertical_accuracy" />
+                        <externalMetadataColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].ExternalColumns[speed]"
+                          codePage="1252"
+                          dataType="str"
+                          length="200"
+                          name="speed" />
+                        <externalMetadataColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input].ExternalColumns[speed_accuracy]"
+                          codePage="1252"
+                          dataType="str"
+                          length="200"
+                          name="speed_accuracy" />
+                      </externalMetadataColumns>
+                    </input>
+                  </inputs>
+                  <outputs>
+                    <output
+                      refId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Outputs[OLE DB Destination Error Output]"
+                      exclusionGroup="1"
+                      isErrorOut="true"
+                      name="OLE DB Destination Error Output"
+                      synchronousInputId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input]">
+                      <outputColumns>
+                        <outputColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Outputs[OLE DB Destination Error Output].Columns[ErrorCode]"
+                          dataType="i4"
+                          lineageId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Outputs[OLE DB Destination Error Output].Columns[ErrorCode]"
+                          name="ErrorCode"
+                          specialFlags="1" />
+                        <outputColumn
+                          refId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Outputs[OLE DB Destination Error Output].Columns[ErrorColumn]"
+                          dataType="i4"
+                          lineageId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Outputs[OLE DB Destination Error Output].Columns[ErrorColumn]"
+                          name="ErrorColumn"
+                          specialFlags="2" />
+                      </outputColumns>
+                      <externalMetadataColumns />
+                    </output>
+                  </outputs>
+                </component>
+                <component
+                  refId="Package\Extract Products\stg Oura_SmoothedLocation\RC inserted"
+                  componentClassID="Microsoft.RowCount"
+                  contactInfo="Row Count;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved; http://www.microsoft.com/sql/support;0"
+                  description="Counts rows as they pass through a data flow. For example, use the number of rows processed to determine whether or not to perform cleanup operations, or update text in an e-mail message to communicate processing status."
+                  name="RC inserted">
+                  <properties>
+                    <property
+                      dataType="System.String"
+                      description="Specifies the variable to hold the row count."
+                      name="VariableName">User::RecordsInserted</property>
+                  </properties>
+                  <inputs>
+                    <input
+                      refId="Package\Extract Products\stg Oura_SmoothedLocation\RC inserted.Inputs[Row Count Input 1]"
+                      hasSideEffects="true"
+                      name="Row Count Input 1">
+                      <externalMetadataColumns />
+                    </input>
+                  </inputs>
+                  <outputs>
+                    <output
+                      refId="Package\Extract Products\stg Oura_SmoothedLocation\RC inserted.Outputs[Row Count Output 1]"
+                      name="Row Count Output 1"
+                      synchronousInputId="Package\Extract Products\stg Oura_SmoothedLocation\RC inserted.Inputs[Row Count Input 1]">
+                      <externalMetadataColumns />
+                    </output>
+                  </outputs>
+                </component>
+                <component
+                  refId="Package\Extract Products\stg Oura_SmoothedLocation\RC selected"
+                  componentClassID="Microsoft.RowCount"
+                  contactInfo="Row Count;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved; http://www.microsoft.com/sql/support;0"
+                  description="Counts rows as they pass through a data flow. For example, use the number of rows processed to determine whether or not to perform cleanup operations, or update text in an e-mail message to communicate processing status."
+                  name="RC selected">
+                  <properties>
+                    <property
+                      dataType="System.String"
+                      description="Specifies the variable to hold the row count."
+                      name="VariableName">User::RecordsSelected</property>
+                  </properties>
+                  <inputs>
+                    <input
+                      refId="Package\Extract Products\stg Oura_SmoothedLocation\RC selected.Inputs[Row Count Input 1]"
+                      hasSideEffects="true"
+                      name="Row Count Input 1">
+                      <externalMetadataColumns />
+                    </input>
+                  </inputs>
+                  <outputs>
+                    <output
+                      refId="Package\Extract Products\stg Oura_SmoothedLocation\RC selected.Outputs[Row Count Output 1]"
+                      name="Row Count Output 1"
+                      synchronousInputId="Package\Extract Products\stg Oura_SmoothedLocation\RC selected.Inputs[Row Count Input 1]">
+                      <externalMetadataColumns />
+                    </output>
+                  </outputs>
+                </component>
+              </components>
+              <paths>
+                <path
+                  refId="Package\Extract Products\stg Oura_SmoothedLocation.Paths[Derived Column Output]"
+                  endId="Package\Extract Products\stg Oura_SmoothedLocation\RC inserted.Inputs[Row Count Input 1]"
+                  name="Derived Column Output"
+                  startId="Package\Extract Products\stg Oura_SmoothedLocation\Derived Column.Outputs[Derived Column Output]" />
+                <path
+                  refId="Package\Extract Products\stg Oura_SmoothedLocation.Paths[Flat File Source Output]"
+                  endId="Package\Extract Products\stg Oura_SmoothedLocation\RC selected.Inputs[Row Count Input 1]"
+                  name="Flat File Source Output"
+                  startId="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source.Outputs[Flat File Source Output]" />
+                <path
+                  refId="Package\Extract Products\stg Oura_SmoothedLocation.Paths[Row Count Output 1]"
+                  endId="Package\Extract Products\stg Oura_SmoothedLocation\Derived Column.Inputs[Derived Column Input]"
+                  name="Row Count Output 1"
+                  startId="Package\Extract Products\stg Oura_SmoothedLocation\RC selected.Outputs[Row Count Output 1]" />
+                <path
+                  refId="Package\Extract Products\stg Oura_SmoothedLocation.Paths[Row Count Output 11]"
+                  endId="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination.Inputs[OLE DB Destination Input]"
+                  name="Row Count Output 1"
+                  startId="Package\Extract Products\stg Oura_SmoothedLocation\RC inserted.Outputs[Row Count Output 1]" />
+              </paths>
+            </pipeline>
+          </DTS:ObjectData>
+        </DTS:Executable>
+        <DTS:Executable
+          DTS:refId="Package\Extract Products\Truncate table"
+          DTS:CreationName="Microsoft.ExecuteSQLTask"
+          DTS:Description="Execute SQL Task"
+          DTS:DTSID="{CCF3CAB3-C49D-4225-B56A-8A1A3F2A33E5}"
+          DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+          DTS:LocaleID="-1"
+          DTS:ObjectName="Truncate table"
+          DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+          DTS:ThreadHint="0">
+          <DTS:Variables />
+          <DTS:ObjectData>
+            <SQLTask:SqlTaskData
+              SQLTask:Connection="{63CDF9AD-CF5A-4A3C-903A-3F8E8B3D16D3}"
+              SQLTask:SqlStatementSource="truncate table [HealthReporting].[stg].[Oura_SmoothedLocation]" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+          </DTS:ObjectData>
+        </DTS:Executable>
+      </DTS:Executables>
+      <DTS:PrecedenceConstraints>
+        <DTS:PrecedenceConstraint
+          DTS:refId="Package\Extract Products.PrecedenceConstraints[Constraint]"
+          DTS:CreationName=""
+          DTS:DTSID="{DC394490-023F-4D0E-ABD3-00986A8D41DB}"
+          DTS:From="Package\Extract Products\Truncate table"
+          DTS:LogicalAnd="True"
+          DTS:ObjectName="Constraint"
+          DTS:To="Package\Extract Products\stg Oura_SmoothedLocation" />
+        <DTS:PrecedenceConstraint
+          DTS:refId="Package\Extract Products.PrecedenceConstraints[Constraint 1]"
+          DTS:CreationName=""
+          DTS:DTSID="{7F32689F-C960-47F2-BC66-B078D918FAAF}"
+          DTS:From="Package\Extract Products\SQL ExtractStart"
+          DTS:LogicalAnd="True"
+          DTS:ObjectName="Constraint 1"
+          DTS:To="Package\Extract Products\Truncate table" />
+        <DTS:PrecedenceConstraint
+          DTS:refId="Package\Extract Products.PrecedenceConstraints[Constraint 2]"
+          DTS:CreationName=""
+          DTS:DTSID="{D5BBBCC7-495F-4C44-AD85-A28DAB88DA0F}"
+          DTS:From="Package\Extract Products\stg Oura_SmoothedLocation"
+          DTS:LogicalAnd="True"
+          DTS:ObjectName="Constraint 2"
+          DTS:To="Package\Extract Products\SQL ExtractEnd Succeeded" />
+        <DTS:PrecedenceConstraint
+          DTS:refId="Package\Extract Products.PrecedenceConstraints[Constraint 3]"
+          DTS:CreationName=""
+          DTS:DTSID="{C5393EEF-0C8A-49DA-B604-868149149847}"
+          DTS:From="Package\Extract Products\stg Oura_SmoothedLocation"
+          DTS:ObjectName="Constraint 3"
+          DTS:To="Package\Extract Products\SQL ExtractEnd Failed"
+          DTS:Value="1" />
+        <DTS:PrecedenceConstraint
+          DTS:refId="Package\Extract Products.PrecedenceConstraints[Constraint 4]"
+          DTS:CreationName=""
+          DTS:DTSID="{F0F56942-06B6-4A6F-9066-F45561D094CF}"
+          DTS:From="Package\Extract Products\Truncate table"
+          DTS:ObjectName="Constraint 4"
+          DTS:To="Package\Extract Products\SQL ExtractEnd Failed"
+          DTS:Value="1" />
+      </DTS:PrecedenceConstraints>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL ExecutionEnd Failed"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Execute SQL Task"
+      DTS:DTSID="{B5D0C2C5-E928-4F9D-AC1C-42EDF69AE45C}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL ExecutionEnd Failed"
+      DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{B4D3DEFE-1F92-4C84-A98D-98DCB1F090F6}"
+          SQLTask:SqlStatementSource="EXEC Audit.ExecutionEnd @Id, 'Failed'" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+          <SQLTask:ParameterBinding
+            SQLTask:ParameterName="Id"
+            SQLTask:DtsVariableName="User::ExecutionId"
+            SQLTask:ParameterDirection="Input"
+            SQLTask:DataType="12"
+            SQLTask:ParameterSize="-1" />
+        </SQLTask:SqlTaskData>
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL ExecutionEnd Succeeded"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Execute SQL Task"
+      DTS:DTSID="{A84447EB-2A48-4EBB-9B1B-40A8F9C98C35}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL ExecutionEnd Succeeded"
+      DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+      DTS:ThreadHint="1">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{B4D3DEFE-1F92-4C84-A98D-98DCB1F090F6}"
+          SQLTask:IsStoredProc="True"
+          SQLTask:SqlStatementSource="Audit.ExecutionEnd" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+          <SQLTask:ParameterBinding
+            SQLTask:ParameterName="Id"
+            SQLTask:DtsVariableName="User::ExecutionId"
+            SQLTask:ParameterDirection="Input"
+            SQLTask:DataType="12"
+            SQLTask:ParameterSize="-1" />
+        </SQLTask:SqlTaskData>
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL ExecutionStart"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Execute SQL Task"
+      DTS:DTSID="{43E6105E-7CDB-4465-8074-17ECD9D5F9B3}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL ExecutionStart"
+      DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{B4D3DEFE-1F92-4C84-A98D-98DCB1F090F6}"
+          SQLTask:IsStoredProc="True"
+          SQLTask:SqlStatementSource="Audit.ExecutionStart" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+          <SQLTask:ParameterBinding
+            SQLTask:ParameterName="Id"
+            SQLTask:DtsVariableName="User::ExecutionId"
+            SQLTask:ParameterDirection="Output"
+            SQLTask:DataType="12"
+            SQLTask:ParameterSize="-1" />
+          <SQLTask:ParameterBinding
+            SQLTask:ParameterName="PackageID"
+            SQLTask:DtsVariableName="System::PackageID"
+            SQLTask:ParameterDirection="Input"
+            SQLTask:DataType="9"
+            SQLTask:ParameterSize="-1" />
+          <SQLTask:ParameterBinding
+            SQLTask:ParameterName="PackageName"
+            SQLTask:DtsVariableName="System::PackageName"
+            SQLTask:ParameterDirection="Input"
+            SQLTask:DataType="16"
+            SQLTask:ParameterSize="-1" />
+          <SQLTask:ParameterBinding
+            SQLTask:ParameterName="Database"
+            SQLTask:DtsVariableName="$Project::Database"
+            SQLTask:ParameterDirection="Input"
+            SQLTask:DataType="16"
+            SQLTask:ParameterSize="-1" />
+          <SQLTask:ParameterBinding
+            SQLTask:ParameterName="ServerExecutionID"
+            SQLTask:DtsVariableName="System::ServerExecutionID"
+            SQLTask:ParameterDirection="Input"
+            SQLTask:DataType="12"
+            SQLTask:ParameterSize="-1" />
+        </SQLTask:SqlTaskData>
+      </DTS:ObjectData>
+    </DTS:Executable>
+  </DTS:Executables>
+  <DTS:PrecedenceConstraints>
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[Constraint]"
+      DTS:CreationName=""
+      DTS:DTSID="{80500A05-2053-4CC1-9568-9A59C922F760}"
+      DTS:From="Package\SQL ExecutionStart"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="Constraint"
+      DTS:To="Package\Extract Products" />
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[Constraint 1]"
+      DTS:CreationName=""
+      DTS:DTSID="{2EDD0711-B9A9-4551-BBE2-CC5044B885E1}"
+      DTS:From="Package\Extract Products"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="Constraint 1"
+      DTS:To="Package\SQL ExecutionEnd Succeeded" />
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[Constraint 2]"
+      DTS:CreationName=""
+      DTS:DTSID="{89A031EC-DEFA-4E74-B8B6-C30B54E3A5F9}"
+      DTS:From="Package\Extract Products"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="Constraint 2"
+      DTS:To="Package\SQL ExecutionEnd Failed"
+      DTS:Value="1" />
+  </DTS:PrecedenceConstraints>
+  <DTS:EventHandlers>
+    <DTS:EventHandler
+      DTS:refId="Package.EventHandlers[OnError]"
+      DTS:CreationName="OnError"
+      DTS:DTSID="{2B8B64B4-EB4F-4B27-926D-B552C69EEE1B}"
+      DTS:EventID="0"
+      DTS:EventName="OnError"
+      DTS:LocaleID="-1">
+      <DTS:Variables>
+        <DTS:Variable
+          DTS:CreationName=""
+          DTS:Description="The propagate property of the event"
+          DTS:DTSID="{A06B89AC-F8A3-4AD8-8D34-56BB9BF47256}"
+          DTS:IncludeInDebugDump="6789"
+          DTS:Namespace="System"
+          DTS:ObjectName="Propagate">
+          <DTS:VariableValue
+            DTS:DataType="11">-1</DTS:VariableValue>
+        </DTS:Variable>
+      </DTS:Variables>
+      <DTS:Executables>
+        <DTS:Executable
+          DTS:refId="Package.EventHandlers[OnError]\SQL ExecutionError"
+          DTS:CreationName="Microsoft.ExecuteSQLTask"
+          DTS:Description="Execute SQL Task"
+          DTS:DTSID="{EA00A481-0352-41D8-A917-655A91DB355B}"
+          DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+          DTS:LocaleID="-1"
+          DTS:ObjectName="SQL ExecutionError"
+          DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+          <DTS:Variables />
+          <DTS:ObjectData>
+            <SQLTask:SqlTaskData
+              SQLTask:Connection="{B4D3DEFE-1F92-4C84-A98D-98DCB1F090F6}"
+              SQLTask:IsStoredProc="True"
+              SQLTask:SqlStatementSource="Audit.ExecutionError" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="ExecutionID"
+                SQLTask:DtsVariableName="User::ExecutionId"
+                SQLTask:ParameterDirection="Input"
+                SQLTask:DataType="12"
+                SQLTask:ParameterSize="-1" />
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="ErrorCode"
+                SQLTask:DtsVariableName="System::ErrorCode"
+                SQLTask:ParameterDirection="Input"
+                SQLTask:DataType="11"
+                SQLTask:ParameterSize="-1" />
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="ErrorDescription"
+                SQLTask:DtsVariableName="System::ErrorDescription"
+                SQLTask:ParameterDirection="Input"
+                SQLTask:DataType="16"
+                SQLTask:ParameterSize="-1" />
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="SourceName"
+                SQLTask:DtsVariableName="System::SourceName"
+                SQLTask:ParameterDirection="Input"
+                SQLTask:DataType="16"
+                SQLTask:ParameterSize="-1" />
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="SourceDescription"
+                SQLTask:DtsVariableName="System::SourceDescription"
+                SQLTask:ParameterDirection="Input"
+                SQLTask:DataType="16"
+                SQLTask:ParameterSize="-1" />
+            </SQLTask:SqlTaskData>
+          </DTS:ObjectData>
+        </DTS:Executable>
+      </DTS:Executables>
+    </DTS:EventHandler>
+  </DTS:EventHandlers>
+  <DTS:DesignTimeProperties><![CDATA[<?xml version="1.0"?>
+<!--This CDATA section contains the layout information of the package. The section includes information such as (x,y) coordinates, width, and height.-->
+<!--If you manually edit this section and make a mistake, you can delete it. -->
+<!--The package will still be able to load normally but the previous layout information will be lost and the designer will automatically re-arrange the elements on the design surface.-->
+<Objects
+  Version="8">
+  <!--Each node below will contain properties that do not affect runtime behavior.-->
+  <Package
+    design-time-name="Package">
+    <LayoutInfo>
+      <GraphLayout
+        Capacity="32" xmlns="clr-namespace:Microsoft.SqlServer.IntegrationServices.Designer.Model.Serialization;assembly=Microsoft.SqlServer.IntegrationServices.Graph" xmlns:mssgle="clr-namespace:Microsoft.SqlServer.Graph.LayoutEngine;assembly=Microsoft.SqlServer.Graph" xmlns:assembly="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:mssgm="clr-namespace:Microsoft.SqlServer.Graph.Model;assembly=Microsoft.SqlServer.Graph">
+        <NodeLayout
+          Size="191,42"
+          Id="Package\Extract Products\SQL ExtractEnd Failed"
+          TopLeft="282,311.5" />
+        <NodeLayout
+          Size="216,42"
+          Id="Package\Extract Products\SQL ExtractEnd Succeeded"
+          TopLeft="5.50000000000006,311.5" />
+        <NodeLayout
+          Size="161,42"
+          Id="Package\Extract Products\SQL ExtractStart"
+          TopLeft="297,5.5" />
+        <NodeLayout
+          Size="212,42"
+          Id="Package\Extract Products\stg Oura_SmoothedLocation"
+          TopLeft="105,209.5" />
+        <NodeLayout
+          Size="149,42"
+          Id="Package\Extract Products\Truncate table"
+          TopLeft="303,107.5" />
+        <EdgeLayout
+          Id="Package\Extract Products.PrecedenceConstraints[Constraint]"
+          TopLeft="354,149.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="-143,60"
+              Start="0,0"
+              End="-143,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,20.3824701195219" />
+                  <mssgle:CubicBezierSegment
+                    Point1="0,20.3824701195219"
+                    Point2="0,24.3824701195219"
+                    Point3="-4,24.3824701195219" />
+                  <mssgle:LineSegment
+                    End="-139,24.3824701195219" />
+                  <mssgle:CubicBezierSegment
+                    Point1="-139,24.3824701195219"
+                    Point2="-143,24.3824701195219"
+                    Point3="-143,28.3824701195219" />
+                  <mssgle:LineSegment
+                    End="-143,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Extract Products.PrecedenceConstraints[Constraint 1]"
+          TopLeft="377.5,47.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Extract Products.PrecedenceConstraints[Constraint 2]"
+          TopLeft="177,251.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="-63.4999999999999,60"
+              Start="0,0"
+              End="-63.4999999999999,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,20.2696629213483" />
+                  <mssgle:CubicBezierSegment
+                    Point1="0,20.2696629213483"
+                    Point2="0,24.2696629213483"
+                    Point3="-4,24.2696629213483" />
+                  <mssgle:LineSegment
+                    End="-59.4999999999999,24.2696629213483" />
+                  <mssgle:CubicBezierSegment
+                    Point1="-59.4999999999999,24.2696629213483"
+                    Point2="-63.4999999999999,24.2696629213483"
+                    Point3="-63.4999999999999,28.2696629213483" />
+                  <mssgle:LineSegment
+                    End="-63.4999999999999,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Extract Products.PrecedenceConstraints[Constraint 3]"
+          TopLeft="245,251.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="102,60"
+              Start="0,0"
+              End="102,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,25.9694900479442" />
+                  <mssgle:CubicBezierSegment
+                    Point1="0,25.9694900479442"
+                    Point2="0,29.9694900479442"
+                    Point3="4,29.9694900479442" />
+                  <mssgle:LineSegment
+                    End="98,29.9694900479442" />
+                  <mssgle:CubicBezierSegment
+                    Point1="98,29.9694900479442"
+                    Point2="102,29.9694900479442"
+                    Point3="102,33.9694900479442" />
+                  <mssgle:LineSegment
+                    End="102,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <mssgm:EdgeLabel
+              BoundingBox="35.75865234375,34.9694900479442,30.4826953125,9.7490234375"
+              RelativePosition="Any" />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Extract Products.PrecedenceConstraints[Constraint 4]"
+          TopLeft="404.5,149.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,162"
+              Start="0,0"
+              End="0,154.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,154.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <mssgm:EdgeLabel
+              BoundingBox="-15.24134765625,72.37548828125,30.4826953125,9.7490234375"
+              RelativePosition="Any" />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <ContainerLayout
+          HeaderHeight="43"
+          IsExpanded="True"
+          PanelSize="478,409"
+          Size="478,452"
+          Id="Package\Extract Products"
+          TopLeft="159.5,107.5" />
+        <NodeLayout
+          Size="205,42"
+          Id="Package\SQL ExecutionEnd Failed"
+          TopLeft="296,619.5" />
+        <NodeLayout
+          Size="230,42"
+          Id="Package\SQL ExecutionEnd Succeeded"
+          TopLeft="5.50000000000011,619.5" />
+        <NodeLayout
+          Size="176,42"
+          Id="Package\SQL ExecutionStart"
+          TopLeft="310.5,5.5" />
+        <EdgeLayout
+          Id="Package.PrecedenceConstraints[Constraint]"
+          TopLeft="398.5,47.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package.PrecedenceConstraints[Constraint 1]"
+          TopLeft="320.166666666667,559.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="-199.666666666667,60"
+              Start="0,0"
+              End="-199.666666666667,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,20.1201000834028" />
+                  <mssgle:CubicBezierSegment
+                    Point1="0,20.1201000834028"
+                    Point2="0,24.1201000834028"
+                    Point3="-4,24.1201000834028" />
+                  <mssgle:LineSegment
+                    End="-195.666666666667,24.1201000834028" />
+                  <mssgle:CubicBezierSegment
+                    Point1="-195.666666666667,24.1201000834028"
+                    Point2="-199.666666666667,24.1201000834028"
+                    Point3="-199.666666666667,28.1201000834028" />
+                  <mssgle:LineSegment
+                    End="-199.666666666667,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package.PrecedenceConstraints[Constraint 2]"
+          TopLeft="476.833333333333,559.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="-78.3333333333333,60"
+              Start="0,0"
+              End="-78.3333333333333,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,20.1201000834028" />
+                  <mssgle:CubicBezierSegment
+                    Point1="0,20.1201000834028"
+                    Point2="0,24.1201000834028"
+                    Point3="-4,24.1201000834028" />
+                  <mssgle:LineSegment
+                    End="-74.3333333333333,24.1201000834028" />
+                  <mssgle:CubicBezierSegment
+                    Point1="-74.3333333333333,24.1201000834028"
+                    Point2="-78.3333333333333,24.1201000834028"
+                    Point3="-78.3333333333333,28.1201000834028" />
+                  <mssgle:LineSegment
+                    End="-78.3333333333333,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <mssgm:EdgeLabel
+              BoundingBox="-54.4080143229166,29.1201000834028,30.4826953125,9.7490234375"
+              RelativePosition="Any" />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+      </GraphLayout>
+    </LayoutInfo>
+  </Package>
+  <DtsEventHandler
+    design-time-name="Package.EventHandlers[OnError]">
+    <LayoutInfo>
+      <GraphLayout
+        Capacity="4" xmlns="clr-namespace:Microsoft.SqlServer.IntegrationServices.Designer.Model.Serialization;assembly=Microsoft.SqlServer.IntegrationServices.Graph">
+        <NodeLayout
+          Size="177,42"
+          Id="Package.EventHandlers[OnError]\SQL ExecutionError"
+          TopLeft="450,168" />
+      </GraphLayout>
+    </LayoutInfo>
+  </DtsEventHandler>
+  <TaskHost
+    design-time-name="Package\Extract Products\stg Oura_SmoothedLocation">
+    <LayoutInfo>
+      <GraphLayout
+        Capacity="16" xmlns="clr-namespace:Microsoft.SqlServer.IntegrationServices.Designer.Model.Serialization;assembly=Microsoft.SqlServer.IntegrationServices.Graph" xmlns:mssgle="clr-namespace:Microsoft.SqlServer.Graph.LayoutEngine;assembly=Microsoft.SqlServer.Graph" xmlns:assembly="http://schemas.microsoft.com/winfx/2006/xaml">
+        <NodeLayout
+          Size="139,42"
+          Id="Package\Extract Products\stg Oura_SmoothedLocation\RC selected"
+          TopLeft="27.5,107.5" />
+        <NodeLayout
+          Size="156,42"
+          Id="Package\Extract Products\stg Oura_SmoothedLocation\Flat File Source"
+          TopLeft="16,5.5" />
+        <NodeLayout
+          Size="137,42"
+          Id="Package\Extract Products\stg Oura_SmoothedLocation\RC inserted"
+          TopLeft="23,311.5" />
+        <NodeLayout
+          Size="177,42"
+          Id="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination"
+          TopLeft="5.50000000000004,413.5" />
+        <NodeLayout
+          Size="158,42"
+          Id="Package\Extract Products\stg Oura_SmoothedLocation\Derived Column"
+          TopLeft="15,209.5" />
+        <EdgeLayout
+          Id="Package\Extract Products\stg Oura_SmoothedLocation.Paths[Flat File Source Output]"
+          TopLeft="95.5,47.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Extract Products\stg Oura_SmoothedLocation.Paths[Derived Column Output]"
+          TopLeft="92.75,251.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Extract Products\stg Oura_SmoothedLocation.Paths[Row Count Output 11]"
+          TopLeft="92.75,353.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Extract Products\stg Oura_SmoothedLocation.Paths[Row Count Output 1]"
+          TopLeft="95.5,149.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+      </GraphLayout>
+    </LayoutInfo>
+  </TaskHost>
+  <PipelineComponentMetadata
+    design-time-name="Package\Extract Products\stg Oura_SmoothedLocation\OLE DB Destination">
+    <Properties>
+      <Property>
+        <Name>DataSourceViewID</Name>
+      </Property>
+      <Property>
+        <Name>TableInfoObjectType</Name>
+        <Value
+          type="q2:string">Table</Value>
+      </Property>
+    </Properties>
+  </PipelineComponentMetadata>
+</Objects>]]></DTS:DesignTimeProperties>
+</DTS:Executable>

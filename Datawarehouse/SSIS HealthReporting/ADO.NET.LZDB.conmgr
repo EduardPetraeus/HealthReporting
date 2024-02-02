@@ -1,0 +1,10 @@
+﻿<?xml version="1.0"?>
+<DTS:ConnectionManager xmlns:DTS="www.microsoft.com/SqlServer/Dts"
+  DTS:ObjectName="ADO NET LZDB"
+  DTS:DTSID="{B4D3DEFE-1F92-4C84-A98D-98DCB1F090F6}"
+  DTS:CreationName="ADO.NET:System.Data.SqlClient.SqlConnection, System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+  <DTS:ObjectData>
+    <DTS:ConnectionManager
+      DTS:ConnectionString="Data Source=.;Initial Catalog=LZDB;Integrated Security=True;Application Name=&quot;SSIS-SSIS Salg-{B4D3DEFE-1F92-4C84-A98D-98DCB1F090F6}LocalHost.LZDB&quot;;" />
+  </DTS:ObjectData>
+</DTS:ConnectionManager>

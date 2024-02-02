@@ -1,0 +1,164 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>HealthReporting</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{6a71db12-8a9b-441d-8802-545c0e450773}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql130DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>HealthReporting</RootNamespace>
+    <AssemblyName>HealthReporting</AssemblyName>
+    <ModelCollation>1033, CI</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <NoWarn>71502,71562</NoWarn>
+    <SuppressTSqlWarnings>71502,71562</SuppressTSqlWarnings>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+    <Folder Include="stg" />
+    <Folder Include="security" />
+    <Folder Include="silver" />
+    <Folder Include="meta" />
+    <Folder Include="silver\tables" />
+    <Folder Include="silver\views" />
+    <Folder Include="silver\procedures" />
+    <Folder Include="stg\views" />
+    <Folder Include="stg\tables" />
+    <Folder Include="gold" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="security\stg.sql" />
+    <Build Include="security\silver.sql" />
+    <Build Include="security\meta.sql" />
+    <Build Include="meta\Audit.sql" />
+    <Build Include="meta\Config.sql" />
+    <Build Include="silver\tables\DailyMeal.sql" />
+    <Build Include="silver\procedures\delete_insert_Weight.sql" />
+    <Build Include="silver\tables\PulseWaveVelocity.sql" />
+    <Build Include="silver\procedures\delete_insert_PulseWaveVelocity.sql" />
+    <Build Include="silver\tables\BloodPressure.sql" />
+    <Build Include="silver\procedures\delete_insert_BloodPressure.sql" />
+    <Build Include="silver\tables\DailyActivity.sql" />
+    <Build Include="silver\procedures\delete_insert_DailyActivity.sql" />
+    <Build Include="silver\tables\BodyTemperature.sql" />
+    <Build Include="silver\procedures\delete_insert_BodyTemperature.sql" />
+    <Build Include="silver\tables\BloodOxygenLevel.sql" />
+    <Build Include="silver\procedures\delete_insert_BloodOxygenLevel.sql" />
+    <Build Include="silver\tables\HeartRate.sql" />
+    <Build Include="silver\procedures\delete_insert_HeartRate.sql" />
+    <Build Include="silver\tables\DailySleep.sql" />
+    <Build Include="silver\procedures\delete_insert_DailySleep.sql" />
+    <Build Include="stg\views\vw_Withings_Measurements.sql" />
+    <Build Include="stg\tables\Withings_Weight.sql" />
+    <Build Include="stg\tables\Oura_BloodOxygenLevel.sql" />
+    <Build Include="security\gold.sql" />
+    <Build Include="silver\tables\BodyMeasurement.sql" />
+    <Build Include="silver\procedures\delete_insert_BodyMeasurement.sql" />
+    <Build Include="gold\vw_Fact_Weight.sql" />
+    <Build Include="gold\vw_Fact_DailyActivity.sql" />
+    <Build Include="stg\tables\Lifesum_DailyMeals.sql" />
+    <Build Include="silver\tables\Weight.sql" />
+    <Build Include="silver\tables\FoodItem.sql" />
+    <Build Include="silver\tables\MealType.sql" />
+    <Build Include="silver\procedures\insert_FoodItem.sql" />
+    <Build Include="silver\procedures\insert_MealType.sql" />
+    <Build Include="silver\procedures\upsert_DailyMeal.sql" />
+    <Build Include="gold\vw_Dim_Date.sql" />
+    <Build Include="gold\vw_Dim_Time.sql" />
+    <Build Include="gold\vw_Fact_DailySleep.sql" />
+    <Build Include="gold\vw_Fact_BloodOxygenLevel.sql" />
+    <Build Include="gold\vw_Fact_BloodPressure.sql" />
+    <Build Include="gold\vw_DailySleepDescription.sql" />
+    <Build Include="gold\vw_MasterData_ClausEduardPetraeus.sql" />
+    <Build Include="gold\vw_Fact_BodyMeasurement.sql" />
+    <Build Include="gold\vw_Fact_BodyTemperature.sql" />
+    <Build Include="gold\vw_Fact_DailyMeal.sql" />
+    <Build Include="gold\vw_Dim_FoodItem.sql" />
+    <Build Include="gold\vw_Fact_HeartRate.sql" />
+    <Build Include="gold\vw_Dim_MealType.sql" />
+    <Build Include="gold\vw_Fact_PulseWaveVelocity.sql" />
+    <Build Include="stg\tables\Strava_Training.sql" />
+    <Build Include="silver\tables\Workout.sql" />
+    <Build Include="silver\tables\ActivityType.sql" />
+    <Build Include="silver\procedures\delete_insert_Workout.sql" />
+    <Build Include="gold\vw_Dim_ActivityType.sql" />
+    <Build Include="gold\vw_Fact_Workout.sql" />
+    <Build Include="silver\tables\FoodType.sql" />
+    <Build Include="silver\procedures\data_Dim_Date.sql" />
+    <Build Include="silver\procedures\data_Dim_Time.sql" />
+    <Build Include="silver\tables\Dim_Date.sql" />
+    <Build Include="silver\tables\Dim_Time.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="HealthReporting.publish.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\130\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\130\SqlSchemas\master.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>True</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="stg\tables\Oura_DailyActivity.sql" />
+    <Build Include="stg\tables\Oura_DailyReadiness.sql" />
+    <Build Include="stg\tables\Oura_DailySleep.sql" />
+    <Build Include="stg\tables\Oura_HeartRate.sql" />
+    <Build Include="stg\tables\Oura_Sleep.sql" />
+    <Build Include="stg\tables\Oura_SmoothedLocation.sql" />
+    <Build Include="stg\tables\OwnCreation_Withings_BodyTemperature.sql" />
+    <Build Include="stg\tables\Withings_Activities.sql" />
+    <Build Include="stg\tables\Withings_AggregatesCaloriesEarned.sql" />
+    <Build Include="stg\tables\Withings_AggregatesCaloriesPassive.sql" />
+    <Build Include="stg\tables\Withings_AggregatesDistance.sql" />
+    <Build Include="stg\tables\Withings_AggregatesSteps.sql" />
+    <Build Include="stg\tables\Withings_BloodPressure.sql" />
+    <Build Include="stg\tables\Withings_Electrocardiogram.sql" />
+    <Build Include="stg\tables\Withings_Measurements.sql" />
+    <Build Include="stg\tables\Withings_PulseWaveVelocity.sql" />
+    <Build Include="stg\tables\Withings_RawHeartRate.sql" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<DTS:ConnectionManager xmlns:DTS="www.microsoft.com/SqlServer/Dts"
+  DTS:ObjectName="ADO NET Salg"
+  DTS:DTSID="{451A5FA4-85FC-408B-8604-3DF653A42D2B}"
+  DTS:CreationName="ADO.NET:System.Data.SqlClient.SqlConnection, System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+  <DTS:ObjectData>
+    <DTS:ConnectionManager
+      DTS:ConnectionString="Data Source=.;Initial Catalog=Salg;Integrated Security=True;Application Name=SSIS-SSIS Salg-{451A5FA4-85FC-408B-8604-3DF653A42D2B}LocalHost.Salg1;" />
+  </DTS:ObjectData>
+</DTS:ConnectionManager>

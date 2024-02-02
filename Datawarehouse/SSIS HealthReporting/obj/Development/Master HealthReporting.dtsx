@@ -1,0 +1,2179 @@
+<?xml version="1.0"?>
+<DTS:Executable xmlns:DTS="www.microsoft.com/SqlServer/Dts"
+  DTS:refId="Package"
+  DTS:CreationDate="5/11/2020 9:36:52 PM"
+  DTS:CreationName="Microsoft.Package"
+  DTS:CreatorComputerName="PC0QGDKR"
+  DTS:CreatorName="NCLAN\cep"
+  DTS:DTSID="{4A98F2EF-E815-473E-9CFF-781DBC22E5FB}"
+  DTS:ExecutableType="Microsoft.Package"
+  DTS:LastModifiedProductVersion="16.0.5270.0"
+  DTS:LocaleID="1030"
+  DTS:ObjectName="Master HealthReporting"
+  DTS:PackageType="5"
+  DTS:VersionBuild="59"
+  DTS:VersionGUID="{E08ACE9D-0C45-427D-864C-8D5399F6AF91}">
+  <DTS:Property
+    DTS:Name="PackageFormatVersion">8</DTS:Property>
+  <DTS:ConnectionManagers>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[Ailes data]"
+      DTS:CreationName="FLATFILE"
+      DTS:DTSID="{5E7B44D0-6A35-4DC5-B352-F7DE640CE871}"
+      DTS:ObjectName="Ailes data">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:Format="Delimited"
+          DTS:LocaleID="1030"
+          DTS:HeaderRowDelimiter="_x000D__x000A_"
+          DTS:ColumnNamesInFirstDataRow="True"
+          DTS:RowDelimiter=""
+          DTS:TextQualifier="_x003C_none_x003E_"
+          DTS:CodePage="1252"
+          DTS:ConnectionString="C:\Users\cep\Documents\Data til Datavarehus\Ailes data.csv">
+          <DTS:FlatFileColumns>
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x003B_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="aisle_id"
+              DTS:DTSID="{A56771A5-3863-463F-9F02-E5C4A95D2288}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x000D__x000A_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="aisle"
+              DTS:DTSID="{10D6B5ED-F2B8-4353-8B4C-ED4AD14E288F}"
+              DTS:CreationName="" />
+          </DTS:FlatFileColumns>
+        </DTS:ConnectionManager>
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[LocalHost.Salg]"
+      DTS:CreationName="OLEDB"
+      DTS:DTSID="{E1F59E3E-5294-468A-8350-1C6FA36BBB65}"
+      DTS:ObjectName="LocalHost.Salg">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:ConnectRetryCount="1"
+          DTS:ConnectRetryInterval="5"
+          DTS:ConnectionString="Data Source=.;Initial Catalog=Salg;Provider=SQLNCLI11.1;Integrated Security=SSPI;Auto Translate=False;" />
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+  </DTS:ConnectionManagers>
+  <DTS:Variables>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{E6B3E1E8-6E1F-40A8-A2F4-EBD4C2AC79B6}"
+      DTS:IncludeInDebugDump="6789"
+      DTS:Namespace="User"
+      DTS:ObjectName="ExecutionId">
+      <DTS:VariableValue
+        DTS:DataType="20">0</DTS:VariableValue>
+    </DTS:Variable>
+  </DTS:Variables>
+  <DTS:Executables>
+    <DTS:Executable
+      DTS:refId="Package\Master HealthReporting"
+      DTS:CreationName="STOCK:SEQUENCE"
+      DTS:Description="Sequence Container"
+      DTS:DTSID="{A878AAB8-9FC5-439F-8F23-33A0EDD4595C}"
+      DTS:ExecutableType="STOCK:SEQUENCE"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="Master HealthReporting">
+      <DTS:Variables />
+      <DTS:Executables>
+        <DTS:Executable
+          DTS:refId="Package\Master HealthReporting\Silver layer procedures"
+          DTS:CreationName="STOCK:SEQUENCE"
+          DTS:Description="Sequence Container"
+          DTS:DTSID="{6522D322-28BB-4A6D-9AE8-6E3B8CE4234D}"
+          DTS:ExecutableType="STOCK:SEQUENCE"
+          DTS:LocaleID="-1"
+          DTS:ObjectName="Silver layer procedures">
+          <DTS:Variables />
+          <DTS:Executables>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_BloodOxygenLevel"
+              DTS:CreationName="Microsoft.ExecuteSQLTask"
+              DTS:Description="Execute SQL Task"
+              DTS:DTSID="{e5adad12-2405-4e1f-820f-6cac31943a47}"
+              DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Exec delete_insert_BloodOxygenLevel"
+              DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+              DTS:ThreadHint="0">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <SQLTask:SqlTaskData
+                  SQLTask:Connection="{63CDF9AD-CF5A-4A3C-903A-3F8E8B3D16D3}"
+                  SQLTask:SqlStatementSource="EXEC [silver].[delete_insert_BloodOxygenLevel]" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_BloodPressure"
+              DTS:CreationName="Microsoft.ExecuteSQLTask"
+              DTS:Description="Execute SQL Task"
+              DTS:DTSID="{85e1692e-c123-43c3-9f7e-7e9008c9e096}"
+              DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Exec delete_insert_BloodPressure"
+              DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+              DTS:ThreadHint="0">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <SQLTask:SqlTaskData
+                  SQLTask:Connection="{63CDF9AD-CF5A-4A3C-903A-3F8E8B3D16D3}"
+                  SQLTask:SqlStatementSource="EXEC [silver].[delete_insert_BloodPressure]" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_BodyMeasurement"
+              DTS:CreationName="Microsoft.ExecuteSQLTask"
+              DTS:Description="Execute SQL Task"
+              DTS:DTSID="{90061a89-67e1-4142-bd85-5909bfd0c181}"
+              DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Exec delete_insert_BodyMeasurement"
+              DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+              DTS:ThreadHint="0">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <SQLTask:SqlTaskData
+                  SQLTask:Connection="{63CDF9AD-CF5A-4A3C-903A-3F8E8B3D16D3}"
+                  SQLTask:SqlStatementSource="EXEC [silver].[delete_insert_BodyMeasurement]" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_BodyTemperature"
+              DTS:CreationName="Microsoft.ExecuteSQLTask"
+              DTS:Description="Execute SQL Task"
+              DTS:DTSID="{90cd2a59-f809-4859-981d-95fa9cc1070d}"
+              DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Exec delete_insert_BodyTemperature"
+              DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+              DTS:ThreadHint="0">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <SQLTask:SqlTaskData
+                  SQLTask:Connection="{63CDF9AD-CF5A-4A3C-903A-3F8E8B3D16D3}"
+                  SQLTask:SqlStatementSource="EXEC [silver].[delete_insert_BodyTemperature]" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_DailyActivity"
+              DTS:CreationName="Microsoft.ExecuteSQLTask"
+              DTS:Description="Execute SQL Task"
+              DTS:DTSID="{5d581069-524d-4446-88a3-1259fdb797ac}"
+              DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Exec delete_insert_DailyActivity"
+              DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+              DTS:ThreadHint="0">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <SQLTask:SqlTaskData
+                  SQLTask:Connection="{63CDF9AD-CF5A-4A3C-903A-3F8E8B3D16D3}"
+                  SQLTask:SqlStatementSource="EXEC [silver].[delete_insert_DailyActivity]" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_DailySleep"
+              DTS:CreationName="Microsoft.ExecuteSQLTask"
+              DTS:Description="Execute SQL Task"
+              DTS:DTSID="{c7e2fa7c-26b8-4b2b-bbb8-c8c0fa0863a1}"
+              DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Exec delete_insert_DailySleep"
+              DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+              DTS:ThreadHint="0">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <SQLTask:SqlTaskData
+                  SQLTask:Connection="{63CDF9AD-CF5A-4A3C-903A-3F8E8B3D16D3}"
+                  SQLTask:SqlStatementSource="EXEC [silver].[delete_insert_DailySleep]" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_HeartRate"
+              DTS:CreationName="Microsoft.ExecuteSQLTask"
+              DTS:Description="Execute SQL Task"
+              DTS:DTSID="{46227d48-ca97-452a-8a28-d4e8167c9c2a}"
+              DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Exec delete_insert_HeartRate"
+              DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+              DTS:ThreadHint="0">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <SQLTask:SqlTaskData
+                  SQLTask:Connection="{63CDF9AD-CF5A-4A3C-903A-3F8E8B3D16D3}"
+                  SQLTask:SqlStatementSource="EXEC [silver].[delete_insert_HeartRate]" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_PulseWaveVelocity"
+              DTS:CreationName="Microsoft.ExecuteSQLTask"
+              DTS:Description="Execute SQL Task"
+              DTS:DTSID="{f4808d78-09ef-4e7a-9902-7b110fb01a93}"
+              DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Exec delete_insert_PulseWaveVelocity"
+              DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+              DTS:ThreadHint="0">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <SQLTask:SqlTaskData
+                  SQLTask:Connection="{63CDF9AD-CF5A-4A3C-903A-3F8E8B3D16D3}"
+                  SQLTask:SqlStatementSource="EXEC [silver].[delete_insert_PulseWaveVelocity]" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_Weight"
+              DTS:CreationName="Microsoft.ExecuteSQLTask"
+              DTS:Description="Execute SQL Task"
+              DTS:DTSID="{68053382-AA97-4EE5-AE5C-DF1F48759CB2}"
+              DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Exec delete_insert_Weight"
+              DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+              DTS:ThreadHint="0">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <SQLTask:SqlTaskData
+                  SQLTask:Connection="{63CDF9AD-CF5A-4A3C-903A-3F8E8B3D16D3}"
+                  SQLTask:SqlStatementSource="EXEC [silver].[delete_insert_Weight]" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_Workout"
+              DTS:CreationName="Microsoft.ExecuteSQLTask"
+              DTS:Description="Execute SQL Task"
+              DTS:DTSID="{393c2892-703e-44ba-b04f-5eaa0e8efd91}"
+              DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Exec delete_insert_Workout"
+              DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+              DTS:ThreadHint="0">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <SQLTask:SqlTaskData
+                  SQLTask:Connection="{63CDF9AD-CF5A-4A3C-903A-3F8E8B3D16D3}"
+                  SQLTask:SqlStatementSource="EXEC [silver].[delete_insert_Workout]" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\Silver layer procedures\Execute DailyMeal Fact"
+              DTS:CreationName="Microsoft.ExecuteSQLTask"
+              DTS:Description="Execute SQL Task"
+              DTS:DTSID="{9325e424-74e2-4b42-b46c-da542cc93264}"
+              DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Execute DailyMeal Fact"
+              DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+              DTS:ThreadHint="0">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <SQLTask:SqlTaskData
+                  SQLTask:Connection="{63CDF9AD-CF5A-4A3C-903A-3F8E8B3D16D3}"
+                  SQLTask:SqlStatementSource="EXEC [silver].[upsert_DailyMeal]" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\Silver layer procedures\Execute Food item dimension"
+              DTS:CreationName="Microsoft.ExecuteSQLTask"
+              DTS:Description="Execute SQL Task"
+              DTS:DTSID="{85f00c0f-67ea-4a14-963b-7ad29ab72d1c}"
+              DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Execute Food item dimension"
+              DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+              DTS:ThreadHint="0">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <SQLTask:SqlTaskData
+                  SQLTask:Connection="{63CDF9AD-CF5A-4A3C-903A-3F8E8B3D16D3}"
+                  SQLTask:SqlStatementSource="EXEC [silver].[insert_FoodItem]" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\Silver layer procedures\Execute Meal type dimension"
+              DTS:CreationName="Microsoft.ExecuteSQLTask"
+              DTS:Description="Execute SQL Task"
+              DTS:DTSID="{1ffa8c7a-835c-4217-86d7-2844ee67297f}"
+              DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Execute Meal type dimension"
+              DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+              DTS:ThreadHint="0">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <SQLTask:SqlTaskData
+                  SQLTask:Connection="{63CDF9AD-CF5A-4A3C-903A-3F8E8B3D16D3}"
+                  SQLTask:SqlStatementSource="EXEC [silver].[insert_MealType]" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\Silver layer procedures\Silver FoodType"
+              DTS:CreationName="Microsoft.ExecutePackageTask"
+              DTS:Description="Execute Package Task"
+              DTS:DTSID="{db07fa21-844f-4072-b21c-180b1a4870d8}"
+              DTS:ExecutableType="Microsoft.ExecutePackageTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Silver FoodType"
+              DTS:TaskContact="Microsoft Corporation; Microsoft SQL Server; Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <ExecutePackageTask>
+                  <UseProjectReference>True</UseProjectReference>
+                  <PackageName>silver Lifesum_FoodType.dtsx</PackageName>
+                </ExecutePackageTask>
+              </DTS:ObjectData>
+            </DTS:Executable>
+          </DTS:Executables>
+          <DTS:PrecedenceConstraints>
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\Silver layer procedures.PrecedenceConstraints[Constraint]"
+              DTS:CreationName=""
+              DTS:DTSID="{2052DEAC-B220-4CDD-B082-0AFBB43F2297}"
+              DTS:From="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_Weight"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint"
+              DTS:To="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_PulseWaveVelocity" />
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\Silver layer procedures.PrecedenceConstraints[Constraint 1]"
+              DTS:CreationName=""
+              DTS:DTSID="{B94EED22-DD58-49F0-B8E9-3C97E5665B64}"
+              DTS:From="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_PulseWaveVelocity"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint 1"
+              DTS:To="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_DailyActivity" />
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\Silver layer procedures.PrecedenceConstraints[Constraint 10]"
+              DTS:CreationName=""
+              DTS:DTSID="{FCEBB9EB-2EF3-4E50-BDAD-2B86FF1252B1}"
+              DTS:From="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_Workout"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint 10"
+              DTS:To="Package\Master HealthReporting\Silver layer procedures\Silver FoodType" />
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\Silver layer procedures.PrecedenceConstraints[Constraint 2]"
+              DTS:CreationName=""
+              DTS:DTSID="{855949F2-5929-49F3-914C-1869705697E6}"
+              DTS:From="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_DailyActivity"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint 2"
+              DTS:To="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_BloodPressure" />
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\Silver layer procedures.PrecedenceConstraints[Constraint 3]"
+              DTS:CreationName=""
+              DTS:DTSID="{2348CB6E-CE2A-4A46-9841-248016A0F252}"
+              DTS:From="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_BloodPressure"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint 3"
+              DTS:To="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_BodyTemperature" />
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\Silver layer procedures.PrecedenceConstraints[Constraint 4]"
+              DTS:CreationName=""
+              DTS:DTSID="{D1ADF671-CC0F-41DF-8975-CD91C3AD56F7}"
+              DTS:From="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_BodyTemperature"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint 4"
+              DTS:To="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_BloodOxygenLevel" />
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\Silver layer procedures.PrecedenceConstraints[Constraint 5]"
+              DTS:CreationName=""
+              DTS:DTSID="{17A0034E-7D8D-4312-80C5-85F4BE0ED769}"
+              DTS:From="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_BloodOxygenLevel"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint 5"
+              DTS:To="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_HeartRate" />
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\Silver layer procedures.PrecedenceConstraints[Constraint 5 1]"
+              DTS:CreationName=""
+              DTS:DTSID="{21132ba2-5f4d-40a9-93ea-cef44ca2fac5}"
+              DTS:From="Package\Master HealthReporting\Silver layer procedures\Execute Food item dimension"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint 5 1"
+              DTS:To="Package\Master HealthReporting\Silver layer procedures\Execute Meal type dimension" />
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\Silver layer procedures.PrecedenceConstraints[Constraint 6]"
+              DTS:CreationName=""
+              DTS:DTSID="{7BFF0A29-4198-430C-9A55-F093CFDBB991}"
+              DTS:From="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_HeartRate"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint 6"
+              DTS:To="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_DailySleep" />
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\Silver layer procedures.PrecedenceConstraints[Constraint 7]"
+              DTS:CreationName=""
+              DTS:DTSID="{2D54FC18-BA12-4E0A-B525-4C1F4DE83563}"
+              DTS:From="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_DailySleep"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint 7"
+              DTS:To="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_BodyMeasurement" />
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\Silver layer procedures.PrecedenceConstraints[Constraint 7 1]"
+              DTS:CreationName=""
+              DTS:DTSID="{f28c2f29-7b27-4d42-a0c0-eb6a6fa3f5bc}"
+              DTS:From="Package\Master HealthReporting\Silver layer procedures\Execute Meal type dimension"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint 7 1"
+              DTS:To="Package\Master HealthReporting\Silver layer procedures\Execute DailyMeal Fact" />
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\Silver layer procedures.PrecedenceConstraints[Constraint 8]"
+              DTS:CreationName=""
+              DTS:DTSID="{32A0D407-54B5-4220-8BFE-801682808418}"
+              DTS:From="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_BodyMeasurement"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint 8"
+              DTS:To="Package\Master HealthReporting\Silver layer procedures\Execute Food item dimension" />
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\Silver layer procedures.PrecedenceConstraints[Constraint 9]"
+              DTS:CreationName=""
+              DTS:DTSID="{6089A589-EA5B-4D79-BF1A-5F9BD46E6C29}"
+              DTS:From="Package\Master HealthReporting\Silver layer procedures\Execute DailyMeal Fact"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint 9"
+              DTS:To="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_Workout" />
+          </DTS:PrecedenceConstraints>
+        </DTS:Executable>
+        <DTS:Executable
+          DTS:refId="Package\Master HealthReporting\stg SSIS pakker"
+          DTS:CreationName="STOCK:SEQUENCE"
+          DTS:Description="Sequence Container"
+          DTS:DTSID="{3AA90E17-551D-4734-93C3-3F62AC34B3EE}"
+          DTS:ExecutableType="STOCK:SEQUENCE"
+          DTS:LocaleID="-1"
+          DTS:ObjectName="stg SSIS pakker">
+          <DTS:Variables />
+          <DTS:Executables>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker\Lifesum_DailyMeals"
+              DTS:CreationName="Microsoft.ExecutePackageTask"
+              DTS:Description="Execute Package Task"
+              DTS:DTSID="{8ab7b43e-18da-4092-89ab-b068ba00b87b}"
+              DTS:ExecutableType="Microsoft.ExecutePackageTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Lifesum_DailyMeals"
+              DTS:TaskContact="Microsoft Corporation; Microsoft SQL Server; Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <ExecutePackageTask>
+                  <UseProjectReference>True</UseProjectReference>
+                  <PackageName>stg Lifesum_DailyMeals.dtsx</PackageName>
+                </ExecutePackageTask>
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker\Oura_BloodOxygenLevel"
+              DTS:CreationName="Microsoft.ExecutePackageTask"
+              DTS:Description="Execute Package Task"
+              DTS:DTSID="{1522C925-B2C2-40D9-B5E1-2FF68D05C578}"
+              DTS:ExecutableType="Microsoft.ExecutePackageTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Oura_BloodOxygenLevel"
+              DTS:TaskContact="Microsoft Corporation; Microsoft SQL Server; Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <ExecutePackageTask>
+                  <UseProjectReference>True</UseProjectReference>
+                  <PackageName>stg Oura_BloodOxygenLevel.dtsx</PackageName>
+                </ExecutePackageTask>
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker\Oura_DailyActivity"
+              DTS:CreationName="Microsoft.ExecutePackageTask"
+              DTS:Description="Execute Package Task"
+              DTS:DTSID="{61B6C4B8-704A-4F19-89FA-67092C508F52}"
+              DTS:ExecutableType="Microsoft.ExecutePackageTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Oura_DailyActivity"
+              DTS:TaskContact="Microsoft Corporation; Microsoft SQL Server; Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <ExecutePackageTask>
+                  <UseProjectReference>True</UseProjectReference>
+                  <PackageName>stg Oura_DailyActivity.dtsx</PackageName>
+                </ExecutePackageTask>
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker\Oura_DailyReadiness"
+              DTS:CreationName="Microsoft.ExecutePackageTask"
+              DTS:Description="Execute Package Task"
+              DTS:DTSID="{726CB1D1-AB3A-463F-B2CD-BD1E5433656C}"
+              DTS:ExecutableType="Microsoft.ExecutePackageTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Oura_DailyReadiness"
+              DTS:TaskContact="Microsoft Corporation; Microsoft SQL Server; Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <ExecutePackageTask>
+                  <UseProjectReference>True</UseProjectReference>
+                  <PackageName>stg Oura_DailyReadiness.dtsx</PackageName>
+                </ExecutePackageTask>
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker\Oura_DailySleep"
+              DTS:CreationName="Microsoft.ExecutePackageTask"
+              DTS:Description="Execute Package Task"
+              DTS:DTSID="{FAE34247-9096-4F8A-9176-5435316FA5C5}"
+              DTS:ExecutableType="Microsoft.ExecutePackageTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Oura_DailySleep"
+              DTS:TaskContact="Microsoft Corporation; Microsoft SQL Server; Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <ExecutePackageTask>
+                  <UseProjectReference>True</UseProjectReference>
+                  <PackageName>stg Oura_DailySleep.dtsx</PackageName>
+                </ExecutePackageTask>
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker\Oura_HeartRate"
+              DTS:CreationName="Microsoft.ExecutePackageTask"
+              DTS:Description="Execute Package Task"
+              DTS:DTSID="{094F3FAA-1B34-4AE4-9567-D686AA200E24}"
+              DTS:ExecutableType="Microsoft.ExecutePackageTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Oura_HeartRate"
+              DTS:TaskContact="Microsoft Corporation; Microsoft SQL Server; Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <ExecutePackageTask>
+                  <UseProjectReference>True</UseProjectReference>
+                  <PackageName>stg Oura_HeartRate.dtsx</PackageName>
+                </ExecutePackageTask>
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker\Oura_Sleep"
+              DTS:CreationName="Microsoft.ExecutePackageTask"
+              DTS:Description="Execute Package Task"
+              DTS:DTSID="{F6492745-F64B-4808-8259-5374FF1C9953}"
+              DTS:ExecutableType="Microsoft.ExecutePackageTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Oura_Sleep"
+              DTS:TaskContact="Microsoft Corporation; Microsoft SQL Server; Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <ExecutePackageTask>
+                  <UseProjectReference>True</UseProjectReference>
+                  <PackageName>stg Oura_Sleep.dtsx</PackageName>
+                </ExecutePackageTask>
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker\Oura_SmoothedLocation"
+              DTS:CreationName="Microsoft.ExecutePackageTask"
+              DTS:Description="Execute Package Task"
+              DTS:DTSID="{721418fe-6c7c-46a2-9cc1-bb4b88434b61}"
+              DTS:ExecutableType="Microsoft.ExecutePackageTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Oura_SmoothedLocation"
+              DTS:TaskContact="Microsoft Corporation; Microsoft SQL Server; Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <ExecutePackageTask>
+                  <UseProjectReference>True</UseProjectReference>
+                  <PackageName>stg Oura_SmoothedLocation.dtsx</PackageName>
+                </ExecutePackageTask>
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker\Strava_Training"
+              DTS:CreationName="Microsoft.ExecutePackageTask"
+              DTS:Description="Execute Package Task"
+              DTS:DTSID="{ef0c52cb-8a4e-4e9d-8369-7eafe922f582}"
+              DTS:ExecutableType="Microsoft.ExecutePackageTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Strava_Training"
+              DTS:TaskContact="Microsoft Corporation; Microsoft SQL Server; Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <ExecutePackageTask>
+                  <UseProjectReference>True</UseProjectReference>
+                  <PackageName>stg Strava_Training.dtsx</PackageName>
+                </ExecutePackageTask>
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker\Withings_Activities"
+              DTS:CreationName="Microsoft.ExecutePackageTask"
+              DTS:Description="Execute Package Task"
+              DTS:DTSID="{47e1a978-a696-41a1-8ae5-80efcd335255}"
+              DTS:ExecutableType="Microsoft.ExecutePackageTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Withings_Activities"
+              DTS:TaskContact="Microsoft Corporation; Microsoft SQL Server; Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <ExecutePackageTask>
+                  <UseProjectReference>True</UseProjectReference>
+                  <PackageName>stg Withings_Activities.dtsx</PackageName>
+                </ExecutePackageTask>
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker\Withings_AggregatesCaloriesEarned"
+              DTS:CreationName="Microsoft.ExecutePackageTask"
+              DTS:Description="Execute Package Task"
+              DTS:DTSID="{1ec9d1bd-5cae-4ded-a22d-efcf2ccf4046}"
+              DTS:ExecutableType="Microsoft.ExecutePackageTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Withings_AggregatesCaloriesEarned"
+              DTS:TaskContact="Microsoft Corporation; Microsoft SQL Server; Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <ExecutePackageTask>
+                  <UseProjectReference>True</UseProjectReference>
+                  <PackageName>stg Withings_AggregatesCaloriesEarned.dtsx</PackageName>
+                </ExecutePackageTask>
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker\Withings_AggregatesCaloriesPassive"
+              DTS:CreationName="Microsoft.ExecutePackageTask"
+              DTS:Description="Execute Package Task"
+              DTS:DTSID="{51d2d816-01d1-40cb-9b28-e241b29dfe47}"
+              DTS:ExecutableType="Microsoft.ExecutePackageTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Withings_AggregatesCaloriesPassive"
+              DTS:TaskContact="Microsoft Corporation; Microsoft SQL Server; Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <ExecutePackageTask>
+                  <UseProjectReference>True</UseProjectReference>
+                  <PackageName>stg Withings_AggregatesCaloriesPassive.dtsx</PackageName>
+                </ExecutePackageTask>
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker\Withings_AggregatesDistance"
+              DTS:CreationName="Microsoft.ExecutePackageTask"
+              DTS:Description="Execute Package Task"
+              DTS:DTSID="{594d51d4-bd99-4bcf-9cd7-5b658b9fac5f}"
+              DTS:ExecutableType="Microsoft.ExecutePackageTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Withings_AggregatesDistance"
+              DTS:TaskContact="Microsoft Corporation; Microsoft SQL Server; Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <ExecutePackageTask>
+                  <UseProjectReference>True</UseProjectReference>
+                  <PackageName>stg Withings_AggregatesDistance.dtsx</PackageName>
+                </ExecutePackageTask>
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker\Withings_AggregatesSteps"
+              DTS:CreationName="Microsoft.ExecutePackageTask"
+              DTS:Description="Execute Package Task"
+              DTS:DTSID="{bdb6f795-1f30-40d4-8878-c86ed27edab6}"
+              DTS:ExecutableType="Microsoft.ExecutePackageTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Withings_AggregatesSteps"
+              DTS:TaskContact="Microsoft Corporation; Microsoft SQL Server; Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <ExecutePackageTask>
+                  <UseProjectReference>True</UseProjectReference>
+                  <PackageName>stg Withings_AggregatesSteps.dtsx</PackageName>
+                </ExecutePackageTask>
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker\Withings_BloodPressure"
+              DTS:CreationName="Microsoft.ExecutePackageTask"
+              DTS:Description="Execute Package Task"
+              DTS:DTSID="{a38cfed3-ea55-47dc-bb8e-f93bc4489339}"
+              DTS:ExecutableType="Microsoft.ExecutePackageTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Withings_BloodPressure"
+              DTS:TaskContact="Microsoft Corporation; Microsoft SQL Server; Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <ExecutePackageTask>
+                  <UseProjectReference>True</UseProjectReference>
+                  <PackageName>stg Withings_BloodPressure.dtsx</PackageName>
+                </ExecutePackageTask>
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker\Withings_Electrocardiogram"
+              DTS:CreationName="Microsoft.ExecutePackageTask"
+              DTS:Description="Execute Package Task"
+              DTS:DTSID="{4af30926-4328-446d-bc0f-d5e22bb361f5}"
+              DTS:ExecutableType="Microsoft.ExecutePackageTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Withings_Electrocardiogram"
+              DTS:TaskContact="Microsoft Corporation; Microsoft SQL Server; Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <ExecutePackageTask>
+                  <UseProjectReference>True</UseProjectReference>
+                  <PackageName>stg Withings_Electrocardiogram.dtsx</PackageName>
+                </ExecutePackageTask>
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker\Withings_Measurements"
+              DTS:CreationName="Microsoft.ExecutePackageTask"
+              DTS:Description="Execute Package Task"
+              DTS:DTSID="{59dbcb89-c53a-48ac-b5a8-6582c554e717}"
+              DTS:ExecutableType="Microsoft.ExecutePackageTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Withings_Measurements"
+              DTS:TaskContact="Microsoft Corporation; Microsoft SQL Server; Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <ExecutePackageTask>
+                  <UseProjectReference>True</UseProjectReference>
+                  <PackageName>stg Withings_Measurements.dtsx</PackageName>
+                </ExecutePackageTask>
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker\Withings_PulseWaveVelocity"
+              DTS:CreationName="Microsoft.ExecutePackageTask"
+              DTS:Description="Execute Package Task"
+              DTS:DTSID="{9ad6e7bb-204b-4d44-a247-1a19ca189708}"
+              DTS:ExecutableType="Microsoft.ExecutePackageTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Withings_PulseWaveVelocity"
+              DTS:TaskContact="Microsoft Corporation; Microsoft SQL Server; Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <ExecutePackageTask>
+                  <UseProjectReference>True</UseProjectReference>
+                  <PackageName>stg Withings_PulseWaveVelocity.dtsx</PackageName>
+                </ExecutePackageTask>
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker\Withings_RawHeartRate"
+              DTS:CreationName="Microsoft.ExecutePackageTask"
+              DTS:Description="Execute Package Task"
+              DTS:DTSID="{f5bad141-b7bd-4c97-8205-997fed3a62f5}"
+              DTS:ExecutableType="Microsoft.ExecutePackageTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Withings_RawHeartRate"
+              DTS:TaskContact="Microsoft Corporation; Microsoft SQL Server; Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <ExecutePackageTask>
+                  <UseProjectReference>True</UseProjectReference>
+                  <PackageName>stg Withings_RawHeartRate.dtsx</PackageName>
+                </ExecutePackageTask>
+              </DTS:ObjectData>
+            </DTS:Executable>
+            <DTS:Executable
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker\Withings_Weight"
+              DTS:CreationName="Microsoft.ExecutePackageTask"
+              DTS:Description="Execute Package Task"
+              DTS:DTSID="{e1783e31-fcdf-485d-9f0c-085409e993e2}"
+              DTS:ExecutableType="Microsoft.ExecutePackageTask"
+              DTS:LocaleID="-1"
+              DTS:ObjectName="Withings_Weight"
+              DTS:TaskContact="Microsoft Corporation; Microsoft SQL Server; Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+              <DTS:Variables />
+              <DTS:ObjectData>
+                <ExecutePackageTask>
+                  <UseProjectReference>True</UseProjectReference>
+                  <PackageName>stg Withings_Weight.dtsx</PackageName>
+                </ExecutePackageTask>
+              </DTS:ObjectData>
+            </DTS:Executable>
+          </DTS:Executables>
+          <DTS:PrecedenceConstraints>
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint]"
+              DTS:CreationName=""
+              DTS:DTSID="{B05A7624-A080-4672-A2D7-DEAE0AC4F82A}"
+              DTS:From="Package\Master HealthReporting\stg SSIS pakker\Oura_BloodOxygenLevel"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint"
+              DTS:To="Package\Master HealthReporting\stg SSIS pakker\Oura_DailyActivity" />
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 1]"
+              DTS:CreationName=""
+              DTS:DTSID="{6D4C6AFC-9CF9-4FBF-AA16-20BAB8676959}"
+              DTS:From="Package\Master HealthReporting\stg SSIS pakker\Oura_DailyActivity"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint 1"
+              DTS:To="Package\Master HealthReporting\stg SSIS pakker\Oura_DailyReadiness" />
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 10]"
+              DTS:CreationName=""
+              DTS:DTSID="{A87EEC2B-423D-4F97-84A3-931642DB78C3}"
+              DTS:From="Package\Master HealthReporting\stg SSIS pakker\Withings_AggregatesDistance"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint 10"
+              DTS:To="Package\Master HealthReporting\stg SSIS pakker\Withings_AggregatesSteps" />
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 11]"
+              DTS:CreationName=""
+              DTS:DTSID="{9F7C8D39-52E6-4122-ABC7-74A0367C4C72}"
+              DTS:From="Package\Master HealthReporting\stg SSIS pakker\Withings_AggregatesSteps"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint 11"
+              DTS:To="Package\Master HealthReporting\stg SSIS pakker\Withings_BloodPressure" />
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 12]"
+              DTS:CreationName=""
+              DTS:DTSID="{9EF31CE3-98D7-4464-8394-0B419AB80FD3}"
+              DTS:From="Package\Master HealthReporting\stg SSIS pakker\Withings_BloodPressure"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint 12"
+              DTS:To="Package\Master HealthReporting\stg SSIS pakker\Withings_Electrocardiogram" />
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 13]"
+              DTS:CreationName=""
+              DTS:DTSID="{64345E6D-55A7-47C2-B1AE-346E576597D8}"
+              DTS:From="Package\Master HealthReporting\stg SSIS pakker\Withings_Electrocardiogram"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint 13"
+              DTS:To="Package\Master HealthReporting\stg SSIS pakker\Withings_Measurements" />
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 14]"
+              DTS:CreationName=""
+              DTS:DTSID="{69BA34A5-54A0-4661-BF62-A86731847F04}"
+              DTS:From="Package\Master HealthReporting\stg SSIS pakker\Withings_Measurements"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint 14"
+              DTS:To="Package\Master HealthReporting\stg SSIS pakker\Withings_PulseWaveVelocity" />
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 15]"
+              DTS:CreationName=""
+              DTS:DTSID="{D18B5203-394E-409E-922C-E3CD8F564468}"
+              DTS:From="Package\Master HealthReporting\stg SSIS pakker\Withings_PulseWaveVelocity"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint 15"
+              DTS:To="Package\Master HealthReporting\stg SSIS pakker\Withings_RawHeartRate" />
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 16]"
+              DTS:CreationName=""
+              DTS:DTSID="{354F91B7-039B-46DB-B881-8F1AEB9CABBE}"
+              DTS:From="Package\Master HealthReporting\stg SSIS pakker\Withings_RawHeartRate"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint 16"
+              DTS:To="Package\Master HealthReporting\stg SSIS pakker\Withings_Weight" />
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 17]"
+              DTS:CreationName=""
+              DTS:DTSID="{F623B46A-CDB0-4BAE-A7E3-7F15813A07C4}"
+              DTS:From="Package\Master HealthReporting\stg SSIS pakker\Withings_Weight"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint 17"
+              DTS:To="Package\Master HealthReporting\stg SSIS pakker\Lifesum_DailyMeals" />
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 18]"
+              DTS:CreationName=""
+              DTS:DTSID="{B2F9B591-1B61-46C3-8CA3-C0C44777990D}"
+              DTS:From="Package\Master HealthReporting\stg SSIS pakker\Lifesum_DailyMeals"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint 18"
+              DTS:To="Package\Master HealthReporting\stg SSIS pakker\Strava_Training" />
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 2]"
+              DTS:CreationName=""
+              DTS:DTSID="{E66B089A-6213-4873-965A-4040FC557615}"
+              DTS:From="Package\Master HealthReporting\stg SSIS pakker\Oura_DailyReadiness"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint 2"
+              DTS:To="Package\Master HealthReporting\stg SSIS pakker\Oura_DailySleep" />
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 3]"
+              DTS:CreationName=""
+              DTS:DTSID="{71858C98-F833-4C1D-9E56-6EFC34DEE1B1}"
+              DTS:From="Package\Master HealthReporting\stg SSIS pakker\Oura_DailySleep"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint 3"
+              DTS:To="Package\Master HealthReporting\stg SSIS pakker\Oura_HeartRate" />
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 4]"
+              DTS:CreationName=""
+              DTS:DTSID="{876AEFF2-89FE-4B87-9610-6F4E14697AFB}"
+              DTS:From="Package\Master HealthReporting\stg SSIS pakker\Oura_HeartRate"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint 4"
+              DTS:To="Package\Master HealthReporting\stg SSIS pakker\Oura_Sleep" />
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 5]"
+              DTS:CreationName=""
+              DTS:DTSID="{C8AB3DEA-AFDE-4FAA-879F-251CF28842AD}"
+              DTS:From="Package\Master HealthReporting\stg SSIS pakker\Oura_Sleep"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint 5"
+              DTS:To="Package\Master HealthReporting\stg SSIS pakker\Oura_SmoothedLocation" />
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 6]"
+              DTS:CreationName=""
+              DTS:DTSID="{83C55E19-8F87-49C5-894E-768161E770F4}"
+              DTS:From="Package\Master HealthReporting\stg SSIS pakker\Oura_SmoothedLocation"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint 6"
+              DTS:To="Package\Master HealthReporting\stg SSIS pakker\Withings_Activities" />
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 7]"
+              DTS:CreationName=""
+              DTS:DTSID="{222F1F00-C493-40B9-86CB-ADA9A97C463B}"
+              DTS:From="Package\Master HealthReporting\stg SSIS pakker\Withings_Activities"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint 7"
+              DTS:To="Package\Master HealthReporting\stg SSIS pakker\Withings_AggregatesCaloriesEarned" />
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 8]"
+              DTS:CreationName=""
+              DTS:DTSID="{9FC56945-75E0-4B86-A377-1022107217F7}"
+              DTS:From="Package\Master HealthReporting\stg SSIS pakker\Withings_AggregatesCaloriesEarned"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint 8"
+              DTS:To="Package\Master HealthReporting\stg SSIS pakker\Withings_AggregatesCaloriesPassive" />
+            <DTS:PrecedenceConstraint
+              DTS:refId="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 9]"
+              DTS:CreationName=""
+              DTS:DTSID="{C27405C0-50C4-4CC1-97ED-D404557DD886}"
+              DTS:From="Package\Master HealthReporting\stg SSIS pakker\Withings_AggregatesCaloriesPassive"
+              DTS:LogicalAnd="True"
+              DTS:ObjectName="Constraint 9"
+              DTS:To="Package\Master HealthReporting\stg SSIS pakker\Withings_AggregatesDistance" />
+          </DTS:PrecedenceConstraints>
+        </DTS:Executable>
+      </DTS:Executables>
+      <DTS:PrecedenceConstraints>
+        <DTS:PrecedenceConstraint
+          DTS:refId="Package\Master HealthReporting.PrecedenceConstraints[Constraint]"
+          DTS:CreationName=""
+          DTS:DTSID="{ECFA1260-EABE-4ABF-B214-DF341DD2A64B}"
+          DTS:From="Package\Master HealthReporting\stg SSIS pakker"
+          DTS:LogicalAnd="True"
+          DTS:ObjectName="Constraint"
+          DTS:To="Package\Master HealthReporting\Silver layer procedures" />
+      </DTS:PrecedenceConstraints>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL ExecutionEnd Failed"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Execute SQL Task"
+      DTS:DTSID="{245F6513-74C7-423A-9CEC-A7C950ACCD80}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL ExecutionEnd Failed"
+      DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{B4D3DEFE-1F92-4C84-A98D-98DCB1F090F6}"
+          SQLTask:SqlStatementSource="EXEC Audit.ExecutionEnd @Id, 'Failed'" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+          <SQLTask:ParameterBinding
+            SQLTask:ParameterName="Id"
+            SQLTask:DtsVariableName="User::ExecutionId"
+            SQLTask:ParameterDirection="Input"
+            SQLTask:DataType="12"
+            SQLTask:ParameterSize="-1" />
+        </SQLTask:SqlTaskData>
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL ExecutionEnd Succeeded"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Execute SQL Task"
+      DTS:DTSID="{941A2A78-7AD8-4CC9-A2AD-005445FE54FD}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL ExecutionEnd Succeeded"
+      DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+      DTS:ThreadHint="1">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{B4D3DEFE-1F92-4C84-A98D-98DCB1F090F6}"
+          SQLTask:IsStoredProc="True"
+          SQLTask:SqlStatementSource="Audit.ExecutionEnd" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+          <SQLTask:ParameterBinding
+            SQLTask:ParameterName="Id"
+            SQLTask:DtsVariableName="User::ExecutionId"
+            SQLTask:ParameterDirection="Input"
+            SQLTask:DataType="12"
+            SQLTask:ParameterSize="-1" />
+        </SQLTask:SqlTaskData>
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL ExecutionStart"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Execute SQL Task"
+      DTS:DTSID="{E1E039C5-2244-46F4-9F9B-D6349AC3088E}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL ExecutionStart"
+      DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{B4D3DEFE-1F92-4C84-A98D-98DCB1F090F6}"
+          SQLTask:IsStoredProc="True"
+          SQLTask:SqlStatementSource="Audit.ExecutionStart" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+          <SQLTask:ParameterBinding
+            SQLTask:ParameterName="Id"
+            SQLTask:DtsVariableName="User::ExecutionId"
+            SQLTask:ParameterDirection="Output"
+            SQLTask:DataType="12"
+            SQLTask:ParameterSize="-1" />
+          <SQLTask:ParameterBinding
+            SQLTask:ParameterName="PackageID"
+            SQLTask:DtsVariableName="System::PackageID"
+            SQLTask:ParameterDirection="Input"
+            SQLTask:DataType="9"
+            SQLTask:ParameterSize="-1" />
+          <SQLTask:ParameterBinding
+            SQLTask:ParameterName="PackageName"
+            SQLTask:DtsVariableName="System::PackageName"
+            SQLTask:ParameterDirection="Input"
+            SQLTask:DataType="16"
+            SQLTask:ParameterSize="-1" />
+          <SQLTask:ParameterBinding
+            SQLTask:ParameterName="Database"
+            SQLTask:DtsVariableName="$Project::Database"
+            SQLTask:ParameterDirection="Input"
+            SQLTask:DataType="16"
+            SQLTask:ParameterSize="-1" />
+          <SQLTask:ParameterBinding
+            SQLTask:ParameterName="ServerExecutionID"
+            SQLTask:DtsVariableName="System::ServerExecutionID"
+            SQLTask:ParameterDirection="Input"
+            SQLTask:DataType="12"
+            SQLTask:ParameterSize="-1" />
+        </SQLTask:SqlTaskData>
+      </DTS:ObjectData>
+    </DTS:Executable>
+  </DTS:Executables>
+  <DTS:PrecedenceConstraints>
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[Constraint]"
+      DTS:CreationName=""
+      DTS:DTSID="{AA46C0C6-BB90-4433-B1D5-CA67F236CA32}"
+      DTS:From="Package\SQL ExecutionStart"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="Constraint"
+      DTS:To="Package\Master HealthReporting" />
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[Constraint 1]"
+      DTS:CreationName=""
+      DTS:DTSID="{5C1CDC5A-4E9E-4FDB-B98E-9F848CCCB612}"
+      DTS:From="Package\Master HealthReporting"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="Constraint 1"
+      DTS:To="Package\SQL ExecutionEnd Succeeded" />
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[Constraint 2]"
+      DTS:CreationName=""
+      DTS:DTSID="{ED99CFE6-CE82-431D-9FD7-16B72F033ED4}"
+      DTS:From="Package\Master HealthReporting"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="Constraint 2"
+      DTS:To="Package\SQL ExecutionEnd Failed"
+      DTS:Value="1" />
+  </DTS:PrecedenceConstraints>
+  <DTS:EventHandlers>
+    <DTS:EventHandler
+      DTS:refId="Package.EventHandlers[OnError]"
+      DTS:CreationName="OnError"
+      DTS:DTSID="{3F3FFD6F-A0A2-472A-B9FA-22FC123B181D}"
+      DTS:EventID="0"
+      DTS:EventName="OnError"
+      DTS:LocaleID="-1">
+      <DTS:Variables>
+        <DTS:Variable
+          DTS:CreationName=""
+          DTS:Description="The propagate property of the event"
+          DTS:DTSID="{03DCB438-F0E4-443A-9947-AAF012871BAC}"
+          DTS:IncludeInDebugDump="6789"
+          DTS:Namespace="System"
+          DTS:ObjectName="Propagate">
+          <DTS:VariableValue
+            DTS:DataType="11">-1</DTS:VariableValue>
+        </DTS:Variable>
+      </DTS:Variables>
+      <DTS:Executables>
+        <DTS:Executable
+          DTS:refId="Package.EventHandlers[OnError]\SQL ExecutionError"
+          DTS:CreationName="Microsoft.ExecuteSQLTask"
+          DTS:Description="Execute SQL Task"
+          DTS:DTSID="{72376386-4AEB-4B23-8D89-52ACFDBB957A}"
+          DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+          DTS:LocaleID="-1"
+          DTS:ObjectName="SQL ExecutionError"
+          DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+          <DTS:Variables />
+          <DTS:ObjectData>
+            <SQLTask:SqlTaskData
+              SQLTask:Connection="{B4D3DEFE-1F92-4C84-A98D-98DCB1F090F6}"
+              SQLTask:IsStoredProc="True"
+              SQLTask:SqlStatementSource="Audit.ExecutionError" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="ExecutionID"
+                SQLTask:DtsVariableName="User::ExecutionId"
+                SQLTask:ParameterDirection="Input"
+                SQLTask:DataType="12"
+                SQLTask:ParameterSize="-1" />
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="ErrorCode"
+                SQLTask:DtsVariableName="System::ErrorCode"
+                SQLTask:ParameterDirection="Input"
+                SQLTask:DataType="11"
+                SQLTask:ParameterSize="-1" />
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="ErrorDescription"
+                SQLTask:DtsVariableName="System::ErrorDescription"
+                SQLTask:ParameterDirection="Input"
+                SQLTask:DataType="16"
+                SQLTask:ParameterSize="-1" />
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="SourceName"
+                SQLTask:DtsVariableName="System::SourceName"
+                SQLTask:ParameterDirection="Input"
+                SQLTask:DataType="16"
+                SQLTask:ParameterSize="-1" />
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="SourceDescription"
+                SQLTask:DtsVariableName="System::SourceDescription"
+                SQLTask:ParameterDirection="Input"
+                SQLTask:DataType="16"
+                SQLTask:ParameterSize="-1" />
+            </SQLTask:SqlTaskData>
+          </DTS:ObjectData>
+        </DTS:Executable>
+      </DTS:Executables>
+    </DTS:EventHandler>
+  </DTS:EventHandlers>
+  <DTS:DesignTimeProperties><![CDATA[<?xml version="1.0"?>
+<!--This CDATA section contains the layout information of the package. The section includes information such as (x,y) coordinates, width, and height.-->
+<!--If you manually edit this section and make a mistake, you can delete it. -->
+<!--The package will still be able to load normally but the previous layout information will be lost and the designer will automatically re-arrange the elements on the design surface.-->
+<Objects
+  Version="8">
+  <!--Each node below will contain properties that do not affect runtime behavior.-->
+  <Package
+    design-time-name="Package">
+    <LayoutInfo>
+      <GraphLayout
+        Capacity="128" xmlns="clr-namespace:Microsoft.SqlServer.IntegrationServices.Designer.Model.Serialization;assembly=Microsoft.SqlServer.IntegrationServices.Graph" xmlns:mssgle="clr-namespace:Microsoft.SqlServer.Graph.LayoutEngine;assembly=Microsoft.SqlServer.Graph" xmlns:assembly="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:mssgm="clr-namespace:Microsoft.SqlServer.Graph.Model;assembly=Microsoft.SqlServer.Graph">
+        <NodeLayout
+          Size="163,42"
+          Id="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_BloodOxygenLevel"
+          TopLeft="32.5000000000001,515.5" />
+        <NodeLayout
+          Size="163,42"
+          Id="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_BloodPressure"
+          TopLeft="32.5,311.5" />
+        <NodeLayout
+          Size="163,42"
+          Id="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_BodyMeasurement"
+          TopLeft="32.5000000000001,821.5" />
+        <NodeLayout
+          Size="163,42"
+          Id="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_BodyTemperature"
+          TopLeft="32.5000000000001,413.5" />
+        <NodeLayout
+          Size="163,42"
+          Id="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_DailyActivity"
+          TopLeft="32.5,209.5" />
+        <NodeLayout
+          Size="163,42"
+          Id="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_DailySleep"
+          TopLeft="32.5000000000001,719.5" />
+        <NodeLayout
+          Size="163,42"
+          Id="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_HeartRate"
+          TopLeft="32.5000000000001,617.5" />
+        <NodeLayout
+          Size="163,42"
+          Id="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_PulseWaveVelocity"
+          TopLeft="32.5,107.5" />
+        <NodeLayout
+          Size="163,42"
+          Id="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_Weight"
+          TopLeft="32.5,5.5" />
+        <NodeLayout
+          Size="211,42"
+          Id="Package\Master HealthReporting\Silver layer procedures\Exec delete_insert_Workout"
+          TopLeft="8.50000000000016,1229.5" />
+        <NodeLayout
+          Size="162,42"
+          Id="Package\Master HealthReporting\Silver layer procedures\Execute DailyMeal Fact"
+          TopLeft="33.0000000000001,1127.5" />
+        <NodeLayout
+          Size="217,42"
+          Id="Package\Master HealthReporting\Silver layer procedures\Execute Food item dimension"
+          TopLeft="5.50000000000011,923.5" />
+        <NodeLayout
+          Size="197,42"
+          Id="Package\Master HealthReporting\Silver layer procedures\Execute Meal type dimension"
+          TopLeft="15.5000000000001,1025.5" />
+        <EdgeLayout
+          Id="Package\Master HealthReporting\Silver layer procedures.PrecedenceConstraints[Constraint]"
+          TopLeft="114,47.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Master HealthReporting\Silver layer procedures.PrecedenceConstraints[Constraint 1]"
+          TopLeft="114,149.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Master HealthReporting\Silver layer procedures.PrecedenceConstraints[Constraint 2]"
+          TopLeft="114,251.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Master HealthReporting\Silver layer procedures.PrecedenceConstraints[Constraint 3]"
+          TopLeft="114,353.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Master HealthReporting\Silver layer procedures.PrecedenceConstraints[Constraint 4]"
+          TopLeft="114,455.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Master HealthReporting\Silver layer procedures.PrecedenceConstraints[Constraint 5]"
+          TopLeft="114,557.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Master HealthReporting\Silver layer procedures.PrecedenceConstraints[Constraint 5 1]"
+          TopLeft="114,965.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Master HealthReporting\Silver layer procedures.PrecedenceConstraints[Constraint 6]"
+          TopLeft="114,659.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Master HealthReporting\Silver layer procedures.PrecedenceConstraints[Constraint 7]"
+          TopLeft="114,761.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Master HealthReporting\Silver layer procedures.PrecedenceConstraints[Constraint 7 1]"
+          TopLeft="114,1067.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Master HealthReporting\Silver layer procedures.PrecedenceConstraints[Constraint 8]"
+          TopLeft="114,863.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Master HealthReporting\Silver layer procedures.PrecedenceConstraints[Constraint 9]"
+          TopLeft="114,1169.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <NodeLayout
+          Size="171,42"
+          Id="Package\Master HealthReporting\Silver layer procedures\Silver FoodType"
+          TopLeft="28.5000000000002,1331.5" />
+        <EdgeLayout
+          Id="Package\Master HealthReporting\Silver layer procedures.PrecedenceConstraints[Constraint 10]"
+          TopLeft="114,1271.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <ContainerLayout
+          HeaderHeight="43"
+          IsExpanded="True"
+          PanelSize="228,1428"
+          Size="228,1472"
+          Id="Package\Master HealthReporting\Silver layer procedures"
+          TopLeft="5.50000000000044,2149.5" />
+        <NodeLayout
+          Size="171,42"
+          Id="Package\Master HealthReporting\stg SSIS pakker\Lifesum_DailyMeals"
+          TopLeft="22.0000000000002,1841.5" />
+        <NodeLayout
+          Size="194,42"
+          Id="Package\Master HealthReporting\stg SSIS pakker\Oura_BloodOxygenLevel"
+          TopLeft="10.5,5.5" />
+        <NodeLayout
+          Size="188,42"
+          Id="Package\Master HealthReporting\stg SSIS pakker\Oura_DailyActivity"
+          TopLeft="13.5,107.5" />
+        <NodeLayout
+          Size="188,42"
+          Id="Package\Master HealthReporting\stg SSIS pakker\Oura_DailyReadiness"
+          TopLeft="13.5,209.5" />
+        <NodeLayout
+          Size="188,42"
+          Id="Package\Master HealthReporting\stg SSIS pakker\Oura_DailySleep"
+          TopLeft="13.5,311.5" />
+        <NodeLayout
+          Size="188,42"
+          Id="Package\Master HealthReporting\stg SSIS pakker\Oura_HeartRate"
+          TopLeft="13.5,413.5" />
+        <NodeLayout
+          Size="188,42"
+          Id="Package\Master HealthReporting\stg SSIS pakker\Oura_Sleep"
+          TopLeft="13.5000000000001,515.5" />
+        <NodeLayout
+          Size="195,42"
+          Id="Package\Master HealthReporting\stg SSIS pakker\Oura_SmoothedLocation"
+          TopLeft="10.0000000000001,617.5" />
+        <NodeLayout
+          Size="171,42"
+          Id="Package\Master HealthReporting\stg SSIS pakker\Strava_Training"
+          TopLeft="22.0000000000002,1943.5" />
+        <NodeLayout
+          Size="167,42"
+          Id="Package\Master HealthReporting\stg SSIS pakker\Withings_Activities"
+          TopLeft="24.0000000000001,719.5" />
+        <NodeLayout
+          Size="204,42"
+          Id="Package\Master HealthReporting\stg SSIS pakker\Withings_AggregatesCaloriesEarned"
+          TopLeft="5.5000000000001,821.5" />
+        <NodeLayout
+          Size="204,42"
+          Id="Package\Master HealthReporting\stg SSIS pakker\Withings_AggregatesCaloriesPassive"
+          TopLeft="5.50000000000011,923.5" />
+        <NodeLayout
+          Size="204,42"
+          Id="Package\Master HealthReporting\stg SSIS pakker\Withings_AggregatesDistance"
+          TopLeft="5.50000000000013,1025.5" />
+        <NodeLayout
+          Size="204,42"
+          Id="Package\Master HealthReporting\stg SSIS pakker\Withings_AggregatesSteps"
+          TopLeft="5.50000000000013,1127.5" />
+        <NodeLayout
+          Size="204,42"
+          Id="Package\Master HealthReporting\stg SSIS pakker\Withings_BloodPressure"
+          TopLeft="5.50000000000014,1229.5" />
+        <NodeLayout
+          Size="204,42"
+          Id="Package\Master HealthReporting\stg SSIS pakker\Withings_Electrocardiogram"
+          TopLeft="5.50000000000016,1331.5" />
+        <NodeLayout
+          Size="204,42"
+          Id="Package\Master HealthReporting\stg SSIS pakker\Withings_Measurements"
+          TopLeft="5.50000000000017,1433.5" />
+        <NodeLayout
+          Size="204,42"
+          Id="Package\Master HealthReporting\stg SSIS pakker\Withings_PulseWaveVelocity"
+          TopLeft="5.50000000000018,1535.5" />
+        <NodeLayout
+          Size="204,42"
+          Id="Package\Master HealthReporting\stg SSIS pakker\Withings_RawHeartRate"
+          TopLeft="5.5000000000002,1637.5" />
+        <NodeLayout
+          Size="159,42"
+          Id="Package\Master HealthReporting\stg SSIS pakker\Withings_Weight"
+          TopLeft="28.0000000000002,1739.5" />
+        <EdgeLayout
+          Id="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint]"
+          TopLeft="107.5,47.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 1]"
+          TopLeft="107.5,149.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 10]"
+          TopLeft="107.5,1067.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 11]"
+          TopLeft="107.5,1169.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 12]"
+          TopLeft="107.5,1271.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 13]"
+          TopLeft="107.5,1373.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 14]"
+          TopLeft="107.5,1475.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 15]"
+          TopLeft="107.5,1577.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 16]"
+          TopLeft="107.5,1679.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 17]"
+          TopLeft="107.5,1781.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 18]"
+          TopLeft="107.5,1883.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 2]"
+          TopLeft="107.5,251.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 3]"
+          TopLeft="107.5,353.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 4]"
+          TopLeft="107.5,455.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 5]"
+          TopLeft="107.5,557.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 6]"
+          TopLeft="107.5,659.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 7]"
+          TopLeft="107.5,761.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 8]"
+          TopLeft="107.5,863.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Master HealthReporting\stg SSIS pakker.PrecedenceConstraints[Constraint 9]"
+          TopLeft="107.5,965.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <ContainerLayout
+          HeaderHeight="43"
+          IsExpanded="True"
+          PanelSize="215,2040"
+          Size="215,2084"
+          Id="Package\Master HealthReporting\stg SSIS pakker"
+          TopLeft="12.0000000000002,5.5" />
+        <EdgeLayout
+          Id="Package\Master HealthReporting.PrecedenceConstraints[Constraint]"
+          TopLeft="119.5,2089.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <ContainerLayout
+          HeaderHeight="43"
+          IsExpanded="True"
+          PanelSize="239,3676"
+          Size="239,3720"
+          Id="Package\Master HealthReporting"
+          TopLeft="279,107.5" />
+        <NodeLayout
+          Size="205,42"
+          Id="Package\SQL ExecutionEnd Failed"
+          TopLeft="296.000000000001,3887.5" />
+        <NodeLayout
+          Size="230,42"
+          Id="Package\SQL ExecutionEnd Succeeded"
+          TopLeft="5.50000000000051,3887.5" />
+        <NodeLayout
+          Size="176,42"
+          Id="Package\SQL ExecutionStart"
+          TopLeft="310.5,5.5" />
+        <EdgeLayout
+          Id="Package.PrecedenceConstraints[Constraint]"
+          TopLeft="398.5,47.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package.PrecedenceConstraints[Constraint 1]"
+          TopLeft="360,3827.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="-239.5,60"
+              Start="0,0"
+              End="-239.5,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,20.2394014962594" />
+                  <mssgle:CubicBezierSegment
+                    Point1="0,20.2394014962594"
+                    Point2="0,24.2394014962594"
+                    Point3="-4,24.2394014962594" />
+                  <mssgle:LineSegment
+                    End="-235.5,24.2394014962594" />
+                  <mssgle:CubicBezierSegment
+                    Point1="-235.5,24.2394014962594"
+                    Point2="-239.5,24.2394014962594"
+                    Point3="-239.5,28.2394014962594" />
+                  <mssgle:LineSegment
+                    End="-239.5,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package.PrecedenceConstraints[Constraint 2]"
+          TopLeft="437,3827.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="-38.4999999999998,60"
+              Start="0,0"
+              End="-38.4999999999998,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,20.2394014962594" />
+                  <mssgle:CubicBezierSegment
+                    Point1="0,20.2394014962594"
+                    Point2="0,24.2394014962594"
+                    Point3="-4,24.2394014962594" />
+                  <mssgle:LineSegment
+                    End="-34.4999999999998,24.2394014962594" />
+                  <mssgle:CubicBezierSegment
+                    Point1="-34.4999999999998,24.2394014962594"
+                    Point2="-38.4999999999998,24.2394014962594"
+                    Point3="-38.4999999999998,28.2394014962594" />
+                  <mssgle:LineSegment
+                    End="-38.4999999999998,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <mssgm:EdgeLabel
+              BoundingBox="-34.4913476562499,29.2394014962594,30.4826953125,9.7490234375"
+              RelativePosition="Any" />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+      </GraphLayout>
+    </LayoutInfo>
+  </Package>
+  <DtsEventHandler
+    design-time-name="Package.EventHandlers[OnError]">
+    <LayoutInfo>
+      <GraphLayout
+        Capacity="4" xmlns="clr-namespace:Microsoft.SqlServer.IntegrationServices.Designer.Model.Serialization;assembly=Microsoft.SqlServer.IntegrationServices.Graph">
+        <NodeLayout
+          Size="177,42"
+          Id="Package.EventHandlers[OnError]\SQL ExecutionError"
+          TopLeft="450,168" />
+      </GraphLayout>
+    </LayoutInfo>
+  </DtsEventHandler>
+</Objects>]]></DTS:DesignTimeProperties>
+</DTS:Executable>
