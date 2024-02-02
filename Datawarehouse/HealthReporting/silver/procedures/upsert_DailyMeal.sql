@@ -94,7 +94,7 @@ BEGIN
       ,CAST(NULLIF([Cholesterol],'') AS DECIMAL(18,7)) AS [Cholesterol]
       ,CAST(NULLIF([Protein],'') AS DECIMAL(18,7)) AS [Protein]
       ,CAST(NULLIF([Potassium],'') AS DECIMAL(18,7)) AS [Potassium]
-      ,CAST(NULLIF([Sodium],'') AS DECIMAL(18,7)) AS [Sodium]
+      ,CAST(NULLIF(REPLACE(REPLACE(Sodium,CHAR(10),''),CHAR(13),''),'') AS DECIMAL(18,7)) AS [Sodium]
 	  ,ROW_NUMBER() OVER ( PARTITION BY [Date] ,[Meal type] ,[Title] ,[Amount] ,[Serving] ,[Amount in grams] ,[Calories] ,[Carbs] 
 	  ,[Carbs fiber] ,[Carbs sugar] ,[Fat] ,[Fat saturated] ,[Fat unsaturated] ,[Cholesterol] ,[Protein] ,[Potassium] ,[Sodium] ORDER BY [Meta_CreateTime] DESC ) row_num
   FROM [stg].[Lifesum_DailyMeals]
