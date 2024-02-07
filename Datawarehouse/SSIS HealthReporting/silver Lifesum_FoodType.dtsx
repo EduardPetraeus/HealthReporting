@@ -7,12 +7,12 @@
   DTS:CreatorName="NCLAN\cep"
   DTS:DTSID="{7540ECEB-C5C1-4CE8-A1BC-1C8BF079E03E}"
   DTS:ExecutableType="Microsoft.Package"
-  DTS:LastModifiedProductVersion="15.0.2000.71"
+  DTS:LastModifiedProductVersion="16.0.5270.0"
   DTS:LocaleID="1030"
   DTS:ObjectName="silver Lifesum_FoodType"
   DTS:PackageType="5"
-  DTS:VersionBuild="110"
-  DTS:VersionGUID="{53023369-AA95-431A-BC3C-DED64D6CE682}">
+  DTS:VersionBuild="111"
+  DTS:VersionGUID="{EF624F0C-32BB-49A2-B324-9D708E748EBC}">
   <DTS:Property
     DTS:Name="PackageFormatVersion">8</DTS:Property>
   <DTS:ConnectionManagers>
@@ -1384,7 +1384,7 @@
                           errorOrTruncationOperation="Conversion"
                           errorRowDisposition="FailComponent"
                           externalMetadataColumnId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Food item]"
-                          length="50"
+                          length="200"
                           lineageId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Food item]"
                           name="Food item"
                           truncationRowDisposition="FailComponent">
@@ -1471,7 +1471,7 @@
                         <externalMetadataColumn
                           refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Food item]"
                           dataType="wstr"
-                          length="50"
+                          length="200"
                           name="Food item" />
                         <externalMetadataColumn
                           refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Food type]"
@@ -1543,7 +1543,7 @@
                       dataType="System.String"
                       description="The SQL command to be executed."
                       name="SqlCommand"
-                      UITypeEditor="Microsoft.DataTransformationServices.Controls.ModalMultilineStringEditor"></property>
+                      UITypeEditor="Microsoft.DataTransformationServices.Controls.ModalMultilineStringEditor, Microsoft.DataTransformationServices.Controls, Version=16.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91"></property>
                     <property
                       dataType="System.Int32"
                       description="Specifies the column code page to use when code page information is unavailable from the data source."
@@ -1593,7 +1593,7 @@
                         <inputColumn
                           refId="Package\stg package\stg dataflow\OLE DB Destination.Inputs[OLE DB Destination Input].Columns[Food item]"
                           cachedDataType="wstr"
-                          cachedLength="50"
+                          cachedLength="200"
                           cachedName="Food item"
                           externalMetadataColumnId="Package\stg package\stg dataflow\OLE DB Destination.Inputs[OLE DB Destination Input].ExternalColumns[Food item]"
                           lineageId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Food item]" />
@@ -2250,18 +2250,6 @@
       <GraphLayout
         Capacity="16" xmlns="clr-namespace:Microsoft.SqlServer.IntegrationServices.Designer.Model.Serialization;assembly=Microsoft.SqlServer.IntegrationServices.Graph" xmlns:mssgle="clr-namespace:Microsoft.SqlServer.Graph.LayoutEngine;assembly=Microsoft.SqlServer.Graph" xmlns:assembly="http://schemas.microsoft.com/winfx/2006/xaml">
         <NodeLayout
-          Size="139,42"
-          Id="Package\stg package\stg dataflow\RC selected"
-          TopLeft="27.5,107.5" />
-        <NodeLayout
-          Size="156,42"
-          Id="Package\stg package\stg dataflow\Flat File Source"
-          TopLeft="16,5.5" />
-        <NodeLayout
-          Size="137,42"
-          Id="Package\stg package\stg dataflow\RC inserted"
-          TopLeft="23,311.5" />
-        <NodeLayout
           Size="177,42"
           Id="Package\stg package\stg dataflow\OLE DB Destination"
           TopLeft="5.50000000000004,413.5" />
@@ -2269,6 +2257,40 @@
           Size="158,42"
           Id="Package\stg package\stg dataflow\Derived Column"
           TopLeft="15,209.5" />
+        <NodeLayout
+          Size="156,42"
+          Id="Package\stg package\stg dataflow\Flat File Source"
+          TopLeft="16,5.5" />
+        <NodeLayout
+          Size="139,42"
+          Id="Package\stg package\stg dataflow\RC selected"
+          TopLeft="27.5,107.5" />
+        <NodeLayout
+          Size="137,42"
+          Id="Package\stg package\stg dataflow\RC inserted"
+          TopLeft="23,311.5" />
+        <EdgeLayout
+          Id="Package\stg package\stg dataflow.Paths[Row Count Output 11]"
+          TopLeft="92.75,353.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
         <EdgeLayout
           Id="Package\stg package\stg dataflow.Paths[Row Count Output 1]"
           TopLeft="95.5,149.5">
@@ -2316,28 +2338,6 @@
         <EdgeLayout
           Id="Package\stg package\stg dataflow.Paths[Derived Column Output]"
           TopLeft="92.75,251.5">
-          <EdgeLayout.Curve>
-            <mssgle:Curve
-              StartConnector="{assembly:Null}"
-              EndConnector="0,60"
-              Start="0,0"
-              End="0,52.5">
-              <mssgle:Curve.Segments>
-                <mssgle:SegmentCollection
-                  Capacity="5">
-                  <mssgle:LineSegment
-                    End="0,52.5" />
-                </mssgle:SegmentCollection>
-              </mssgle:Curve.Segments>
-            </mssgle:Curve>
-          </EdgeLayout.Curve>
-          <EdgeLayout.Labels>
-            <EdgeLabelCollection />
-          </EdgeLayout.Labels>
-        </EdgeLayout>
-        <EdgeLayout
-          Id="Package\stg package\stg dataflow.Paths[Row Count Output 11]"
-          TopLeft="92.75,353.5">
           <EdgeLayout.Curve>
             <mssgle:Curve
               StartConnector="{assembly:Null}"

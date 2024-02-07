@@ -9,7 +9,7 @@
         <WinAuthUserName />
         <WinAuthDomain />
         <ServerName>.</ServerName>
-        <PathOnServer>/SSISDB/HealthReporting/SSIS Extract</PathOnServer>
+        <PathOnServer>/SSISDB/HealthReporting/HealthReporting</PathOnServer>
         <UserIDs />
         <UserPasswords />
         <OfflineMode>false</OfflineMode>
