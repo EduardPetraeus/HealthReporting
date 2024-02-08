@@ -77,7 +77,7 @@ BEGIN
 	WITH CTE_DailyMeal AS(
 	SELECT 
        CAST(NULLIF([Date],'') AS DATE) AS [Date]
-	  ,CAST(SUBSTRING(REPLACE(REPLACE([Date],'"',''),'-',''),1,8)AS INT) AS [DateCode]
+	  ,CAST(SUBSTRING(REPLACE(REPLACE(CAST([Date] AS DATE),'"',''),'-',''),1,8)AS INT) AS [DateCode]
       ,NULLIF([Meal type],'') AS [Meal type]
 	  ,RTRIM(LTRIM(NULLIF([Title],''))) AS [Food item]
       ,CAST(HASHBYTES('SHA2_256',CAST(UPPER(RTRIM(LTRIM(ISNULL([Title], N'#')))) AS NVARCHAR(200))) AS BIGINT) AS [UniqueFoodItemKey]
