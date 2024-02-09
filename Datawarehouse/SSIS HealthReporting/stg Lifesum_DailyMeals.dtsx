@@ -11,8 +11,8 @@
   DTS:LocaleID="1030"
   DTS:ObjectName="stg Lifesum_DailyMeals"
   DTS:PackageType="5"
-  DTS:VersionBuild="110"
-  DTS:VersionGUID="{D16FC32E-8660-4ED4-8176-AE1084E325F9}">
+  DTS:VersionBuild="112"
+  DTS:VersionGUID="{47F02974-DEFF-4059-9276-67B5879693D2}">
   <DTS:Property
     DTS:Name="PackageFormatVersion">8</DTS:Property>
   <DTS:ConnectionManagers>
@@ -359,6 +359,179 @@
               DTS:TextQualified="True"
               DTS:ObjectName="Sodium"
               DTS:DTSID="{F0D14B56-C1D5-41B5-BD5F-9E3B9EFEAD95}"
+              DTS:CreationName="" />
+          </DTS:FlatFileColumns>
+        </DTS:ConnectionManager>
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[Lifesum CSV PDF converted files with proper columns]"
+      DTS:CreationName="FLATFILE"
+      DTS:DTSID="{0AF00C7C-9C52-4B4A-BE10-29D58620B1BC}"
+      DTS:ObjectName="Lifesum CSV PDF converted files with proper columns">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:Format="Delimited"
+          DTS:LocaleID="1033"
+          DTS:HeaderRowDelimiter="_x000D__x000A_"
+          DTS:ColumnNamesInFirstDataRow="True"
+          DTS:RowDelimiter=""
+          DTS:TextQualifier="_x0022_"
+          DTS:CodePage="65001"
+          DTS:ConnectionString="C:\Users\clepe\OneDrive - Pandora\Documents\LifeSum data export\Tracking data.csv">
+          <DTS:FlatFileColumns>
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Date"
+              DTS:DTSID="{EB03F677-8C31-42E9-AB58-4B5956E28076}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Meal type"
+              DTS:DTSID="{D1C6D8F3-9A60-4DBE-8E71-9E755AF7D924}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="200"
+              DTS:DataType="130"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Title"
+              DTS:DTSID="{7614B7DA-729E-4CCD-A549-41637EEE1D25}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Amount"
+              DTS:DTSID="{99C6CD9F-2EBE-4DE0-A534-BBFB6F1D6B13}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Serving"
+              DTS:DTSID="{8BDC140B-DC1F-4F21-A697-EC9EBD3B1602}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Amount in grams"
+              DTS:DTSID="{0995D22E-26BC-4FAE-BC31-2A561439D228}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Calories"
+              DTS:DTSID="{74E32B13-AB54-4724-9954-C1BC4337D336}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Carbs"
+              DTS:DTSID="{E1C12D93-0B1E-4953-B77A-5EB58C9D5804}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Carbs fiber"
+              DTS:DTSID="{54314D96-EB12-4496-8FDF-7FC390E1BC1D}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Carbs sugar"
+              DTS:DTSID="{DFE91575-6E85-4789-BCDB-8805D040A3D5}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Fat"
+              DTS:DTSID="{941DEEDB-4799-4A4F-AEE5-1534CCBB7E3F}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Fat saturated"
+              DTS:DTSID="{F976CCC2-C712-4912-96FE-A1CDEB45F55D}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Fat unsaturated"
+              DTS:DTSID="{FB1816B5-9250-431D-A199-D3401C1D64FD}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Cholesterol"
+              DTS:DTSID="{D582F5ED-D999-4DC1-80D5-115128B51D4A}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Protein"
+              DTS:DTSID="{37357745-47FC-4325-8C20-165F577545E6}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Potassium"
+              DTS:DTSID="{4ECCEEA3-7B6A-4216-BA17-F14BCE900C71}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x000D__x000A_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Sodium"
+              DTS:DTSID="{54F29076-38D6-49CF-ACEA-51DD440390EF}"
               DTS:CreationName="" />
           </DTS:FlatFileColumns>
         </DTS:ConnectionManager>
@@ -1609,8 +1782,8 @@
                   <connections>
                     <connection
                       refId="Package\stg package\stg dataflow\Flat File Source.Connections[FlatFileConnection]"
-                      connectionManagerID="Package.ConnectionManagers[Lifesum CSV PDF converted files]"
-                      connectionManagerRefId="Package.ConnectionManagers[Lifesum CSV PDF converted files]"
+                      connectionManagerID="Package.ConnectionManagers[Lifesum CSV PDF converted files with proper columns]"
+                      connectionManagerRefId="Package.ConnectionManagers[Lifesum CSV PDF converted files with proper columns]"
                       name="FlatFileConnection" />
                   </connections>
                   <outputs>
@@ -1684,72 +1857,6 @@
                           </properties>
                         </outputColumn>
                         <outputColumn
-                          refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Column 3]"
-                          codePage="65001"
-                          dataType="str"
-                          errorOrTruncationOperation="Conversion"
-                          errorRowDisposition="FailComponent"
-                          externalMetadataColumnId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Column 3]"
-                          length="50"
-                          lineageId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Column 3]"
-                          name="Column 3"
-                          truncationRowDisposition="FailComponent">
-                          <properties>
-                            <property
-                              dataType="System.Boolean"
-                              description="Indicates whether the column uses the faster, locale-neutral parsing routines."
-                              name="FastParse">false</property>
-                            <property
-                              dataType="System.Boolean"
-                              description="Indicates whether the data is in binary format."
-                              name="UseBinaryFormat">false</property>
-                          </properties>
-                        </outputColumn>
-                        <outputColumn
-                          refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Column 4]"
-                          codePage="65001"
-                          dataType="str"
-                          errorOrTruncationOperation="Conversion"
-                          errorRowDisposition="FailComponent"
-                          externalMetadataColumnId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Column 4]"
-                          length="50"
-                          lineageId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Column 4]"
-                          name="Column 4"
-                          truncationRowDisposition="FailComponent">
-                          <properties>
-                            <property
-                              dataType="System.Boolean"
-                              description="Indicates whether the column uses the faster, locale-neutral parsing routines."
-                              name="FastParse">false</property>
-                            <property
-                              dataType="System.Boolean"
-                              description="Indicates whether the data is in binary format."
-                              name="UseBinaryFormat">false</property>
-                          </properties>
-                        </outputColumn>
-                        <outputColumn
-                          refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Column 5]"
-                          codePage="65001"
-                          dataType="str"
-                          errorOrTruncationOperation="Conversion"
-                          errorRowDisposition="FailComponent"
-                          externalMetadataColumnId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Column 5]"
-                          length="50"
-                          lineageId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Column 5]"
-                          name="Column 5"
-                          truncationRowDisposition="FailComponent">
-                          <properties>
-                            <property
-                              dataType="System.Boolean"
-                              description="Indicates whether the column uses the faster, locale-neutral parsing routines."
-                              name="FastParse">false</property>
-                            <property
-                              dataType="System.Boolean"
-                              description="Indicates whether the data is in binary format."
-                              name="UseBinaryFormat">false</property>
-                          </properties>
-                        </outputColumn>
-                        <outputColumn
                           refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Amount]"
                           codePage="65001"
                           dataType="str"
@@ -1759,28 +1866,6 @@
                           length="50"
                           lineageId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Amount]"
                           name="Amount"
-                          truncationRowDisposition="FailComponent">
-                          <properties>
-                            <property
-                              dataType="System.Boolean"
-                              description="Indicates whether the column uses the faster, locale-neutral parsing routines."
-                              name="FastParse">false</property>
-                            <property
-                              dataType="System.Boolean"
-                              description="Indicates whether the data is in binary format."
-                              name="UseBinaryFormat">false</property>
-                          </properties>
-                        </outputColumn>
-                        <outputColumn
-                          refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Column 7]"
-                          codePage="65001"
-                          dataType="str"
-                          errorOrTruncationOperation="Conversion"
-                          errorRowDisposition="FailComponent"
-                          externalMetadataColumnId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Column 7]"
-                          length="50"
-                          lineageId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Column 7]"
-                          name="Column 7"
                           truncationRowDisposition="FailComponent">
                           <properties>
                             <property
@@ -1816,28 +1901,6 @@
                           </properties>
                         </outputColumn>
                         <outputColumn
-                          refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Column 9]"
-                          codePage="65001"
-                          dataType="str"
-                          errorOrTruncationOperation="Conversion"
-                          errorRowDisposition="FailComponent"
-                          externalMetadataColumnId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Column 9]"
-                          length="50"
-                          lineageId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Column 9]"
-                          name="Column 9"
-                          truncationRowDisposition="FailComponent">
-                          <properties>
-                            <property
-                              dataType="System.Boolean"
-                              description="Indicates whether the column uses the faster, locale-neutral parsing routines."
-                              name="FastParse">false</property>
-                            <property
-                              dataType="System.Boolean"
-                              description="Indicates whether the data is in binary format."
-                              name="UseBinaryFormat">false</property>
-                          </properties>
-                        </outputColumn>
-                        <outputColumn
                           refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Amount in grams]"
                           codePage="65001"
                           dataType="str"
@@ -1860,28 +1923,6 @@
                           </properties>
                         </outputColumn>
                         <outputColumn
-                          refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Column 11]"
-                          codePage="65001"
-                          dataType="str"
-                          errorOrTruncationOperation="Conversion"
-                          errorRowDisposition="FailComponent"
-                          externalMetadataColumnId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Column 11]"
-                          length="50"
-                          lineageId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Column 11]"
-                          name="Column 11"
-                          truncationRowDisposition="FailComponent">
-                          <properties>
-                            <property
-                              dataType="System.Boolean"
-                              description="Indicates whether the column uses the faster, locale-neutral parsing routines."
-                              name="FastParse">false</property>
-                            <property
-                              dataType="System.Boolean"
-                              description="Indicates whether the data is in binary format."
-                              name="UseBinaryFormat">false</property>
-                          </properties>
-                        </outputColumn>
-                        <outputColumn
                           refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Calories]"
                           codePage="65001"
                           dataType="str"
@@ -1891,28 +1932,6 @@
                           length="50"
                           lineageId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Calories]"
                           name="Calories"
-                          truncationRowDisposition="FailComponent">
-                          <properties>
-                            <property
-                              dataType="System.Boolean"
-                              description="Indicates whether the column uses the faster, locale-neutral parsing routines."
-                              name="FastParse">false</property>
-                            <property
-                              dataType="System.Boolean"
-                              description="Indicates whether the data is in binary format."
-                              name="UseBinaryFormat">false</property>
-                          </properties>
-                        </outputColumn>
-                        <outputColumn
-                          refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Column 13]"
-                          codePage="65001"
-                          dataType="str"
-                          errorOrTruncationOperation="Conversion"
-                          errorRowDisposition="FailComponent"
-                          externalMetadataColumnId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Column 13]"
-                          length="50"
-                          lineageId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Column 13]"
-                          name="Column 13"
                           truncationRowDisposition="FailComponent">
                           <properties>
                             <property
@@ -2014,28 +2033,6 @@
                           </properties>
                         </outputColumn>
                         <outputColumn
-                          refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Column 18]"
-                          codePage="65001"
-                          dataType="str"
-                          errorOrTruncationOperation="Conversion"
-                          errorRowDisposition="FailComponent"
-                          externalMetadataColumnId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Column 18]"
-                          length="50"
-                          lineageId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Column 18]"
-                          name="Column 18"
-                          truncationRowDisposition="FailComponent">
-                          <properties>
-                            <property
-                              dataType="System.Boolean"
-                              description="Indicates whether the column uses the faster, locale-neutral parsing routines."
-                              name="FastParse">false</property>
-                            <property
-                              dataType="System.Boolean"
-                              description="Indicates whether the data is in binary format."
-                              name="UseBinaryFormat">false</property>
-                          </properties>
-                        </outputColumn>
-                        <outputColumn
                           refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Fat saturated]"
                           codePage="65001"
                           dataType="str"
@@ -2045,28 +2042,6 @@
                           length="50"
                           lineageId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Fat saturated]"
                           name="Fat saturated"
-                          truncationRowDisposition="FailComponent">
-                          <properties>
-                            <property
-                              dataType="System.Boolean"
-                              description="Indicates whether the column uses the faster, locale-neutral parsing routines."
-                              name="FastParse">false</property>
-                            <property
-                              dataType="System.Boolean"
-                              description="Indicates whether the data is in binary format."
-                              name="UseBinaryFormat">false</property>
-                          </properties>
-                        </outputColumn>
-                        <outputColumn
-                          refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Column 20]"
-                          codePage="65001"
-                          dataType="str"
-                          errorOrTruncationOperation="Conversion"
-                          errorRowDisposition="FailComponent"
-                          externalMetadataColumnId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Column 20]"
-                          length="50"
-                          lineageId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Column 20]"
-                          name="Column 20"
                           truncationRowDisposition="FailComponent">
                           <properties>
                             <property
@@ -2102,28 +2077,6 @@
                           </properties>
                         </outputColumn>
                         <outputColumn
-                          refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Column 22]"
-                          codePage="65001"
-                          dataType="str"
-                          errorOrTruncationOperation="Conversion"
-                          errorRowDisposition="FailComponent"
-                          externalMetadataColumnId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Column 22]"
-                          length="50"
-                          lineageId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Column 22]"
-                          name="Column 22"
-                          truncationRowDisposition="FailComponent">
-                          <properties>
-                            <property
-                              dataType="System.Boolean"
-                              description="Indicates whether the column uses the faster, locale-neutral parsing routines."
-                              name="FastParse">false</property>
-                            <property
-                              dataType="System.Boolean"
-                              description="Indicates whether the data is in binary format."
-                              name="UseBinaryFormat">false</property>
-                          </properties>
-                        </outputColumn>
-                        <outputColumn
                           refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Cholesterol]"
                           codePage="65001"
                           dataType="str"
@@ -2133,28 +2086,6 @@
                           length="50"
                           lineageId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Cholesterol]"
                           name="Cholesterol"
-                          truncationRowDisposition="FailComponent">
-                          <properties>
-                            <property
-                              dataType="System.Boolean"
-                              description="Indicates whether the column uses the faster, locale-neutral parsing routines."
-                              name="FastParse">false</property>
-                            <property
-                              dataType="System.Boolean"
-                              description="Indicates whether the data is in binary format."
-                              name="UseBinaryFormat">false</property>
-                          </properties>
-                        </outputColumn>
-                        <outputColumn
-                          refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Column 24]"
-                          codePage="65001"
-                          dataType="str"
-                          errorOrTruncationOperation="Conversion"
-                          errorRowDisposition="FailComponent"
-                          externalMetadataColumnId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Column 24]"
-                          length="50"
-                          lineageId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].Columns[Column 24]"
-                          name="Column 24"
                           truncationRowDisposition="FailComponent">
                           <properties>
                             <property
@@ -2254,35 +2185,11 @@
                           length="200"
                           name="Title" />
                         <externalMetadataColumn
-                          refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Column 3]"
-                          codePage="65001"
-                          dataType="str"
-                          length="50"
-                          name="Column 3" />
-                        <externalMetadataColumn
-                          refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Column 4]"
-                          codePage="65001"
-                          dataType="str"
-                          length="50"
-                          name="Column 4" />
-                        <externalMetadataColumn
-                          refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Column 5]"
-                          codePage="65001"
-                          dataType="str"
-                          length="50"
-                          name="Column 5" />
-                        <externalMetadataColumn
                           refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Amount]"
                           codePage="65001"
                           dataType="str"
                           length="50"
                           name="Amount" />
-                        <externalMetadataColumn
-                          refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Column 7]"
-                          codePage="65001"
-                          dataType="str"
-                          length="50"
-                          name="Column 7" />
                         <externalMetadataColumn
                           refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Serving]"
                           codePage="65001"
@@ -2290,35 +2197,17 @@
                           length="50"
                           name="Serving" />
                         <externalMetadataColumn
-                          refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Column 9]"
-                          codePage="65001"
-                          dataType="str"
-                          length="50"
-                          name="Column 9" />
-                        <externalMetadataColumn
                           refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Amount in grams]"
                           codePage="65001"
                           dataType="str"
                           length="50"
                           name="Amount in grams" />
                         <externalMetadataColumn
-                          refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Column 11]"
-                          codePage="65001"
-                          dataType="str"
-                          length="50"
-                          name="Column 11" />
-                        <externalMetadataColumn
                           refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Calories]"
                           codePage="65001"
                           dataType="str"
                           length="50"
                           name="Calories" />
-                        <externalMetadataColumn
-                          refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Column 13]"
-                          codePage="65001"
-                          dataType="str"
-                          length="50"
-                          name="Column 13" />
                         <externalMetadataColumn
                           refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Carbs]"
                           codePage="65001"
@@ -2344,23 +2233,11 @@
                           length="50"
                           name="Fat" />
                         <externalMetadataColumn
-                          refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Column 18]"
-                          codePage="65001"
-                          dataType="str"
-                          length="50"
-                          name="Column 18" />
-                        <externalMetadataColumn
                           refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Fat saturated]"
                           codePage="65001"
                           dataType="str"
                           length="50"
                           name="Fat saturated" />
-                        <externalMetadataColumn
-                          refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Column 20]"
-                          codePage="65001"
-                          dataType="str"
-                          length="50"
-                          name="Column 20" />
                         <externalMetadataColumn
                           refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Fat unsaturated]"
                           codePage="65001"
@@ -2368,23 +2245,11 @@
                           length="50"
                           name="Fat unsaturated" />
                         <externalMetadataColumn
-                          refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Column 22]"
-                          codePage="65001"
-                          dataType="str"
-                          length="50"
-                          name="Column 22" />
-                        <externalMetadataColumn
                           refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Cholesterol]"
                           codePage="65001"
                           dataType="str"
                           length="50"
                           name="Cholesterol" />
-                        <externalMetadataColumn
-                          refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Column 24]"
-                          codePage="65001"
-                          dataType="str"
-                          length="50"
-                          name="Column 24" />
                         <externalMetadataColumn
                           refId="Package\stg package\stg dataflow\Flat File Source.Outputs[Flat File Source Output].ExternalColumns[Protein]"
                           codePage="65001"
@@ -3632,46 +3497,24 @@
       <GraphLayout
         Capacity="16" xmlns="clr-namespace:Microsoft.SqlServer.IntegrationServices.Designer.Model.Serialization;assembly=Microsoft.SqlServer.IntegrationServices.Graph" xmlns:mssgle="clr-namespace:Microsoft.SqlServer.Graph.LayoutEngine;assembly=Microsoft.SqlServer.Graph" xmlns:assembly="http://schemas.microsoft.com/winfx/2006/xaml">
         <NodeLayout
-          Size="139,42"
-          Id="Package\stg package\stg dataflow\RC selected"
-          TopLeft="27.5,107.5" />
-        <NodeLayout
-          Size="137,42"
-          Id="Package\stg package\stg dataflow\RC inserted"
-          TopLeft="23,311.5" />
-        <NodeLayout
           Size="177,42"
           Id="Package\stg package\stg dataflow\OLE DB Destination"
           TopLeft="5.50000000000004,413.5" />
         <NodeLayout
+          Size="139,42"
+          Id="Package\stg package\stg dataflow\RC selected"
+          TopLeft="24.5,107.5" />
+        <NodeLayout
           Size="158,42"
           Id="Package\stg package\stg dataflow\Derived Column"
           TopLeft="15,209.5" />
-        <EdgeLayout
-          Id="Package\stg package\stg dataflow.Paths[Row Count Output 1]"
-          TopLeft="95.5,149.5">
-          <EdgeLayout.Curve>
-            <mssgle:Curve
-              StartConnector="{assembly:Null}"
-              EndConnector="0,60"
-              Start="0,0"
-              End="0,52.5">
-              <mssgle:Curve.Segments>
-                <mssgle:SegmentCollection
-                  Capacity="5">
-                  <mssgle:LineSegment
-                    End="0,52.5" />
-                </mssgle:SegmentCollection>
-              </mssgle:Curve.Segments>
-            </mssgle:Curve>
-          </EdgeLayout.Curve>
-          <EdgeLayout.Labels>
-            <EdgeLabelCollection />
-          </EdgeLayout.Labels>
-        </EdgeLayout>
+        <NodeLayout
+          Size="137,42"
+          Id="Package\stg package\stg dataflow\RC inserted"
+          TopLeft="25.5,311.5" />
         <EdgeLayout
           Id="Package\stg package\stg dataflow.Paths[Derived Column Output]"
-          TopLeft="92.75,251.5">
+          TopLeft="94,251.5">
           <EdgeLayout.Curve>
             <mssgle:Curve
               StartConnector="{assembly:Null}"
@@ -3693,7 +3536,29 @@
         </EdgeLayout>
         <EdgeLayout
           Id="Package\stg package\stg dataflow.Paths[Row Count Output 11]"
-          TopLeft="92.75,353.5">
+          TopLeft="94,353.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\stg package\stg dataflow.Paths[Row Count Output 1]"
+          TopLeft="94,149.5">
           <EdgeLayout.Curve>
             <mssgle:Curve
               StartConnector="{assembly:Null}"
@@ -3716,21 +3581,21 @@
         <NodeLayout
           Size="151,42"
           Id="Package\stg package\stg dataflow\Flat File Source"
-          TopLeft="19,10" />
+          TopLeft="18.5,5.5" />
         <EdgeLayout
           Id="Package\stg package\stg dataflow.Paths[Flat File Source Output]"
-          TopLeft="95.75,52">
+          TopLeft="94,47.5">
           <EdgeLayout.Curve>
             <mssgle:Curve
               StartConnector="{assembly:Null}"
-              EndConnector="0,55.5"
+              EndConnector="0,60"
               Start="0,0"
-              End="0,48">
+              End="0,52.5">
               <mssgle:Curve.Segments>
                 <mssgle:SegmentCollection
                   Capacity="5">
                   <mssgle:LineSegment
-                    End="0,48" />
+                    End="0,52.5" />
                 </mssgle:SegmentCollection>
               </mssgle:Curve.Segments>
             </mssgle:Curve>

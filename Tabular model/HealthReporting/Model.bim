@@ -1,0 +1,1764 @@
+{
+  "name": "SemanticModel",
+  "compatibilityLevel": 1200,
+  "model": {
+    "culture": "en-US",
+    "dataSources": [
+      {
+        "name": "SqlServer localhost HealthReporting",
+        "connectionString": "Provider=SQLNCLI11;Data Source=.;Integrated Security=SSPI;Persist Security Info=false;Initial Catalog=HealthReporting",
+        "impersonationMode": "impersonateAccount",
+        "account": "global\\clepe",
+        "annotations": [
+          {
+            "name": "ConnectionEditUISource",
+            "value": "SqlServer"
+          }
+        ]
+      }
+    ],
+    "tables": [
+      {
+        "name": "Daily Sleep Description",
+        "columns": [
+          {
+            "name": "DailySleep ColumnName",
+            "dataType": "string",
+            "sourceColumn": "DailySleep ColumnName",
+            "sourceProviderType": "Char"
+          },
+          {
+            "name": "DailySleep Description",
+            "dataType": "string",
+            "sourceColumn": "DailySleep Description",
+            "sourceProviderType": "Char"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Daily Sleep Description",
+            "dataView": "full",
+            "source": {
+              "type": "query",
+              "query": " SELECT [gold].[vw_DailySleepDescription].* FROM [gold].[vw_DailySleepDescription] ",
+              "dataSource": "SqlServer localhost HealthReporting"
+            }
+          }
+        ],
+        "annotations": [
+          {
+            "name": "_TM_ExtProp_QueryDefinition",
+            "value": " SELECT [gold].[vw_DailySleepDescription].* FROM [gold].[vw_DailySleepDescription] "
+          },
+          {
+            "name": "_TM_ExtProp_DbTableName",
+            "value": "vw_DailySleepDescription"
+          },
+          {
+            "name": "_TM_ExtProp_DbSchemaName",
+            "value": "gold"
+          }
+        ]
+      },
+      {
+        "name": "Activity Type Dimension",
+        "columns": [
+          {
+            "name": "SK_ActivityType",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "SK_ActivityType",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "Activity Name",
+            "dataType": "string",
+            "sourceColumn": "Activity Name",
+            "sourceProviderType": "WChar"
+          },
+          {
+            "name": "Activity Type",
+            "dataType": "string",
+            "sourceColumn": "Activity Type",
+            "sourceProviderType": "WChar"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Activity Type Dimension",
+            "dataView": "full",
+            "source": {
+              "type": "query",
+              "query": " SELECT [gold].[vw_Dim_ActivityType].* FROM [gold].[vw_Dim_ActivityType] ",
+              "dataSource": "SqlServer localhost HealthReporting"
+            }
+          }
+        ],
+        "annotations": [
+          {
+            "name": "_TM_ExtProp_QueryDefinition",
+            "value": " SELECT [gold].[vw_Dim_ActivityType].* FROM [gold].[vw_Dim_ActivityType] "
+          },
+          {
+            "name": "_TM_ExtProp_DbTableName",
+            "value": "vw_Dim_ActivityType"
+          },
+          {
+            "name": "_TM_ExtProp_DbSchemaName",
+            "value": "gold"
+          }
+        ]
+      },
+      {
+        "name": "Date Dimension",
+        "columns": [
+          {
+            "name": "SK_Date",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "SK_Date",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "Dato",
+            "dataType": "dateTime",
+            "sourceColumn": "Dato",
+            "formatString": "General Date",
+            "sourceProviderType": "DBTimeStamp"
+          },
+          {
+            "name": "Aar",
+            "dataType": "int64",
+            "sourceColumn": "Aar",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "Kvartal",
+            "dataType": "int64",
+            "sourceColumn": "Kvartal",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "Maaned",
+            "dataType": "int64",
+            "sourceColumn": "Maaned",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "Uge",
+            "dataType": "int64",
+            "sourceColumn": "Uge",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "Dag Nr I Uge",
+            "dataType": "int64",
+            "sourceColumn": "Dag Nr I Uge",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "Dag Nr I Maaned",
+            "dataType": "int64",
+            "sourceColumn": "Dag Nr I Maaned",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "Dag Nr I Aar",
+            "dataType": "int64",
+            "sourceColumn": "Dag Nr I Aar",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "Maaned Navn",
+            "dataType": "string",
+            "sourceColumn": "Maaned Navn",
+            "sourceProviderType": "WChar"
+          },
+          {
+            "name": "Dag Navn",
+            "dataType": "string",
+            "sourceColumn": "Dag Navn",
+            "sourceProviderType": "WChar"
+          },
+          {
+            "name": "Skudaar",
+            "dataType": "boolean",
+            "sourceColumn": "Skudaar",
+            "formatString": "\"TRUE\";\"TRUE\";\"FALSE\"",
+            "sourceProviderType": "Boolean"
+          },
+          {
+            "name": "Uge Nr I Maaned",
+            "dataType": "int64",
+            "sourceColumn": "Uge Nr I Maaned",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "Maaned Nr I Kvartal",
+            "dataType": "int64",
+            "sourceColumn": "Maaned Nr I Kvartal",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "Aar Maaned Nr",
+            "dataType": "int64",
+            "sourceColumn": "Aar Maaned Nr",
+            "sourceProviderType": "Integer"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Date Dimension",
+            "dataView": "full",
+            "source": {
+              "type": "query",
+              "query": " SELECT [gold].[vw_Dim_Date].* FROM [gold].[vw_Dim_Date] ",
+              "dataSource": "SqlServer localhost HealthReporting"
+            }
+          }
+        ],
+        "annotations": [
+          {
+            "name": "_TM_ExtProp_QueryDefinition",
+            "value": " SELECT [gold].[vw_Dim_Date].* FROM [gold].[vw_Dim_Date] "
+          },
+          {
+            "name": "_TM_ExtProp_DbTableName",
+            "value": "vw_Dim_Date"
+          },
+          {
+            "name": "_TM_ExtProp_DbSchemaName",
+            "value": "gold"
+          }
+        ]
+      },
+      {
+        "name": "Food Item Dimension",
+        "columns": [
+          {
+            "name": "SK_FoodItem",
+            "dataType": "string",
+            "isHidden": true,
+            "sourceColumn": "SK_FoodItem",
+            "sourceProviderType": "Char"
+          },
+          {
+            "name": "Food item",
+            "dataType": "string",
+            "sourceColumn": "Food item",
+            "sourceProviderType": "WChar"
+          },
+          {
+            "name": "Food type",
+            "dataType": "string",
+            "sourceColumn": "Food type",
+            "sourceProviderType": "WChar"
+          },
+          {
+            "name": "Food group",
+            "dataType": "string",
+            "sourceColumn": "Food group",
+            "sourceProviderType": "WChar"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Food Item Dimension",
+            "dataView": "full",
+            "source": {
+              "type": "query",
+              "query": " SELECT [gold].[vw_Dim_FoodItem].* FROM [gold].[vw_Dim_FoodItem] ",
+              "dataSource": "SqlServer localhost HealthReporting"
+            }
+          }
+        ],
+        "annotations": [
+          {
+            "name": "_TM_ExtProp_QueryDefinition",
+            "value": " SELECT [gold].[vw_Dim_FoodItem].* FROM [gold].[vw_Dim_FoodItem] "
+          },
+          {
+            "name": "_TM_ExtProp_DbTableName",
+            "value": "vw_Dim_FoodItem"
+          },
+          {
+            "name": "_TM_ExtProp_DbSchemaName",
+            "value": "gold"
+          }
+        ]
+      },
+      {
+        "name": "Meal Type Dimension",
+        "columns": [
+          {
+            "name": "SK_MealType",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "SK_MealType",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "Meal type",
+            "dataType": "string",
+            "sourceColumn": "Meal type",
+            "sourceProviderType": "WChar"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Meal Type Dimension",
+            "dataView": "full",
+            "source": {
+              "type": "query",
+              "query": " SELECT [gold].[vw_Dim_MealType].* FROM [gold].[vw_Dim_MealType] ",
+              "dataSource": "SqlServer localhost HealthReporting"
+            }
+          }
+        ],
+        "annotations": [
+          {
+            "name": "_TM_ExtProp_QueryDefinition",
+            "value": " SELECT [gold].[vw_Dim_MealType].* FROM [gold].[vw_Dim_MealType] "
+          },
+          {
+            "name": "_TM_ExtProp_DbTableName",
+            "value": "vw_Dim_MealType"
+          },
+          {
+            "name": "_TM_ExtProp_DbSchemaName",
+            "value": "gold"
+          }
+        ]
+      },
+      {
+        "name": "Time Dimension",
+        "columns": [
+          {
+            "name": "SK_Time",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "SK_Time",
+            "sourceProviderType": "BigInt"
+          },
+          {
+            "name": "Ekey_Time",
+            "dataType": "string",
+            "isHidden": true,
+            "sourceColumn": "Ekey_Time",
+            "sourceProviderType": "Char"
+          },
+          {
+            "name": "TimeCode",
+            "dataType": "string",
+            "sourceColumn": "TimeCode",
+            "sourceProviderType": "Char"
+          },
+          {
+            "name": "Hour12Code",
+            "dataType": "string",
+            "sourceColumn": "Hour12Code",
+            "sourceProviderType": "Char"
+          },
+          {
+            "name": "Hour12Key",
+            "dataType": "string",
+            "sourceColumn": "Hour12Key",
+            "sourceProviderType": "Char"
+          },
+          {
+            "name": "MinuteCode",
+            "dataType": "string",
+            "sourceColumn": "MinuteCode",
+            "sourceProviderType": "Char"
+          },
+          {
+            "name": "MinuteKey",
+            "dataType": "int64",
+            "sourceColumn": "MinuteKey",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "AMPMCode",
+            "dataType": "string",
+            "sourceColumn": "AMPMCode",
+            "sourceProviderType": "Char"
+          },
+          {
+            "name": "Hour24Code",
+            "dataType": "string",
+            "sourceColumn": "Hour24Code",
+            "sourceProviderType": "Char"
+          },
+          {
+            "name": "Hour24Key",
+            "dataType": "int64",
+            "sourceColumn": "Hour24Key",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "Minute15Code",
+            "dataType": "string",
+            "sourceColumn": "Minute15Code",
+            "sourceProviderType": "Char"
+          },
+          {
+            "name": "Minute15Key",
+            "dataType": "int64",
+            "sourceColumn": "Minute15Key",
+            "sourceProviderType": "Integer"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Time Dimension",
+            "dataView": "full",
+            "source": {
+              "type": "query",
+              "query": " SELECT [gold].[vw_Dim_Time].* FROM [gold].[vw_Dim_Time] ",
+              "dataSource": "SqlServer localhost HealthReporting"
+            }
+          }
+        ],
+        "annotations": [
+          {
+            "name": "_TM_ExtProp_QueryDefinition",
+            "value": " SELECT [gold].[vw_Dim_Time].* FROM [gold].[vw_Dim_Time] "
+          },
+          {
+            "name": "_TM_ExtProp_DbTableName",
+            "value": "vw_Dim_Time"
+          },
+          {
+            "name": "_TM_ExtProp_DbSchemaName",
+            "value": "gold"
+          }
+        ]
+      },
+      {
+        "name": "Blood Oxygen Level",
+        "columns": [
+          {
+            "name": "SK_Date",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "SK_Date",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "Oxygen saturation (SpO2)",
+            "dataType": "double",
+            "sourceColumn": "Oxygen saturation (SpO2)",
+            "sourceProviderType": "Numeric"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Blood Oxygen Level",
+            "dataView": "full",
+            "source": {
+              "type": "query",
+              "query": " SELECT [gold].[vw_Fact_BloodOxygenLevel].* FROM [gold].[vw_Fact_BloodOxygenLevel] ",
+              "dataSource": "SqlServer localhost HealthReporting"
+            }
+          }
+        ],
+        "annotations": [
+          {
+            "name": "_TM_ExtProp_QueryDefinition",
+            "value": " SELECT [gold].[vw_Fact_BloodOxygenLevel].* FROM [gold].[vw_Fact_BloodOxygenLevel] "
+          },
+          {
+            "name": "_TM_ExtProp_DbTableName",
+            "value": "vw_Fact_BloodOxygenLevel"
+          },
+          {
+            "name": "_TM_ExtProp_DbSchemaName",
+            "value": "gold"
+          }
+        ]
+      },
+      {
+        "name": "Blood Pressure",
+        "columns": [
+          {
+            "name": "SK_Date",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "SK_Date",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "SK_Time",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "SK_Time",
+            "sourceProviderType": "BigInt"
+          },
+          {
+            "name": "Heart rate",
+            "dataType": "int64",
+            "sourceColumn": "Heart rate",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "Systolic",
+            "dataType": "int64",
+            "sourceColumn": "Systolic",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "Diastolic",
+            "dataType": "int64",
+            "sourceColumn": "Diastolic",
+            "sourceProviderType": "Integer"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Blood Pressure",
+            "dataView": "full",
+            "source": {
+              "type": "query",
+              "query": " SELECT [gold].[vw_Fact_BloodPressure].* FROM [gold].[vw_Fact_BloodPressure] ",
+              "dataSource": "SqlServer localhost HealthReporting"
+            }
+          }
+        ],
+        "annotations": [
+          {
+            "name": "_TM_ExtProp_QueryDefinition",
+            "value": " SELECT [gold].[vw_Fact_BloodPressure].* FROM [gold].[vw_Fact_BloodPressure] "
+          },
+          {
+            "name": "_TM_ExtProp_DbTableName",
+            "value": "vw_Fact_BloodPressure"
+          },
+          {
+            "name": "_TM_ExtProp_DbSchemaName",
+            "value": "gold"
+          }
+        ]
+      },
+      {
+        "name": "Body Measurement",
+        "columns": [
+          {
+            "name": "SK_Date",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "SK_Date",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "SK_Time",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "SK_Time",
+            "sourceProviderType": "BigInt"
+          },
+          {
+            "name": "Atrial fibrillation result",
+            "dataType": "int64",
+            "sourceColumn": "Atrial fibrillation result",
+            "sourceProviderType": "SmallInt"
+          },
+          {
+            "name": "Basal Metabolic Rate (BMR)",
+            "dataType": "int64",
+            "sourceColumn": "Basal Metabolic Rate (BMR)",
+            "sourceProviderType": "SmallInt"
+          },
+          {
+            "name": "BMI",
+            "dataType": "int64",
+            "sourceColumn": "BMI",
+            "sourceProviderType": "SmallInt"
+          },
+          {
+            "name": "VO2 Max",
+            "dataType": "int64",
+            "sourceColumn": "VO2 Max",
+            "sourceProviderType": "SmallInt"
+          },
+          {
+            "name": "Nerve Health Score Feet",
+            "dataType": "int64",
+            "sourceColumn": "Nerve Health Score Feet",
+            "sourceProviderType": "SmallInt"
+          },
+          {
+            "name": "Nerve Health Score left foot",
+            "dataType": "int64",
+            "sourceColumn": "Nerve Health Score left foot",
+            "sourceProviderType": "SmallInt"
+          },
+          {
+            "name": "Nerve Health Score right foot",
+            "dataType": "int64",
+            "sourceColumn": "Nerve Health Score right foot",
+            "sourceProviderType": "SmallInt"
+          },
+          {
+            "name": "Water %",
+            "dataType": "int64",
+            "sourceColumn": "Water %",
+            "sourceProviderType": "SmallInt"
+          },
+          {
+            "name": "Bone %",
+            "dataType": "int64",
+            "sourceColumn": "Bone %",
+            "sourceProviderType": "SmallInt"
+          },
+          {
+            "name": "Muscle %",
+            "dataType": "int64",
+            "sourceColumn": "Muscle %",
+            "sourceProviderType": "SmallInt"
+          },
+          {
+            "name": "Fat Free body mass %",
+            "dataType": "int64",
+            "sourceColumn": "Fat Free body mass %",
+            "sourceProviderType": "SmallInt"
+          },
+          {
+            "name": "Fat %",
+            "dataType": "int64",
+            "sourceColumn": "Fat %",
+            "sourceProviderType": "SmallInt"
+          },
+          {
+            "name": "Fat Free body mass (kg)",
+            "dataType": "int64",
+            "sourceColumn": "Fat Free body mass (kg)",
+            "sourceProviderType": "SmallInt"
+          },
+          {
+            "name": "Visceral Fat (kg)",
+            "dataType": "int64",
+            "sourceColumn": "Visceral Fat (kg)",
+            "sourceProviderType": "SmallInt"
+          },
+          {
+            "name": "Vascular age",
+            "dataType": "int64",
+            "sourceColumn": "Vascular age",
+            "sourceProviderType": "SmallInt"
+          },
+          {
+            "name": "Metabolic Age",
+            "dataType": "int64",
+            "sourceColumn": "Metabolic Age",
+            "sourceProviderType": "SmallInt"
+          },
+          {
+            "name": "Extracellular Water",
+            "dataType": "int64",
+            "sourceColumn": "Extracellular Water",
+            "sourceProviderType": "SmallInt"
+          },
+          {
+            "name": "Intracellular Water",
+            "dataType": "int64",
+            "sourceColumn": "Intracellular Water",
+            "sourceProviderType": "SmallInt"
+          },
+          {
+            "name": "Fat Free Mass for segments",
+            "dataType": "int64",
+            "sourceColumn": "Fat Free Mass for segments",
+            "sourceProviderType": "SmallInt"
+          },
+          {
+            "name": "Fat Mass for segments in mass unit",
+            "dataType": "int64",
+            "sourceColumn": "Fat Mass for segments in mass unit",
+            "sourceProviderType": "SmallInt"
+          },
+          {
+            "name": "Muscle Mass for segments",
+            "dataType": "int64",
+            "sourceColumn": "Muscle Mass for segments",
+            "sourceProviderType": "SmallInt"
+          },
+          {
+            "name": "Valvular heart disease result",
+            "dataType": "int64",
+            "sourceColumn": "Valvular heart disease result",
+            "sourceProviderType": "SmallInt"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Body Measurement",
+            "dataView": "full",
+            "source": {
+              "type": "query",
+              "query": " SELECT [gold].[vw_Fact_BodyMeasurement].* FROM [gold].[vw_Fact_BodyMeasurement] ",
+              "dataSource": "SqlServer localhost HealthReporting"
+            }
+          }
+        ],
+        "annotations": [
+          {
+            "name": "_TM_ExtProp_QueryDefinition",
+            "value": " SELECT [gold].[vw_Fact_BodyMeasurement].* FROM [gold].[vw_Fact_BodyMeasurement] "
+          },
+          {
+            "name": "_TM_ExtProp_DbTableName",
+            "value": "vw_Fact_BodyMeasurement"
+          },
+          {
+            "name": "_TM_ExtProp_DbSchemaName",
+            "value": "gold"
+          }
+        ]
+      },
+      {
+        "name": "Body Temperature",
+        "columns": [
+          {
+            "name": "SK_Date",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "SK_Date",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "SK_Time",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "SK_Time",
+            "sourceProviderType": "BigInt"
+          },
+          {
+            "name": "BodyTemperature (°C)",
+            "dataType": "double",
+            "sourceColumn": "BodyTemperature (°C)",
+            "sourceProviderType": "Numeric"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Body Temperature",
+            "dataView": "full",
+            "source": {
+              "type": "query",
+              "query": " SELECT [gold].[vw_Fact_BodyTemperature].* FROM [gold].[vw_Fact_BodyTemperature] ",
+              "dataSource": "SqlServer localhost HealthReporting"
+            }
+          }
+        ],
+        "annotations": [
+          {
+            "name": "_TM_ExtProp_QueryDefinition",
+            "value": " SELECT [gold].[vw_Fact_BodyTemperature].* FROM [gold].[vw_Fact_BodyTemperature] "
+          },
+          {
+            "name": "_TM_ExtProp_DbTableName",
+            "value": "vw_Fact_BodyTemperature"
+          },
+          {
+            "name": "_TM_ExtProp_DbSchemaName",
+            "value": "gold"
+          }
+        ]
+      },
+      {
+        "name": "Daily Activity",
+        "columns": [
+          {
+            "name": "SK_Date",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "SK_Date",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "DailyCaloriesPassive",
+            "dataType": "double",
+            "sourceColumn": "DailyCaloriesPassive",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "DailyCaloriesActive",
+            "dataType": "double",
+            "sourceColumn": "DailyCaloriesActive",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "DailyCaloriesTotal",
+            "dataType": "double",
+            "sourceColumn": "DailyCaloriesTotal",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "DailyDistance (m) CY",
+            "dataType": "double",
+            "sourceColumn": "DailyDistance (m) CY",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "DailyDistance (m) LY",
+            "dataType": "double",
+            "sourceColumn": "DailyDistance (m) LY",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "DailySteps CY",
+            "dataType": "int64",
+            "sourceColumn": "DailySteps CY",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "DailySteps LY",
+            "dataType": "int64",
+            "sourceColumn": "DailySteps LY",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "DailyActivityScore CY",
+            "dataType": "int64",
+            "sourceColumn": "DailyActivityScore CY",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "DailyActivityScore LY",
+            "dataType": "int64",
+            "sourceColumn": "DailyActivityScore LY",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "DailyReadinessScore CY",
+            "dataType": "int64",
+            "sourceColumn": "DailyReadinessScore CY",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "DailyReadinessScore LY",
+            "dataType": "int64",
+            "sourceColumn": "DailyReadinessScore LY",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "SK_Date LY",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "SK_Date LY",
+            "sourceProviderType": "Integer"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Daily Activity",
+            "dataView": "full",
+            "source": {
+              "type": "query",
+              "query": " SELECT [gold].[vw_Fact_DailyActivity].* FROM [gold].[vw_Fact_DailyActivity] ",
+              "dataSource": "SqlServer localhost HealthReporting"
+            }
+          }
+        ],
+        "annotations": [
+          {
+            "name": "_TM_ExtProp_QueryDefinition",
+            "value": " SELECT [gold].[vw_Fact_DailyActivity].* FROM [gold].[vw_Fact_DailyActivity] "
+          },
+          {
+            "name": "_TM_ExtProp_DbTableName",
+            "value": "vw_Fact_DailyActivity"
+          },
+          {
+            "name": "_TM_ExtProp_DbSchemaName",
+            "value": "gold"
+          }
+        ]
+      },
+      {
+        "name": "Daily Meal",
+        "columns": [
+          {
+            "name": "SK_Date",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "SK_Date",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "SK_MealType",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "SK_MealType",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "SK_FoodItem",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "SK_FoodItem",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "Amount in grams",
+            "dataType": "double",
+            "sourceColumn": "Amount in grams",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "Calories",
+            "dataType": "double",
+            "sourceColumn": "Calories",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "Carbs",
+            "dataType": "double",
+            "sourceColumn": "Carbs",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "Carbs fiber",
+            "dataType": "double",
+            "sourceColumn": "Carbs fiber",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "Carbs sugar",
+            "dataType": "double",
+            "sourceColumn": "Carbs sugar",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "Fat",
+            "dataType": "double",
+            "sourceColumn": "Fat",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "Fat saturated",
+            "dataType": "double",
+            "sourceColumn": "Fat saturated",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "Fat unsaturated",
+            "dataType": "double",
+            "sourceColumn": "Fat unsaturated",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "Cholesterol",
+            "dataType": "double",
+            "sourceColumn": "Cholesterol",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "Protein",
+            "dataType": "double",
+            "sourceColumn": "Protein",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "Potassium",
+            "dataType": "double",
+            "sourceColumn": "Potassium",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "Sodium",
+            "dataType": "double",
+            "sourceColumn": "Sodium",
+            "sourceProviderType": "Numeric"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Daily Meal",
+            "dataView": "full",
+            "source": {
+              "type": "query",
+              "query": " SELECT [gold].[vw_Fact_DailyMeal].* FROM [gold].[vw_Fact_DailyMeal] ",
+              "dataSource": "SqlServer localhost HealthReporting"
+            }
+          }
+        ],
+        "annotations": [
+          {
+            "name": "_TM_ExtProp_QueryDefinition",
+            "value": " SELECT [gold].[vw_Fact_DailyMeal].* FROM [gold].[vw_Fact_DailyMeal] "
+          },
+          {
+            "name": "_TM_ExtProp_DbTableName",
+            "value": "vw_Fact_DailyMeal"
+          },
+          {
+            "name": "_TM_ExtProp_DbSchemaName",
+            "value": "gold"
+          }
+        ]
+      },
+      {
+        "name": "Daily Sleep",
+        "columns": [
+          {
+            "name": "SK_Date_BedtimeStart",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "SK_Date_BedtimeStart",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "SK_Time_BedtimeStart",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "SK_Time_BedtimeStart",
+            "sourceProviderType": "BigInt"
+          },
+          {
+            "name": "SK_Date_BedtimeEnd",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "SK_Date_BedtimeEnd",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "SK_Time_BedtimeEnd",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "SK_Time_BedtimeEnd",
+            "sourceProviderType": "BigInt"
+          },
+          {
+            "name": "SK_Date",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "SK_Date",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "AverageBreath (min)",
+            "dataType": "double",
+            "sourceColumn": "AverageBreath (min)",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "AverageHeartRate",
+            "dataType": "double",
+            "sourceColumn": "AverageHeartRate",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "LowestHeartRate",
+            "dataType": "double",
+            "sourceColumn": "LowestHeartRate",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "AverageHeartRateVariability",
+            "dataType": "double",
+            "sourceColumn": "AverageHeartRateVariability",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "DeepSleepDuration (sec)",
+            "dataType": "double",
+            "sourceColumn": "DeepSleepDuration (sec)",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "LightSleepDuration (sec)",
+            "dataType": "double",
+            "sourceColumn": "LightSleepDuration (sec)",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "RemSleepDuration (sec)",
+            "dataType": "double",
+            "sourceColumn": "RemSleepDuration (sec)",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "RestlessPeriods (sec)",
+            "dataType": "double",
+            "sourceColumn": "RestlessPeriods (sec)",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "TemperatureDeviation",
+            "dataType": "double",
+            "sourceColumn": "TemperatureDeviation",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "TemperatureTrendDeviation",
+            "dataType": "double",
+            "sourceColumn": "TemperatureTrendDeviation",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "SleepEfficiency in %",
+            "dataType": "int64",
+            "sourceColumn": "SleepEfficiency in %",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "SleepLatency (sec)",
+            "dataType": "double",
+            "sourceColumn": "SleepLatency (sec)",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "SleepPeriods",
+            "dataType": "boolean",
+            "sourceColumn": "SleepPeriods",
+            "formatString": "\"TRUE\";\"TRUE\";\"FALSE\"",
+            "sourceProviderType": "Boolean"
+          },
+          {
+            "name": "SleepScore",
+            "dataType": "int64",
+            "sourceColumn": "SleepScore",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "SleepSegmentState",
+            "dataType": "string",
+            "sourceColumn": "SleepSegmentState",
+            "sourceProviderType": "WChar"
+          },
+          {
+            "name": "SleepMidpoint (sec)",
+            "dataType": "double",
+            "sourceColumn": "SleepMidpoint (sec)",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "TimeInBed (sec)",
+            "dataType": "double",
+            "sourceColumn": "TimeInBed (sec)",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "TotalSleepDuration (sec)",
+            "dataType": "double",
+            "sourceColumn": "TotalSleepDuration (sec)",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "AwakeTime (sec)",
+            "dataType": "double",
+            "sourceColumn": "AwakeTime (sec)",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "SleepType",
+            "dataType": "string",
+            "sourceColumn": "SleepType",
+            "sourceProviderType": "WChar"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Daily Sleep",
+            "dataView": "full",
+            "source": {
+              "type": "query",
+              "query": " SELECT [gold].[vw_Fact_DailySleep].* FROM [gold].[vw_Fact_DailySleep] ",
+              "dataSource": "SqlServer localhost HealthReporting"
+            }
+          }
+        ],
+        "annotations": [
+          {
+            "name": "_TM_ExtProp_QueryDefinition",
+            "value": " SELECT [gold].[vw_Fact_DailySleep].* FROM [gold].[vw_Fact_DailySleep] "
+          },
+          {
+            "name": "_TM_ExtProp_DbTableName",
+            "value": "vw_Fact_DailySleep"
+          },
+          {
+            "name": "_TM_ExtProp_DbSchemaName",
+            "value": "gold"
+          }
+        ]
+      },
+      {
+        "name": "Heart Rate",
+        "columns": [
+          {
+            "name": "SK_Date",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "SK_Date",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "SK_Time",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "SK_Time",
+            "sourceProviderType": "BigInt"
+          },
+          {
+            "name": "HeartRate",
+            "dataType": "int64",
+            "sourceColumn": "HeartRate",
+            "sourceProviderType": "Integer"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Heart Rate",
+            "dataView": "full",
+            "source": {
+              "type": "query",
+              "query": " SELECT [gold].[vw_Fact_HeartRate].* FROM [gold].[vw_Fact_HeartRate] ",
+              "dataSource": "SqlServer localhost HealthReporting"
+            }
+          }
+        ],
+        "annotations": [
+          {
+            "name": "_TM_ExtProp_QueryDefinition",
+            "value": " SELECT [gold].[vw_Fact_HeartRate].* FROM [gold].[vw_Fact_HeartRate] "
+          },
+          {
+            "name": "_TM_ExtProp_DbTableName",
+            "value": "vw_Fact_HeartRate"
+          },
+          {
+            "name": "_TM_ExtProp_DbSchemaName",
+            "value": "gold"
+          }
+        ]
+      },
+      {
+        "name": "Pulse Wave Velocity",
+        "columns": [
+          {
+            "name": "SK_Date",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "SK_Date",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "SK_Time",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "SK_Time",
+            "sourceProviderType": "BigInt"
+          },
+          {
+            "name": "PulseWaveVelocity",
+            "dataType": "double",
+            "sourceColumn": "PulseWaveVelocity",
+            "sourceProviderType": "Numeric"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Pulse Wave Velocity",
+            "dataView": "full",
+            "source": {
+              "type": "query",
+              "query": " SELECT [gold].[vw_Fact_PulseWaveVelocity].* FROM [gold].[vw_Fact_PulseWaveVelocity] ",
+              "dataSource": "SqlServer localhost HealthReporting"
+            }
+          }
+        ],
+        "annotations": [
+          {
+            "name": "_TM_ExtProp_QueryDefinition",
+            "value": " SELECT [gold].[vw_Fact_PulseWaveVelocity].* FROM [gold].[vw_Fact_PulseWaveVelocity] "
+          },
+          {
+            "name": "_TM_ExtProp_DbTableName",
+            "value": "vw_Fact_PulseWaveVelocity"
+          },
+          {
+            "name": "_TM_ExtProp_DbSchemaName",
+            "value": "gold"
+          }
+        ]
+      },
+      {
+        "name": "Weight",
+        "columns": [
+          {
+            "name": "SK_Date",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "SK_Date",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "SK_Time",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "SK_Time",
+            "sourceProviderType": "BigInt"
+          },
+          {
+            "name": "Weight (kg)",
+            "dataType": "double",
+            "sourceColumn": "Weight (kg)",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "Fat mass (kg)",
+            "dataType": "double",
+            "sourceColumn": "Fat mass (kg)",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "Bone mass (kg)",
+            "dataType": "double",
+            "sourceColumn": "Bone mass (kg)",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "Muscle mass (kg)",
+            "dataType": "double",
+            "sourceColumn": "Muscle mass (kg)",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "Hydration (kg)",
+            "dataType": "double",
+            "sourceColumn": "Hydration (kg)",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "BMI",
+            "dataType": "double",
+            "sourceColumn": "BMI",
+            "sourceProviderType": "Numeric"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Weight",
+            "dataView": "full",
+            "source": {
+              "type": "query",
+              "query": " SELECT [gold].[vw_Fact_Weight].* FROM [gold].[vw_Fact_Weight] ",
+              "dataSource": "SqlServer localhost HealthReporting"
+            }
+          }
+        ],
+        "annotations": [
+          {
+            "name": "_TM_ExtProp_QueryDefinition",
+            "value": " SELECT [gold].[vw_Fact_Weight].* FROM [gold].[vw_Fact_Weight] "
+          },
+          {
+            "name": "_TM_ExtProp_DbTableName",
+            "value": "vw_Fact_Weight"
+          },
+          {
+            "name": "_TM_ExtProp_DbSchemaName",
+            "value": "gold"
+          }
+        ]
+      },
+      {
+        "name": "Workout",
+        "columns": [
+          {
+            "name": "SK_Date",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "SK_Date",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "SK_Time",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "SK_Time",
+            "sourceProviderType": "BigInt"
+          },
+          {
+            "name": "SK_ActivityType",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "SK_ActivityType",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "Max Speed (km/h)",
+            "dataType": "double",
+            "sourceColumn": "Max Speed (km/h)",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "Average Speed (km/h)",
+            "dataType": "double",
+            "sourceColumn": "Average Speed (km/h)",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "Average Speed (km/min)",
+            "dataType": "double",
+            "sourceColumn": "Average Speed (km/min)",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "Average Speed (min/km)",
+            "dataType": "double",
+            "sourceColumn": "Average Speed (min/km)",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "Average Elapsed Speed (km/h)",
+            "dataType": "double",
+            "sourceColumn": "Average Elapsed Speed (km/h)",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "Elapsed TIME (sec)",
+            "dataType": "double",
+            "sourceColumn": "Elapsed TIME (sec)",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "Moving TIME (sec)",
+            "dataType": "double",
+            "sourceColumn": "Moving TIME (sec)",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "Distance (km)",
+            "dataType": "double",
+            "sourceColumn": "Distance (km)",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "Distance (m)",
+            "dataType": "double",
+            "sourceColumn": "Distance (m)",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "Total Steps",
+            "dataType": "double",
+            "sourceColumn": "Total Steps",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "Max Heart Rate",
+            "dataType": "double",
+            "sourceColumn": "Max Heart Rate",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "Average Heart Rate",
+            "dataType": "double",
+            "sourceColumn": "Average Heart Rate",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "Calories",
+            "dataType": "double",
+            "sourceColumn": "Calories",
+            "sourceProviderType": "Numeric"
+          },
+          {
+            "name": "Relative Effort",
+            "dataType": "double",
+            "sourceColumn": "Relative Effort",
+            "sourceProviderType": "Numeric"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Workout",
+            "dataView": "full",
+            "source": {
+              "type": "query",
+              "query": " SELECT [gold].[vw_Fact_Workout].* FROM [gold].[vw_Fact_Workout] ",
+              "dataSource": "SqlServer localhost HealthReporting"
+            }
+          }
+        ],
+        "annotations": [
+          {
+            "name": "_TM_ExtProp_QueryDefinition",
+            "value": " SELECT [gold].[vw_Fact_Workout].* FROM [gold].[vw_Fact_Workout] "
+          },
+          {
+            "name": "_TM_ExtProp_DbTableName",
+            "value": "vw_Fact_Workout"
+          },
+          {
+            "name": "_TM_ExtProp_DbSchemaName",
+            "value": "gold"
+          }
+        ]
+      },
+      {
+        "name": "Master Data for Claus Eduard Petraeus",
+        "columns": [
+          {
+            "name": "First name",
+            "dataType": "string",
+            "sourceColumn": "First name",
+            "sourceProviderType": "WChar"
+          },
+          {
+            "name": "Last name",
+            "dataType": "string",
+            "sourceColumn": "Last name",
+            "sourceProviderType": "WChar"
+          },
+          {
+            "name": "Gender",
+            "dataType": "string",
+            "sourceColumn": "Gender",
+            "sourceProviderType": "WChar"
+          },
+          {
+            "name": "Height in CM",
+            "dataType": "int64",
+            "sourceColumn": "Height in CM",
+            "sourceProviderType": "Integer"
+          },
+          {
+            "name": "Birthday",
+            "dataType": "string",
+            "sourceColumn": "Birthday",
+            "sourceProviderType": "Char"
+          },
+          {
+            "name": "Age",
+            "dataType": "int64",
+            "sourceColumn": "Age",
+            "sourceProviderType": "Integer"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Master Data for Claus Eduard Petraeus",
+            "dataView": "full",
+            "source": {
+              "type": "query",
+              "query": " SELECT [gold].[vw_MasterData_ClausEduardPetraeus].* FROM [gold].[vw_MasterData_ClausEduardPetraeus] ",
+              "dataSource": "SqlServer localhost HealthReporting"
+            }
+          }
+        ],
+        "annotations": [
+          {
+            "name": "_TM_ExtProp_QueryDefinition",
+            "value": " SELECT [gold].[vw_MasterData_ClausEduardPetraeus].* FROM [gold].[vw_MasterData_ClausEduardPetraeus] "
+          },
+          {
+            "name": "_TM_ExtProp_DbTableName",
+            "value": "vw_MasterData_ClausEduardPetraeus"
+          },
+          {
+            "name": "_TM_ExtProp_DbSchemaName",
+            "value": "gold"
+          }
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "name": "bfaed81f-6b2b-4afe-a60a-543a26293ba4",
+        "fromCardinality": "one",
+        "fromTable": "Date Dimension",
+        "fromColumn": "SK_Date",
+        "toTable": "Blood Oxygen Level",
+        "toColumn": "SK_Date",
+        "crossFilteringBehavior": "bothDirections"
+      },
+      {
+        "name": "53240f5f-97f8-4678-bbc0-5dc2fa8622ba",
+        "fromTable": "Blood Pressure",
+        "fromColumn": "SK_Date",
+        "toTable": "Date Dimension",
+        "toColumn": "SK_Date"
+      },
+      {
+        "name": "dbdc33d1-9b60-415d-8fd8-b18c6484ce1c",
+        "fromTable": "Blood Pressure",
+        "fromColumn": "SK_Time",
+        "toTable": "Time Dimension",
+        "toColumn": "SK_Time"
+      },
+      {
+        "name": "1e1d4ed7-e623-44ef-9ab0-c55a8b2df4fb",
+        "fromTable": "Body Measurement",
+        "fromColumn": "SK_Date",
+        "toTable": "Date Dimension",
+        "toColumn": "SK_Date"
+      },
+      {
+        "name": "f47645b1-9387-4926-b9fc-626ca9749d44",
+        "fromTable": "Body Measurement",
+        "fromColumn": "SK_Time",
+        "toTable": "Time Dimension",
+        "toColumn": "SK_Time"
+      },
+      {
+        "name": "2a9672f1-4bd3-4297-ab69-d81371922118",
+        "fromTable": "Body Temperature",
+        "fromColumn": "SK_Date",
+        "toTable": "Date Dimension",
+        "toColumn": "SK_Date"
+      },
+      {
+        "name": "a8f8d01b-249a-4b53-b4ad-decc64c6d051",
+        "fromCardinality": "one",
+        "fromTable": "Time Dimension",
+        "fromColumn": "SK_Time",
+        "toTable": "Body Temperature",
+        "toColumn": "SK_Time",
+        "isActive": false,
+        "crossFilteringBehavior": "bothDirections"
+      },
+      {
+        "name": "bd91db33-8322-436b-8be1-ce8d0fb4e2d6",
+        "fromCardinality": "one",
+        "fromTable": "Date Dimension",
+        "fromColumn": "SK_Date",
+        "toTable": "Daily Activity",
+        "toColumn": "SK_Date",
+        "crossFilteringBehavior": "bothDirections"
+      },
+      {
+        "name": "c0006220-8f9a-46bb-ab4a-33c0af32723e",
+        "fromTable": "Daily Meal",
+        "fromColumn": "SK_Date",
+        "toTable": "Date Dimension",
+        "toColumn": "SK_Date"
+      },
+      {
+        "name": "d7212bed-36d7-48a8-b771-6270ac902107",
+        "fromTable": "Daily Meal",
+        "fromColumn": "SK_MealType",
+        "toTable": "Meal Type Dimension",
+        "toColumn": "SK_MealType"
+      },
+      {
+        "name": "631829fd-216e-40d8-b01f-8d410b65303e",
+        "fromTable": "Daily Meal",
+        "fromColumn": "SK_FoodItem",
+        "toTable": "Food Item Dimension",
+        "toColumn": "SK_FoodItem"
+      },
+      {
+        "name": "81dc95be-437e-4da9-a59d-b8240fa0a4bd",
+        "fromTable": "Daily Sleep",
+        "fromColumn": "SK_Date",
+        "toTable": "Date Dimension",
+        "toColumn": "SK_Date"
+      },
+      {
+        "name": "bc947e1c-c1e0-4471-b456-6db2c27c7396",
+        "fromTable": "Daily Sleep",
+        "fromColumn": "SK_Date_BedtimeStart",
+        "toTable": "Date Dimension",
+        "toColumn": "SK_Date",
+        "isActive": false
+      },
+      {
+        "name": "5fd93290-d424-49c3-8d4e-5f26b84dceb2",
+        "fromTable": "Daily Sleep",
+        "fromColumn": "SK_Date_BedtimeEnd",
+        "toTable": "Date Dimension",
+        "toColumn": "SK_Date",
+        "isActive": false
+      },
+      {
+        "name": "5ba80cc4-087b-4457-a8cd-b9787a1d4f77",
+        "fromTable": "Daily Sleep",
+        "fromColumn": "SK_Time_BedtimeStart",
+        "toTable": "Time Dimension",
+        "toColumn": "SK_Time"
+      },
+      {
+        "name": "4d807eeb-06a3-4ded-92f3-afc74565a915",
+        "fromTable": "Daily Sleep",
+        "fromColumn": "SK_Time_BedtimeEnd",
+        "toTable": "Time Dimension",
+        "toColumn": "SK_Time",
+        "isActive": false
+      },
+      {
+        "name": "17d1d703-ec82-4330-9f6c-c35394ff8cbd",
+        "fromTable": "Heart Rate",
+        "fromColumn": "SK_Date",
+        "toTable": "Date Dimension",
+        "toColumn": "SK_Date"
+      },
+      {
+        "name": "3e9e9eec-8812-4f88-b21d-4f82d654c69b",
+        "fromTable": "Heart Rate",
+        "fromColumn": "SK_Time",
+        "toTable": "Time Dimension",
+        "toColumn": "SK_Time"
+      },
+      {
+        "name": "88c1062f-7202-44b5-b18e-453574ca6c8d",
+        "fromTable": "Pulse Wave Velocity",
+        "fromColumn": "SK_Date",
+        "toTable": "Date Dimension",
+        "toColumn": "SK_Date"
+      },
+      {
+        "name": "a5353d8e-51dd-418d-9c49-459ac968a4e6",
+        "fromTable": "Pulse Wave Velocity",
+        "fromColumn": "SK_Time",
+        "toTable": "Time Dimension",
+        "toColumn": "SK_Time"
+      },
+      {
+        "name": "b54a9d2a-632f-4c58-a184-2d33901e3f9a",
+        "fromTable": "Weight",
+        "fromColumn": "SK_Date",
+        "toTable": "Date Dimension",
+        "toColumn": "SK_Date"
+      },
+      {
+        "name": "485ed3a7-97c5-44c8-9a97-d5181ba576c0",
+        "fromTable": "Weight",
+        "fromColumn": "SK_Time",
+        "toTable": "Time Dimension",
+        "toColumn": "SK_Time"
+      },
+      {
+        "name": "fd487ab4-07df-42ec-a986-cbcb136c147a",
+        "fromTable": "Workout",
+        "fromColumn": "SK_ActivityType",
+        "toTable": "Activity Type Dimension",
+        "toColumn": "SK_ActivityType"
+      },
+      {
+        "name": "f1e0c429-a3bb-4084-a12d-036ccadd7bba",
+        "fromTable": "Workout",
+        "fromColumn": "SK_Date",
+        "toTable": "Date Dimension",
+        "toColumn": "SK_Date"
+      },
+      {
+        "name": "c6818ee7-30c0-46e6-a0c7-98fdc892bf01",
+        "fromTable": "Workout",
+        "fromColumn": "SK_Time",
+        "toTable": "Time Dimension",
+        "toColumn": "SK_Time"
+      }
+    ],
+    "annotations": [
+      {
+        "name": "ClientCompatibilityLevel",
+        "value": "400"
+      }
+    ]
+  },
+  "id": "SemanticModel"
+}
