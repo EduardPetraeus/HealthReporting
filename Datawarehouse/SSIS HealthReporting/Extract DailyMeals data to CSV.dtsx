@@ -1,0 +1,3352 @@
+﻿<?xml version="1.0"?>
+<DTS:Executable xmlns:DTS="www.microsoft.com/SqlServer/Dts"
+  DTS:refId="Package"
+  DTS:CreationDate="5/11/2020 9:36:52 PM"
+  DTS:CreationName="Microsoft.Package"
+  DTS:CreatorComputerName="PC0QGDKR"
+  DTS:CreatorName="NCLAN\cep"
+  DTS:DTSID="{295DB29A-1C53-4B76-AF2E-24D000779DF0}"
+  DTS:ExecutableType="Microsoft.Package"
+  DTS:LastModifiedProductVersion="16.0.5270.0"
+  DTS:LocaleID="1030"
+  DTS:ObjectName="Extract DailyMeals data to CSV"
+  DTS:PackageType="5"
+  DTS:VersionBuild="92"
+  DTS:VersionGUID="{A8FE16A2-327E-427E-9047-FA5ED20315F7}">
+  <DTS:Property
+    DTS:Name="PackageFormatVersion">8</DTS:Property>
+  <DTS:ConnectionManagers>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[Ailes data]"
+      DTS:CreationName="FLATFILE"
+      DTS:DTSID="{9155331A-4254-469F-9CA9-6AC6C001FBD3}"
+      DTS:ObjectName="Ailes data">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:Format="Delimited"
+          DTS:LocaleID="1030"
+          DTS:HeaderRowDelimiter="_x000D__x000A_"
+          DTS:ColumnNamesInFirstDataRow="True"
+          DTS:RowDelimiter=""
+          DTS:TextQualifier="_x003C_none_x003E_"
+          DTS:CodePage="1252"
+          DTS:ConnectionString="C:\Users\cep\Documents\Data til Datavarehus\Ailes data.csv">
+          <DTS:FlatFileColumns>
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x003B_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="aisle_id"
+              DTS:DTSID="{37469517-411F-4A50-A104-005D0BB147EE}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x000D__x000A_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="aisle"
+              DTS:DTSID="{4E849E22-6989-44CA-A2BC-35EFCC8ABEC2}"
+              DTS:CreationName="" />
+          </DTS:FlatFileColumns>
+        </DTS:ConnectionManager>
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[Departments]"
+      DTS:CreationName="FLATFILE"
+      DTS:DTSID="{3E9430F5-A1D4-458F-9D34-A1081924367B}"
+      DTS:ObjectName="Departments">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:Format="Delimited"
+          DTS:LocaleID="1030"
+          DTS:HeaderRowDelimiter="_x000D__x000A_"
+          DTS:ColumnNamesInFirstDataRow="True"
+          DTS:RowDelimiter=""
+          DTS:TextQualifier="_x003C_none_x003E_"
+          DTS:CodePage="1252"
+          DTS:ConnectionString="C:\Users\cep\Documents\Data til Datavarehus\Departments.csv">
+          <DTS:FlatFileColumns>
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x003B_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="department_id"
+              DTS:DTSID="{4D4A0B7E-DD30-4F08-802F-A870F0211225}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x000D__x000A_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Department"
+              DTS:DTSID="{24B5BE99-061E-4884-95FA-86487CD3B932}"
+              DTS:CreationName="" />
+          </DTS:FlatFileColumns>
+        </DTS:ConnectionManager>
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[Full load daily meal CSV file]"
+      DTS:CreationName="FLATFILE"
+      DTS:DTSID="{5C645D1A-6AA3-4CDD-9197-21B4ACF4AE6A}"
+      DTS:ObjectName="Full load daily meal CSV file">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:Format="Delimited"
+          DTS:LocaleID="1033"
+          DTS:HeaderRowDelimiter="_x000D__x000A_"
+          DTS:ColumnNamesInFirstDataRow="True"
+          DTS:RowDelimiter=""
+          DTS:TextQualifier="_x0022_"
+          DTS:CodePage="65001"
+          DTS:ConnectionString="C:\Users\clepe\OneDrive - Pandora\Documents\LifeSum data export\Full data export of DailyMeals table.csv">
+          <DTS:FlatFileColumns>
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:DataType="133"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Date"
+              DTS:DTSID="{4521BF9A-751A-4E6D-A856-7BB95A4C7059}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="125"
+              DTS:DataType="130"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Meal type"
+              DTS:DTSID="{D7D13540-93CB-4B80-A491-BC69B42A437D}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="200"
+              DTS:DataType="130"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Food item"
+              DTS:DTSID="{5B9C53C8-4DCC-4433-9528-5F7614E7A873}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:DataType="131"
+              DTS:DataPrecision="18"
+              DTS:DataScale="7"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Amount"
+              DTS:DTSID="{64765C1A-1022-40BA-8A94-986F7F690228}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="125"
+              DTS:DataType="130"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Serving"
+              DTS:DTSID="{9B21300A-020D-49EF-AB46-65DC6DDEA64D}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:DataType="131"
+              DTS:DataPrecision="18"
+              DTS:DataScale="7"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Amount in grams"
+              DTS:DTSID="{9F8AB432-2F56-43D4-9983-25751BB5DB3F}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:DataType="131"
+              DTS:DataPrecision="18"
+              DTS:DataScale="7"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Calories"
+              DTS:DTSID="{9782B1AC-6210-4411-9DBF-52021731AF02}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:DataType="131"
+              DTS:DataPrecision="18"
+              DTS:DataScale="7"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Carbs"
+              DTS:DTSID="{ED684A05-97A3-4B4F-AA88-E4F55570A150}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:DataType="131"
+              DTS:DataPrecision="18"
+              DTS:DataScale="7"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Carbs fiber"
+              DTS:DTSID="{56446001-C6C4-4293-8501-6E4577E2FB8A}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:DataType="131"
+              DTS:DataPrecision="18"
+              DTS:DataScale="7"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Carbs sugar"
+              DTS:DTSID="{EC2CDC64-5B90-42BB-AE09-028731DBE8F7}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:DataType="131"
+              DTS:DataPrecision="18"
+              DTS:DataScale="7"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Fat"
+              DTS:DTSID="{B3ADFDAC-1483-4AAF-B856-A9A59DA6CC51}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:DataType="131"
+              DTS:DataPrecision="18"
+              DTS:DataScale="7"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Fat saturated"
+              DTS:DTSID="{37240416-46EB-4C2A-83AB-C22385F369BA}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:DataType="131"
+              DTS:DataPrecision="18"
+              DTS:DataScale="7"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Fat unsaturated"
+              DTS:DTSID="{A180D266-029A-4C8E-A2B9-AF73A7A4C54F}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:DataType="131"
+              DTS:DataPrecision="18"
+              DTS:DataScale="7"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Cholesterol"
+              DTS:DTSID="{CF046789-7DAD-48F1-98A3-C1463B2DBC1D}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:DataType="131"
+              DTS:DataPrecision="18"
+              DTS:DataScale="7"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Protein"
+              DTS:DTSID="{8EBDB0C8-AEDD-4A5E-B3B0-BD9060C7C54C}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:DataType="131"
+              DTS:DataPrecision="18"
+              DTS:DataScale="7"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Potassium"
+              DTS:DTSID="{06254D5E-EAD5-43E6-80B6-9E7AC77A3B87}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:DataType="131"
+              DTS:DataPrecision="18"
+              DTS:DataScale="7"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Sodium"
+              DTS:DTSID="{3311219A-FBE4-493F-8A5E-00A7717596F9}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:DataType="20"
+              DTS:TextQualified="True"
+              DTS:ObjectName="UniqueFoodItemKey"
+              DTS:DTSID="{024BAD07-50D1-429C-8BF0-914861252FCF}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:DataType="20"
+              DTS:TextQualified="True"
+              DTS:ObjectName="UniqueTableKey"
+              DTS:DTSID="{B75D7760-439A-4513-93CA-F40C96CAA1D0}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x000D__x000A_"
+              DTS:DataType="20"
+              DTS:TextQualified="True"
+              DTS:ObjectName="DW_Hash_Column"
+              DTS:DTSID="{4429934C-9632-4829-8382-4FA3B603BB5A}"
+              DTS:CreationName="" />
+          </DTS:FlatFileColumns>
+        </DTS:ConnectionManager>
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[Orders]"
+      DTS:CreationName="FLATFILE"
+      DTS:DTSID="{B8D86182-7AAA-4267-B5B9-C76641F78C69}"
+      DTS:ObjectName="Orders">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:Format="Delimited"
+          DTS:LocaleID="1030"
+          DTS:HeaderRowDelimiter="_x000D__x000A_"
+          DTS:ColumnNamesInFirstDataRow="True"
+          DTS:RowDelimiter=""
+          DTS:TextQualifier="_x003C_none_x003E_"
+          DTS:CodePage="1252"
+          DTS:ConnectionString="C:\Users\cep\Documents\Data til Datavarehus\Orders.csv">
+          <DTS:FlatFileColumns>
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x003B_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="order_id"
+              DTS:DTSID="{4DC277E3-6F14-4ECB-8211-4904B01268BD}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x003B_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="user_id"
+              DTS:DTSID="{7DC814EB-8614-4CE4-A67A-339E474EA315}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x003B_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="eval_set"
+              DTS:DTSID="{4C2C56AE-50F9-49CE-9EC0-9F5C57C69A4F}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x003B_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="order_number"
+              DTS:DTSID="{B092E018-EFB4-4941-B68E-12A5295539FB}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x003B_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="order_dow"
+              DTS:DTSID="{29EBD77D-C6E9-4BF6-B747-85EC97B57917}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x003B_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="order_hour_of_day"
+              DTS:DTSID="{A7EA1E7C-ACCA-4603-8C8F-47CB3A6B2D0D}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x000D__x000A_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="days_since_prior_order"
+              DTS:DTSID="{EEBAE567-6874-43F3-8AB5-CB6C79D88EAF}"
+              DTS:CreationName="" />
+          </DTS:FlatFileColumns>
+        </DTS:ConnectionManager>
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[Oura_BloodOxygenLevel]"
+      DTS:CreationName="FLATFILE"
+      DTS:DTSID="{D144EEB7-33CA-44CA-BEB7-3E2CB7ED24EE}"
+      DTS:ObjectName="Oura_BloodOxygenLevel">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:Format="Delimited"
+          DTS:LocaleID="1033"
+          DTS:HeaderRowDelimiter="_x000D__x000A_"
+          DTS:ColumnNamesInFirstDataRow="True"
+          DTS:RowDelimiter=""
+          DTS:TextQualifier="_x003C_none_x003E_"
+          DTS:CodePage="1252"
+          DTS:ConnectionString="C:\Users\clepe\OneDrive - Pandora\Documents\oura_daily-spo2_2023-12-22T19-56-22.csv">
+          <DTS:FlatFileColumns>
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="spo2_percentage"
+              DTS:DTSID="{EA369D02-DE53-47AA-BF58-7455A0930EBF}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x000D__x000A_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="day"
+              DTS:DTSID="{574FF271-3B18-44FF-B14D-D002C00D066D}"
+              DTS:CreationName="" />
+          </DTS:FlatFileColumns>
+        </DTS:ConnectionManager>
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[Oura_DailySleep]"
+      DTS:CreationName="FLATFILE"
+      DTS:DTSID="{5843F639-E784-4CB4-B222-974880735AB3}"
+      DTS:ObjectName="Oura_DailySleep">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:Format="Delimited"
+          DTS:LocaleID="1033"
+          DTS:HeaderRowDelimiter="_x000D__x000A_"
+          DTS:ColumnNamesInFirstDataRow="True"
+          DTS:RowDelimiter=""
+          DTS:TextQualifier="_x003C_none_x003E_"
+          DTS:CodePage="1252"
+          DTS:ConnectionString="C:\Users\clepe\OneDrive - Pandora\Documents\oura_daily-sleep_2023-12-22T22-08-17.csv">
+          <DTS:FlatFileColumns>
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="score"
+              DTS:DTSID="{0B8CA505-AE59-480E-B14E-3FAFFB4FA14F}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="day"
+              DTS:DTSID="{F1227495-1509-4BEB-AFA3-D5F002688AEC}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="contributors_timing"
+              DTS:DTSID="{4AD44162-263A-4C9B-9504-2250FD28DAAE}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="contributors_deep_sleep"
+              DTS:DTSID="{C6406A96-C41B-4F04-AE88-DEF949F85A6B}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="contributors_restfulness"
+              DTS:DTSID="{7022BDF6-4126-447C-891B-B336B9F097A5}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="contributors_efficiency"
+              DTS:DTSID="{72BCB45C-E5D5-4408-A660-2754845325D4}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="contributors_latency"
+              DTS:DTSID="{7776C605-06D2-4C4F-95CB-3A8B587DFFE5}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="contributors_rem_sleep"
+              DTS:DTSID="{8BB302B7-911D-4DB6-9261-3AC1BDE47353}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x000D__x000A_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="contributors_total_sleep"
+              DTS:DTSID="{D3A96F10-0C5A-484B-8148-8DC95CCFD19E}"
+              DTS:CreationName="" />
+          </DTS:FlatFileColumns>
+        </DTS:ConnectionManager>
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[Oura_HeartRate]"
+      DTS:CreationName="FLATFILE"
+      DTS:DTSID="{62131630-C283-446D-852F-6F25A9E573DC}"
+      DTS:ObjectName="Oura_HeartRate">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:Format="Delimited"
+          DTS:LocaleID="1033"
+          DTS:HeaderRowDelimiter="_x000D__x000A_"
+          DTS:ColumnNamesInFirstDataRow="True"
+          DTS:RowDelimiter=""
+          DTS:TextQualifier="_x003C_none_x003E_"
+          DTS:CodePage="1252"
+          DTS:ConnectionString="C:\Users\clepe\OneDrive - Pandora\Documents\oura_heart-rate_2023-12-22T20-54-23.csv">
+          <DTS:FlatFileColumns>
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="timestamp"
+              DTS:DTSID="{07617674-DA3C-44D5-A82C-23D50459B690}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="bpm"
+              DTS:DTSID="{F27C0A9A-E33A-4352-BB66-13C4F31A00B6}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="quality"
+              DTS:DTSID="{A1C56234-73EB-48E4-922C-C63DFE8361FA}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="source"
+              DTS:DTSID="{3F910E87-1818-4E3B-8742-1AA6FAE1CE99}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x000D__x000A_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="restorative"
+              DTS:DTSID="{C57DD96E-95BA-4EC6-8900-9B53E862BA99}"
+              DTS:CreationName="" />
+          </DTS:FlatFileColumns>
+        </DTS:ConnectionManager>
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[Oura_SmoothedLocation]"
+      DTS:CreationName="FLATFILE"
+      DTS:DTSID="{4E8DA0DD-6E6C-419A-BE5A-CB02F22C2F13}"
+      DTS:ObjectName="Oura_SmoothedLocation">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:Format="Delimited"
+          DTS:LocaleID="1033"
+          DTS:HeaderRowDelimiter="_x000D__x000A_"
+          DTS:ColumnNamesInFirstDataRow="True"
+          DTS:RowDelimiter=""
+          DTS:TextQualifier="_x003C_none_x003E_"
+          DTS:CodePage="1252"
+          DTS:ConnectionString="C:\Users\clepe\OneDrive - Pandora\Documents\Oura health data\oura_smoothed-location.csv">
+          <DTS:FlatFileColumns>
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="timestamp"
+              DTS:DTSID="{607A52FA-C946-45A6-9CB8-2C864DAF7FAE}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="latitude"
+              DTS:DTSID="{910B34D4-EFA8-4097-AF4B-70FFCE960E3D}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="longitude"
+              DTS:DTSID="{C1B84013-0944-4291-9ED6-C7845BE6821E}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="altitude"
+              DTS:DTSID="{2A1D6000-2A2F-4317-8FA6-69045CEF1B69}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="course"
+              DTS:DTSID="{4271D5D8-480A-4F72-B1FA-23A91B6FB2BE}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="course_accuracy"
+              DTS:DTSID="{FAA4BAAC-2D15-4DCD-B3EF-E1D8E553C7D2}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="horizontal_accuracy"
+              DTS:DTSID="{D607719B-8148-4B4B-8C59-5AEEE57769AD}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="vertical_accuracy"
+              DTS:DTSID="{97C92B19-BFC6-4618-9E9D-FE5F262DC863}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="speed"
+              DTS:DTSID="{CBB54141-7841-4764-BC86-5DBE4E46741A}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x000D__x000A_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="speed_accuracy"
+              DTS:DTSID="{0F9DADD9-5BB9-4ADB-A7A9-7CFA7304EABE}"
+              DTS:CreationName="" />
+          </DTS:FlatFileColumns>
+        </DTS:ConnectionManager>
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[Products]"
+      DTS:CreationName="FLATFILE"
+      DTS:DTSID="{4DD9BBD4-BEF7-4FA5-9CDA-55A1916C47A0}"
+      DTS:ObjectName="Products">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:Format="Delimited"
+          DTS:LocaleID="1030"
+          DTS:HeaderRowDelimiter="_x000D__x000A_"
+          DTS:ColumnNamesInFirstDataRow="True"
+          DTS:RowDelimiter=""
+          DTS:TextQualifier="_x003C_none_x003E_"
+          DTS:CodePage="1252"
+          DTS:ConnectionString="C:\Users\cpet\OneDrive - Inspari AS\Documents\Datavarehus data\Products.csv">
+          <DTS:FlatFileColumns>
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x003B_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="product_id"
+              DTS:DTSID="{C4923047-195A-4842-88A2-A92C64FE78A7}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x003B_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="product_name"
+              DTS:DTSID="{9AAEC9C6-192E-47DB-A119-FF74DC9F89DC}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x003B_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="aisle_id"
+              DTS:DTSID="{BDB6928F-9EF3-4AF3-8AB6-756F02F0FF57}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x003B_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="department_id"
+              DTS:DTSID="{3E40C079-BC0F-4DC1-8322-453EE6163480}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x000D__x000A_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Column 4"
+              DTS:DTSID="{BE975D6A-83B9-4D74-8404-162396C318C9}"
+              DTS:CreationName="" />
+          </DTS:FlatFileColumns>
+        </DTS:ConnectionManager>
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[Strava_Training]"
+      DTS:CreationName="FLATFILE"
+      DTS:DTSID="{35B1820D-CB30-4C37-813B-68F5173EA5FD}"
+      DTS:ObjectName="Strava_Training">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:Format="Delimited"
+          DTS:LocaleID="1033"
+          DTS:HeaderRowDelimiter="_x000D__x000A_"
+          DTS:ColumnNamesInFirstDataRow="True"
+          DTS:RowDelimiter=""
+          DTS:TextQualifier="_x0022_"
+          DTS:CodePage="1252"
+          DTS:ConnectionString="C:\Users\clepe\OneDrive - Pandora\Documents\Strave health data\activities.csv">
+          <DTS:FlatFileColumns>
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Activity ID1"
+              DTS:DTSID="{04725351-15C4-4EA7-ADC6-B535AE96A944}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Activity Date1"
+              DTS:DTSID="{479E9B60-9EB6-4DA0-862B-3199C091537F}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Activity Name1"
+              DTS:DTSID="{D153FD7D-FBC3-4EFA-A5CE-2681F150422C}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Activity Type1"
+              DTS:DTSID="{A505C71D-A22F-4CAF-AD5D-BC0C499897FC}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Activity Description"
+              DTS:DTSID="{1F013C62-8FD6-41A8-ACD2-62ACBB588381}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Elapsed Time"
+              DTS:DTSID="{FF6AAD9E-B367-41A2-9EEE-86BD760531A4}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Distance"
+              DTS:DTSID="{FF74674A-C25C-402E-B73F-440F92108E61}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Max Heart Rate1"
+              DTS:DTSID="{6CF2F73C-5DAD-452D-8160-32F51080E6E6}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Relative Effort"
+              DTS:DTSID="{179D186E-5175-4FED-B4E2-35297D33F4BC}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Commute"
+              DTS:DTSID="{4E668788-378F-4407-A55F-AC73B18DFC96}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Activity Private Note"
+              DTS:DTSID="{5A83156C-921D-4D36-A2A7-C16AA857D4B9}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Activity Gear"
+              DTS:DTSID="{25F2596A-D53F-41FA-BEAF-F757A9264EF9}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Filename"
+              DTS:DTSID="{882D107F-519E-4586-804B-F67F3E1225B8}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Athlete Weight"
+              DTS:DTSID="{43D72895-0FCC-4C38-A649-69DA653F60EE}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Bike Weight"
+              DTS:DTSID="{BB407DFA-73E9-42E5-B035-8C6DCBD8109B}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Elapsed Time1"
+              DTS:DTSID="{4B06DFF5-38F5-4EC6-BBD3-614A915B5C9B}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Moving Time"
+              DTS:DTSID="{0D9B6E30-5E47-4A27-BC92-A975F5F6C7F9}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Distance1"
+              DTS:DTSID="{68B0DC63-B21B-48DB-B6FF-D3C2E4517C64}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Max Speed"
+              DTS:DTSID="{9BE1A275-EE0E-49CB-844C-4046D2217A1A}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Average Speed"
+              DTS:DTSID="{91BC5718-47DD-4803-A239-A57F51C7BA9E}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Elevation Gain"
+              DTS:DTSID="{CAA39E9D-984A-4BE7-A7F8-2F92A6A5FA3F}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Elevation Loss"
+              DTS:DTSID="{B23C613F-B0F1-4BD2-8B89-61CF1C190FDD}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Elevation Low"
+              DTS:DTSID="{515B3A6B-9708-4883-B9FE-C8D67E416D08}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Elevation High"
+              DTS:DTSID="{7F5FCC22-83D5-462B-A657-6FFE012FE046}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Max Grade"
+              DTS:DTSID="{929620A4-B18B-4B13-958A-B7BBAF8EBA98}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Average Grade"
+              DTS:DTSID="{A38C71AE-BE1F-4C6D-80AE-5E9659B78688}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Average Positive Grade"
+              DTS:DTSID="{8BAFCB79-FF4B-4047-807A-AE232AB11CD7}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Average Negative Grade"
+              DTS:DTSID="{2145E76A-A61E-4601-BFAC-2521C3E0856C}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Max Cadence"
+              DTS:DTSID="{56D72F66-DC5F-431F-A7BB-D66E3ECDC1FA}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Average Cadence"
+              DTS:DTSID="{FF8E6209-6176-4CFB-8A99-AE21E0661ED5}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Max Heart Rate"
+              DTS:DTSID="{623E2F3C-ECDC-40C4-AF0A-4267CA5FB4EC}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Average Heart Rate"
+              DTS:DTSID="{B5DAA630-DECD-49DD-BB9F-A05097909336}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Max Watts"
+              DTS:DTSID="{7AF40948-B7AB-4EED-8BCD-06E1B487D063}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Average Watts"
+              DTS:DTSID="{2C2C1D4A-4908-4E98-98F8-1A860D65AAF0}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Calories"
+              DTS:DTSID="{7205B3D5-0455-4ADE-AFB9-3575A5C94951}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Max Temperature"
+              DTS:DTSID="{D1BA3C48-84C1-4C22-A12A-FC52B99ECA8F}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Average Temperature"
+              DTS:DTSID="{F6D666A7-7DFA-4923-8F06-F354A130443B}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Relative Effort1"
+              DTS:DTSID="{0D3148FA-D836-49CF-96CD-43608093E1C9}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Total Work"
+              DTS:DTSID="{CBAF2860-1CAB-4BE6-861D-088C416C42F4}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Number of Runs"
+              DTS:DTSID="{8E44171B-C837-4226-A03C-2FABB3491A28}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Uphill Time"
+              DTS:DTSID="{7190AF02-696C-4DD3-9E47-FD4362879E74}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Downhill Time"
+              DTS:DTSID="{46AD4E41-711F-464D-986D-DEA6800D3393}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Other Time"
+              DTS:DTSID="{A87A92ED-58E7-4BF5-97F1-26D06D1CAD29}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Perceived Exertion"
+              DTS:DTSID="{D3BA7DC5-842D-4B0E-8481-E127E5A1DCE4}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Type"
+              DTS:DTSID="{9115ED5E-4D73-4070-B975-87BA3EDC64D3}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Start Time"
+              DTS:DTSID="{1E620B63-48B7-47E7-8FEE-B8ADBA76595D}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Weighted Average Power"
+              DTS:DTSID="{5A451EEB-02D3-4A02-A748-06F898319D5F}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Power Count"
+              DTS:DTSID="{14310A20-9CCD-4756-B70C-88137B540969}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Prefer Perceived Exertion"
+              DTS:DTSID="{7BF1C932-DDE8-4A0A-973F-32B727D4BB3C}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Perceived Relative Effort"
+              DTS:DTSID="{CC16C516-9A24-43B5-9A90-DF5CC7B886B9}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Commute1"
+              DTS:DTSID="{FE9B9511-48FE-4F94-A160-2490BA17D7B7}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Total Weight Lifted"
+              DTS:DTSID="{6BE61BF4-F553-4CC3-8E63-8FCE6BF9631C}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="From Upload"
+              DTS:DTSID="{36231A1C-5BFD-40B8-A311-77A1220BEE14}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Grade Adjusted Distance"
+              DTS:DTSID="{E813BC3F-FFA8-42B1-BE66-C222FC84C477}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Weather Observation Time"
+              DTS:DTSID="{CD35785E-3D7D-4DED-9526-3C06F48651FE}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Weather Condition"
+              DTS:DTSID="{59808D09-316F-4F8B-8A8C-E04A71883880}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Weather Temperature"
+              DTS:DTSID="{5131DFF1-5070-4BC9-ABDA-8905BAE11C8E}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Apparent Temperature"
+              DTS:DTSID="{F838D6EE-88C1-435C-A28D-00E6BE054690}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Dewpoint"
+              DTS:DTSID="{43B9B79B-8580-4A65-8752-A9E800841F79}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Humidity"
+              DTS:DTSID="{A19E7F04-7E2D-44B6-B587-0EE0B4FC0FDF}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Weather Pressure"
+              DTS:DTSID="{A7BA5304-716E-4235-8142-994B0DA603BA}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Wind Speed"
+              DTS:DTSID="{743E842B-F457-462C-BF65-49BE90C44A34}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Wind Gust"
+              DTS:DTSID="{469071B3-9118-4DA8-A51D-1D632E4E5279}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Wind Bearing"
+              DTS:DTSID="{4F90CDA5-051F-4A96-AFA6-C9976886FD10}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Precipitation Intensity"
+              DTS:DTSID="{F05D253C-04C8-48FB-BC20-41A15672392B}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Sunrise Time"
+              DTS:DTSID="{7CEA7342-1F4A-4ED8-9C6A-1B2549B6A30F}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Sunset Time"
+              DTS:DTSID="{7C6DEB47-255A-4D29-92FD-69D73CF4237F}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Moon Phase"
+              DTS:DTSID="{BA0B9199-35AF-4C3A-9976-9B22C4DECC65}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Bike"
+              DTS:DTSID="{7801779B-3D5E-4307-85BC-A79DAAD4AACE}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Gear"
+              DTS:DTSID="{1322A935-3463-4FE9-A207-7BDF31124E9E}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Precipitation Probability"
+              DTS:DTSID="{EA2E8245-CB83-47FF-BE35-32D8A9EFC9CD}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Precipitation Type"
+              DTS:DTSID="{EAA79E8C-777A-4E70-BFF6-D3FD5BFF7E1F}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Cloud Cover"
+              DTS:DTSID="{82FE3CAE-7687-4E08-AB90-E13E40660687}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Weather Visibility"
+              DTS:DTSID="{7CDDD88A-1C3B-4D7F-B92E-DF2167ECDE2C}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="UV Index"
+              DTS:DTSID="{9C17E7ED-EE17-4364-8EE9-2D4F8D8B4221}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Weather Ozone"
+              DTS:DTSID="{51ADF387-986F-42B7-BB8B-7A85948ADB87}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Jump Count"
+              DTS:DTSID="{220054FB-7CC2-4580-B668-C7D2FD7FD073}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Total Grit"
+              DTS:DTSID="{A15E7EE8-FE3F-459E-9CEA-B454BCC3F39D}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Average Flow"
+              DTS:DTSID="{73AE4DD2-0367-4380-A42F-B890B3C3C5EE}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Flagged"
+              DTS:DTSID="{64C89885-DF7D-4D27-846B-00836B7E8B51}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Average Elapsed Speed"
+              DTS:DTSID="{94F76FC1-38CF-47F5-9F5D-65FE2125F06B}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Dirt Distance"
+              DTS:DTSID="{286A24DB-9166-4B9D-89E5-77A2239F13C1}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Newly Explored Distance"
+              DTS:DTSID="{2C6E9F5C-2521-4F7E-9400-102B0ED1424F}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Newly Explored Dirt Distance"
+              DTS:DTSID="{5CBB5C76-019E-4DC3-8EC7-4C83E15F735C}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Activity Count"
+              DTS:DTSID="{015C17A6-E2EA-4521-AE78-714799C5E7C1}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x002C_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Total Steps"
+              DTS:DTSID="{709B918F-3ECB-49E8-B111-9CD8C5BE7BE6}"
+              DTS:CreationName="" />
+            <DTS:FlatFileColumn
+              DTS:ColumnType="Delimited"
+              DTS:ColumnDelimiter="_x000A_"
+              DTS:MaximumWidth="50"
+              DTS:DataType="129"
+              DTS:TextQualified="True"
+              DTS:ObjectName="Media"
+              DTS:DTSID="{39F33F5F-6590-4FDD-AF29-8CB2F07DC51B}"
+              DTS:CreationName="" />
+          </DTS:FlatFileColumns>
+        </DTS:ConnectionManager>
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+  </DTS:ConnectionManagers>
+  <DTS:PackageParameters>
+    <DTS:PackageParameter
+      DTS:CreationName=""
+      DTS:DataType="11"
+      DTS:DTSID="{41AB3C89-BB7A-4A1E-9285-9224A54AB1B6}"
+      DTS:ObjectName="IsFullLoad">
+      <DTS:Property
+        DTS:DataType="11"
+        DTS:Name="ParameterValue">-1</DTS:Property>
+    </DTS:PackageParameter>
+  </DTS:PackageParameters>
+  <DTS:Variables>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{236CBF90-86E0-4641-B230-54AA0883A68E}"
+      DTS:IncludeInDebugDump="6789"
+      DTS:Namespace="User"
+      DTS:ObjectName="ExecutionId">
+      <DTS:VariableValue
+        DTS:DataType="20">0</DTS:VariableValue>
+    </DTS:Variable>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{4A5F24C4-5FE6-4954-8105-3E7E3E2C3110}"
+      DTS:IncludeInDebugDump="6789"
+      DTS:Namespace="User"
+      DTS:ObjectName="ExtractId">
+      <DTS:VariableValue
+        DTS:DataType="20">0</DTS:VariableValue>
+    </DTS:Variable>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{15FF5D35-7DD2-4F1D-AE90-5304AA61C6AF}"
+      DTS:IncludeInDebugDump="6789"
+      DTS:Namespace="User"
+      DTS:ObjectName="RecordsInserted">
+      <DTS:VariableValue
+        DTS:DataType="20">0</DTS:VariableValue>
+    </DTS:Variable>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{1F6ACB41-4956-42BD-B7AD-0A31112E5997}"
+      DTS:IncludeInDebugDump="6789"
+      DTS:Namespace="User"
+      DTS:ObjectName="RecordsSelected">
+      <DTS:VariableValue
+        DTS:DataType="20">0</DTS:VariableValue>
+    </DTS:Variable>
+    <DTS:Variable
+      DTS:CreationName=""
+      DTS:DTSID="{D9A380B0-C4B8-4889-9DBF-0C9106AC9C4F}"
+      DTS:IncludeInDebugDump="2345"
+      DTS:Namespace="User"
+      DTS:ObjectName="TableName">
+      <DTS:VariableValue
+        DTS:DataType="8">DailyMeals data extract</DTS:VariableValue>
+    </DTS:Variable>
+  </DTS:Variables>
+  <DTS:Executables>
+    <DTS:Executable
+      DTS:refId="Package\SQL ExecutionEnd Failed"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Execute SQL Task"
+      DTS:DTSID="{38AF01D6-5950-46F7-B7C8-58706DD804C7}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL ExecutionEnd Failed"
+      DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{B4D3DEFE-1F92-4C84-A98D-98DCB1F090F6}"
+          SQLTask:SqlStatementSource="EXEC Audit.ExecutionEnd @Id, 'Failed'" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+          <SQLTask:ParameterBinding
+            SQLTask:ParameterName="Id"
+            SQLTask:DtsVariableName="User::ExecutionId"
+            SQLTask:ParameterDirection="Input"
+            SQLTask:DataType="12"
+            SQLTask:ParameterSize="-1" />
+        </SQLTask:SqlTaskData>
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL ExecutionEnd Succeeded"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Execute SQL Task"
+      DTS:DTSID="{3C4D2F2A-7D8A-4DA4-89A7-EC4FB68EAABD}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL ExecutionEnd Succeeded"
+      DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+      DTS:ThreadHint="1">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{B4D3DEFE-1F92-4C84-A98D-98DCB1F090F6}"
+          SQLTask:IsStoredProc="True"
+          SQLTask:SqlStatementSource="Audit.ExecutionEnd" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+          <SQLTask:ParameterBinding
+            SQLTask:ParameterName="Id"
+            SQLTask:DtsVariableName="User::ExecutionId"
+            SQLTask:ParameterDirection="Input"
+            SQLTask:DataType="12"
+            SQLTask:ParameterSize="-1" />
+        </SQLTask:SqlTaskData>
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\SQL ExecutionStart"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Execute SQL Task"
+      DTS:DTSID="{2BF04B65-3906-4264-8C42-3398D8D73F47}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SQL ExecutionStart"
+      DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{B4D3DEFE-1F92-4C84-A98D-98DCB1F090F6}"
+          SQLTask:IsStoredProc="True"
+          SQLTask:SqlStatementSource="Audit.ExecutionStart" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+          <SQLTask:ParameterBinding
+            SQLTask:ParameterName="Id"
+            SQLTask:DtsVariableName="User::ExecutionId"
+            SQLTask:ParameterDirection="Output"
+            SQLTask:DataType="12"
+            SQLTask:ParameterSize="-1" />
+          <SQLTask:ParameterBinding
+            SQLTask:ParameterName="PackageID"
+            SQLTask:DtsVariableName="System::PackageID"
+            SQLTask:ParameterDirection="Input"
+            SQLTask:DataType="9"
+            SQLTask:ParameterSize="-1" />
+          <SQLTask:ParameterBinding
+            SQLTask:ParameterName="PackageName"
+            SQLTask:DtsVariableName="System::PackageName"
+            SQLTask:ParameterDirection="Input"
+            SQLTask:DataType="16"
+            SQLTask:ParameterSize="-1" />
+          <SQLTask:ParameterBinding
+            SQLTask:ParameterName="Database"
+            SQLTask:DtsVariableName="$Project::Database"
+            SQLTask:ParameterDirection="Input"
+            SQLTask:DataType="16"
+            SQLTask:ParameterSize="-1" />
+          <SQLTask:ParameterBinding
+            SQLTask:ParameterName="ServerExecutionID"
+            SQLTask:DtsVariableName="System::ServerExecutionID"
+            SQLTask:ParameterDirection="Input"
+            SQLTask:DataType="12"
+            SQLTask:ParameterSize="-1" />
+        </SQLTask:SqlTaskData>
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\Strava_Training"
+      DTS:CreationName="STOCK:SEQUENCE"
+      DTS:Description="Sequence Container"
+      DTS:DTSID="{54FFA510-0844-4987-8589-79230F0750CB}"
+      DTS:ExecutableType="STOCK:SEQUENCE"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="Strava_Training">
+      <DTS:Variables />
+      <DTS:Executables>
+        <DTS:Executable
+          DTS:refId="Package\Strava_Training\Data extract"
+          DTS:CreationName="Microsoft.Pipeline"
+          DTS:Description="Data Flow Task"
+          DTS:DTSID="{9458A4E1-E4EC-4659-8E66-91967A1CB667}"
+          DTS:ExecutableType="Microsoft.Pipeline"
+          DTS:LocaleID="-1"
+          DTS:ObjectName="Data extract"
+          DTS:TaskContact="Performs high-performance data extraction, transformation and loading;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+          <DTS:Variables />
+          <DTS:ObjectData>
+            <pipeline
+              version="1">
+              <components>
+                <component
+                  refId="Package\Strava_Training\Data extract\Derived Column"
+                  componentClassID="Microsoft.DerivedColumn"
+                  contactInfo="Derived Column;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved; http://www.microsoft.com/sql/support;0"
+                  description="Creates new column values by applying expressions to transformation input columns. Create new columns or overwrite existing ones. For example, concatenate the values from the 'first name' and 'last name' column to make a 'full name' column."
+                  name="Derived Column"
+                  usesDispositions="true">
+                  <inputs>
+                    <input
+                      refId="Package\Strava_Training\Data extract\Derived Column.Inputs[Derived Column Input]"
+                      description="Input to the Derived Column Transformation"
+                      name="Derived Column Input">
+                      <externalMetadataColumns />
+                    </input>
+                  </inputs>
+                  <outputs>
+                    <output
+                      refId="Package\Strava_Training\Data extract\Derived Column.Outputs[Derived Column Output]"
+                      description="Default Output of the Derived Column Transformation"
+                      exclusionGroup="1"
+                      name="Derived Column Output"
+                      synchronousInputId="Package\Strava_Training\Data extract\Derived Column.Inputs[Derived Column Input]">
+                      <externalMetadataColumns />
+                    </output>
+                    <output
+                      refId="Package\Strava_Training\Data extract\Derived Column.Outputs[Derived Column Error Output]"
+                      description="Error Output of the Derived Column Transformation"
+                      exclusionGroup="1"
+                      isErrorOut="true"
+                      name="Derived Column Error Output"
+                      synchronousInputId="Package\Strava_Training\Data extract\Derived Column.Inputs[Derived Column Input]">
+                      <outputColumns>
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\Derived Column.Outputs[Derived Column Error Output].Columns[ErrorCode]"
+                          dataType="i4"
+                          lineageId="Package\Strava_Training\Data extract\Derived Column.Outputs[Derived Column Error Output].Columns[ErrorCode]"
+                          name="ErrorCode"
+                          specialFlags="1" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\Derived Column.Outputs[Derived Column Error Output].Columns[ErrorColumn]"
+                          dataType="i4"
+                          lineageId="Package\Strava_Training\Data extract\Derived Column.Outputs[Derived Column Error Output].Columns[ErrorColumn]"
+                          name="ErrorColumn"
+                          specialFlags="2" />
+                      </outputColumns>
+                      <externalMetadataColumns />
+                    </output>
+                  </outputs>
+                </component>
+                <component
+                  refId="Package\Strava_Training\Data extract\Flat File Destination"
+                  componentClassID="Microsoft.FlatFileDestination"
+                  contactInfo="Flat File Destination;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved; http://www.microsoft.com/sql/support;1"
+                  description="Flat File Destination"
+                  localeId="1033"
+                  name="Flat File Destination"
+                  version="1">
+                  <properties>
+                    <property
+                      dataType="System.Boolean"
+                      description="Specifies whether the data will overwrite or append to the destination file."
+                      name="Overwrite">true</property>
+                    <property
+                      dataType="System.Null"
+                      description="Specifies the text to write to the destination file before any data is written."
+                      expressionType="Notify"
+                      name="Header" />
+                    <property
+                      dataType="System.Boolean"
+                      description="When text qualifier is enabled, specifies whether the text qualifier in the data written to the destination file will be escaped or not."
+                      name="EscapeQualifier">false</property>
+                  </properties>
+                  <connections>
+                    <connection
+                      refId="Package\Strava_Training\Data extract\Flat File Destination.Connections[FlatFileConnection]"
+                      connectionManagerID="Package.ConnectionManagers[Full load daily meal CSV file]"
+                      connectionManagerRefId="Package.ConnectionManagers[Full load daily meal CSV file]"
+                      name="FlatFileConnection" />
+                  </connections>
+                  <inputs>
+                    <input
+                      refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input]"
+                      hasSideEffects="true"
+                      name="Flat File Destination Input">
+                      <inputColumns>
+                        <inputColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].Columns[Date]"
+                          cachedDataType="dbDate"
+                          cachedName="Date"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Date]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Date]" />
+                        <inputColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].Columns[Meal type]"
+                          cachedDataType="wstr"
+                          cachedLength="125"
+                          cachedName="Meal type"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Meal type]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Meal type]" />
+                        <inputColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].Columns[Food item]"
+                          cachedDataType="wstr"
+                          cachedLength="200"
+                          cachedName="Food item"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Food item]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Food item]" />
+                        <inputColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].Columns[Amount]"
+                          cachedDataType="numeric"
+                          cachedName="Amount"
+                          cachedPrecision="18"
+                          cachedScale="7"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Amount]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Amount]" />
+                        <inputColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].Columns[Serving]"
+                          cachedDataType="wstr"
+                          cachedLength="125"
+                          cachedName="Serving"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Serving]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Serving]" />
+                        <inputColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].Columns[Amount in grams]"
+                          cachedDataType="numeric"
+                          cachedName="Amount in grams"
+                          cachedPrecision="18"
+                          cachedScale="7"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Amount in grams]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Amount in grams]" />
+                        <inputColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].Columns[Calories]"
+                          cachedDataType="numeric"
+                          cachedName="Calories"
+                          cachedPrecision="18"
+                          cachedScale="7"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Calories]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Calories]" />
+                        <inputColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].Columns[Carbs]"
+                          cachedDataType="numeric"
+                          cachedName="Carbs"
+                          cachedPrecision="18"
+                          cachedScale="7"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Carbs]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Carbs]" />
+                        <inputColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].Columns[Carbs fiber]"
+                          cachedDataType="numeric"
+                          cachedName="Carbs fiber"
+                          cachedPrecision="18"
+                          cachedScale="7"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Carbs fiber]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Carbs fiber]" />
+                        <inputColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].Columns[Carbs sugar]"
+                          cachedDataType="numeric"
+                          cachedName="Carbs sugar"
+                          cachedPrecision="18"
+                          cachedScale="7"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Carbs sugar]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Carbs sugar]" />
+                        <inputColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].Columns[Fat]"
+                          cachedDataType="numeric"
+                          cachedName="Fat"
+                          cachedPrecision="18"
+                          cachedScale="7"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Fat]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Fat]" />
+                        <inputColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].Columns[Fat saturated]"
+                          cachedDataType="numeric"
+                          cachedName="Fat saturated"
+                          cachedPrecision="18"
+                          cachedScale="7"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Fat saturated]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Fat saturated]" />
+                        <inputColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].Columns[Fat unsaturated]"
+                          cachedDataType="numeric"
+                          cachedName="Fat unsaturated"
+                          cachedPrecision="18"
+                          cachedScale="7"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Fat unsaturated]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Fat unsaturated]" />
+                        <inputColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].Columns[Cholesterol]"
+                          cachedDataType="numeric"
+                          cachedName="Cholesterol"
+                          cachedPrecision="18"
+                          cachedScale="7"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Cholesterol]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Cholesterol]" />
+                        <inputColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].Columns[Protein]"
+                          cachedDataType="numeric"
+                          cachedName="Protein"
+                          cachedPrecision="18"
+                          cachedScale="7"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Protein]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Protein]" />
+                        <inputColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].Columns[Potassium]"
+                          cachedDataType="numeric"
+                          cachedName="Potassium"
+                          cachedPrecision="18"
+                          cachedScale="7"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Potassium]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Potassium]" />
+                        <inputColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].Columns[Sodium]"
+                          cachedDataType="numeric"
+                          cachedName="Sodium"
+                          cachedPrecision="18"
+                          cachedScale="7"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Sodium]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Sodium]" />
+                        <inputColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].Columns[UniqueFoodItemKey]"
+                          cachedDataType="i8"
+                          cachedName="UniqueFoodItemKey"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[UniqueFoodItemKey]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[UniqueFoodItemKey]" />
+                        <inputColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].Columns[UniqueTableKey]"
+                          cachedDataType="i8"
+                          cachedName="UniqueTableKey"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[UniqueTableKey]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[UniqueTableKey]" />
+                        <inputColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].Columns[DW_Hash_Column]"
+                          cachedDataType="i8"
+                          cachedName="DW_Hash_Column"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[DW_Hash_Column]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[DW_Hash_Column]" />
+                      </inputColumns>
+                      <externalMetadataColumns
+                        isUsed="True">
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Date]"
+                          dataType="dbDate"
+                          name="Date" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Meal type]"
+                          dataType="wstr"
+                          length="125"
+                          name="Meal type" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Food item]"
+                          dataType="wstr"
+                          length="200"
+                          name="Food item" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Amount]"
+                          dataType="numeric"
+                          name="Amount"
+                          precision="18"
+                          scale="7" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Serving]"
+                          dataType="wstr"
+                          length="125"
+                          name="Serving" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Amount in grams]"
+                          dataType="numeric"
+                          name="Amount in grams"
+                          precision="18"
+                          scale="7" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Calories]"
+                          dataType="numeric"
+                          name="Calories"
+                          precision="18"
+                          scale="7" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Carbs]"
+                          dataType="numeric"
+                          name="Carbs"
+                          precision="18"
+                          scale="7" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Carbs fiber]"
+                          dataType="numeric"
+                          name="Carbs fiber"
+                          precision="18"
+                          scale="7" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Carbs sugar]"
+                          dataType="numeric"
+                          name="Carbs sugar"
+                          precision="18"
+                          scale="7" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Fat]"
+                          dataType="numeric"
+                          name="Fat"
+                          precision="18"
+                          scale="7" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Fat saturated]"
+                          dataType="numeric"
+                          name="Fat saturated"
+                          precision="18"
+                          scale="7" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Fat unsaturated]"
+                          dataType="numeric"
+                          name="Fat unsaturated"
+                          precision="18"
+                          scale="7" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Cholesterol]"
+                          dataType="numeric"
+                          name="Cholesterol"
+                          precision="18"
+                          scale="7" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Protein]"
+                          dataType="numeric"
+                          name="Protein"
+                          precision="18"
+                          scale="7" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Potassium]"
+                          dataType="numeric"
+                          name="Potassium"
+                          precision="18"
+                          scale="7" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[Sodium]"
+                          dataType="numeric"
+                          name="Sodium"
+                          precision="18"
+                          scale="7" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[UniqueFoodItemKey]"
+                          dataType="i8"
+                          name="UniqueFoodItemKey" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[UniqueTableKey]"
+                          dataType="i8"
+                          name="UniqueTableKey" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input].ExternalColumns[DW_Hash_Column]"
+                          dataType="i8"
+                          name="DW_Hash_Column" />
+                      </externalMetadataColumns>
+                    </input>
+                  </inputs>
+                </component>
+                <component
+                  refId="Package\Strava_Training\Data extract\OLE DB Source"
+                  componentClassID="Microsoft.OLEDBSource"
+                  contactInfo="OLE DB Source;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved; http://www.microsoft.com/sql/support;7"
+                  description="OLE DB Source"
+                  name="OLE DB Source"
+                  usesDispositions="true"
+                  version="7">
+                  <properties>
+                    <property
+                      dataType="System.Int32"
+                      description="The number of seconds before a command times out.  A value of 0 indicates an infinite time-out."
+                      name="CommandTimeout">0</property>
+                    <property
+                      dataType="System.String"
+                      description="Specifies the name of the database object used to open a rowset."
+                      name="OpenRowset"></property>
+                    <property
+                      dataType="System.String"
+                      description="Specifies the variable that contains the name of the database object used to open a rowset."
+                      name="OpenRowsetVariable"></property>
+                    <property
+                      dataType="System.String"
+                      description="The SQL command to be executed."
+                      name="SqlCommand"
+                      UITypeEditor="Microsoft.DataTransformationServices.Controls.ModalMultilineStringEditor, Microsoft.DataTransformationServices.Controls, Version=16.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91">SELECT
+	   DM.[Date]
+      ,CAST(DM.[Meal type] AS NVARCHAR(125)) AS [Meal type]
+      ,DM.[Food item]
+      ,DM.[Amount]
+      ,CAST(DM.[Serving] AS NVARCHAR(125)) AS [Serving] 
+      ,DM.[Amount in grams]
+      ,DM.[Calories]
+      ,DM.[Carbs]
+      ,DM.[Carbs fiber]
+      ,DM.[Carbs sugar]
+      ,DM.[Fat]
+      ,DM.[Fat saturated]
+      ,DM.[Fat unsaturated]
+      ,DM.[Cholesterol]
+      ,DM.[Protein]
+      ,DM.[Potassium]
+      ,DM.[Sodium]
+	  ,FI.[UniqueFoodItemKey]
+      ,DM.[UniqueTableKey]
+      ,DM.[DW_Hash_Column]
+  FROM [HealthReporting].[silver].[DailyMeal] DM
+  LEFT JOIN [HealthReporting].[silver].[FoodItem] FI
+  ON DM.SK_FoodItem = FI.SK_FoodItem</property>
+                    <property
+                      dataType="System.String"
+                      description="The variable that contains the SQL command to be executed."
+                      name="SqlCommandVariable"></property>
+                    <property
+                      dataType="System.Int32"
+                      description="Specifies the column code page to use when code page information is unavailable from the data source."
+                      name="DefaultCodePage">1252</property>
+                    <property
+                      dataType="System.Boolean"
+                      description="Forces the use of the DefaultCodePage property value when describing character data."
+                      name="AlwaysUseDefaultCodePage">false</property>
+                    <property
+                      dataType="System.Int32"
+                      description="Specifies the mode used to access the database."
+                      name="AccessMode"
+                      typeConverter="AccessMode">2</property>
+                    <property
+                      dataType="System.String"
+                      description="The mappings between the parameters in the SQL command and variables."
+                      name="ParameterMapping"></property>
+                  </properties>
+                  <connections>
+                    <connection
+                      refId="Package\Strava_Training\Data extract\OLE DB Source.Connections[OleDbConnection]"
+                      connectionManagerID="{63CDF9AD-CF5A-4A3C-903A-3F8E8B3D16D3}:external"
+                      connectionManagerRefId="Project.ConnectionManagers[OLEDB HealthReporting]"
+                      description="The OLE DB runtime connection used to access the database."
+                      name="OleDbConnection" />
+                  </connections>
+                  <outputs>
+                    <output
+                      refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output]"
+                      name="OLE DB Source Output">
+                      <outputColumns>
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Date]"
+                          dataType="dbDate"
+                          errorOrTruncationOperation="Conversion"
+                          errorRowDisposition="FailComponent"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Date]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Date]"
+                          name="Date"
+                          truncationRowDisposition="FailComponent" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Meal type]"
+                          dataType="wstr"
+                          errorOrTruncationOperation="Conversion"
+                          errorRowDisposition="FailComponent"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Meal type]"
+                          length="125"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Meal type]"
+                          name="Meal type"
+                          truncationRowDisposition="FailComponent" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Food item]"
+                          dataType="wstr"
+                          errorOrTruncationOperation="Conversion"
+                          errorRowDisposition="FailComponent"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Food item]"
+                          length="200"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Food item]"
+                          name="Food item"
+                          truncationRowDisposition="FailComponent" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Amount]"
+                          dataType="numeric"
+                          errorOrTruncationOperation="Conversion"
+                          errorRowDisposition="FailComponent"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Amount]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Amount]"
+                          name="Amount"
+                          precision="18"
+                          scale="7"
+                          truncationRowDisposition="FailComponent" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Serving]"
+                          dataType="wstr"
+                          errorOrTruncationOperation="Conversion"
+                          errorRowDisposition="FailComponent"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Serving]"
+                          length="125"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Serving]"
+                          name="Serving"
+                          truncationRowDisposition="FailComponent" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Amount in grams]"
+                          dataType="numeric"
+                          errorOrTruncationOperation="Conversion"
+                          errorRowDisposition="FailComponent"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Amount in grams]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Amount in grams]"
+                          name="Amount in grams"
+                          precision="18"
+                          scale="7"
+                          truncationRowDisposition="FailComponent" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Calories]"
+                          dataType="numeric"
+                          errorOrTruncationOperation="Conversion"
+                          errorRowDisposition="FailComponent"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Calories]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Calories]"
+                          name="Calories"
+                          precision="18"
+                          scale="7"
+                          truncationRowDisposition="FailComponent" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Carbs]"
+                          dataType="numeric"
+                          errorOrTruncationOperation="Conversion"
+                          errorRowDisposition="FailComponent"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Carbs]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Carbs]"
+                          name="Carbs"
+                          precision="18"
+                          scale="7"
+                          truncationRowDisposition="FailComponent" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Carbs fiber]"
+                          dataType="numeric"
+                          errorOrTruncationOperation="Conversion"
+                          errorRowDisposition="FailComponent"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Carbs fiber]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Carbs fiber]"
+                          name="Carbs fiber"
+                          precision="18"
+                          scale="7"
+                          truncationRowDisposition="FailComponent" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Carbs sugar]"
+                          dataType="numeric"
+                          errorOrTruncationOperation="Conversion"
+                          errorRowDisposition="FailComponent"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Carbs sugar]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Carbs sugar]"
+                          name="Carbs sugar"
+                          precision="18"
+                          scale="7"
+                          truncationRowDisposition="FailComponent" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Fat]"
+                          dataType="numeric"
+                          errorOrTruncationOperation="Conversion"
+                          errorRowDisposition="FailComponent"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Fat]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Fat]"
+                          name="Fat"
+                          precision="18"
+                          scale="7"
+                          truncationRowDisposition="FailComponent" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Fat saturated]"
+                          dataType="numeric"
+                          errorOrTruncationOperation="Conversion"
+                          errorRowDisposition="FailComponent"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Fat saturated]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Fat saturated]"
+                          name="Fat saturated"
+                          precision="18"
+                          scale="7"
+                          truncationRowDisposition="FailComponent" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Fat unsaturated]"
+                          dataType="numeric"
+                          errorOrTruncationOperation="Conversion"
+                          errorRowDisposition="FailComponent"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Fat unsaturated]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Fat unsaturated]"
+                          name="Fat unsaturated"
+                          precision="18"
+                          scale="7"
+                          truncationRowDisposition="FailComponent" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Cholesterol]"
+                          dataType="numeric"
+                          errorOrTruncationOperation="Conversion"
+                          errorRowDisposition="FailComponent"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Cholesterol]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Cholesterol]"
+                          name="Cholesterol"
+                          precision="18"
+                          scale="7"
+                          truncationRowDisposition="FailComponent" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Protein]"
+                          dataType="numeric"
+                          errorOrTruncationOperation="Conversion"
+                          errorRowDisposition="FailComponent"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Protein]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Protein]"
+                          name="Protein"
+                          precision="18"
+                          scale="7"
+                          truncationRowDisposition="FailComponent" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Potassium]"
+                          dataType="numeric"
+                          errorOrTruncationOperation="Conversion"
+                          errorRowDisposition="FailComponent"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Potassium]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Potassium]"
+                          name="Potassium"
+                          precision="18"
+                          scale="7"
+                          truncationRowDisposition="FailComponent" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Sodium]"
+                          dataType="numeric"
+                          errorOrTruncationOperation="Conversion"
+                          errorRowDisposition="FailComponent"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Sodium]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[Sodium]"
+                          name="Sodium"
+                          precision="18"
+                          scale="7"
+                          truncationRowDisposition="FailComponent" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[UniqueFoodItemKey]"
+                          dataType="i8"
+                          errorOrTruncationOperation="Conversion"
+                          errorRowDisposition="FailComponent"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[UniqueFoodItemKey]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[UniqueFoodItemKey]"
+                          name="UniqueFoodItemKey"
+                          truncationRowDisposition="FailComponent" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[UniqueTableKey]"
+                          dataType="i8"
+                          errorOrTruncationOperation="Conversion"
+                          errorRowDisposition="FailComponent"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[UniqueTableKey]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[UniqueTableKey]"
+                          name="UniqueTableKey"
+                          truncationRowDisposition="FailComponent" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[DW_Hash_Column]"
+                          dataType="i8"
+                          errorOrTruncationOperation="Conversion"
+                          errorRowDisposition="FailComponent"
+                          externalMetadataColumnId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[DW_Hash_Column]"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].Columns[DW_Hash_Column]"
+                          name="DW_Hash_Column"
+                          truncationRowDisposition="FailComponent" />
+                      </outputColumns>
+                      <externalMetadataColumns
+                        isUsed="True">
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Date]"
+                          dataType="dbDate"
+                          name="Date" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Meal type]"
+                          dataType="wstr"
+                          length="125"
+                          name="Meal type" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Food item]"
+                          dataType="wstr"
+                          length="200"
+                          name="Food item" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Amount]"
+                          dataType="numeric"
+                          name="Amount"
+                          precision="18"
+                          scale="7" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Serving]"
+                          dataType="wstr"
+                          length="125"
+                          name="Serving" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Amount in grams]"
+                          dataType="numeric"
+                          name="Amount in grams"
+                          precision="18"
+                          scale="7" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Calories]"
+                          dataType="numeric"
+                          name="Calories"
+                          precision="18"
+                          scale="7" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Carbs]"
+                          dataType="numeric"
+                          name="Carbs"
+                          precision="18"
+                          scale="7" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Carbs fiber]"
+                          dataType="numeric"
+                          name="Carbs fiber"
+                          precision="18"
+                          scale="7" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Carbs sugar]"
+                          dataType="numeric"
+                          name="Carbs sugar"
+                          precision="18"
+                          scale="7" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Fat]"
+                          dataType="numeric"
+                          name="Fat"
+                          precision="18"
+                          scale="7" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Fat saturated]"
+                          dataType="numeric"
+                          name="Fat saturated"
+                          precision="18"
+                          scale="7" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Fat unsaturated]"
+                          dataType="numeric"
+                          name="Fat unsaturated"
+                          precision="18"
+                          scale="7" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Cholesterol]"
+                          dataType="numeric"
+                          name="Cholesterol"
+                          precision="18"
+                          scale="7" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Protein]"
+                          dataType="numeric"
+                          name="Protein"
+                          precision="18"
+                          scale="7" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Potassium]"
+                          dataType="numeric"
+                          name="Potassium"
+                          precision="18"
+                          scale="7" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[Sodium]"
+                          dataType="numeric"
+                          name="Sodium"
+                          precision="18"
+                          scale="7" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[UniqueFoodItemKey]"
+                          dataType="i8"
+                          name="UniqueFoodItemKey" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[UniqueTableKey]"
+                          dataType="i8"
+                          name="UniqueTableKey" />
+                        <externalMetadataColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output].ExternalColumns[DW_Hash_Column]"
+                          dataType="i8"
+                          name="DW_Hash_Column" />
+                      </externalMetadataColumns>
+                    </output>
+                    <output
+                      refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output]"
+                      isErrorOut="true"
+                      name="OLE DB Source Error Output">
+                      <outputColumns>
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Date]"
+                          dataType="dbDate"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Date]"
+                          name="Date" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Meal type]"
+                          dataType="wstr"
+                          length="125"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Meal type]"
+                          name="Meal type" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Food item]"
+                          dataType="wstr"
+                          length="200"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Food item]"
+                          name="Food item" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Amount]"
+                          dataType="numeric"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Amount]"
+                          name="Amount"
+                          precision="18"
+                          scale="7" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Serving]"
+                          dataType="wstr"
+                          length="125"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Serving]"
+                          name="Serving" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Amount in grams]"
+                          dataType="numeric"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Amount in grams]"
+                          name="Amount in grams"
+                          precision="18"
+                          scale="7" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Calories]"
+                          dataType="numeric"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Calories]"
+                          name="Calories"
+                          precision="18"
+                          scale="7" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Carbs]"
+                          dataType="numeric"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Carbs]"
+                          name="Carbs"
+                          precision="18"
+                          scale="7" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Carbs fiber]"
+                          dataType="numeric"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Carbs fiber]"
+                          name="Carbs fiber"
+                          precision="18"
+                          scale="7" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Carbs sugar]"
+                          dataType="numeric"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Carbs sugar]"
+                          name="Carbs sugar"
+                          precision="18"
+                          scale="7" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Fat]"
+                          dataType="numeric"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Fat]"
+                          name="Fat"
+                          precision="18"
+                          scale="7" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Fat saturated]"
+                          dataType="numeric"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Fat saturated]"
+                          name="Fat saturated"
+                          precision="18"
+                          scale="7" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Fat unsaturated]"
+                          dataType="numeric"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Fat unsaturated]"
+                          name="Fat unsaturated"
+                          precision="18"
+                          scale="7" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Cholesterol]"
+                          dataType="numeric"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Cholesterol]"
+                          name="Cholesterol"
+                          precision="18"
+                          scale="7" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Protein]"
+                          dataType="numeric"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Protein]"
+                          name="Protein"
+                          precision="18"
+                          scale="7" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Potassium]"
+                          dataType="numeric"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Potassium]"
+                          name="Potassium"
+                          precision="18"
+                          scale="7" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Sodium]"
+                          dataType="numeric"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[Sodium]"
+                          name="Sodium"
+                          precision="18"
+                          scale="7" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[UniqueFoodItemKey]"
+                          dataType="i8"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[UniqueFoodItemKey]"
+                          name="UniqueFoodItemKey" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[UniqueTableKey]"
+                          dataType="i8"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[UniqueTableKey]"
+                          name="UniqueTableKey" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[DW_Hash_Column]"
+                          dataType="i8"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[DW_Hash_Column]"
+                          name="DW_Hash_Column" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[ErrorCode]"
+                          dataType="i4"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[ErrorCode]"
+                          name="ErrorCode"
+                          specialFlags="1" />
+                        <outputColumn
+                          refId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[ErrorColumn]"
+                          dataType="i4"
+                          lineageId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Error Output].Columns[ErrorColumn]"
+                          name="ErrorColumn"
+                          specialFlags="2" />
+                      </outputColumns>
+                      <externalMetadataColumns />
+                    </output>
+                  </outputs>
+                </component>
+                <component
+                  refId="Package\Strava_Training\Data extract\RC inserted"
+                  componentClassID="Microsoft.RowCount"
+                  contactInfo="Row Count;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved; http://www.microsoft.com/sql/support;0"
+                  description="Counts rows as they pass through a data flow. For example, use the number of rows processed to determine whether or not to perform cleanup operations, or update text in an e-mail message to communicate processing status."
+                  name="RC inserted">
+                  <properties>
+                    <property
+                      dataType="System.String"
+                      description="Specifies the variable to hold the row count."
+                      name="VariableName">User::RecordsInserted</property>
+                  </properties>
+                  <inputs>
+                    <input
+                      refId="Package\Strava_Training\Data extract\RC inserted.Inputs[Row Count Input 1]"
+                      hasSideEffects="true"
+                      name="Row Count Input 1">
+                      <externalMetadataColumns />
+                    </input>
+                  </inputs>
+                  <outputs>
+                    <output
+                      refId="Package\Strava_Training\Data extract\RC inserted.Outputs[Row Count Output 1]"
+                      name="Row Count Output 1"
+                      synchronousInputId="Package\Strava_Training\Data extract\RC inserted.Inputs[Row Count Input 1]">
+                      <externalMetadataColumns />
+                    </output>
+                  </outputs>
+                </component>
+                <component
+                  refId="Package\Strava_Training\Data extract\RC selected"
+                  componentClassID="Microsoft.RowCount"
+                  contactInfo="Row Count;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved; http://www.microsoft.com/sql/support;0"
+                  description="Counts rows as they pass through a data flow. For example, use the number of rows processed to determine whether or not to perform cleanup operations, or update text in an e-mail message to communicate processing status."
+                  name="RC selected">
+                  <properties>
+                    <property
+                      dataType="System.String"
+                      description="Specifies the variable to hold the row count."
+                      name="VariableName">User::RecordsSelected</property>
+                  </properties>
+                  <inputs>
+                    <input
+                      refId="Package\Strava_Training\Data extract\RC selected.Inputs[Row Count Input 1]"
+                      hasSideEffects="true"
+                      name="Row Count Input 1">
+                      <externalMetadataColumns />
+                    </input>
+                  </inputs>
+                  <outputs>
+                    <output
+                      refId="Package\Strava_Training\Data extract\RC selected.Outputs[Row Count Output 1]"
+                      name="Row Count Output 1"
+                      synchronousInputId="Package\Strava_Training\Data extract\RC selected.Inputs[Row Count Input 1]">
+                      <externalMetadataColumns />
+                    </output>
+                  </outputs>
+                </component>
+              </components>
+              <paths>
+                <path
+                  refId="Package\Strava_Training\Data extract.Paths[Derived Column Output]"
+                  endId="Package\Strava_Training\Data extract\RC inserted.Inputs[Row Count Input 1]"
+                  name="Derived Column Output"
+                  startId="Package\Strava_Training\Data extract\Derived Column.Outputs[Derived Column Output]" />
+                <path
+                  refId="Package\Strava_Training\Data extract.Paths[OLE DB Source Output]"
+                  endId="Package\Strava_Training\Data extract\RC selected.Inputs[Row Count Input 1]"
+                  name="OLE DB Source Output"
+                  startId="Package\Strava_Training\Data extract\OLE DB Source.Outputs[OLE DB Source Output]" />
+                <path
+                  refId="Package\Strava_Training\Data extract.Paths[Row Count Output 1]"
+                  endId="Package\Strava_Training\Data extract\Derived Column.Inputs[Derived Column Input]"
+                  name="Row Count Output 1"
+                  startId="Package\Strava_Training\Data extract\RC selected.Outputs[Row Count Output 1]" />
+                <path
+                  refId="Package\Strava_Training\Data extract.Paths[Row Count Output 11]"
+                  endId="Package\Strava_Training\Data extract\Flat File Destination.Inputs[Flat File Destination Input]"
+                  name="Row Count Output 1"
+                  startId="Package\Strava_Training\Data extract\RC inserted.Outputs[Row Count Output 1]" />
+              </paths>
+            </pipeline>
+          </DTS:ObjectData>
+        </DTS:Executable>
+        <DTS:Executable
+          DTS:refId="Package\Strava_Training\SQL ExtractEnd Failed"
+          DTS:CreationName="Microsoft.ExecuteSQLTask"
+          DTS:Description="Execute SQL Task"
+          DTS:DTSID="{2F937B33-7E53-448D-9FA3-308F7B528271}"
+          DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+          DTS:LocaleID="-1"
+          DTS:ObjectName="SQL ExtractEnd Failed"
+          DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+          DTS:ThreadHint="0">
+          <DTS:Variables />
+          <DTS:ObjectData>
+            <SQLTask:SqlTaskData
+              SQLTask:Connection="{B4D3DEFE-1F92-4C84-A98D-98DCB1F090F6}"
+              SQLTask:SqlStatementSource="EXEC Audit.ExtractEnd @ExtractId, 'Failed'" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="ExtractId"
+                SQLTask:DtsVariableName="User::ExtractId"
+                SQLTask:ParameterDirection="Input"
+                SQLTask:DataType="12"
+                SQLTask:ParameterSize="-1" />
+            </SQLTask:SqlTaskData>
+          </DTS:ObjectData>
+        </DTS:Executable>
+        <DTS:Executable
+          DTS:refId="Package\Strava_Training\SQL ExtractEnd Succeeded"
+          DTS:CreationName="Microsoft.ExecuteSQLTask"
+          DTS:Description="Execute SQL Task"
+          DTS:DTSID="{4456D0F0-DBCE-4D39-A1C4-70A60AF7A8D8}"
+          DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+          DTS:LocaleID="-1"
+          DTS:ObjectName="SQL ExtractEnd Succeeded"
+          DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+          DTS:ThreadHint="1">
+          <DTS:Variables />
+          <DTS:ObjectData>
+            <SQLTask:SqlTaskData
+              SQLTask:Connection="{B4D3DEFE-1F92-4C84-A98D-98DCB1F090F6}"
+              SQLTask:IsStoredProc="True"
+              SQLTask:SqlStatementSource="Audit.ExtractEnd" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="ExtractId"
+                SQLTask:DtsVariableName="User::ExtractId"
+                SQLTask:ParameterDirection="Input"
+                SQLTask:DataType="12"
+                SQLTask:ParameterSize="-1" />
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="RecordsSelected"
+                SQLTask:DtsVariableName="User::RecordsSelected"
+                SQLTask:ParameterDirection="Input"
+                SQLTask:DataType="12"
+                SQLTask:ParameterSize="-1" />
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="RecordsInserted"
+                SQLTask:DtsVariableName="User::RecordsInserted"
+                SQLTask:ParameterDirection="Input"
+                SQLTask:DataType="12"
+                SQLTask:ParameterSize="-1" />
+            </SQLTask:SqlTaskData>
+          </DTS:ObjectData>
+        </DTS:Executable>
+        <DTS:Executable
+          DTS:refId="Package\Strava_Training\SQL ExtractStart"
+          DTS:CreationName="Microsoft.ExecuteSQLTask"
+          DTS:Description="Execute SQL Task"
+          DTS:DTSID="{A0C203F4-7251-43CC-BD01-02C2529537E6}"
+          DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+          DTS:LocaleID="-1"
+          DTS:ObjectName="SQL ExtractStart"
+          DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+          DTS:ThreadHint="0">
+          <DTS:Variables />
+          <DTS:ObjectData>
+            <SQLTask:SqlTaskData
+              SQLTask:Connection="{B4D3DEFE-1F92-4C84-A98D-98DCB1F090F6}"
+              SQLTask:IsStoredProc="True"
+              SQLTask:SqlStatementSource="Audit.ExtractStart" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="ExecutionId"
+                SQLTask:DtsVariableName="User::ExecutionId"
+                SQLTask:ParameterDirection="Input"
+                SQLTask:DataType="12"
+                SQLTask:ParameterSize="-1" />
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="ExtractId"
+                SQLTask:DtsVariableName="User::ExtractId"
+                SQLTask:ParameterDirection="Output"
+                SQLTask:DataType="12"
+                SQLTask:ParameterSize="-1" />
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="TableName"
+                SQLTask:DtsVariableName="User::TableName"
+                SQLTask:ParameterDirection="Input"
+                SQLTask:DataType="16"
+                SQLTask:ParameterSize="-1" />
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="Database"
+                SQLTask:DtsVariableName="$Project::Database"
+                SQLTask:ParameterDirection="Input"
+                SQLTask:DataType="16"
+                SQLTask:ParameterSize="-1" />
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="Schema"
+                SQLTask:DtsVariableName="$Project::Schema"
+                SQLTask:ParameterDirection="Input"
+                SQLTask:DataType="16"
+                SQLTask:ParameterSize="-1" />
+            </SQLTask:SqlTaskData>
+          </DTS:ObjectData>
+        </DTS:Executable>
+      </DTS:Executables>
+      <DTS:PrecedenceConstraints>
+        <DTS:PrecedenceConstraint
+          DTS:refId="Package\Strava_Training.PrecedenceConstraints[Constraint]"
+          DTS:CreationName=""
+          DTS:DTSID="{BD37D504-B868-451B-8420-3049C8DF0C8E}"
+          DTS:From="Package\Strava_Training\SQL ExtractStart"
+          DTS:LogicalAnd="True"
+          DTS:ObjectName="Constraint"
+          DTS:To="Package\Strava_Training\Data extract" />
+        <DTS:PrecedenceConstraint
+          DTS:refId="Package\Strava_Training.PrecedenceConstraints[Constraint 2]"
+          DTS:CreationName=""
+          DTS:DTSID="{573EFBF8-24BD-42E4-BD50-81D238AA7DF4}"
+          DTS:From="Package\Strava_Training\Data extract"
+          DTS:LogicalAnd="True"
+          DTS:ObjectName="Constraint 2"
+          DTS:To="Package\Strava_Training\SQL ExtractEnd Succeeded" />
+        <DTS:PrecedenceConstraint
+          DTS:refId="Package\Strava_Training.PrecedenceConstraints[Constraint 3]"
+          DTS:CreationName=""
+          DTS:DTSID="{0AEE975E-389E-4B7B-B7E9-708C83BE49D5}"
+          DTS:From="Package\Strava_Training\Data extract"
+          DTS:ObjectName="Constraint 3"
+          DTS:To="Package\Strava_Training\SQL ExtractEnd Failed"
+          DTS:Value="1" />
+      </DTS:PrecedenceConstraints>
+    </DTS:Executable>
+  </DTS:Executables>
+  <DTS:PrecedenceConstraints>
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[Constraint]"
+      DTS:CreationName=""
+      DTS:DTSID="{90C3CE90-51AA-44CF-9D00-7DDE8581290A}"
+      DTS:From="Package\SQL ExecutionStart"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="Constraint"
+      DTS:To="Package\Strava_Training" />
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[Constraint 1]"
+      DTS:CreationName=""
+      DTS:DTSID="{DBC2095E-427B-48B3-80E4-5990518EECE8}"
+      DTS:From="Package\Strava_Training"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="Constraint 1"
+      DTS:To="Package\SQL ExecutionEnd Succeeded" />
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[Constraint 2]"
+      DTS:CreationName=""
+      DTS:DTSID="{FC9E9A04-9CD6-415B-A3C8-CCA1137078E0}"
+      DTS:From="Package\Strava_Training"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="Constraint 2"
+      DTS:To="Package\SQL ExecutionEnd Failed"
+      DTS:Value="1" />
+  </DTS:PrecedenceConstraints>
+  <DTS:EventHandlers>
+    <DTS:EventHandler
+      DTS:refId="Package.EventHandlers[OnError]"
+      DTS:CreationName="OnError"
+      DTS:DTSID="{0026BA22-CA14-432E-9596-9927559210EB}"
+      DTS:EventID="0"
+      DTS:EventName="OnError"
+      DTS:LocaleID="-1">
+      <DTS:Variables>
+        <DTS:Variable
+          DTS:CreationName=""
+          DTS:Description="The propagate property of the event"
+          DTS:DTSID="{2EBB270D-D299-4914-B481-4D16CF0A61FA}"
+          DTS:IncludeInDebugDump="6789"
+          DTS:Namespace="System"
+          DTS:ObjectName="Propagate">
+          <DTS:VariableValue
+            DTS:DataType="11">-1</DTS:VariableValue>
+        </DTS:Variable>
+      </DTS:Variables>
+      <DTS:Executables>
+        <DTS:Executable
+          DTS:refId="Package.EventHandlers[OnError]\SQL ExecutionError"
+          DTS:CreationName="Microsoft.ExecuteSQLTask"
+          DTS:Description="Execute SQL Task"
+          DTS:DTSID="{AC7AE8B3-BA5B-403F-9F3D-2AB69B64F98C}"
+          DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+          DTS:LocaleID="-1"
+          DTS:ObjectName="SQL ExecutionError"
+          DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2019; © 2019 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+          <DTS:Variables />
+          <DTS:ObjectData>
+            <SQLTask:SqlTaskData
+              SQLTask:Connection="{B4D3DEFE-1F92-4C84-A98D-98DCB1F090F6}"
+              SQLTask:IsStoredProc="True"
+              SQLTask:SqlStatementSource="Audit.ExecutionError" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="ExecutionID"
+                SQLTask:DtsVariableName="User::ExecutionId"
+                SQLTask:ParameterDirection="Input"
+                SQLTask:DataType="12"
+                SQLTask:ParameterSize="-1" />
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="ErrorCode"
+                SQLTask:DtsVariableName="System::ErrorCode"
+                SQLTask:ParameterDirection="Input"
+                SQLTask:DataType="11"
+                SQLTask:ParameterSize="-1" />
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="ErrorDescription"
+                SQLTask:DtsVariableName="System::ErrorDescription"
+                SQLTask:ParameterDirection="Input"
+                SQLTask:DataType="16"
+                SQLTask:ParameterSize="-1" />
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="SourceName"
+                SQLTask:DtsVariableName="System::SourceName"
+                SQLTask:ParameterDirection="Input"
+                SQLTask:DataType="16"
+                SQLTask:ParameterSize="-1" />
+              <SQLTask:ParameterBinding
+                SQLTask:ParameterName="SourceDescription"
+                SQLTask:DtsVariableName="System::SourceDescription"
+                SQLTask:ParameterDirection="Input"
+                SQLTask:DataType="16"
+                SQLTask:ParameterSize="-1" />
+            </SQLTask:SqlTaskData>
+          </DTS:ObjectData>
+        </DTS:Executable>
+      </DTS:Executables>
+    </DTS:EventHandler>
+  </DTS:EventHandlers>
+  <DTS:DesignTimeProperties><![CDATA[<?xml version="1.0"?>
+<!--This CDATA section contains the layout information of the package. The section includes information such as (x,y) coordinates, width, and height.-->
+<!--If you manually edit this section and make a mistake, you can delete it. -->
+<!--The package will still be able to load normally but the previous layout information will be lost and the designer will automatically re-arrange the elements on the design surface.-->
+<Objects
+  Version="8">
+  <!--Each node below will contain properties that do not affect runtime behavior.-->
+  <Package
+    design-time-name="Package">
+    <LayoutInfo>
+      <GraphLayout
+        Capacity="16" xmlns="clr-namespace:Microsoft.SqlServer.IntegrationServices.Designer.Model.Serialization;assembly=Microsoft.SqlServer.IntegrationServices.Graph" xmlns:mssgle="clr-namespace:Microsoft.SqlServer.Graph.LayoutEngine;assembly=Microsoft.SqlServer.Graph" xmlns:assembly="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:mssgm="clr-namespace:Microsoft.SqlServer.Graph.Model;assembly=Microsoft.SqlServer.Graph">
+        <NodeLayout
+          Size="205,42"
+          Id="Package\SQL ExecutionEnd Failed"
+          TopLeft="296,517.5" />
+        <NodeLayout
+          Size="230,42"
+          Id="Package\SQL ExecutionEnd Succeeded"
+          TopLeft="5.50000000000006,517.5" />
+        <NodeLayout
+          Size="176,42"
+          Id="Package\SQL ExecutionStart"
+          TopLeft="310.5,5.5" />
+        <NodeLayout
+          Size="137,42"
+          Id="Package\Strava_Training\Data extract"
+          TopLeft="309,107.5" />
+        <NodeLayout
+          Size="191,42"
+          Id="Package\Strava_Training\SQL ExtractEnd Failed"
+          TopLeft="282,209.5" />
+        <NodeLayout
+          Size="216,42"
+          Id="Package\Strava_Training\SQL ExtractEnd Succeeded"
+          TopLeft="5.50000000000006,209.5" />
+        <NodeLayout
+          Size="161,42"
+          Id="Package\Strava_Training\SQL ExtractStart"
+          TopLeft="297,5.5" />
+        <EdgeLayout
+          Id="Package\Strava_Training.PrecedenceConstraints[Constraint]"
+          TopLeft="377.5,47.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Strava_Training.PrecedenceConstraints[Constraint 2]"
+          TopLeft="356,149.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="-242.5,60"
+              Start="0,0"
+              End="-242.5,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,20.4155844155844" />
+                  <mssgle:CubicBezierSegment
+                    Point1="0,20.4155844155844"
+                    Point2="0,24.4155844155844"
+                    Point3="-4,24.4155844155844" />
+                  <mssgle:LineSegment
+                    End="-238.5,24.4155844155844" />
+                  <mssgle:CubicBezierSegment
+                    Point1="-238.5,24.4155844155844"
+                    Point2="-242.5,24.4155844155844"
+                    Point3="-242.5,28.4155844155844" />
+                  <mssgle:LineSegment
+                    End="-242.5,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Strava_Training.PrecedenceConstraints[Constraint 3]"
+          TopLeft="399,149.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="-21.5,60"
+              Start="0,0"
+              End="-21.5,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,20.4155844155844" />
+                  <mssgle:CubicBezierSegment
+                    Point1="0,20.4155844155844"
+                    Point2="0,24.4155844155844"
+                    Point3="-4,24.4155844155844" />
+                  <mssgle:LineSegment
+                    End="-17.5,24.4155844155844" />
+                  <mssgle:CubicBezierSegment
+                    Point1="-17.5,24.4155844155844"
+                    Point2="-21.5,24.4155844155844"
+                    Point3="-21.5,28.4155844155844" />
+                  <mssgle:LineSegment
+                    End="-21.5,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <mssgm:EdgeLabel
+              BoundingBox="-25.99134765625,29.4155844155844,30.4826953125,9.7490234375"
+              RelativePosition="Any" />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <ContainerLayout
+          HeaderHeight="43"
+          IsExpanded="True"
+          PanelSize="478,307"
+          Size="478,350"
+          Id="Package\Strava_Training"
+          TopLeft="159.5,107.5" />
+        <EdgeLayout
+          Id="Package.PrecedenceConstraints[Constraint]"
+          TopLeft="398.5,47.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package.PrecedenceConstraints[Constraint 1]"
+          TopLeft="320.166666666667,457.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="-199.666666666667,60"
+              Start="0,0"
+              End="-199.666666666667,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,20.1201000834028" />
+                  <mssgle:CubicBezierSegment
+                    Point1="0,20.1201000834028"
+                    Point2="0,24.1201000834028"
+                    Point3="-4,24.1201000834028" />
+                  <mssgle:LineSegment
+                    End="-195.666666666667,24.1201000834028" />
+                  <mssgle:CubicBezierSegment
+                    Point1="-195.666666666667,24.1201000834028"
+                    Point2="-199.666666666667,24.1201000834028"
+                    Point3="-199.666666666667,28.1201000834028" />
+                  <mssgle:LineSegment
+                    End="-199.666666666667,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package.PrecedenceConstraints[Constraint 2]"
+          TopLeft="476.833333333333,457.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="-78.3333333333333,60"
+              Start="0,0"
+              End="-78.3333333333333,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,20.1201000834028" />
+                  <mssgle:CubicBezierSegment
+                    Point1="0,20.1201000834028"
+                    Point2="0,24.1201000834028"
+                    Point3="-4,24.1201000834028" />
+                  <mssgle:LineSegment
+                    End="-74.3333333333333,24.1201000834028" />
+                  <mssgle:CubicBezierSegment
+                    Point1="-74.3333333333333,24.1201000834028"
+                    Point2="-78.3333333333333,24.1201000834028"
+                    Point3="-78.3333333333333,28.1201000834028" />
+                  <mssgle:LineSegment
+                    End="-78.3333333333333,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <mssgm:EdgeLabel
+              BoundingBox="-54.4080143229166,29.1201000834028,30.4826953125,9.7490234375"
+              RelativePosition="Any" />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+      </GraphLayout>
+    </LayoutInfo>
+  </Package>
+  <DtsEventHandler
+    design-time-name="Package.EventHandlers[OnError]">
+    <LayoutInfo>
+      <GraphLayout
+        Capacity="4" xmlns="clr-namespace:Microsoft.SqlServer.IntegrationServices.Designer.Model.Serialization;assembly=Microsoft.SqlServer.IntegrationServices.Graph">
+        <NodeLayout
+          Size="177,42"
+          Id="Package.EventHandlers[OnError]\SQL ExecutionError"
+          TopLeft="450,168" />
+      </GraphLayout>
+    </LayoutInfo>
+  </DtsEventHandler>
+  <TaskHost
+    design-time-name="Package\Strava_Training\Data extract">
+    <LayoutInfo>
+      <GraphLayout
+        Capacity="16" xmlns="clr-namespace:Microsoft.SqlServer.IntegrationServices.Designer.Model.Serialization;assembly=Microsoft.SqlServer.IntegrationServices.Graph" xmlns:mssgle="clr-namespace:Microsoft.SqlServer.Graph.LayoutEngine;assembly=Microsoft.SqlServer.Graph" xmlns:assembly="http://schemas.microsoft.com/winfx/2006/xaml">
+        <NodeLayout
+          Size="139,42"
+          Id="Package\Strava_Training\Data extract\RC selected"
+          TopLeft="22,107.5" />
+        <NodeLayout
+          Size="137,42"
+          Id="Package\Strava_Training\Data extract\RC inserted"
+          TopLeft="23,311.5" />
+        <NodeLayout
+          Size="172,42"
+          Id="Package\Strava_Training\Data extract\Flat File Destination"
+          TopLeft="5.50000000000004,413.5" />
+        <NodeLayout
+          Size="150,42"
+          Id="Package\Strava_Training\Data extract\OLE DB Source"
+          TopLeft="16.5,5.5" />
+        <NodeLayout
+          Size="158,42"
+          Id="Package\Strava_Training\Data extract\Derived Column"
+          TopLeft="12.5,209.5" />
+        <EdgeLayout
+          Id="Package\Strava_Training\Data extract.Paths[Row Count Output 1]"
+          TopLeft="91.5,149.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Strava_Training\Data extract.Paths[OLE DB Source Output]"
+          TopLeft="91.5,47.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Strava_Training\Data extract.Paths[Derived Column Output]"
+          TopLeft="91.5,251.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Strava_Training\Data extract.Paths[Row Count Output 11]"
+          TopLeft="91.5,353.5">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,60"
+              Start="0,0"
+              End="0,52.5">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,52.5" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+      </GraphLayout>
+    </LayoutInfo>
+  </TaskHost>
+  <PipelineComponentMetadata
+    design-time-name="Package\Strava_Training\Data extract\OLE DB Source">
+    <Properties>
+      <Property>
+        <Name>DataSourceViewID</Name>
+      </Property>
+    </Properties>
+  </PipelineComponentMetadata>
+</Objects>]]></DTS:DesignTimeProperties>
+</DTS:Executable>
