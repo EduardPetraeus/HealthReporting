@@ -1,10 +1,8 @@
 CREATE TABLE workspace.silver.DailyMeal (
-  date DATE,
-  meal_type STRING,
-  title STRING,
+  date DATE NOT NULL,
+  meal_type STRING NOT NULL,
+  food_item STRING NOT NULL,
   brand STRING,
-  serving_name STRING,
-  amount DOUBLE,
   amount_in_grams DOUBLE,
   calories DOUBLE,
   carbs DOUBLE,
@@ -16,6 +14,9 @@ CREATE TABLE workspace.silver.DailyMeal (
   fat_unsaturated DOUBLE,
   potassium DOUBLE,
   protein DOUBLE,
-  sodium DOUBLE
+  sodium DOUBLE,
+  row_hash STRING NOT NULL,
+  load_datetime TIMESTAMP NOT NULL,
+  update_datetime TIMESTAMP NOT NULL
 )
 USING DELTA
