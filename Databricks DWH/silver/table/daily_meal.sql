@@ -16,6 +16,7 @@ CREATE TABLE workspace.silver.daily_meal (
   potassium DOUBLE,
   protein DOUBLE,
   sodium DOUBLE,
+  business_key_hash STRING NOT NULL,
   row_hash STRING NOT NULL,
   load_datetime TIMESTAMP NOT NULL,
   update_datetime TIMESTAMP NOT NULL
