@@ -1,4 +1,5 @@
-CREATE TABLE workspace.silver.DailyMeal (
+CREATE TABLE workspace.silver.daily_meal (
+  sk_date INTEGER NOT NULL,
   date DATE NOT NULL,
   meal_type STRING NOT NULL,
   food_item STRING NOT NULL,
