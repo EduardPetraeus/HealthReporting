@@ -12,7 +12,7 @@ WITH deduped_food AS (
             PARTITION BY date, meal_type, title
             ORDER BY date, meal_type, title
         ) AS rn
-    FROM workspace.default.food
+    FROM workspace.default.lifesum_food
     WHERE date IS NOT NULL
       AND meal_type IS NOT NULL
       AND title IS NOT NULL

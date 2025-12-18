@@ -12,7 +12,7 @@ WITH deduped_weight AS (
             PARTITION BY Date, `Weight (kg)`, `Fat mass (kg)`, `Bone mass (kg)`, `Muscle mass (kg)`, `Hydration (kg)`
             ORDER BY Date
         ) AS rn
-    FROM workspace.default.weight
+    FROM workspace.default.withings_weight
     WHERE Date IS NOT NULL
       AND `Weight (kg)` IS NOT NULL
 )
