@@ -1,5 +1,5 @@
 %sql
-CREATE TABLE workspace.silver.date (
+CREATE TABLE health_dw.silver.date (
   date DATE,
   sk_date INT,
   year INT,

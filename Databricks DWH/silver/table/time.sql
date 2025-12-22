@@ -1,5 +1,5 @@
 %sql
-CREATE TABLE silver.time (
+CREATE TABLE health_dw.silver.time (
     sk_time STRING,
     time_code STRING,
     hour_12_code STRING,

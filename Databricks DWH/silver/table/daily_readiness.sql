@@ -1,4 +1,4 @@
-CREATE TABLE workspace.silver.daily_readiness (
+CREATE TABLE health_dw.silver.daily_readiness (
   sk_date INTEGER NOT NULL,
   id STRING NOT NULL,
   day DATE NOT NULL,

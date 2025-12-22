@@ -1,0 +1,4 @@
+CREATE SCHEMA IF NOT EXISTS health_dw.bronze;
+CREATE SCHEMA IF NOT EXISTS health_dw.stg;
+CREATE SCHEMA IF NOT EXISTS health_dw.silver;
+CREATE SCHEMA IF NOT EXISTS health_dw.gold;

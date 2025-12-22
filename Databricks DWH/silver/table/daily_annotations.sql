@@ -1,4 +1,4 @@
-CREATE TABLE workspace.silver.daily_annotations (
+CREATE TABLE health_dw.silver.daily_annotations (
   sk_date          INT NOT NULL,
   annotation_type  STRING NOT NULL,  -- e.g. 'training', 'incident', 'work', 'travel'
   annotation       STRING NOT NULL,
