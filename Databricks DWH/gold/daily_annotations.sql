@@ -1,4 +1,4 @@
-CREATE OR REPLACE VIEW workspace.gold.daily_annotations_valid AS
+CREATE OR REPLACE VIEW health_dw.gold.daily_annotations_valid AS
 SELECT
     sk_date,
     annotation_type   AS activity_type,

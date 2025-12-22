@@ -1,4 +1,4 @@
-CREATE TABLE workspace.silver.weight (
+CREATE TABLE health_dw.silver.weight (
   sk_date INTEGER NOT NULL,
   sk_time STRING NOT NULL,
   datetime TIMESTAMP NOT NULL,

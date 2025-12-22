@@ -1,4 +1,4 @@
-MERGE INTO workspace.silver.daily_annotations AS target
+MERGE INTO health_dw.silver.daily_annotations AS target
 USING (
   SELECT * FROM VALUES
     (20240624, 'social',   'Attended the 2024 UEFA European Football Championship', 'claus', 1),
