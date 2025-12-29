@@ -4,7 +4,7 @@
 
 -- COMMAND ----------
 
-CREATE OR REPLACE TABLE workspace.silver.daily_readiness_staging AS
+CREATE OR REPLACE TABLE health_dw.silver.daily_readiness_staging AS
 WITH deduped_readiness AS (
     SELECT
         *,
@@ -64,8 +64,8 @@ WHERE rn = 1;
 
 -- COMMAND ----------
 
-MERGE INTO workspace.silver.daily_readiness AS target
-USING workspace.silver.daily_readiness_staging AS source
+MERGE INTO health_dw.silver.daily_readiness AS target
+USING health_dw.silver.daily_readiness_staging AS source
 ON target.id = source.id AND target.day = source.day
 
 WHEN MATCHED
@@ -136,4 +136,4 @@ WHEN NOT MATCHED THEN
 
 -- COMMAND ----------
 
-DROP TABLE IF EXISTS workspace.silver.daily_readiness_staging;
+DROP TABLE IF EXISTS health_dw.silver.daily_readiness_staging;

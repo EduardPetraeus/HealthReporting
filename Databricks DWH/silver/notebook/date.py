@@ -33,4 +33,4 @@ df = (
 
 display(df)
 
-df.write.format("delta").mode("overwrite").saveAsTable("workspace.silver.date")
+df.write.format("delta").mode("overwrite").saveAsTable("health_dw.silver.date")

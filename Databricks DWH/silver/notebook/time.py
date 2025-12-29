@@ -89,6 +89,6 @@ df = (
     )
 )
 
-df.write.mode("overwrite").insertInto("silver.time")
+df.write.mode("overwrite").insertInto("health_dw.silver.time")
 
 display(df)

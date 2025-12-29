@@ -4,7 +4,7 @@
 
 -- COMMAND ----------
 
-CREATE OR REPLACE TABLE workspace.silver.daily_meal_staging AS
+CREATE OR REPLACE TABLE health_dw.silver.daily_meal_staging AS
 WITH deduped_food AS (
     SELECT
         *,
@@ -72,8 +72,8 @@ WHERE rn = 1;
 
 -- COMMAND ----------
 
-MERGE INTO workspace.silver.daily_meal AS target
-USING workspace.silver.daily_meal_staging AS source
+MERGE INTO health_dw.silver.daily_meal AS target
+USING health_dw.silver.daily_meal_staging AS source
 ON target.business_key_hash = source.business_key_hash
 
 WHEN MATCHED
@@ -149,4 +149,4 @@ WHEN NOT MATCHED THEN
 
 -- COMMAND ----------
 
-DROP TABLE IF EXISTS workspace.silver.daily_meal_staging;
+DROP TABLE IF EXISTS health_dw.silver.daily_meal_staging;

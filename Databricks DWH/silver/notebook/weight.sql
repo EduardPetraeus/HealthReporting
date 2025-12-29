@@ -4,7 +4,7 @@
 
 -- COMMAND ----------
 
-CREATE OR REPLACE TABLE workspace.silver.weight_staging AS
+CREATE OR REPLACE TABLE health_dw.silver.weight_staging AS
 WITH deduped_weight AS (
     SELECT
         *,
@@ -55,8 +55,8 @@ WHERE rn = 1
 
 -- COMMAND ----------
 
-MERGE INTO workspace.silver.weight AS target
-USING workspace.silver.weight_staging AS source
+MERGE INTO health_dw.silver.weight AS target
+USING health_dw.silver.weight_staging AS source
 ON target.business_key_hash = source.business_key_hash
 
 WHEN MATCHED
@@ -105,4 +105,4 @@ WHEN NOT MATCHED THEN
 
 -- COMMAND ----------
 
-DROP TABLE IF EXISTS workspace.silver.weight_staging;
+DROP TABLE IF EXISTS health_dw.silver.weight_staging;
