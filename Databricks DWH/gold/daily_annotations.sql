@@ -3,5 +3,5 @@ SELECT
     sk_date,
     annotation_type   AS activity_type,
     annotation        AS comment
-FROM workspace.silver.daily_annotations
+FROM health_dw.silver.daily_annotations
 WHERE is_valid = TRUE;
