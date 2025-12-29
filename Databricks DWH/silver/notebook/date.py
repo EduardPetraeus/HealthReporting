@@ -31,6 +31,58 @@ df = (
       ).otherwise(0))
 )
 
-display(df)
+# display(df)
 
-df.write.format("delta").mode("overwrite").saveAsTable("health_dw.silver.date")
+df.write.format("delta").mode("overwrite").saveAsTable("health_dw.silver.date_staging")
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC MERGE INTO health_dw.silver.date AS target
+# MAGIC USING health_dw.silver.date_staging AS source
+# MAGIC ON target.sk_date = source.sk_date
+# MAGIC
+# MAGIC WHEN MATCHED AND (
+# MAGIC     target.year <> source.year OR
+# MAGIC     target.quarter <> source.quarter OR
+# MAGIC     target.month <> source.month OR
+# MAGIC     target.week <> source.week OR
+# MAGIC     target.day_of_week <> source.day_of_week OR
+# MAGIC     target.day_of_year <> source.day_of_year OR
+# MAGIC     target.day_of_month <> source.day_of_month OR
+# MAGIC     target.month_name <> source.month_name OR
+# MAGIC     target.day_name <> source.day_name OR
+# MAGIC     target.is_leap_year <> source.is_leap_year OR
+# MAGIC     target.year_month <> source.year_month OR
+# MAGIC     target.is_weekend <> source.is_weekend
+# MAGIC )
+# MAGIC THEN UPDATE SET
+# MAGIC     target.date = source.date,
+# MAGIC     target.year = source.year,
+# MAGIC     target.quarter = source.quarter,
+# MAGIC     target.month = source.month,
+# MAGIC     target.week = source.week,
+# MAGIC     target.day_of_week = source.day_of_week,
+# MAGIC     target.day_of_year = source.day_of_year,
+# MAGIC     target.day_of_month = source.day_of_month,
+# MAGIC     target.month_name = source.month_name,
+# MAGIC     target.day_name = source.day_name,
+# MAGIC     target.is_leap_year = source.is_leap_year,
+# MAGIC     target.year_month = source.year_month,
+# MAGIC     target.is_weekend = source.is_weekend
+# MAGIC
+# MAGIC WHEN NOT MATCHED THEN
+# MAGIC   INSERT (
+# MAGIC     date, sk_date, year, quarter, month, week, day_of_week, day_of_year, day_of_month,
+# MAGIC     month_name, day_name, is_leap_year, year_month, is_weekend
+# MAGIC   )
+# MAGIC   VALUES (
+# MAGIC     source.date, source.sk_date, source.year, source.quarter, source.month, source.week,
+# MAGIC     source.day_of_week, source.day_of_year, source.day_of_month, source.month_name,
+# MAGIC     source.day_name, source.is_leap_year, source.year_month, source.is_weekend
+# MAGIC   );
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC DROP TABLE IF EXISTS health_dw.silver.date_staging;

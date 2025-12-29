@@ -89,6 +89,70 @@ df = (
     )
 )
 
-df.write.mode("overwrite").insertInto("health_dw.silver.time")
+df.write.mode("overwrite").saveAsTable("health_dw.silver.time_staging")
 
-display(df)
+# display(df)
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC MERGE INTO health_dw.silver.time AS target
+# MAGIC USING health_dw.silver.time_staging AS source
+# MAGIC ON target.sk_time = source.sk_time
+# MAGIC
+# MAGIC WHEN MATCHED AND (
+# MAGIC     target.time_code         <> source.time_code OR
+# MAGIC     target.hour_12_code      <> source.hour_12_code OR
+# MAGIC     target.hour_12_key       <> source.hour_12_key OR
+# MAGIC     target.minute_code       <> source.minute_code OR
+# MAGIC     target.minute_key        <> source.minute_key OR
+# MAGIC     target.ampm_code         <> source.ampm_code OR
+# MAGIC     target.hour_24_code      <> source.hour_24_code OR
+# MAGIC     target.hour_24_key       <> source.hour_24_key OR
+# MAGIC     target.minute_15_code    <> source.minute_15_code OR
+# MAGIC     target.minute_15_key     <> source.minute_15_key
+# MAGIC )
+# MAGIC THEN UPDATE SET
+# MAGIC     target.time_code         = source.time_code,
+# MAGIC     target.hour_12_code      = source.hour_12_code,
+# MAGIC     target.hour_12_key       = source.hour_12_key,
+# MAGIC     target.minute_code       = source.minute_code,
+# MAGIC     target.minute_key        = source.minute_key,
+# MAGIC     target.ampm_code         = source.ampm_code,
+# MAGIC     target.hour_24_code      = source.hour_24_code,
+# MAGIC     target.hour_24_key       = source.hour_24_key,
+# MAGIC     target.minute_15_code    = source.minute_15_code,
+# MAGIC     target.minute_15_key     = source.minute_15_key
+# MAGIC
+# MAGIC WHEN NOT MATCHED THEN
+# MAGIC   INSERT (
+# MAGIC     sk_time,
+# MAGIC     time_code,
+# MAGIC     hour_12_code,
+# MAGIC     hour_12_key,
+# MAGIC     minute_code,
+# MAGIC     minute_key,
+# MAGIC     ampm_code,
+# MAGIC     hour_24_code,
+# MAGIC     hour_24_key,
+# MAGIC     minute_15_code,
+# MAGIC     minute_15_key
+# MAGIC   )
+# MAGIC   VALUES (
+# MAGIC     source.sk_time,
+# MAGIC     source.time_code,
+# MAGIC     source.hour_12_code,
+# MAGIC     source.hour_12_key,
+# MAGIC     source.minute_code,
+# MAGIC     source.minute_key,
+# MAGIC     source.ampm_code,
+# MAGIC     source.hour_24_code,
+# MAGIC     source.hour_24_key,
+# MAGIC     source.minute_15_code,
+# MAGIC     source.minute_15_key
+# MAGIC   );
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC DROP TABLE IF EXISTS health_dw.silver.time_staging;
