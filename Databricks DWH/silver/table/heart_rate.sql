@@ -1,5 +1,6 @@
 CREATE TABLE health_dw.silver.heart_rate (
   sk_date INT NOT NULL,
+  sk_time STRING NOT NULL,
   timestamp TIMESTAMP NOT NULL,
   bpm BIGINT,
   source STRING,

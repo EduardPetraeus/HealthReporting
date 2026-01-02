@@ -16,21 +16,22 @@ WITH deduped_heart_rate AS (
     WHERE timestamp IS NOT NULL
 )
 SELECT
-    -- Surrogate date key
+-- Surrogate date key
     year(timestamp) * 10000 + month(timestamp) * 100 + dayofmonth(timestamp) AS sk_date,
-
-    -- Business columns
+-- Surrogate time key
+    lpad(hour(timestamp), 2, '0') || lpad(minute(timestamp), 2, '0') AS sk_time,
+    
     timestamp,
     bpm,
     source,
-
--- Deterministic business key hash (identity)
     sha2(
-    concat_ws('||', CAST(timestamp AS STRING), source),
-    256
-) AS business_key_hash,
-
-    -- Row hash (change detection)
+        concat_ws(
+            '||',
+            coalesce(CAST(timestamp AS STRING), ''),
+            coalesce(source, '')
+        ),
+        256
+    ) AS business_key_hash,
     sha2(
         concat_ws(
             '||',
@@ -40,11 +41,9 @@ SELECT
         ),
         256
     ) AS row_hash,
-
     current_timestamp() AS load_datetime
 FROM deduped_heart_rate
 WHERE rn = 1;
-
 
 -- COMMAND ----------
 
@@ -55,6 +54,7 @@ ON target.business_key_hash = source.business_key_hash
 WHEN MATCHED AND target.row_hash <> source.row_hash THEN
   UPDATE SET
     target.sk_date           = source.sk_date,
+    target.sk_time           = source.sk_time,
     target.timestamp         = source.timestamp,
     target.bpm               = source.bpm,
     target.source            = source.source,
@@ -65,6 +65,7 @@ WHEN MATCHED AND target.row_hash <> source.row_hash THEN
 WHEN NOT MATCHED THEN
   INSERT (
     sk_date,
+    sk_time,
     timestamp,
     bpm,
     source,
@@ -75,6 +76,7 @@ WHEN NOT MATCHED THEN
   )
   VALUES (
     source.sk_date,
+    source.sk_time,
     source.timestamp,
     source.bpm,
     source.source,
