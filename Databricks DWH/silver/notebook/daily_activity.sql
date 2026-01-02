@@ -1,4 +1,9 @@
 -- Databricks notebook source
+-- MAGIC %md
+-- MAGIC Build a core data model for the daily activities
+
+-- COMMAND ----------
+
 CREATE OR REPLACE TABLE health_dw.silver.daily_activity_staging AS
 WITH deduped_activity AS (
     SELECT
@@ -78,7 +83,6 @@ WHEN MATCHED AND target.row_hash <> source.row_hash THEN
     target.training_frequency    = source.training_frequency,
     target.training_volume       = source.training_volume,
     target.row_hash              = source.row_hash,
-    target.load_datetime         = source.load_datetime,
     target.update_datetime       = current_timestamp()
 
 WHEN NOT MATCHED THEN
@@ -119,7 +123,7 @@ WHEN NOT MATCHED THEN
     source.training_frequency,
     source.training_volume,
     source.row_hash,
-    source.load_datetime,
+    current_timestamp(),
     current_timestamp()
   );
 
