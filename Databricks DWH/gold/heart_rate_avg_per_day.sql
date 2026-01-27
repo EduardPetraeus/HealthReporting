@@ -1,4 +1,4 @@
-CREATE VIEW health_dw.silver.vw_heart_rate_avg_per_day AS
+CREATE VIEW health_dw.gold.vw_heart_rate_avg_per_day AS
 SELECT
   sk_date,
   AVG(bpm) AS avg_bpm
