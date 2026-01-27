@@ -3,7 +3,7 @@ USING (
   SELECT * FROM VALUES
     (20240624, 'social',   'Attended the 2024 UEFA European Football Championship', 'claus', 1),
     (20240625, 'social',   'Attended the 2024 UEFA European Football Championship', 'claus', 1),
-    (20240929, 'social',   'Attended the 2024 UEFA European Football Championship', 'claus', 1),
+    (20240929, 'social',   'Trip to Berlin', 'claus', 1),
     (20240330, 'social',   'Easter vacation', 'claus', 1),
     (20240829, 'social',   'Trip to Sweden', 'claus', 1),
     (20240831, 'social',   'Trip to Sweden', 'claus', 1),
@@ -20,8 +20,12 @@ USING (
   )
 ) AS source
 ON  target.sk_date = source.sk_date
-AND target.annotation_type = source.annotation_type
-AND target.annotation = source.annotation
+WHEN MATCHED THEN
+  UPDATE SET
+    target.annotation_type = source.annotation_type,
+    target.annotation = source.annotation,
+    target.created_by = source.created_by,
+    target.is_valid = source.is_valid
 WHEN NOT MATCHED THEN
   INSERT (
     sk_date,
