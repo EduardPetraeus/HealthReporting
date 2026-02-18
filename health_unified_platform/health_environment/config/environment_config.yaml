@@ -1,0 +1,19 @@
+# health_unified_platform - environment_config
+# This file defines the local environment settings for the data platform.
+
+paths:
+  # The root directory for all health data (raw, silver, gold)
+  data_lake_root: "/Users/Shared/data_lake"
+  
+  # Centralized location for all execution logs
+  log_root: "/Users/Shared/data_lake/logs"
+  
+  # The central folder for database files, kept outside the code base
+  db_root: "/Users/Shared/data_lake/database"
+
+defaults:
+  # The default execution environment (e.g., dev, prd)
+  environment: "dev"
+  
+  # The standard storage format for processed data across the platform
+  output_format: "parquet"
