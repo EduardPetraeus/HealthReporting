@@ -1,0 +1,30 @@
+# health_unified_platform - source_metadata
+# This file defines the mapping between raw parquet files and bronze staging tables
+sources:
+  - name: "apple_health_toothbrushing"
+    # Captures all partitioned parquet files for toothbrushing events
+    relative_path: "apple_health_data/Hygiene/toothbrushingevent/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_toothbrushing"
+
+  - name: "apple_health_step_count"
+    # Captures all partitioned parquet files for step count data
+    relative_path: "apple_health_data/Activity/stepcount/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_step_count"
+
+  - name: "apple_health_heart_rate"
+    # Captures heart rate samples across all years (e.g., 2026)
+    relative_path: "apple_health_data/Vitality/heartrate/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_heart_rate"
+
+  - name: "apple_health_vo2_max"
+    # Captures VO2 Max cardio fitness data across all years (e.g., 2025)
+    relative_path: "apple_health_data/Vitality/vo2max/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_vo2_max"
