@@ -259,3 +259,24 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+
+# Ignore the raw data and the processed data lake
+eksport.xml
+export_cda.xml
+health_data_lake/
+
+# Ignore Python caches
+__pycache__/
+.venv/
+
+# Ignore the actual data lake
+data/
+*.xml
+*.parquet
+*.delta
+*.csv
+
+# Mac/IDE noise
+.DS_Store
+.vscode/
+__pycache__/

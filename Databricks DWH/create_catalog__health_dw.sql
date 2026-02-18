@@ -1,1 +1,0 @@
-CREATE CATALOG health_dw;
