@@ -280,3 +280,9 @@ data/
 .DS_Store
 .vscode/
 __pycache__/
+
+# AI dev kit artifacts
+.ai-dev-kit/version
+.mcp.json
+.claude/claude_mcp_config.json
+.claude/skills/
