@@ -2,3 +2,17 @@
 __pycache__/
 *.pyc
 legacy_on_premise_dw/
+
+# dbt artifacts
+target/
+dbt_packages/
+logs/
+
+# Database files 
+*.db
+*.db.wal
+
+# IDE og system files
+.vscode/
+.DS_Store
+.ai-dev-kit/

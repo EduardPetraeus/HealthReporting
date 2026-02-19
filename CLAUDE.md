@@ -31,3 +31,10 @@ Personal health data platform (owner: Claus Eduard Petraeus) that ingests, trans
 - Key paths and config files: `docs/paths.md`
 - How to run the platform locally: `docs/runbook.md`
 - Architecture, data flow, silver/gold patterns: `docs/architecture.md`
+- Project context is located in the /docs folder. Review `docs/architecture.md` or `docs/CONTEXT.md` only when explicitly relevant to the task at hand
+
+
+## Usage Optimization
+- **Be concise**: Provide brief explanations and avoid repeating project context unless asked.
+- **Targeted Reading**: Only read files in `docs/` if the user's request requires specific architectural or path knowledge.
+- **Ignore Legacy**: Never index or read the `legacy_on_premise_dw/` directory.
