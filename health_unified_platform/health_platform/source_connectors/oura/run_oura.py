@@ -34,6 +34,18 @@ ENDPOINTS: list[tuple[str, str, str]] = [
 ]
 
 
+def _normalize_records(endpoint_name: str, records: list[dict]) -> list[dict]:
+    """
+    Applies endpoint-specific normalization before writing.
+    Ensures consistent types across parquet files to prevent schema conflicts on read.
+    """
+    if endpoint_name == "daily_spo2":
+        for r in records:
+            spo2 = r.get("spo2_percentage")
+            r["spo2_percentage"] = {"average": spo2.get("average") if isinstance(spo2, dict) else None}
+    return records
+
+
 def main() -> None:
     print(f"--- Oura pipeline starting [env: {SOURCE_ENV}] ---")
 
@@ -43,6 +55,7 @@ def main() -> None:
 
     # Fetch all dated endpoints
     for endpoint_name, method_name, date_field in ENDPOINTS:
+
         start_date = get_start_date(endpoint_name, state)
 
         if start_date > END_DATE:
@@ -52,6 +65,7 @@ def main() -> None:
         print(f"{endpoint_name}: fetching {start_date} -> {END_DATE}...")
         records = getattr(client, method_name)(start_date, END_DATE)
         print(f"  Fetched {len(records):,} records.")
+        records = _normalize_records(endpoint_name, records)
         write_records(records, endpoint_name, date_field, source_env=SOURCE_ENV)
         update_state(endpoint_name, END_DATE, state)
 

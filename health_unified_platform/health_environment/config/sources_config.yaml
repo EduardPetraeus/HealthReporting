@@ -133,3 +133,52 @@ sources:
     source_type: "parquet"
     target_schema: "bronze"
     target_table: "stg_apple_health_active_energy_burned"
+
+  # Oura Ring endpoints (V2 API, fetched via source_connectors/oura/run_oura.py)
+  - name: "oura_daily_sleep"
+    relative_path: "oura/raw/daily_sleep/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_oura_daily_sleep"
+
+  - name: "oura_daily_activity"
+    relative_path: "oura/raw/daily_activity/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_oura_daily_activity"
+
+  - name: "oura_daily_readiness"
+    relative_path: "oura/raw/daily_readiness/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_oura_daily_readiness"
+
+  - name: "oura_heartrate"
+    relative_path: "oura/raw/heartrate/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_oura_heartrate"
+
+  - name: "oura_workout"
+    relative_path: "oura/raw/workout/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_oura_workout"
+
+  - name: "oura_daily_spo2"
+    relative_path: "oura/raw/daily_spo2/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_oura_daily_spo2"
+
+  - name: "oura_daily_stress"
+    relative_path: "oura/raw/daily_stress/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_oura_daily_stress"
+
+  - name: "oura_personal_info"
+    relative_path: "oura/raw/personal_info/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_oura_personal_info"

@@ -291,3 +291,6 @@ __pycache__/
 .mcp.json
 .claude/claude_mcp_config.json
 .claude/skills/
+.env
+*.env
+**/.env
