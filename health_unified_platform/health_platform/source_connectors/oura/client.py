@@ -62,8 +62,25 @@ class OuraClient:
         return self._get_collection("/v2/usercollection/daily_readiness", self._date_params(start, end))
 
     def fetch_heartrate(self, start: date, end: date) -> list[dict]:
-        """Heart rate uses full datetime range, not date-only."""
-        return self._get_collection("/v2/usercollection/heartrate", self._datetime_params(start, end))
+        """
+        Heart rate uses full datetime range and must be fetched in chunks.
+        Oura rejects ranges larger than ~7 days for this high-frequency endpoint.
+        """
+        from datetime import timedelta
+
+        records = []
+        chunk_days = 7
+        chunk_start = start
+        while chunk_start <= end:
+            chunk_end = min(chunk_start + timedelta(days=chunk_days - 1), end)
+            records.extend(
+                self._get_collection(
+                    "/v2/usercollection/heartrate",
+                    self._datetime_params(chunk_start, chunk_end),
+                )
+            )
+            chunk_start = chunk_end + timedelta(days=1)
+        return records
 
     def fetch_workout(self, start: date, end: date) -> list[dict]:
         return self._get_collection("/v2/usercollection/workout", self._date_params(start, end))
