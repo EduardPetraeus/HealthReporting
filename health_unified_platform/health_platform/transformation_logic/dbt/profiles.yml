@@ -1,0 +1,11 @@
+health_dw:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: /Users/Shared/data_lake/database/health_dw_dev.db
+      schema: main
+    prd:
+      type: duckdb
+      path: /Users/Shared/data_lake/database/health_dw_prd.db
+      schema: main

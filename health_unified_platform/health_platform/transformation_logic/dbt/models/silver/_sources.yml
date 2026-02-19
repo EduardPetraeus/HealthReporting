@@ -1,0 +1,7 @@
+version: 2
+
+sources:
+  - name: bronze
+    schema: bronze
+    tables:
+      - name: stg_apple_health_heart_rate

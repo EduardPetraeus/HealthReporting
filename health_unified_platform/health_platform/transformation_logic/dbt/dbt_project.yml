@@ -1,0 +1,13 @@
+name: health_dw
+version: '1.0.0'
+
+profile: health_dw
+
+model-paths: ["models"]
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  health_dw:
+    silver:
+      +schema: silver
+      +materialized: incremental
