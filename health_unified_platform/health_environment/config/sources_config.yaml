@@ -35,3 +35,101 @@ sources:
     source_type: "parquet"
     target_schema: "bronze"
     target_table: "stg_lifesum_food"
+
+  - name: "apple_health_water"
+    # Daily water intake tracking
+    relative_path: "apple_health_data/Nutrition/dietarywater/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_water"
+
+  - name: "apple_health_body_temperature"
+    # Basal and peripheral body temperature readings
+    relative_path: "apple_health_data/Vitality/bodytemperature/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_body_temperature"
+
+  - name: "apple_health_respiratory_rate"
+    # Average breaths per minute during sleep or rest
+    relative_path: "apple_health_data/Vitality/respiratoryrate/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_respiratory_rate"
+
+  - name: "apple_health_walking_steadiness"
+    # Metric for fall risk and balance stability
+    relative_path: "apple_health_data/Mobility/applewalkingsteadiness/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_walking_steadiness"
+
+  - name: "apple_health_walking_asymmetry"
+    # Percentage of time one foot is faster/slower than the other
+    relative_path: "apple_health_data/Mobility/walkingasymmetrypercentage/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_walking_asymmetry"
+
+  - name: "apple_health_walking_double_support"
+    # Percentage of time both feet are on the ground during a walk
+    relative_path: "apple_health_data/Mobility/walkingdoublesupportpercentage/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_walking_double_support"
+
+  - name: "apple_health_walking_heart_rate_avg"
+    # Average heart rate specifically captured during walking periods
+    relative_path: "apple_health_data/Mobility/walkingheartrateaverage/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_walking_heart_rate_avg"
+
+  - name: "apple_health_walking_speed"
+    # Walking speed measured on flat ground
+    relative_path: "apple_health_data/Mobility/walkingspeed/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_walking_speed"
+
+  - name: "apple_health_walking_step_length"
+    # Distance covered between two steps of the same foot
+    relative_path: "apple_health_data/Mobility/walkingsteplength/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_walking_step_length"
+
+  - name: "apple_health_mindful_session"
+    # Logged mindfulness or meditation sessions
+    relative_path: "apple_health_data/Mindfulness/mindfulsession/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_mindful_session"
+
+  - name: "apple_health_height"
+    # User body height measurements
+    relative_path: "apple_health_data/BodyMetrics/height/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_height"
+
+  - name: "apple_health_physical_effort"
+    # Estimated physical effort/intensity during activity
+    relative_path: "apple_health_data/Activity/physicaleffort/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_physical_effort"
+
+  - name: "apple_health_basal_energy_burned"
+    # Resting energy expenditure (BMR)
+    relative_path: "apple_health_data/Activity/basalenergyburned/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_basal_energy_burned"
+
+  - name: "apple_health_active_energy_burned"
+    # Active calories burned through movement
+    relative_path: "apple_health_data/Activity/activeenergyburned/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_active_energy_burned"
