@@ -11,7 +11,7 @@ WITH deduped AS (
         *,
         ROW_NUMBER() OVER (
             PARTITION BY startDate, sourceName
-            ORDER BY startDate
+            ORDER BY _ingested_at, startDate
         ) AS rn
     FROM bronze.stg_apple_health_step_count
     WHERE startDate IS NOT NULL
