@@ -28,3 +28,10 @@ sources:
     source_type: "parquet"
     target_schema: "bronze"
     target_table: "stg_apple_health_vo2_max"
+
+  - name: "lifesum_food"
+    # Full load export from Lifesum — converted via csv_to_parquet.py
+    relative_path: "lifesum/parquet/food/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_lifesum_food"
