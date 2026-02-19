@@ -13,7 +13,7 @@ select
     null::varchar    as sk_time,
     null::timestamp  as timestamp,
     null::integer    as bpm,
-    null::varchar    as source,
+    null::varchar    as source_name,
     null::varchar    as business_key_hash,
     null::varchar    as row_hash,
     null::timestamp  as load_datetime,
