@@ -281,6 +281,11 @@ data/
 .vscode/
 __pycache__/
 
+# dbt artifacts
+**/dbt/target/
+**/dbt/logs/
+**/dbt/.user.yml
+
 # AI dev kit artifacts
 .ai-dev-kit/version
 .mcp.json
