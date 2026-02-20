@@ -4,14 +4,27 @@ Personal health data platform (owner: Claus Eduard Petraeus) that ingests, trans
 
 ## Architecture
 
-Medallion architecture (bronze → silver → gold) with a local-first approach on DuckDB, targeting Databricks as the cloud platform.
+Medallion architecture (bronze → silver → gold) running on two parallel tracks:
 
+**Local (DuckDB)** — development and experimentation:
 ```
 Source APIs / files  →  parquet (hive-partitioned)
   →  bronze (DuckDB stg_* tables via ingestion_engine.py)
   →  silver (dbt-duckdb schema + run_merge.py)
-  →  gold (Databricks views — planned)
+  →  gold (DuckDB views)
 ```
+
+**Cloud (Databricks)** — production pipeline:
+```
+Cloud storage (parquet)
+  →  bronze (Autoloader / cloudFiles → Delta table)
+  →  silver (MERGE INTO → Delta table, driven by YAML + SQL)
+  →  gold (CREATE OR REPLACE VIEW, driven by YAML + SQL)
+```
+
+The cloud pipeline is fully generic and metadata-driven: adding a new source requires one YAML config file and one SQL file — no Python changes. Deployed via Databricks Asset Bundles (DAB) with GitHub Actions CI/CD.
+
+See `docs/databricks_framework.md` for the full cloud pipeline reference.
 
 ## Data Sources
 
@@ -44,10 +57,11 @@ cd health_unified_platform/health_platform/transformation_logic/dbt/merge
 for f in silver/merge_oura_*.sql; do HEALTH_ENV=dev python run_merge.py "$f"; done
 ```
 
-See `docs/runbook.md` for the full runbook, `docs/architecture.md` for design details, and `docs/paths.md` for key file locations.
+See `docs/runbook.md` for the full runbook, `docs/architecture.md` for design details, `docs/paths.md` for key file locations, and `docs/databricks_framework.md` for the cloud pipeline reference.
 
 ## Stack
 
 - **Local**: Python 3.9, DuckDB, dbt-duckdb, pyarrow, pandas
-- **Cloud target**: Databricks (Unity Catalog)
-- **Storage**: Parquet (hive-partitioned), DuckDB file at `/Users/Shared/data_lake/database/`
+- **Cloud**: Databricks (Unity Catalog, Delta Lake, Autoloader, Asset Bundles)
+- **CI/CD**: GitHub Actions → auto-deploy on merge to main
+- **Storage**: Parquet (hive-partitioned) locally at `/Users/Shared/data_lake/`; ADLS/S3 on cloud

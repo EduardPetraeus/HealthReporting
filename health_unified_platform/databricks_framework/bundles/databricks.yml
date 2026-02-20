@@ -1,0 +1,79 @@
+# =============================================================================
+# databricks.yml — Health Platform Asset Bundle
+# =============================================================================
+# Bundle root: databricks_framework/bundles/
+#
+# Run all `databricks bundle` commands from this directory:
+#   cd health_unified_platform/databricks_framework/bundles
+#   databricks bundle deploy --target dev
+#   databricks bundle deploy --target prd
+#
+# Note: notebooks and config files sit outside this bundle root (at ../notebooks
+# and ../config). They are pulled in via sync.include below and uploaded to the
+# workspace alongside the bundle artifacts.
+# =============================================================================
+
+bundle:
+  name: health_platform
+
+# Include job resource YAML files from the workflows/ folder (one level up).
+include:
+  - ../workflows/*.yml
+
+# Sync notebooks and config files that live outside the bundle root.
+# DABs resolve these relative to this databricks.yml file.
+sync:
+  include:
+    - ../config/**
+    - ../notebooks/**
+
+# ---------------------------------------------------------------------------
+# Variables — overridden per target
+# ---------------------------------------------------------------------------
+variables:
+  env:
+    description: "Deployment environment (dev | prd)"
+    default: dev
+
+  catalog:
+    description: "Unity Catalog name"
+    default: health_dw
+
+  cluster_node_type:
+    description: "Node type for job clusters (Azure: Standard_DS3_v2 | AWS: i3.xlarge)"
+    default: Standard_DS3_v2
+
+  config_root:
+    description: "Workspace path to source YAML configs after bundle deployment"
+    default: /Workspace/Shared/health_platform/config/sources
+
+  gold_config_root:
+    description: "Workspace path to gold YAML configs after bundle deployment"
+    default: /Workspace/Shared/health_platform/config/gold
+
+  silver_sql_root:
+    description: "Workspace path to silver SQL files after bundle deployment"
+    default: /Workspace/Shared/health_platform/notebooks/silver/sql
+
+  gold_sql_root:
+    description: "Workspace path to gold SQL files after bundle deployment"
+    default: /Workspace/Shared/health_platform/notebooks/gold/sql
+
+# ---------------------------------------------------------------------------
+# Targets
+# ---------------------------------------------------------------------------
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: https://your-dev-workspace.azuredatabricks.net  # TODO: replace
+    variables:
+      env: dev
+
+  prd:
+    mode: production
+    workspace:
+      host: https://your-prd-workspace.azuredatabricks.net  # TODO: replace
+    variables:
+      env: prd

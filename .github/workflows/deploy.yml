@@ -1,0 +1,102 @@
+# =============================================================================
+# deploy.yml — GitHub Actions CI/CD for Databricks Asset Bundles
+#
+# Triggers on push to main (only when files under databricks_framework change).
+# Deploys the bundle to the production target.
+#
+# Required GitHub secrets:
+#   DATABRICKS_HOST_PRD    — e.g. https://your-prd-workspace.azuredatabricks.net
+#   DATABRICKS_TOKEN_PRD   — a Databricks personal access token (or service principal token)
+#
+# Optional: add a deploy-dev job that runs on pull_request to validate changes
+# before they reach main.
+# =============================================================================
+
+name: Deploy Databricks Bundle
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - health_unified_platform/databricks_framework/**
+
+  # Allow manual trigger from the Actions tab
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Bundle target to deploy (dev | prd)"
+        required: true
+        default: prd
+        type: choice
+        options:
+          - dev
+          - prd
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Validate — runs on every PR to catch bundle errors early
+  # ---------------------------------------------------------------------------
+  validate:
+    name: Validate bundle
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Validate bundle (dev)
+        working-directory: health_unified_platform/databricks_framework/bundles
+        run: databricks bundle validate --target dev
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_DEV }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_DEV }}
+
+  # ---------------------------------------------------------------------------
+  # Deploy to production — runs on merge to main
+  # ---------------------------------------------------------------------------
+  deploy-prd:
+    name: Deploy to production
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'prd')
+    environment: production
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Deploy bundle to production
+        working-directory: health_unified_platform/databricks_framework/bundles
+        run: databricks bundle deploy --target prd
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_PRD }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_PRD }}
+
+  # ---------------------------------------------------------------------------
+  # Deploy to dev — manual trigger only
+  # ---------------------------------------------------------------------------
+  deploy-dev:
+    name: Deploy to dev
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'dev'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Deploy bundle to dev
+        working-directory: health_unified_platform/databricks_framework/bundles
+        run: databricks bundle deploy --target dev
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_DEV }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_DEV }}

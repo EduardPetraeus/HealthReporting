@@ -1,0 +1,55 @@
+# =============================================================================
+# bronze_job.yml — Autoloader ingestion job
+#
+# Each source gets its own task so they can run in parallel.
+# Add a new task block here whenever you onboard a new source.
+# =============================================================================
+
+resources:
+  jobs:
+    bronze_pipeline:
+      name: "[${var.env}] health_platform — bronze_pipeline"
+      description: "Incremental bronze ingestion via Autoloader (cloudFiles) for all sources."
+
+      schedule:
+        quartz_cron_expression: "0 0 6 * * ?"  # Daily at 06:00 UTC
+        timezone_id: UTC
+        pause_status: UNPAUSED
+
+      job_clusters:
+        - job_cluster_key: bronze_cluster
+          new_cluster:
+            spark_version: 15.4.x-scala2.12
+            node_type_id: ${var.cluster_node_type}
+            num_workers: 2
+            spark_conf:
+              spark.databricks.delta.preview.enabled: "true"
+            spark_env_vars:
+              HEALTH_ENV: ${var.env}
+
+      tasks:
+        # ------------------------------------------------------------------
+        # apple_health — heart rate
+        # ------------------------------------------------------------------
+        - task_key: bronze_apple_health_heart_rate
+          job_cluster_key: bronze_cluster
+          notebook_task:
+            notebook_path: ../notebooks/bronze/bronze_autoloader
+            base_parameters:
+              source_name: apple_health_heart_rate
+              config_root: ${var.config_root}
+
+        # ------------------------------------------------------------------
+        # oura — heart rate
+        # ------------------------------------------------------------------
+        - task_key: bronze_oura_heart_rate
+          job_cluster_key: bronze_cluster
+          notebook_task:
+            notebook_path: ../notebooks/bronze/bronze_autoloader
+            base_parameters:
+              source_name: oura_heart_rate
+              config_root: ${var.config_root}
+
+        # Add more sources here — copy a task block above and update:
+        # - task_key
+        # - base_parameters.source_name (must match a YAML file in config/sources/)

@@ -38,13 +38,31 @@
 
 | Path | Purpose |
 |---|---|
-| `health_unified_platform/health_platform/transformation_logic/databricks/gold/view/` | Gold layer views |
+| `health_unified_platform/health_platform/transformation_logic/databricks/gold/view/` | Legacy gold layer views |
 
-## Deployment
+## Databricks Framework (cloud pipeline)
 
 | Path | Purpose |
 |---|---|
-| `health_unified_platform/health_environment/deployment/databricks/` | Databricks catalog/schema DDL |
+| `health_unified_platform/databricks_framework/bundles/databricks.yml` | DAB entry point — run all `databricks bundle` commands from `bundles/` |
+| `health_unified_platform/databricks_framework/config/sources/` | Source YAML configs (one per source, covers bronze + silver) |
+| `health_unified_platform/databricks_framework/config/gold/` | Gold entity YAML configs |
+| `health_unified_platform/databricks_framework/notebooks/setup/init.py` | One-time schema creation (run before first pipeline execution) |
+| `health_unified_platform/databricks_framework/notebooks/bronze/bronze_autoloader.py` | Generic Autoloader notebook |
+| `health_unified_platform/databricks_framework/notebooks/silver/silver_runner.py` | Generic silver runner |
+| `health_unified_platform/databricks_framework/notebooks/silver/sql/` | Silver SQL files (transformation + DDL) |
+| `health_unified_platform/databricks_framework/notebooks/gold/gold_runner.py` | Generic gold runner |
+| `health_unified_platform/databricks_framework/notebooks/gold/sql/` | Gold SQL files (view/table definitions) |
+| `health_unified_platform/databricks_framework/workflows/bronze_job.yml` | DAB job: daily bronze ingestion |
+| `health_unified_platform/databricks_framework/workflows/silver_job.yml` | DAB job: daily silver merge |
+| `health_unified_platform/databricks_framework/workflows/gold_job.yml` | DAB job: daily gold refresh |
+| `.github/workflows/deploy.yml` | GitHub Actions CI/CD (validate on PR, deploy to prd on merge to main) |
+
+## Deployment (legacy)
+
+| Path | Purpose |
+|---|---|
+| `health_unified_platform/health_environment/deployment/databricks/` | Databricks catalog/schema DDL (pre-framework) |
 
 ## Data Lake (local filesystem)
 

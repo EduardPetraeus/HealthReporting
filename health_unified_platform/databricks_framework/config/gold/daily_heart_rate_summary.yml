@@ -1,0 +1,11 @@
+# =============================================================================
+# Gold entity config: daily_heart_rate_summary
+#
+# A view that aggregates silver.heart_rate by day and source system,
+# plus a cross-source daily rollup row (source_system = 'all').
+# =============================================================================
+
+name: daily_heart_rate_summary
+type: view
+target: health_dw.gold.daily_heart_rate_summary
+sql_file: daily_heart_rate_summary.sql

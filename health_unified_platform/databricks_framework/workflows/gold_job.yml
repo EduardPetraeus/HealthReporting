@@ -1,0 +1,33 @@
+# =============================================================================
+# gold_job.yml — Gold views and tables job
+# =============================================================================
+
+resources:
+  jobs:
+    gold_pipeline:
+      name: "[${var.env}] health_platform — gold_pipeline"
+      description: "Generic gold layer runner for CREATE OR REPLACE VIEW/TABLE entities."
+
+      schedule:
+        quartz_cron_expression: "0 0 7 * * ?"  # Daily at 07:00 UTC (30 min after silver)
+        timezone_id: UTC
+        pause_status: UNPAUSED
+
+      job_clusters:
+        - job_cluster_key: gold_cluster
+          new_cluster:
+            spark_version: 15.4.x-scala2.12
+            node_type_id: ${var.cluster_node_type}
+            num_workers: 2
+            spark_env_vars:
+              HEALTH_ENV: ${var.env}
+
+      tasks:
+        - task_key: gold_all_entities
+          job_cluster_key: gold_cluster
+          notebook_task:
+            notebook_path: ../notebooks/gold/gold_runner
+            base_parameters:
+              entity_name: ""   # empty = process all gold entities in config_root
+              config_root: ${var.gold_config_root}
+              sql_root: ${var.gold_sql_root}

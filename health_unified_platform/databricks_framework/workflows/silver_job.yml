@@ -1,0 +1,52 @@
+# =============================================================================
+# silver_job.yml — Silver merge job
+#
+# silver_runner.py reads every YAML in config_root (or a single one when
+# source_name is set) and executes the corresponding SQL merge.
+# =============================================================================
+
+resources:
+  jobs:
+    silver_pipeline:
+      name: "[${var.env}] health_platform — silver_pipeline"
+      description: "Generic silver MERGE/INSERT OVERWRITE driven by YAML configs and SQL files."
+
+      schedule:
+        quartz_cron_expression: "0 30 6 * * ?"  # Daily at 06:30 UTC (30 min after bronze)
+        timezone_id: UTC
+        pause_status: UNPAUSED
+
+      job_clusters:
+        - job_cluster_key: silver_cluster
+          new_cluster:
+            spark_version: 15.4.x-scala2.12
+            node_type_id: ${var.cluster_node_type}
+            num_workers: 2
+            spark_conf:
+              spark.databricks.delta.preview.enabled: "true"
+            spark_env_vars:
+              HEALTH_ENV: ${var.env}
+
+      tasks:
+        # ------------------------------------------------------------------
+        # Run all silver sources (leave source_name empty to process all)
+        # Split into separate tasks if you need per-source control.
+        # ------------------------------------------------------------------
+        - task_key: silver_all_sources
+          job_cluster_key: silver_cluster
+          notebook_task:
+            notebook_path: ../notebooks/silver/silver_runner
+            base_parameters:
+              source_name: ""   # empty = process all sources in config_root
+              config_root: ${var.config_root}
+              sql_root: ${var.silver_sql_root}
+
+        # Example: run a single source independently
+        # - task_key: silver_apple_health_heart_rate
+        #   job_cluster_key: silver_cluster
+        #   notebook_task:
+        #     notebook_path: ../notebooks/silver/silver_runner
+        #     base_parameters:
+        #       source_name: apple_health_heart_rate
+        #       config_root: ${var.config_root}
+        #       sql_root: ${var.silver_sql_root}

@@ -115,6 +115,53 @@ for f in silver/merge_oura_*.sql; do HEALTH_ENV=dev python run_merge.py "$f"; do
 
 ---
 
+---
+
+## Databricks Framework: First Deployment
+
+### Prerequisites
+
+- Databricks CLI >= 0.200 installed
+- `health_dw` catalog exists in Unity Catalog
+- Storage account paths filled in — edit `config/sources/*.yml` and replace `yourstorageaccount` with the real account name and container paths
+- Workspace URLs filled in — edit `bundles/databricks.yml` targets
+
+```bash
+# Authenticate (or use ~/.databrickscfg profile)
+export DATABRICKS_HOST=https://your-workspace.azuredatabricks.net
+export DATABRICKS_TOKEN=<pat-or-service-principal-token>
+
+# Deploy bundle to dev
+cd health_unified_platform/databricks_framework/bundles
+databricks bundle deploy --target dev
+
+# Run one-time schema init (from workspace UI: open init.py and run)
+# Creates health_dw.bronze, health_dw.silver, health_dw.gold schemas
+
+# Trigger pipeline manually
+databricks bundle run bronze_pipeline --target dev
+databricks bundle run silver_pipeline --target dev
+databricks bundle run gold_pipeline   --target dev
+
+# Deploy to production
+databricks bundle deploy --target prd
+```
+
+After first deploy: check the workspace file browser to find where configs and notebooks landed, then update the `config_root` / `sql_root` / `gold_config_root` / `gold_sql_root` variables in `databricks.yml` to match.
+
+---
+
+## Databricks Framework: Onboarding a New Source
+
+1. Create `config/sources/<source_name>.yml` — copy an existing one and fill in paths
+2. Create or reuse a SQL file in `notebooks/silver/sql/`
+3. Add a task block to `workflows/bronze_job.yml`
+4. `git push` → GitHub Actions deploys to production automatically
+
+No Python changes required.
+
+---
+
 ## Troubleshooting
 
 **DuckDB lock error** (`Could not set lock on file`):

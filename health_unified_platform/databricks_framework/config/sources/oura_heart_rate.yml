@@ -1,0 +1,42 @@
+# =============================================================================
+# Source config: oura_heart_rate
+#
+# Owner: oura source system.
+# Bronze: stg_oura_heart_rate (hive-partitioned parquet via Autoloader)
+# Silver: health_dw.silver.heart_rate   (shared with apple_health_heart_rate)
+#
+# Uses the same heart_rate.sql file as apple_health_heart_rate. This works
+# because both source connectors normalize the bronze schema to the same
+# column names before writing to parquet:
+#   record_id, recorded_at, heart_rate_bpm, source_system, _ingested_at
+#
+# To use source-specific transformation logic, point sql_file to a different
+# SQL file (e.g. oura_heart_rate.sql) while keeping the same target_table.
+# =============================================================================
+
+name: oura_heart_rate
+source_system: oura
+
+# ---------------------------------------------------------------------------
+# Bronze — Autoloader (cloudFiles) ingestion
+# ---------------------------------------------------------------------------
+bronze:
+  autoloader:
+    source_path: "abfss://raw@yourstorageaccount.dfs.core.windows.net/oura/heartrate/"
+    format: parquet
+    checkpoint_location: "abfss://checkpoints@yourstorageaccount.dfs.core.windows.net/bronze/oura_heart_rate/"
+    schema_location: "abfss://schemas@yourstorageaccount.dfs.core.windows.net/bronze/oura_heart_rate/"
+    target_table: health_dw.bronze.stg_oura_heart_rate
+    load_mode: incremental
+    options: {}
+
+# ---------------------------------------------------------------------------
+# Silver — Parameterized SQL merge (same SQL file as apple_health)
+# ---------------------------------------------------------------------------
+silver:
+  sql_file: heart_rate.sql       # shared SQL; Oura bronze schema matches apple_health
+  target_table: health_dw.silver.heart_rate
+  load_mode: merge
+  unique_key:
+    - source_system
+    - record_id

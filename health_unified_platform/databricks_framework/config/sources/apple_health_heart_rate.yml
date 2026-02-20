@@ -1,0 +1,61 @@
+# =============================================================================
+# Source config: apple_health_heart_rate
+#
+# Owner: apple_health source system.
+# Bronze: stg_apple_health_heart_rate (hive-partitioned parquet via Autoloader)
+# Silver: health_dw.silver.heart_rate   (shared with oura_heart_rate)
+#
+# Unique key (source_system, record_id) ensures apple_health rows are never
+# affected by a full reload of another source (e.g. oura).
+# =============================================================================
+
+name: apple_health_heart_rate
+source_system: apple_health
+
+# ---------------------------------------------------------------------------
+# Bronze — Autoloader (cloudFiles) ingestion
+# ---------------------------------------------------------------------------
+bronze:
+  autoloader:
+    # Path to raw parquet/json/csv files on cloud storage (ABFSS / S3 / GCS).
+    source_path: "abfss://raw@yourstorageaccount.dfs.core.windows.net/apple_health/heart_rate/"
+
+    # File format for cloudFiles reader.
+    format: parquet
+
+    # Checkpoint and schema inference locations (must be unique per source).
+    checkpoint_location: "abfss://checkpoints@yourstorageaccount.dfs.core.windows.net/bronze/apple_health_heart_rate/"
+    schema_location: "abfss://schemas@yourstorageaccount.dfs.core.windows.net/bronze/apple_health_heart_rate/"
+
+    # Fully-qualified Unity Catalog bronze table.
+    target_table: health_dw.bronze.stg_apple_health_heart_rate
+
+    # incremental: streaming Autoloader (cloudFiles) — runs until caught up, then exits
+    # full:        batch overwrite — reads all files and overwrites the table
+    load_mode: incremental
+
+    # Extra Spark reader options (merged into cloudFiles options for incremental,
+    # plain reader options for full). Add header, delimiter, etc. here for CSV.
+    options: {}
+
+# ---------------------------------------------------------------------------
+# Silver — Parameterized SQL merge
+# ---------------------------------------------------------------------------
+silver:
+  # SQL file under notebooks/silver/sql/. Can be shared across sources
+  # when bronze tables expose the same normalized column names.
+  sql_file: heart_rate.sql
+
+  # Target silver table (shared with oura_heart_rate).
+  target_table: health_dw.silver.heart_rate
+
+  # merge:            MERGE INTO on unique_key — recommended for most sources
+  # insert_overwrite: INSERT INTO ... REPLACE WHERE source_system = '{source_system}'
+  #                   — use for full reloads where no incremental key exists
+  load_mode: merge
+
+  # Composite unique key used in the MERGE ON clause inside the SQL file.
+  # source_system is always first to enforce source isolation.
+  unique_key:
+    - source_system
+    - record_id

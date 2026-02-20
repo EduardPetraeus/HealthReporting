@@ -74,9 +74,65 @@ Oura daily endpoints are stored with Hive partitioning (`year=YYYY/month=MM/day=
 | `workout` | Oura | workout_id (UUID) |
 | `personal_info` | Oura | user_id |
 
-## Gold Layer
+## Gold Layer (Local)
 
-Views defined for Databricks (Unity Catalog). Currently minimal — designed for reporting/BI consumption. Local equivalent can be run as DuckDB views.
+Views defined for DuckDB. Minimal — designed for reporting/BI consumption.
+
+---
+
+## Databricks Cloud Pipeline
+
+The Databricks framework is a production-grade, metadata-driven implementation of the same medallion architecture. It runs on Spark/Delta Lake and is deployed via Databricks Asset Bundles (DAB).
+
+### Data Flow
+
+```
+Cloud storage (parquet, same format as local)
+  → bronze_autoloader.py
+    (cloudFiles Autoloader, incremental or full, adds source_system + _ingested_at)
+  → health_dw.bronze.stg_<source_name> (Delta table)
+
+  → silver_runner.py
+    (reads YAML config → reads SQL file → substitutes variables → spark.sql())
+  → health_dw.silver.<entity> (Delta table, MERGE INTO or INSERT INTO REPLACE WHERE)
+
+  → gold_runner.py
+    (reads YAML config → reads SQL file → substitutes {target} → spark.sql())
+  → health_dw.gold.<entity> (Delta view or table)
+```
+
+### Config-Driven Design
+
+Every pipeline behaviour is controlled by YAML files and SQL files. The Python runners are generic executors that never change.
+
+| File type | Location | Controls |
+|---|---|---|
+| Source YAML | `config/sources/*.yml` | Bronze paths, load mode, silver SQL reference, unique key |
+| Silver SQL | `notebooks/silver/sql/*.sql` | Transformation logic, DDL, merge strategy |
+| Gold YAML | `config/gold/*.yml` | Gold entity type, target, SQL reference |
+| Gold SQL | `notebooks/gold/sql/*.sql` | View or table definition |
+
+### Source Isolation
+
+Each source system owns its rows. The composite unique key `(source_system, record_id)` prevents cross-source collisions. A full reload of one source (e.g. Oura) never modifies another source's rows (e.g. Apple Health) in the same silver table.
+
+Enforced at the SQL level:
+- **Merge mode**: `MERGE ON (source_system, record_id)` + `WHERE source_system = '{source_system}'` in the USING clause
+- **Insert overwrite mode**: `INSERT INTO ... REPLACE WHERE source_system = '{source_system}'`
+
+### Multiple Sources → Same Silver Table
+
+Both `apple_health_heart_rate` and `oura_heart_rate` write to `health_dw.silver.heart_rate` using the same `heart_rate.sql` file. This works because source connectors normalise bronze output to a shared column schema before writing to parquet.
+
+If a source requires different transformation logic, it points to a different `sql_file` in its YAML while keeping the same `target_table`.
+
+### Dev / Production Separation
+
+Controlled by DAB targets in `bundles/databricks.yml`. Dev mode prefixes job names and uses an isolated workspace path. Production deploys automatically on merge to main via GitHub Actions.
+
+For full detail: see `docs/databricks_framework.md`.
+
+---
 
 ## Oura Connector
 
