@@ -205,3 +205,78 @@ Port fra `archive/legacy_databricks_pipeline/silver/` — bevar alle navngivning
 - [ ] **`dim_time`** — port `archive/legacy_databricks_pipeline/silver/notebook/time.py` + `table/time.sql` til ny silver-lag. Output: `silver.dim_time` med time, minut, sekund, AM/PM, dagsperiode.
 - [ ] **YAML-config** — tilføj `dim_date` og `dim_time` som entries i `sources_config.yaml` (type: `generated`, ikke parquet-source). Følg metadata-driven mønster.
 - [ ] **Gold joins** — når dim_date og dim_time er i silver, tilføj dato/tid join til relevante gold-views (heart_rate, sleep, activity).
+
+## Scheduled Databricks Jobs — Fuld Automatisk Data Load
+
+Mål: kilde → rapport uden manuel indgriben. Alle jobs kører på Databricks med DAB job configs.
+
+| Job | Frekvens | Kilde | Output |
+|-----|----------|-------|--------|
+| Oura ingest | Daglig 03:00 UTC | Oura REST API | `bronze.stg_oura_*` → `silver.*` |
+| Withings ingest | Daglig 03:30 UTC | Withings REST API | `bronze.stg_withings_*` → `silver.*` |
+| Apple Health ingest | Ugentlig man 04:00 UTC | iCloud zip → XML → parquet | `bronze.stg_apple_*` → `silver.*` |
+| Lifesum ingest | Daglig 04:00 UTC | Lifesum scraper/agent | `bronze.stg_lifesum_*` → `silver.*` |
+| Gold refresh | Daglig 05:00 UTC | Silver → Gold | Alle gold views/tabeller |
+| SLA monitor | Daglig 06:00 UTC | Gold lag | Alert hvis SLA brydes |
+
+- [ ] **Oura daily job** — DAB job: kald Oura REST API → parquet → bronze → silver. Brug eksisterende `ingestion_engine.py` + `silver_runner.py`.
+- [ ] **Withings daily job** — DAB job: kald Withings REST API → parquet → bronze → silver.
+- [ ] **Apple Health weekly job** — DAB job: trigger zip-flow (se nedenfor) → XML → parquet → bronze → silver. Kør mandag.
+- [ ] **Lifesum daily job** — DAB job: kald Lifesum scraper/agent (se nedenfor) → parquet → bronze → silver.
+- [ ] **Gold refresh job** — DAB job: kør alle gold SQL transforms efter silver. `depends_on: [silver_pipeline]`.
+- [ ] **SLA monitor job** — DAB job: valider freshness + row count per kilde. Alert via webhook/e-mail hvis SLA brydes.
+- [ ] **DAB job configs** — definer alle ovenstående i `databricks.yml`. Dev-workspace kører samme jobs med `--dev`-flag.
+
+## Apple Health Auto-Ingest — Zip → XML → Parquet
+
+Automatisk flow fra iCloud export til bronze parquet uden manuel indgriben.
+
+- [ ] **Zip-detektion og -flytning** — Python-script der overvåger iCloud-mappen (`~/Library/Mobile Documents/com~apple~CloudDocs/sundhedsdata/`) for ny `export.zip`. Kopierer til Mac Mini lokal arbejdsmappe (`~/health_data/apple_health/raw/`).
+- [ ] **Automatisk unzip** — script unzipper til `~/health_data/apple_health/unzipped/YYYY-MM-DD/`. Bevarer dato-versioning så gamle exports ikke overskrives.
+- [ ] **XML → Parquet** — kalder eksisterende `xml_to_parquet.py` på den udpakkede `export.xml`. Output: parquet-filer per type i `~/health_data/apple_health/parquet/`.
+- [ ] **End-to-end wrapper** — enkelt Python-orchestrator der kæder: zip-detektion → flytning → unzip → XML parsing → bronze ingestion. Trigges af Databricks weekly job via SSH eller lokalt launchd.
+- [ ] **Launchd plist (Mac Mini)** — lokalt `launchd`-job der kigger efter ny zip ugentligt og kører wrapper automatisk. Backup-trigger uafhængig af Databricks.
+
+## Lifesum Connector — Daglig Mad Data
+
+Automatisk download af ugerapport fra Lifesum. Kør dagligt — altid frisk mad-data for de seneste 7 dage.
+
+- [ ] **Lifesum login-agent** — Python-script der logger ind på Lifesum med credentials fra `.env` (aldrig hardcoded). Brug Playwright til headless browser-login → navigér til export-side → download CSV/JSON for de seneste 7 dage.
+- [ ] **Fallback: Lifesum API/GDPR export** — undersøg om Lifesum tilbyder officiel export-API eller GDPR data export endpoint der kan automatiseres uden headless browser.
+- [ ] **Bronze ingest** — gem downloaded rapport som parquet → `bronze.stg_lifesum_food_log`. Felter: dato, måltid, fødevare, kalorier, protein, kulhydrat, fedt, fiber.
+- [ ] **Silver transform** — `silver.lifesum_food_log` med standardiserede kolonner og `_ingested_at`. YAML-config + `silver_runner.py`.
+- [ ] **Credentials** — Lifesum email + password i `.env` (lokalt) og Databricks secrets (prd). Dokumentér i `.env.example`.
+
+## Web App — Mobile & Browser Dashboard
+
+Tilgængeligt fra iPhone og desktop browser. Viser gold-lag data live.
+
+- [ ] **Framework** — Streamlit MVP (hurtigst, kører på Mac Mini) → eksponeret via Cloudflare Tunnel. Næste iteration: React/Next.js for bedre mobil UX.
+- [ ] **Streamlit MVP** — læser fra DuckDB (dev) eller Health API (prd). Kør på Mac Mini port 8501.
+- [ ] **Mobil-adgang** — eksponér via Cloudflare Tunnel (se `Personal health API → Cloudflare Tunnel`). HTTPS fra iPhone Safari uden åben router.
+- [ ] **Autentificering** — Cloudflare Access (gratis) som login-gate foran appen.
+- [ ] **Dashboard sider**:
+  - [ ] **Overblik** — composite health score, dagens metrics, SLA-status (grøn/rød per kilde)
+  - [ ] **Søvn** — søvnscore, søvnfaser, HRV-trend
+  - [ ] **Aktivitet** — skridt, aktive kalorier, træning
+  - [ ] **Ernæring** — kalorier, makros (Lifesum), trends
+  - [ ] **Vitals** — hvilepuls, blodilt, vægt (Withings)
+  - [ ] **Anomalier** — flag usædvanlige målinger
+- [ ] **Responsivt layout** — brug `st.columns()` der fungerer på mobil. Test på iPhone Safari.
+
+## Data SLA — Freshness & Quality Garantier
+
+SLA defineret per datakilde. Monitoreringsjob kører dagligt kl. 06:00 UTC og skriver til `gold.data_sla_status`.
+
+| Kilde | Freshness SLA | Min. rækker | Alert |
+|-------|--------------|-------------|-------|
+| Oura | < 25 timer | > 0 / dag | E-mail + webhook |
+| Withings | < 25 timer | > 0 / dag | E-mail + webhook |
+| Apple Health | < 8 dage | > 100 / uge | E-mail |
+| Lifesum | < 25 timer | > 0 / dag | E-mail + webhook |
+
+- [ ] **`gold.data_sla_status`** — tabel med kolonner: `source_system`, `last_ingested_at`, `hours_since_last_ingest`, `sla_hours`, `sla_met`, `actual_rows`, `min_rows_sla`, `rows_sla_met`, `checked_at`.
+- [ ] **SLA monitor notebook** — populerer `gold.data_sla_status` og sender alert hvis `sla_met = false`. Brug Databricks notification destinations (e-mail / Slack webhook).
+- [ ] **SLA widget i web app** — øverste sektion i dashboard: grøn/rød status per kilde med tidsstempel for sidst opdateret.
+- [ ] **Quarantine tracking** — inkludér antal rækker i `bronze.quarantine_*` per kilde i SLA-rapporten. Høj quarantine-rate = datakvalitetsproblem.
+- [ ] **Alert kanal** — konfigurér Databricks notification destination + Slack/e-mail webhook i `.env`.
