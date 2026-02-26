@@ -43,4 +43,8 @@ logs/
 .mcp.json
 .claude/claude_mcp_config.json
 .claude/skills/
+.claude/settings.local.json
 .ai-dev-kit/
+
+# Claude personal preferences (gitignored per best practices)
+CLAUDE.local.md
