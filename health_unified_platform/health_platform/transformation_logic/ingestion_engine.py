@@ -48,14 +48,17 @@ def run_ingestion():
             continue
             
         # ensure_target_schema_exists
+        # WARN: schema and table are f-string interpolated into SQL.
+        # Safe only because both values come from trusted YAML config files.
+        # Never pass user-supplied input into these variables.
         con.execute(f"CREATE SCHEMA IF NOT EXISTS {schema}")
-        
+
         # ingestion_logic_with_union_by_name_for_schema_evolution
         query = f"""
-            CREATE OR REPLACE TABLE {schema}.{table} AS 
-            SELECT 
-                *, 
-                current_timestamp as _ingested_at, 
+            CREATE OR REPLACE TABLE {schema}.{table} AS
+            SELECT
+                *,
+                current_timestamp as _ingested_at,
                 '{active_env}' as _source_env
             FROM read_parquet('{input_glob}', hive_partitioning=True, union_by_name=True)
         """
