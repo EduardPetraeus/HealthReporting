@@ -1,5 +1,23 @@
 # TODO
 
+## Prioriteret Arbejdsrækkefølge
+
+Overordnet rækkefølge — arbejd oppefra ned. Hver blok er afhængig af dem over.
+
+| # | Opgave | Blocker for | Sektion |
+|---|--------|-------------|---------|
+| 1 | Databricks workspace URLs + secrets | Alt på Databricks | Configuration |
+| 2 | Fuld data model (alle kilder) | Connectors + gold design | Data Model |
+| 3 | P0 quick wins (logging, path-validering) | Stabil lokal pipeline | Optimering |
+| 4 | Withings API connector | Withings scheduled job | Withings Connector |
+| 5 | Strava API connector | Strava scheduled job | Strava Connector |
+| 6 | Min Sundhed connector (sundhed.dk) | Klinisk data i platformen | Min Sundhed Connector |
+| 7 | Lifesum login-agent | Daglig mad-data | Lifesum Connector |
+| 8 | Apple Health auto-ingest zip-flow | Apple i scheduled flow | Apple Auto-Ingest |
+| 9 | Scheduled jobs — alle kilder i Databricks | Fuld automatisering | Scheduled Jobs |
+| 10 | Web app MVP (Streamlit + Cloudflare) | Dashboard fra iPhone | Web App |
+| 11 | Data SLA + monitoring | Datakvalitet i prd | Data SLA |
+
 ## Configuration
 
 - [ ] **`databricks.yml` workspace URLs** — replace placeholder hosts with real Databricks workspace URLs for `dev` and `prd` targets in `health_unified_platform/health_environment/deployment/databricks/databricks.yml`
@@ -41,7 +59,9 @@ See `README.md` files in each folder for the specific remaining items.
 - [ ] **Lokal Streamlit-dashboard** — interaktivt health dashboard der kører på Mac Mini og læser direkte fra DuckDB eller health API. Flersidet layout: søvn / aktivitet / vitals / trends. Tilgængeligt fra telefon/iPad via lokalt netværk.
 - [ ] **Korrelationsmotor** — automatisk find sammenhænge på tværs af metrics. "Dage med søvnscore > 80 giver X% lavere hvilepuls næste dag." Ren SQL, ingen ML.
 - [ ] **Composite health score** — ét dagligt tal beregnet fra søvn + aktivitet + stress + readiness. Defineres som en gold-view med vægtede inputs.
-- [ ] **Withings / Garmin connector** — flere datakilder ind i samme medallion-arkitektur. Withings: vægt, blodtryk. Garmin: avancerede træningsmetrics. PoC for "plug in any source with one YAML".
+- [ ] **Withings connector** — se dedikeret sektion. Withings: vægt, fedt%, muskelmasse, blodtryk. PoC for "plug in any source with one YAML".
+- [ ] **Strava connector** — se dedikeret sektion. Løb, cykling, roning — distance, tempo, HR-zoner, elevation.
+- [ ] **Min Sundhed connector** — se dedikeret sektion. Kliniske data fra sundhed.dk: blodprøver, diagnoser, medicin.
 - [ ] **Familie-platform** — tilføj `user_id` dimension. Arkitekturen understøtter allerede source isolation — relativt lille refaktor at tracke flere brugeres data i samme platform.
 
 ### Tier 3 — Enterprise PoC materiale
@@ -214,15 +234,19 @@ Mål: kilde → rapport uden manuel indgriben. Alle jobs kører på Databricks m
 |-----|----------|-------|--------|
 | Oura ingest | Daglig 03:00 UTC | Oura REST API | `bronze.stg_oura_*` → `silver.*` |
 | Withings ingest | Daglig 03:30 UTC | Withings REST API | `bronze.stg_withings_*` → `silver.*` |
-| Apple Health ingest | Ugentlig man 04:00 UTC | iCloud zip → XML → parquet | `bronze.stg_apple_*` → `silver.*` |
+| Strava ingest | Daglig 03:45 UTC | Strava REST API | `bronze.stg_strava_*` → `silver.*` |
+| Apple Health ingest | Ugentlig man 04:00 UTC | Zip → XML → parquet | `bronze.stg_apple_*` → `silver.*` |
 | Lifesum ingest | Daglig 04:00 UTC | Lifesum scraper/agent | `bronze.stg_lifesum_*` → `silver.*` |
+| Min Sundhed ingest | Ugentlig man 04:30 UTC | FHIR API / scraper | `bronze.stg_minsundhed_*` → `silver.*` |
 | Gold refresh | Daglig 05:00 UTC | Silver → Gold | Alle gold views/tabeller |
 | SLA monitor | Daglig 06:00 UTC | Gold lag | Alert hvis SLA brydes |
 
 - [ ] **Oura daily job** — DAB job: kald Oura REST API → parquet → bronze → silver. Brug eksisterende `ingestion_engine.py` + `silver_runner.py`.
 - [ ] **Withings daily job** — DAB job: kald Withings REST API → parquet → bronze → silver.
+- [ ] **Strava daily job** — DAB job: kald Strava REST API → parquet → bronze → silver.
 - [ ] **Apple Health weekly job** — DAB job: trigger zip-flow (se nedenfor) → XML → parquet → bronze → silver. Kør mandag.
 - [ ] **Lifesum daily job** — DAB job: kald Lifesum scraper/agent (se nedenfor) → parquet → bronze → silver.
+- [ ] **Min Sundhed weekly job** — DAB job: kald FHIR API / scraper → parquet → bronze → silver. Kør mandag.
 - [ ] **Gold refresh job** — DAB job: kør alle gold SQL transforms efter silver. `depends_on: [silver_pipeline]`.
 - [ ] **SLA monitor job** — DAB job: valider freshness + row count per kilde. Alert via webhook/e-mail hvis SLA brydes.
 - [ ] **DAB job configs** — definer alle ovenstående i `databricks.yml`. Dev-workspace kører samme jobs med `--dev`-flag.
@@ -272,11 +296,89 @@ SLA defineret per datakilde. Monitoreringsjob kører dagligt kl. 06:00 UTC og sk
 |-------|--------------|-------------|-------|
 | Oura | < 25 timer | > 0 / dag | E-mail + webhook |
 | Withings | < 25 timer | > 0 / dag | E-mail + webhook |
+| Strava | < 25 timer | > 0 / dag | E-mail + webhook |
 | Apple Health | < 8 dage | > 100 / uge | E-mail |
 | Lifesum | < 25 timer | > 0 / dag | E-mail + webhook |
+| Min Sundhed | < 8 dage | > 0 / uge | E-mail |
 
 - [ ] **`gold.data_sla_status`** — tabel med kolonner: `source_system`, `last_ingested_at`, `hours_since_last_ingest`, `sla_hours`, `sla_met`, `actual_rows`, `min_rows_sla`, `rows_sla_met`, `checked_at`.
 - [ ] **SLA monitor notebook** — populerer `gold.data_sla_status` og sender alert hvis `sla_met = false`. Brug Databricks notification destinations (e-mail / Slack webhook).
 - [ ] **SLA widget i web app** — øverste sektion i dashboard: grøn/rød status per kilde med tidsstempel for sidst opdateret.
 - [ ] **Quarantine tracking** — inkludér antal rækker i `bronze.quarantine_*` per kilde i SLA-rapporten. Høj quarantine-rate = datakvalitetsproblem.
 - [ ] **Alert kanal** — konfigurér Databricks notification destination + Slack/e-mail webhook i `.env`.
+
+## Fuld Data Model — Alle Kilder
+
+Dokumentér det komplette skema for alle bronze/silver/gold tabeller på tværs af alle kilder. Fundament for connector-udvikling og gold-views.
+
+- [ ] **Kildeoversigt** — kortlæg alle sources og deres raw attributter. Skabelon per kilde: `source_system`, `endpoints`, `raw felter`, `update-frekvens`, `nøgle til deduplication`.
+- [ ] **Bronze skema** — dokumentér alle `stg_*` tabeller: kolonner, typer, partitionering, `_ingested_at`. En tabel per endpoint/filtype.
+- [ ] **Silver skema** — dokumentér alle standardiserede silver-tabeller: rensede typer, renamed kolonner, `sk_`-nøgler, `_source_system`, `_valid_from`. Inkludér `dim_date` og `dim_time` relationer.
+- [ ] **Gold skema** — dokumentér alle gold-views og fact/dim tabeller. Hvilke silver-tabeller joines? Hvilke metrics beregnes?
+- [ ] **ERD (Entity Relationship Diagram)** — tegn relationer: `dim_date` ← `fact_*`, `user_id` på tværs. Gem som `docs/data_model.md` + evt. Mermaid-diagram.
+- [ ] **Kildetabel**:
+
+| Kilde | Frekvens | Bronze tabeller | Silver tabeller |
+|-------|----------|-----------------|-----------------|
+| Oura | Daglig | `stg_oura_sleep`, `stg_oura_readiness`, `stg_oura_activity`, `stg_oura_heart_rate`, `stg_oura_spo2`, `stg_oura_stress`, `stg_oura_tags` | `oura_sleep`, `oura_readiness`, `oura_activity`, `oura_heart_rate`, `oura_spo2` |
+| Withings | Daglig | `stg_withings_measurements`, `stg_withings_sleep`, `stg_withings_activity` | `withings_body_composition`, `withings_blood_pressure`, `withings_sleep`, `withings_activity` |
+| Apple Health | Ugentlig | `stg_apple_*` (per XML type) | `apple_heart_rate`, `apple_steps`, `apple_workouts`, `apple_sleep`, `apple_hrv` |
+| Lifesum | Daglig | `stg_lifesum_food_log` | `lifesum_food_log` |
+| Strava | Daglig | `stg_strava_activities`, `stg_strava_streams` | `strava_activities`, `strava_hr_zones` |
+| Min Sundhed | Ugentlig | `stg_minsundhed_observations`, `stg_minsundhed_conditions`, `stg_minsundhed_medications` | `minsundhed_lab_results`, `minsundhed_diagnoses`, `minsundhed_medications` |
+| Blodprøve PDF | Manuel | `stg_blood_test_pdf` | `blood_test` |
+| 23andMe | Engangs | `stg_23andme_genotype` | `genetic_ancestry`, `genetic_health_risk` |
+| Mikrobiome PDF | Manuel | `stg_microbiome_pdf` | `microbiome_snapshot` |
+| Generated | — | — | `dim_date`, `dim_time` |
+
+## Withings API Connector
+
+Withings Health Mate API (OAuth2). Data: kropsammensætning, blodtryk, søvn, aktivitet.
+
+- [ ] **OAuth2 flow** — registrér app på developer.withings.com. Client ID/secret i `.env`. Authorization code flow med refresh token. Gem tokens i `~/.config/health_reporting/withings_tokens.json`.
+- [ ] **Endpoints**:
+  - `/measure?action=getmeas` — vægt, BMI, fedt%, muskelmasse, knoglemasse, hydration, blodtryk, puls
+  - `/v2/sleep?action=get` — søvnfaser (light, deep, REM), søvnscore, snorken, apnø-flag
+  - `/v2/activity?action=getactivity` — skridt, kalorier, distance, aktive minutter, elevation
+- [ ] **Bronze ingest** — `stg_withings_measurements`, `stg_withings_sleep`, `stg_withings_activity`. Partitionering: `year/month/day`. Felter fra API bevares råt + `_ingested_at`.
+- [ ] **Silver transforms**:
+  - `silver.withings_body_composition` — vægt, fedt%, muskelmasse, BMI, hydration
+  - `silver.withings_blood_pressure` — systolisk, diastolisk, puls, dato/tid
+  - `silver.withings_sleep` — søvnstart, søvnslut, faser, score
+  - `silver.withings_activity` — dato, skridt, kalorier, distance, aktive_min
+- [ ] **YAML-config** — tilføj alle Withings endpoints i `sources_config.yaml`. Følg Oura-mønster.
+- [ ] **Credentials** — `WITHINGS_CLIENT_ID`, `WITHINGS_CLIENT_SECRET`, `WITHINGS_ACCESS_TOKEN`, `WITHINGS_REFRESH_TOKEN` i `.env.example`.
+
+## Strava API Connector
+
+Strava REST API (OAuth2). Data: aktiviteter (løb, cykling, roning m.m.) med detaljerede metrics.
+
+- [ ] **OAuth2 flow** — registrér app på strava.com/settings/api. Scope: `activity:read_all`. Client ID/secret i `.env`. Refresh token-flow. Gem tokens i `~/.config/health_reporting/strava_tokens.json`.
+- [ ] **Endpoints**:
+  - `GET /athlete/activities` — liste af aktiviteter: type, dato, distance, varighed, elevation, avg/max HR, kalorier
+  - `GET /activities/{id}/streams` — detaljerede tidsserier: HR, pace, power, cadence, altitude, lat/lon per sekund
+  - `GET /athlete/zones` — HR-zoner defineret af atleten
+- [ ] **Rate limits** — 100 req/15 min, 1000 req/dag. Implementér exponential backoff + request queue.
+- [ ] **Bronze ingest** — `stg_strava_activities` (én række per aktivitet), `stg_strava_streams` (tidsserier). Partitionering: `year/month/day`.
+- [ ] **Silver transforms**:
+  - `silver.strava_activities` — aktivitetstype, dato, distance_km, varighed_sek, elevation_m, avg_hr, max_hr, kalorier, avg_pace
+  - `silver.strava_hr_zones` — distribution af tid i HR-zone 1-5 per aktivitet
+- [ ] **YAML-config** — tilføj Strava endpoints i `sources_config.yaml`.
+- [ ] **Credentials** — `STRAVA_CLIENT_ID`, `STRAVA_CLIENT_SECRET`, `STRAVA_ACCESS_TOKEN`, `STRAVA_REFRESH_TOKEN` i `.env.example`.
+
+## Min Sundhed Connector — sundhed.dk
+
+Kliniske data fra det danske nationale sundhedsregister via sundhed.dk. Login kræver MitID.
+
+- [ ] **Adgangsmetode — undersøg**:
+  - **Option A: Sundhedsdatastyrelsen FHIR R4 API** — officiel API med NemID/MitID OAuth. Endpoints: `/Patient`, `/Observation` (lab), `/Condition` (diagnoser), `/MedicationRequest`. Kræver ansøgning om adgang.
+  - **Option B: Playwright scraper** — headless MitID-login på sundhed.dk → navigér til "Mine data" → download PDF/CSV eksport. Kompleks pga. MitID-flow.
+  - **Option C: FHIR eksport** — sundhed.dk tilbyder manuel FHIR-eksport (JSON). Automatisér download via Playwright post-login.
+  - Anbefalet: start med Option C (manuel), bygge mod Option A (automatisk).
+- [ ] **Bronze ingest** — `stg_minsundhed_observations` (laboratorieresultater), `stg_minsundhed_conditions` (diagnoser), `stg_minsundhed_medications` (medicin), `stg_minsundhed_vaccinations`.
+- [ ] **Silver transforms**:
+  - `silver.minsundhed_lab_results` — markør (LOINC/lokalkode), værdi, enhed, referenceinterval, dato, laboratorium
+  - `silver.minsundhed_diagnoses` — ICD10-kode, beskrivelse, dato, behandlingssted
+  - `silver.minsundhed_medications` — ATC-kode, præparat, dosis, startdato, status
+- [ ] **Join med blodprøve-PDF** — `silver.blood_test` (PDF-parser) + `silver.minsundhed_lab_results` kan joines på markør + dato for dobbeltvalidering.
+- [ ] **Credentials** — MitID-credentials aldrig i kode. Gem krypteret i macOS Keychain. Tilgås via `keyring`-bibliotek.
