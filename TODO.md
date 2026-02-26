@@ -131,10 +131,27 @@ Opsæt via `/schedule` i Cowork.
 
 ## Repo arbejde
 
-- [ ] Gennemgang af hele repo for optimering potentiale
+- [x] Gennemgang af hele repo for optimering potentiale — se Optimering sektion
 - [ ] Gennemgå best practice og se .md filen — brug den
 - [ ] Start plan mode og arbejd fra todo
 - [ ] Kør GSD `/gsd:discuss` på repo
+
+## Optimering — Quick Wins (< 30 min)
+
+Fundinger fra repo-gennemgang 2026-02-26.
+
+- [ ] **P0 — Struktureret logging** — erstat alle `print()` med `logging`-module i `ingestion_engine.py`. Giver sporbare logs på Databricks og lokal debugning.
+- [ ] **P0 — Path-validering** — tilføj `if not input_path.exists(): sys.exit(...)` i `csv_to_parquet.py` før `pd.read_csv()`. Fejler med klar besked i stedet for cryptic pandas-fejl.
+- [ ] **P1 — Konsistent path-løsning** — `ingestion_engine.py` bruger hardcoded relativ path; `run_merge.py` bruger `Path(__file__).resolve().parents[4]`. Sammenskriv til fælles `get_config_path()` util.
+- [ ] **P1 — YAML schema-validering** — tilføj `jsonschema`-validering af `sources_config.yaml` og `environment_config.yaml` ved load. Runtime-fejl bliver parse-fejl med præcis besked.
+
+## Optimering — Større Opgaver (> 30 min)
+
+- [ ] **P2 — dbt schema-tests** — tilføj `tests:` blokke i silver `schema.yml` med not-null, unique og range-validering per silver-entitet. Kræver ~5-10 tests per tabel × 17 tabeller.
+- [ ] **P2 — Persistent state-tracking** — opret `bronze._state_tracking`-tabel med `last_fetched_date` per kilde/endpoint. Eliminerer hardcoded `DEFAULT_LOOKBACK_DAYS=90` og gør incremental load auditable.
+- [ ] **P2 — Merge-scripts refactor** — 17 merge-scripts har sandsynligvis duplikeret MERGE INTO-logik. Refactor til single parameterized template i stil med `silver_runner.py`.
+- [ ] **P3 — End-to-end integration tests** — pytest-suite der kører fuld medallion-pipeline: bronze ingestion → silver merge → row count validation + schema evolution test.
+- [ ] **P4 — Delta Live Tables migration** — refactor Jobs til DLT med `@dlt.expect` for automatic retry, schema-versioning og data quality SLAs. Enterprise/PoC-milestone.
 
 ## Claude Code subagents
 
