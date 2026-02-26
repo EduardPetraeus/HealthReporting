@@ -42,7 +42,8 @@ See `README.md` files in each folder for the specific remaining items.
 
 - [ ] **Forudsigelsesmodel** — baseret på gårsdagens søvn + aktivitet, forudsig dagens readiness. Simpel lineær regression. Kræver minimum 6 måneders historisk data.
 - [ ] **Personal health API** — FastAPI på Mac Mini der eksponerer gold-laget som REST endpoint. Gør data tilgængeligt for andre apps og devices.
-- [ ] **Lokal Streamlit-visualisering** — alternativ til Databricks dashboard for offline/lokal brug. Kører på Mac Mini, læser direkte fra DuckDB.
+- [ ] **Lokal Streamlit-visualisering** — interaktivt health dashboard der kører på Mac Mini og læser direkte fra DuckDB. Flersidet layout: søvn / aktivitet / vitals / trends. Tilgængeligt fra telefon/iPad via lokalt netværk.
+- [ ] **Databricks AI/BI dashboard** — BI-værktøj direkte på gold-laget uden ekstra infrastruktur. AI-assistent der svarer på spørgsmål om dine data på naturligt sprog. Prioritér når Databricks er konfigureret.
 
 ### Tier 4 — Passiv indkomst
 
