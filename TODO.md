@@ -122,6 +122,13 @@ Peg Cowork mod `~/builder-automation/`
 
 Opsæt via `/schedule` i Cowork.
 
+## GitHub repos og profiler til inspiration
+
+- [ ] **[databrickslabs](https://github.com/databrickslabs)** — Databricks Labs org: acceleratorer, tools og PoC-mønstre. Gennemgå repos der er relevante for medallion, CI/CD og data quality.
+- [ ] **[databricks-solutions/ai-dev-kit](https://github.com/databricks-solutions/ai-dev-kit)** — Officielt Databricks AI dev kit. Evaluer om patterns herfra kan løfte PoC-kvaliteten.
+- [ ] **[great-expectations](https://github.com/great-expectations)** — Data quality og validering. Naturligt næste skridt efter dbt tests — evaluer som enterprise-grade DQ-lag oven på silver.
+- [ ] **[mauran/API-Danmark](https://github.com/mauran/API-Danmark)** — Samling af danske offentlige APIs. Kan bruges som datakilde eller inspiration til connector-mønster i platformen.
+
 ## Repo arbejde
 
 - [ ] Gennemgang af hele repo for optimering potentiale
