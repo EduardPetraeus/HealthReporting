@@ -189,7 +189,7 @@ Fundinger fra repo-gennemgang 2026-02-26.
 
 ## Nye datakilder — iCloud sundhedsdata
 
-Kilde: `/Users/clauseduardpetraeus/Library/Mobile Documents/com~apple~CloudDocs/sundhedsdata`
+Kilde: `/Users/Shared/sundhedsdata`
 
 - [ ] **Blodprøve (PDF)** — parse PDF-rapport til strukturerede rækker → `silver.blood_test`. Felter: markør, værdi, enhed, referenceserie, dato. Connector: Python PDF-parser (pdfplumber).
 - [ ] **23andMe genetisk data (CSV + JSON + PDF)** — importer raw genotype CSV + health report JSON → `silver.genetic_ancestry`, `silver.genetic_health_risk`. Hold kilde-filnavne som `source_file` metadata.
@@ -231,7 +231,7 @@ Mål: kilde → rapport uden manuel indgriben. Alle jobs kører på Databricks m
 
 Automatisk flow fra iCloud export til bronze parquet uden manuel indgriben.
 
-- [ ] **Zip-detektion og -flytning** — Python-script der overvåger iCloud-mappen (`~/Library/Mobile Documents/com~apple~CloudDocs/sundhedsdata/`) for ny `export.zip`. Kopierer til Mac Mini lokal arbejdsmappe (`~/health_data/apple_health/raw/`).
+- [ ] **Zip-detektion og -flytning** — Python-script der overvåger (`/Users/Shared/sundhedsdata/`) for ny `export.zip`. Kopierer til Mac Mini lokal arbejdsmappe (`/Users/Shared/data_lake/apple_health/raw/`).
 - [ ] **Automatisk unzip** — script unzipper til `~/health_data/apple_health/unzipped/YYYY-MM-DD/`. Bevarer dato-versioning så gamle exports ikke overskrives.
 - [ ] **XML → Parquet** — kalder eksisterende `xml_to_parquet.py` på den udpakkede `export.xml`. Output: parquet-filer per type i `~/health_data/apple_health/parquet/`.
 - [ ] **End-to-end wrapper** — enkelt Python-orchestrator der kæder: zip-detektion → flytning → unzip → XML parsing → bronze ingestion. Trigges af Databricks weekly job via SSH eller lokalt launchd.
