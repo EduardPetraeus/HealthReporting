@@ -92,6 +92,74 @@ Inspireret af [yasarkocyigit/daq-databricks-dab](https://github.com/yasarkocyigi
 
 - [ ] **Stemmesundhedsanalyse** — optag 30 sekunders tale hver morgen. Analyser akustiske features (pitch-variation, tale-tempo, pausemønstre) der korrelerer med stress, udmattelse og depression. Ingen invasiv sensor — bare din telefons mikrofon.
 
+## Tools at installere
+
+- [ ] Google Antigravity — `antigravity.google/download` → Download for Apple Silicon
+- [ ] ~~GSD (Get Shit Done)~~ — **PAUSE** (2026-02-26). Crypto-token tilknyttet, anbefaler `--dangerously-skip-permissions`, global npm-install. Revurdér maj 2026 — er den stadig aktiv og ren, kan vi kigge på det.
+- [ ] Figma — opret gratis Starter profil
+- [ ] Apify — aktivér som Claude Connector
+- [ ] Wispr Flow — evaluér til voice-to-text
+
+## Mac Mini setup
+
+- [ ] Disable sleep — aldrig slukke
+- [ ] Enable auto-restart after power failure
+- [ ] SSH adgang
+- [ ] Claude Desktop kører altid (krav for Cowork scheduled tasks)
+
+## Claude Cowork — Scheduled Jobs
+
+Peg Cowork mod `~/builder-automation/`
+
+| Tid | Job |
+|-----|-----|
+| 06:00 | Apify scraper content fra Reddit, LinkedIn, YouTube, Twitter/X → Notion |
+| 07:00 | Claude genererer LinkedIn drafts fra scraped content → Notion |
+| 07:00 mandag | Konkurrentresearch: scrape Gumroad, Etsy, Lemon Squeezy → Notion |
+| 08:00 | Post approved drafts til LinkedIn, Reddit, Twitter/X, GitHub |
+| 22:00 | Saml metrics: engagement, followers, sales → Notion dashboard |
+| On-demand | Oversæt produkter til spansk, tysk, fransk, kinesisk |
+
+Opsæt via `/schedule` i Cowork.
+
+## GitHub repos og profiler til inspiration
+
+- [ ] **[databrickslabs](https://github.com/databrickslabs)** — Databricks Labs org: acceleratorer, tools og PoC-mønstre. Gennemgå repos der er relevante for medallion, CI/CD og data quality.
+- [ ] **[databricks-solutions/ai-dev-kit](https://github.com/databricks-solutions/ai-dev-kit)** — Officielt Databricks AI dev kit. Evaluer om patterns herfra kan løfte PoC-kvaliteten.
+- [ ] **[great-expectations](https://github.com/great-expectations)** — Data quality og validering. Naturligt næste skridt efter dbt tests — evaluer som enterprise-grade DQ-lag oven på silver.
+- [ ] **[mauran/API-Danmark](https://github.com/mauran/API-Danmark)** — Samling af danske offentlige APIs. Kan bruges som datakilde eller inspiration til connector-mønster i platformen.
+
+## Repo arbejde
+
+- [ ] Gennemgang af hele repo for optimering potentiale
+- [ ] Gennemgå best practice og se .md filen — brug den
+- [ ] Start plan mode og arbejd fra todo
+- [ ] Kør GSD `/gsd:discuss` på repo
+
+## Claude Code subagents
+
+- ~~Explorer — scan codebase for snippets og afhængigheder~~ — built-in, dokumenteret i CLAUDE.md
+- ~~Researcher — hent ekstern docs (Synapse, Databricks)~~ — built-in, dokumenteret i CLAUDE.md
+- ~~Historian — context/hukommelse på tværs af sessions~~ — built-in via memory-system
+
+## Figma
+
+- [ ] Opret profil
+- [ ] Test Claude Code → Figma MCP flow
+- [ ] Brug til design-samarbejde med kone på HR-produkter
+
+## Content idéer
+
+- "How I use Claude Code subagents as a data engineer"
+- "My Mac Mini runs 24/7 with Claude Cowork"
+- Claude Code + GSD workflow dokumentation
+- Build in public om hele setuptet
+
+## Droppet
+
+- ~~OpenClaw~~ — erstattet af Claude Cowork + Apify connector
+- ~~Ollama lokalt~~ — kvaliteten er for lav til agentic workflows, brug Gemini 3 Pro gratis i Antigravity
+
 ## Quality & Testing
 
 - [ ] **dbt tests** — add `schema.yml` with not-null, unique, accepted-values tests per silver entity

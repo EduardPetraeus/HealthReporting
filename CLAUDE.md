@@ -73,6 +73,16 @@ Principles:
 - **Think multi-tenant** — `source_system` isolation, `user_id` dimension readiness, catalog/schema separation
 - **PoC patterns worth demonstrating**: medallion architecture, metadata-driven pipelines, CI/CD for data, dev/prd environment separation, data quality gates
 
+## Subagent Usage
+
+Claude Code has three built-in subagent patterns — use them proactively:
+
+| Agent | When to use |
+|---|---|
+| **Explorer** (`Explore`) | Scan codebase for snippets, dependencies, patterns — e.g. "find all silver SQL transforms", "which files use source_system" |
+| **Researcher** (`general-purpose`) | Fetch external docs, search Databricks/Synapse references, investigate unfamiliar APIs |
+| **Historian** (memory system) | Cross-session context lives in `~/.claude/projects/.../memory/`. Read `MEMORY.md` at session start for project state. |
+
 ## Usage Optimization
 - **Be concise**: Provide brief explanations and avoid repeating project context unless asked.
 - **Targeted Reading**: Only read files in `docs/` if the user's request requires specific architectural or path knowledge.
