@@ -95,7 +95,7 @@ Inspireret af [yasarkocyigit/daq-databricks-dab](https://github.com/yasarkocyigi
 ## Tools at installere
 
 - [ ] Google Antigravity — `antigravity.google/download` → Download for Apple Silicon
-- [ ] GSD (Get Shit Done) — `npx get-shit-done-cc --claude --global`
+- [ ] ~~GSD (Get Shit Done)~~ — **PAUSE** (2026-02-26). Crypto-token tilknyttet, anbefaler `--dangerously-skip-permissions`, global npm-install. Revurdér maj 2026 — er den stadig aktiv og ren, kan vi kigge på det.
 - [ ] Figma — opret gratis Starter profil
 - [ ] Apify — aktivér som Claude Connector
 - [ ] Wispr Flow — evaluér til voice-to-text
