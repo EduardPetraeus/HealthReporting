@@ -21,14 +21,14 @@
     "period": {
       "from": "2026-02-16"
     },
-    "total_commits": 39,
+    "total_commits": 40,
     "active_weeks": 2,
-    "avg_commits_per_active_week": 19.5,
-    "avg_files_per_commit": 15.2
+    "avg_commits_per_active_week": 20.0,
+    "avg_files_per_commit": 14.9
   },
   "factors": {
-    "velocity_factor": 4.76,
-    "files_per_commit_factor": 1.52,
+    "velocity_factor": 4.88,
+    "files_per_commit_factor": 1.49,
     "description": "velocity_factor = commits/active_week (Claude) / commits/active_week (baseline). files_per_commit_factor = avg_files (Claude) / avg_files (baseline)."
   },
   "entries": [
@@ -616,6 +616,21 @@
       "refactor_ratio": 0.333,
       "code_density": 2.0,
       "time_since_prev_commit_minutes": 1,
+      "streak_days": 1
+    },
+    {
+      "commit_sha": "5a8586f",
+      "date": "2026-02-26",
+      "message": "Add enterprise scale-up notes and PoC mindset principles",
+      "task_type": "new_feature",
+      "commit_hour": 19,
+      "files_changed": 4,
+      "lines_added": 92,
+      "lines_removed": 5,
+      "files_factor": 0.4,
+      "refactor_ratio": 0.052,
+      "code_density": 23.0,
+      "time_since_prev_commit_minutes": 60,
       "streak_days": 1
     }
   ]
