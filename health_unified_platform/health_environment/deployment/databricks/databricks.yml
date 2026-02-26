@@ -1,31 +1,30 @@
 # =============================================================================
 # databricks.yml — Health Platform Asset Bundle
 # =============================================================================
-# Bundle root: databricks_framework/bundles/
+# Bundle root: health_environment/deployment/databricks/
 #
 # Run all `databricks bundle` commands from this directory:
-#   cd health_unified_platform/databricks_framework/bundles
+#   cd health_unified_platform/health_environment/deployment/databricks
 #   databricks bundle deploy --target dev
 #   databricks bundle deploy --target prd
 #
-# Note: notebooks and config files sit outside this bundle root (at ../notebooks
-# and ../config). They are pulled in via sync.include below and uploaded to the
-# workspace alongside the bundle artifacts.
+# Notebooks: health_platform/transformation_logic/databricks/
+# Configs:   health_environment/config/databricks/
+# Workflows: health_environment/orchestration/
 # =============================================================================
 
 bundle:
   name: health_platform
 
-# Include job resource YAML files from the workflows/ folder (one level up).
+# Include job resource YAML files from orchestration/
 include:
-  - ../workflows/*.yml
+  - ../../orchestration/*.yml
 
-# Sync notebooks and config files that live outside the bundle root.
-# DABs resolve these relative to this databricks.yml file.
+# Sync notebooks and config files relative to this databricks.yml.
 sync:
   include:
-    - ../config/**
-    - ../notebooks/**
+    - ../../config/databricks/**
+    - ../../../health_platform/transformation_logic/databricks/**
 
 # ---------------------------------------------------------------------------
 # Variables — overridden per target

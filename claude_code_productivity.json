@@ -21,14 +21,14 @@
     "period": {
       "from": "2026-02-16"
     },
-    "total_commits": 29,
-    "active_weeks": 1,
-    "avg_commits_per_active_week": 29.0,
-    "avg_files_per_commit": 16.7
+    "total_commits": 30,
+    "active_weeks": 2,
+    "avg_commits_per_active_week": 15.0,
+    "avg_files_per_commit": 18.1
   },
   "factors": {
-    "velocity_factor": 7.07,
-    "files_per_commit_factor": 1.67,
+    "velocity_factor": 3.66,
+    "files_per_commit_factor": 1.81,
     "description": "velocity_factor = commits/active_week (Claude) / commits/active_week (baseline). files_per_commit_factor = avg_files (Claude) / avg_files (baseline)."
   },
   "entries": [
@@ -467,6 +467,21 @@
       "code_density": 71.8,
       "time_since_prev_commit_minutes": 1066,
       "streak_days": 3
+    },
+    {
+      "commit_sha": "0ba569e",
+      "date": "2026-02-26",
+      "message": "Repo housekeeping and Claude Code productivity tracker",
+      "task_type": "other",
+      "commit_hour": 7,
+      "files_changed": 59,
+      "lines_added": 2305,
+      "lines_removed": 1643,
+      "files_factor": 5.9,
+      "refactor_ratio": 0.416,
+      "code_density": 39.1,
+      "time_since_prev_commit_minutes": 8142,
+      "streak_days": 1
     }
   ]
 }
