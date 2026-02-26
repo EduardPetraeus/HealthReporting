@@ -27,7 +27,11 @@ See `README.md` files in each folder for the specific remaining items.
 
 ### Tier 1 — Høj værdi, bygger på eksisterende infrastruktur
 
-- [ ] **Personal health API** — FastAPI på Mac Mini der eksponerer gold-laget som REST endpoint. Fundament for alt andet — widgets, Shortcuts, andre apps. Ingen ny infrastruktur.
+- [ ] **Personal health API** — FastAPI på Mac Mini der eksponerer gold-laget som REST endpoint. Fundament for alt andet — widgets, Shortcuts, andre apps, Databricks. Ingen ny infrastruktur.
+  - [ ] **Cloudflare Tunnel** — giver Mac Mini en fast public HTTPS URL uden statisk IP eller åben router. Gratis. Databricks og andre systemer kan kalde API'et udefra.
+  - [ ] **API key autentificering** — simpel Bearer token header. Versionerede endpoints (`/v1/gold/heart_rate`). Rate limiting.
+  - [ ] **Databricks custom connector** — Databricks notebook/job der kalder health API og skriver til Delta table. Demonstrerer health platform som first-class data source. PoC-værdi til Pandora.
+  - [ ] **Custom Spark data source** — pakker HTTP-kaldet som en rigtig Spark connector: `spark.read.format("health_api").option("entity", "heart_rate").load()`. Enterprise-grade PoC.
 - [ ] **Ugentlig health digest** — automatisk Markdown-rapport hver mandag via GitHub Actions cron. Forrige uge vs ugen før på tværs af alle silver-tabeller. Ingen ny infrastruktur.
 - [ ] **Anomali-detektor** — flag usædvanlige målinger (meget høj puls, meget lav søvnscore) med simpel statistik (z-score eller percentil). Ren SQL/Python.
 - [ ] **Master data annoterings-app** — lokal Streamlit-app til manuel annotation af kontekst wearables ikke kan fange: sygdom, rejse, stress, ny træningsrutine. Gemmes i `gold.daily_annotations` og joines på alle gold-views.
