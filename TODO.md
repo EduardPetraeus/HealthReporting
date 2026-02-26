@@ -66,6 +66,32 @@ Inspireret af [yasarkocyigit/daq-databricks-dab](https://github.com/yasarkocyigi
 - [ ] **DLT pipeline monitoring job** — separat DAB job der kører efter silver/gold og validerer: antal rækker, freshness (`max(_ingested_at) < NOW() - INTERVAL 25 HOURS`), og null-rate på nøglekolonner. Sender alert hvis threshold overskrides.
 - [ ] **Gold `depends_on` ordering** — tilføj eksplicit `depends_on: [silver_pipeline]` i gold DAB job config. Sikrer korrekt rækkefølge og undgår stale gold views ved fejl i silver.
 
+### Tier 5 — Vilde ideer. Ingen grænser.
+
+- [ ] **Digital twin** — en simuleringsmodel af dig selv. Feed ind: "hvad sker der med min readiness hvis jeg sover 6 timer 3 nætter i træk + træner tungt?" Modellen simulerer svaret baseret på dine egne historiske mønstre. Ingen andre har det.
+
+- [ ] **Biologisk aldersberegner** — kombinér HRV, hvilepuls, søvnkvalitet, VO2 max, BMI og aktivitetsniveau til ét tal: din biologiske alder. "Du er 38 år, men din krop er 31." Opdateres dagligt. Baseret på peer-reviewed biomarker-forskning.
+
+- [ ] **AI health coach med fuld kontekst** — LLM der har adgang til *alle* dine health data + annotationer. Svarer på: "Hvorfor sov jeg dårligt i januar?" og "Hvad er den største forskel på mine bedste og dårligste uger?" Ikke generisk rådgivning — personaliseret til dit eget datasæt.
+
+- [ ] **Sygdomsdetektion før symptomer** — HRV, hudtemperatur og SpO2 falder typisk 1-2 dage før du mærker du er syg. Træn en model på dine egne data der flagger: "noget er på vej." Oura gør det allerede delvist — din version er transparent og forklarbar.
+
+- [ ] **Miljøkorrelationsmotor** — automatisk kryds-reference med vejr-API, luftkvalitets-API og pollendata. "Din søvn er 18% dårligere på dage med høj pollentælling." Ren dataingeniør-opgave, nul ML.
+
+- [ ] **Health-aware kalender** — integrer med Google Calendar. Analyser dine energi- og fokus-mønstre (hvornår er din HRV højest? hvornår sover du bedst?) og foreslå automatisk: "Sæt dine vigtigste møder tirsdag-torsdag 9-11. Undgå deep work mandag morgen."
+
+- [ ] **Real-time health streaming** — Kafka + Spark Structured Streaming pipeline. Oura sender events i næsten-realtid. I stedet for batch-ingest én gang i døgnet: kontinuerlig stream ind i Delta. Fundament for live dashboard og instant anomali-alerts.
+
+- [ ] **Corporate wellness platform** — samme arkitektur, `user_id` dimension, multi-tenant deployment. Sælg til virksomheder som et anonymiseret wellness-dashboard: "Jeres teams gennemsnitlige søvnscore er faldet 12% siden Q3." GDPR-compliant by design fordi alt er aggregeret og opt-in.
+
+- [ ] **Federated health intelligence** — træn ML-modeller på tværs af brugere *uden* at dele rådata. Kun model-gradienter synkroniseres. Federated learning betyder at din data aldrig forlader din enhed — men du drager fordel af 1000 brugeres mønstre. Banebrydt inden for sundhedsdata.
+
+- [ ] **Genomik-integration** — connect 23andMe eller AncestryDNA til platformen. Kryds-referencér genetiske markører med dine wearable-data. "Du har APOE-variant der øger søvnbehov — og dine data bekræfter det: du performer 22% bedre med 8+ timers søvn."
+
+- [ ] **Sundhedsdata-pas** — kryptografisk verificerbart credential (W3C Verifiable Credential standard). Du kan bevise over for en læge, forsikringsselskab eller arbejdsgiver: "min gennemsnitlige hvilepuls er 52 bpm, verificeret af mit eget datasystem" — uden at udlevere rådata. Selvbestemmelse over egne data.
+
+- [ ] **Stemmesundhedsanalyse** — optag 30 sekunders tale hver morgen. Analyser akustiske features (pitch-variation, tale-tempo, pausemønstre) der korrelerer med stress, udmattelse og depression. Ingen invasiv sensor — bare din telefons mikrofon.
+
 ## Quality & Testing
 
 - [ ] **dbt tests** — add `schema.yml` with not-null, unique, accepted-values tests per silver entity
