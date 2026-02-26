@@ -34,6 +34,16 @@ Personal health data platform (owner: Claus Eduard Petraeus) that ingests, trans
 - Project context is located in the /docs folder. Review `docs/architecture.md` or `docs/CONTEXT.md` only when explicitly relevant to the task at hand
 
 
+## Productivity Tracking
+
+After every git commit, automatically run:
+
+```bash
+.venv/bin/python update_productivity.py
+```
+
+This updates `claude_code_productivity.json` with git-derived metrics (files changed, lines added/removed, refactor ratio, code density, commit hour, time between commits, streak days, task type). Never ask the user to do this manually — it is always Claude Code's responsibility.
+
 ## Usage Optimization
 - **Be concise**: Provide brief explanations and avoid repeating project context unless asked.
 - **Targeted Reading**: Only read files in `docs/` if the user's request requires specific architectural or path knowledge.
