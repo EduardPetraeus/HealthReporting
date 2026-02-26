@@ -186,3 +186,22 @@ Fundinger fra repo-gennemgang 2026-02-26.
 ## Cleanup
 
 - [ ] **`health_environment/deployment/databricks/`** — catalog/schema DDL scripts (`create_catalog__health_dw.sql`, `create_schemas__health_dw.sql`) may be superseded by `init.py` — consider archiving
+
+## Nye datakilder — iCloud sundhedsdata
+
+Kilde: `/Users/clauseduardpetraeus/Library/Mobile Documents/com~apple~CloudDocs/sundhedsdata`
+
+- [ ] **Blodprøve (PDF)** — parse PDF-rapport til strukturerede rækker → `silver.blood_test`. Felter: markør, værdi, enhed, referenceserie, dato. Connector: Python PDF-parser (pdfplumber).
+- [ ] **23andMe genetisk data (CSV + JSON + PDF)** — importer raw genotype CSV + health report JSON → `silver.genetic_ancestry`, `silver.genetic_health_risk`. Hold kilde-filnavne som `source_file` metadata.
+- [ ] **Mikrobiome (PDF)** — parse mikrobiome-rapport → `silver.microbiome_snapshot`. Felter: bakterie-gruppe, procent, reference-range, dato.
+
+Alle tre følger standard medallion-mønster: raw fil → bronze parquet → silver merge via YAML-config.
+
+## Silver — Dato og Tidsdimensioner
+
+Port fra `archive/legacy_databricks_pipeline/silver/` — bevar alle navngivninger.
+
+- [ ] **`dim_date`** — port `archive/legacy_databricks_pipeline/silver/notebook/date.py` + `table/date.sql` til ny silver-lag. Output: `silver.dim_date` med dag, uge, måned, kvartal, år, ugedagsnavn, helligdag-flag.
+- [ ] **`dim_time`** — port `archive/legacy_databricks_pipeline/silver/notebook/time.py` + `table/time.sql` til ny silver-lag. Output: `silver.dim_time` med time, minut, sekund, AM/PM, dagsperiode.
+- [ ] **YAML-config** — tilføj `dim_date` og `dim_time` som entries i `sources_config.yaml` (type: `generated`, ikke parquet-source). Følg metadata-driven mønster.
+- [ ] **Gold joins** — når dim_date og dim_time er i silver, tilføj dato/tid join til relevante gold-views (heart_rate, sleep, activity).
