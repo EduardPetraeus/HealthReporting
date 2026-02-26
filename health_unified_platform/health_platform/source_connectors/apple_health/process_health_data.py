@@ -1,169 +1,180 @@
 #!/usr/bin/env python3
 """
 Apple Health XML to Partitioned Parquet Ingestor
-Purpose: Stream-parse large Health Export XML files and store them in a Hive-partitioned Data Lake.
-Target: Local Mac Mini M4 / Databricks Compatible
-Note: This version dynamically captures all XML attributes and calculates record duration.
+
+Stream-parses large Health Export XML files and stores them in a
+Hive-partitioned data lake. Processes records in batches to limit
+memory usage and writes timestamped parquet files to support
+incremental runs without overwriting existing data.
+
+Usage:
+    python process_health_data.py --input /path/to/eksport.xml --output /path/to/data_lake
 """
+
+import argparse
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
 
 import pandas as pd
 import xml.etree.ElementTree as ET
-import argparse
-import sys
-from pathlib import Path
 
-# --- DOMAIN MAPPING ---
-# Categorizes technical Apple Health identifiers into logical business domains
+BATCH_SIZE = 500_000
+
 AREA_MAPPING = {
     # Vitality & Clinical Metrics
-    'HKQuantityTypeIdentifierHeart': 'Vitality',
-    'HKQuantityTypeIdentifierRespiratory': 'Vitality',
-    'HKQuantityTypeIdentifierVO2Max': 'Vitality',
-    'HKQuantityTypeIdentifierBodyTemperature': 'Vitality',
-    'HKCorrelationTypeIdentifierBloodPressure': 'Vitality',
-    'HKQuantityTypeIdentifierBloodPressure': 'Vitality',
-    
+    "HKQuantityTypeIdentifierHeart": "Vitality",
+    "HKQuantityTypeIdentifierRespiratory": "Vitality",
+    "HKQuantityTypeIdentifierVO2Max": "Vitality",
+    "HKQuantityTypeIdentifierBodyTemperature": "Vitality",
+    "HKCorrelationTypeIdentifierBloodPressure": "Vitality",
+    "HKQuantityTypeIdentifierBloodPressure": "Vitality",
     # Activity & Workout Events
-    'HKQuantityTypeIdentifierStep': 'Activity',
-    'HKQuantityTypeIdentifierDistance': 'Activity',
-    'HKQuantityTypeIdentifierActiveEnergy': 'Activity',
-    'HKQuantityTypeIdentifierBasalEnergyBurned': 'Activity',
-    'HKQuantityTypeIdentifierFlights': 'Activity',
-    'HKQuantityTypeIdentifierAppleExerciseTime': 'Activity',
-    'HKQuantityTypeIdentifierAppleStand': 'Activity',
-    'HKQuantityTypeIdentifierPhysicalEffort': 'Activity',
-    'HKQuantityTypeIdentifierRunning': 'Activity',
-    'HKWorkoutEventType': 'Activity',
-    
+    "HKQuantityTypeIdentifierStep": "Activity",
+    "HKQuantityTypeIdentifierDistance": "Activity",
+    "HKQuantityTypeIdentifierActiveEnergy": "Activity",
+    "HKQuantityTypeIdentifierBasalEnergyBurned": "Activity",
+    "HKQuantityTypeIdentifierFlights": "Activity",
+    "HKQuantityTypeIdentifierAppleExerciseTime": "Activity",
+    "HKQuantityTypeIdentifierAppleStand": "Activity",
+    "HKQuantityTypeIdentifierPhysicalEffort": "Activity",
+    "HKQuantityTypeIdentifierRunning": "Activity",
+    "HKWorkoutEventType": "Activity",
     # Mobility & Gait
-    'HKQuantityTypeIdentifierWalking': 'Mobility',
-    'HKQuantityTypeIdentifierAppleWalking': 'Mobility',
-    
+    "HKQuantityTypeIdentifierWalking": "Mobility",
+    "HKQuantityTypeIdentifierAppleWalking": "Mobility",
     # Body Composition
-    'HKQuantityTypeIdentifierBodyMass': 'BodyMetrics',
-    'HKQuantityTypeIdentifierBodyFat': 'BodyMetrics',
-    'HKQuantityTypeIdentifierLeanBodyMass': 'BodyMetrics',
-    'HKQuantityTypeIdentifierHeight': 'BodyMetrics',
-    'HKQuantityTypeIdentifierBodyMassIndex': 'BodyMetrics',
-    
+    "HKQuantityTypeIdentifierBodyMass": "BodyMetrics",
+    "HKQuantityTypeIdentifierBodyFat": "BodyMetrics",
+    "HKQuantityTypeIdentifierLeanBodyMass": "BodyMetrics",
+    "HKQuantityTypeIdentifierHeight": "BodyMetrics",
+    "HKQuantityTypeIdentifierBodyMassIndex": "BodyMetrics",
     # Sleep & Mindfulness
-    'HKCategoryTypeIdentifierSleep': 'Sleep',
-    'HKDataTypeSleepDurationGoal': 'Sleep',
-    'HKCategoryTypeIdentifierMindful': 'Mindfulness',
-    
+    "HKCategoryTypeIdentifierSleep": "Sleep",
+    "HKDataTypeSleepDurationGoal": "Sleep",
+    "HKCategoryTypeIdentifierMindful": "Mindfulness",
     # Nutrition & Hydration
-    'HKQuantityTypeIdentifierDietary': 'Nutrition',
-    
+    "HKQuantityTypeIdentifierDietary": "Nutrition",
     # Hygiene
-    'HKCategoryTypeIdentifierToothbrushing': 'Hygiene',
-    'HKCategoryTypeIdentifierHandwashing': 'Hygiene',
-    
+    "HKCategoryTypeIdentifierToothbrushing": "Hygiene",
+    "HKCategoryTypeIdentifierHandwashing": "Hygiene",
     # Environment & Hearing
-    'HKQuantityTypeIdentifierEnvironmental': 'Environment',
-    'HKQuantityTypeIdentifierHeadphone': 'Environment',
-    'HKCategoryTypeIdentifierAudioExposure': 'Environment',
-    'HKDataTypeIdentifierAudiogram': 'Environment'
+    "HKQuantityTypeIdentifierEnvironmental": "Environment",
+    "HKQuantityTypeIdentifierHeadphone": "Environment",
+    "HKCategoryTypeIdentifierAudioExposure": "Environment",
+    "HKDataTypeIdentifierAudiogram": "Environment",
 }
 
-def get_area(record_type):
-    """Assigns the record to a high-level domain (e.g., Vitality, Activity)."""
+
+def get_area(record_type: str) -> str:
     for prefix, area in AREA_MAPPING.items():
         if record_type.startswith(prefix):
             return area
-    return 'Other'
+    return "Other"
 
-def clean_name(name):
-    """Standardizes table names by removing technical prefixes and using snake_case."""
-    return (name.replace('HKQuantityTypeIdentifier', '')
-                .replace('HKCategoryTypeIdentifier', '')
-                .replace('HKCorrelationTypeIdentifier', '')
-                .replace('HKDataTypeIdentifier', '')
-                .replace('HKWorkoutEventType', 'Event_')).lower()
 
-def parse_args():
-    """Configures command-line arguments for dynamic path injection."""
-    parser = argparse.ArgumentParser(description='Ingest Apple Health XML into a partitioned Parquet Data Lake.')
-    parser.add_argument('--input', required=True, help='Full path to the Apple Health eksport.xml file')
-    parser.add_argument('--output', required=True, help='Full path to the target directory for the Data Lake')
+def clean_name(name: str) -> str:
+    return (
+        name.replace("HKQuantityTypeIdentifier", "")
+            .replace("HKCategoryTypeIdentifier", "")
+            .replace("HKCorrelationTypeIdentifier", "")
+            .replace("HKDataTypeIdentifier", "")
+            .replace("HKWorkoutEventType", "event")
+    ).lower()
+
+
+def write_batch(records: list, output_folder: Path, ingested_at: str, batch_num: int) -> int:
+    """Convert a list of records to DataFrame and write partitioned parquet files."""
+    df = pd.DataFrame(records)
+    df["_ingested_at"] = ingested_at
+
+    if "value" in df.columns:
+        df["value"] = pd.to_numeric(df["value"], errors="coerce")
+
+    if "startDate" in df.columns:
+        df["startDate"] = pd.to_datetime(df["startDate"], utc=True)
+        df["year"] = df["startDate"].dt.year
+    else:
+        df["year"] = 0
+
+    # Vectorized duration calculation
+    if "startDate" in df.columns and "endDate" in df.columns:
+        df["endDate"] = pd.to_datetime(df["endDate"], utc=True)
+        df["duration_seconds"] = (df["endDate"] - df["startDate"]).dt.total_seconds()
+
+    files_written = 0
+    filename = f"batch_{batch_num}_{ingested_at}.parquet"
+
+    for (domain, d_type, year), group in df.groupby(["data_domain", "data_type", "year"]):
+        target_path = output_folder / domain / d_type / f"year={year}"
+        target_path.mkdir(parents=True, exist_ok=True)
+        group.to_parquet(target_path / filename, index=False, compression="snappy")
+        files_written += 1
+
+    return files_written
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Ingest Apple Health XML into a partitioned Parquet data lake."
+    )
+    parser.add_argument("--input", required=True, help="Path to eksport.xml")
+    parser.add_argument("--output", required=True, help="Path to data lake root directory")
     return parser.parse_args()
 
-def main():
-    # 1. Handle CLI Arguments
+
+def main() -> None:
     args = parse_args()
     xml_path = Path(args.input)
     output_folder = Path(args.output)
 
-    # 2. Safety Check
     if not xml_path.exists():
-        print(f"❌ Error: Input file not found at {xml_path}")
+        print(f"Error: input file not found at {xml_path}")
         sys.exit(1)
 
-    print(f"🚀 Initializing Dynamic Ingestion...")
-    print(f"📄 Source XML: {xml_path.resolve()}")
-    print(f"🏗️  Target Lake: {output_folder.resolve()}")
+    ingested_at = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    print(f"Starting Apple Health ingestion — run id: {ingested_at}")
+    print(f"Source: {xml_path.resolve()}")
+    print(f"Target: {output_folder.resolve()}")
 
     records = []
-    
-    # 3. Memory-Efficient Stream Parsing
+    total_records = 0
+    total_files = 0
+    batch_num = 0
+
     try:
-        context = ET.iterparse(str(xml_path), events=('end',))
+        context = ET.iterparse(str(xml_path), events=("end",))
         for event, elem in context:
-            if elem.tag == 'Record':
-                # Dynamically capture all attributes from the XML element
+            if elem.tag == "Record":
                 record_data = dict(elem.attrib)
-                
-                # Add transformed metadata
-                r_type = record_data.get('type', 'Unknown')
-                record_data['data_domain'] = get_area(r_type)
-                record_data['data_type'] = clean_name(r_type)
-                
-                # Calculate duration if timestamps are present
-                if 'startDate' in record_data and 'endDate' in record_data:
-                    start = pd.to_datetime(record_data['startDate'])
-                    end = pd.to_datetime(record_data['endDate'])
-                    record_data['duration_seconds'] = (end - start).total_seconds()
-                
+                r_type = record_data.get("type", "Unknown")
+                record_data["data_domain"] = get_area(r_type)
+                record_data["data_type"] = clean_name(r_type)
                 records.append(record_data)
-                
-                # Immediate cleanup to save memory on M4
                 elem.clear()
-                
-                if len(records) % 100000 == 0:
-                    print(f"⏳ Parsed {len(records)} records...")
+
+                if len(records) >= BATCH_SIZE:
+                    total_files += write_batch(records, output_folder, ingested_at, batch_num)
+                    total_records += len(records)
+                    batch_num += 1
+                    print(f"  Processed {total_records:,} records...")
+                    records = []
 
     except Exception as e:
-        print(f"❌ Error during XML parsing: {e}")
+        print(f"Error during XML parsing: {e}")
         sys.exit(1)
 
-    if not records:
-        print("⚠️ No records found in the XML file.")
+    # Write remaining records
+    if records:
+        total_files += write_batch(records, output_folder, ingested_at, batch_num)
+        total_records += len(records)
+
+    if total_records == 0:
+        print("No records found in XML file.")
         return
 
-    # 4. Data Transformation with Pandas
-    print("📊 Refining data structures and enforcing types...")
-    df = pd.DataFrame(records)
-    
-    # Convert standard columns to appropriate types
-    if 'value' in df.columns:
-        df['value'] = pd.to_numeric(df['value'], errors='coerce')
-    
-    if 'startDate' in df.columns:
-        df['startDate'] = pd.to_datetime(df['startDate'], utc=True)
-        df['year'] = df['startDate'].dt.year
-    else:
-        df['year'] = 0
+    print(f"Done. {total_records:,} records written to {total_files} parquet files.")
 
-    # 5. Partitioned Output (Parquet)
-    print(f"📦 Partitioning data by Domain/Type/Year ...")
-    
-    for (domain, d_type, year), group in df.groupby(['data_domain', 'data_type', 'year']):
-        target_path = output_folder / domain / d_type / f"year={year}"
-        target_path.mkdir(parents=True, exist_ok=True)
-        
-        # Save all captured columns to Parquet
-        group.to_parquet(target_path / "data_batch.parquet", index=False, compression='snappy')
-
-    print(f"✅ Success! Data Lake updated at: {output_folder.absolute()}")
 
 if __name__ == "__main__":
     main()
