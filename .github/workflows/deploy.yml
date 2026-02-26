@@ -1,15 +1,18 @@
 # =============================================================================
 # deploy.yml — GitHub Actions CI/CD for Databricks Asset Bundles
 #
-# Triggers on push to main (only when files under databricks_framework change).
-# Deploys the bundle to the production target.
+# Branching strategy:
+#   feature/** | fix/** | docs/** | refactor/**
+#     → validate bundle on PR
+#     → deploy to dev on push
+#   main
+#     → deploy to production on merge
 #
-# Required GitHub secrets:
+# Required GitHub secrets (add when Databricks workspaces are ready):
+#   DATABRICKS_HOST_DEV    — e.g. https://your-dev-workspace.azuredatabricks.net
+#   DATABRICKS_TOKEN_DEV   — Databricks PAT or service principal token (dev)
 #   DATABRICKS_HOST_PRD    — e.g. https://your-prd-workspace.azuredatabricks.net
-#   DATABRICKS_TOKEN_PRD   — a Databricks personal access token (or service principal token)
-#
-# Optional: add a deploy-dev job that runs on pull_request to validate changes
-# before they reach main.
+#   DATABRICKS_TOKEN_PRD   — Databricks PAT or service principal token (prd)
 # =============================================================================
 
 name: Deploy Databricks Bundle
@@ -18,16 +21,32 @@ on:
   push:
     branches:
       - main
+      - "feature/**"
+      - "fix/**"
+      - "docs/**"
+      - "refactor/**"
     paths:
-      - health_unified_platform/databricks_framework/**
+      - health_unified_platform/health_environment/deployment/databricks/**
+      - health_unified_platform/health_environment/config/databricks/**
+      - health_unified_platform/health_environment/orchestration/**
+      - health_unified_platform/health_platform/transformation_logic/databricks/**
 
-  # Allow manual trigger from the Actions tab
+  pull_request:
+    branches:
+      - main
+    paths:
+      - health_unified_platform/health_environment/deployment/databricks/**
+      - health_unified_platform/health_environment/config/databricks/**
+      - health_unified_platform/health_environment/orchestration/**
+      - health_unified_platform/health_platform/transformation_logic/databricks/**
+
+  # Manual trigger from Actions tab
   workflow_dispatch:
     inputs:
       target:
         description: "Bundle target to deploy (dev | prd)"
         required: true
-        default: prd
+        default: dev
         type: choice
         options:
           - dev
@@ -35,7 +54,7 @@ on:
 
 jobs:
   # ---------------------------------------------------------------------------
-  # Validate — runs on every PR to catch bundle errors early
+  # Validate — runs on every PR to main
   # ---------------------------------------------------------------------------
   validate:
     name: Validate bundle
@@ -50,8 +69,32 @@ jobs:
         uses: databricks/setup-cli@main
 
       - name: Validate bundle (dev)
-        working-directory: health_unified_platform/databricks_framework/bundles
+        working-directory: health_unified_platform/health_environment/deployment/databricks
         run: databricks bundle validate --target dev
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_DEV }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_DEV }}
+
+  # ---------------------------------------------------------------------------
+  # Deploy to dev — runs on push to feature branches
+  # ---------------------------------------------------------------------------
+  deploy-dev:
+    name: Deploy to dev
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'push' && github.ref != 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'dev')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Deploy bundle to dev
+        working-directory: health_unified_platform/health_environment/deployment/databricks
+        run: databricks bundle deploy --target dev
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_DEV }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_DEV }}
@@ -62,7 +105,9 @@ jobs:
   deploy-prd:
     name: Deploy to production
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'prd')
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'prd')
     environment: production
 
     steps:
@@ -73,30 +118,8 @@ jobs:
         uses: databricks/setup-cli@main
 
       - name: Deploy bundle to production
-        working-directory: health_unified_platform/databricks_framework/bundles
+        working-directory: health_unified_platform/health_environment/deployment/databricks
         run: databricks bundle deploy --target prd
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_PRD }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_PRD }}
-
-  # ---------------------------------------------------------------------------
-  # Deploy to dev — manual trigger only
-  # ---------------------------------------------------------------------------
-  deploy-dev:
-    name: Deploy to dev
-    runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'dev'
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Databricks CLI
-        uses: databricks/setup-cli@main
-
-      - name: Deploy bundle to dev
-        working-directory: health_unified_platform/databricks_framework/bundles
-        run: databricks bundle deploy --target dev
-        env:
-          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_DEV }}
-          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_DEV }}

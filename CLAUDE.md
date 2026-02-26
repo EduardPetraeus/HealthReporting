@@ -34,6 +34,24 @@ Personal health data platform (owner: Claus Eduard Petraeus) that ingests, trans
 - Project context is located in the /docs folder. Review `docs/architecture.md` or `docs/CONTEXT.md` only when explicitly relevant to the task at hand
 
 
+## Branching Strategy
+
+Always work in a feature branch — never commit directly to `main`.
+
+Branch naming:
+- `feature/` — new functionality
+- `fix/` — bug fixes
+- `docs/` — documentation only
+- `refactor/` — restructuring without new functionality
+
+Workflow:
+1. `git checkout -b feature/<short-description>`
+2. Commit and push
+3. Open PR → GitHub Actions validates bundle
+4. Merge to main → auto-deploys to Databricks prd
+
+Feature branches auto-deploy to Databricks dev on push (once secrets are configured).
+
 ## Productivity Tracking
 
 After every git commit, automatically run:
