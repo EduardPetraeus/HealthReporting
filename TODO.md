@@ -221,10 +221,32 @@ Alle tre følger standard medallion-mønster: raw fil → bronze parquet → sil
 
 Port fra `archive/legacy_databricks_pipeline/silver/` — bevar alle navngivninger.
 
-- [ ] **`dim_date`** — port `archive/legacy_databricks_pipeline/silver/notebook/date.py` + `table/date.sql` til ny silver-lag. Output: `silver.dim_date` med dag, uge, måned, kvartal, år, ugedagsnavn, helligdag-flag.
-- [ ] **`dim_time`** — port `archive/legacy_databricks_pipeline/silver/notebook/time.py` + `table/time.sql` til ny silver-lag. Output: `silver.dim_time` med time, minut, sekund, AM/PM, dagsperiode.
+- [x] **`dim_date`** — portet til `transformation_logic/databricks/silver/dim_date.py`. Kører MERGE INTO `health_dw.silver.dim_date`. ~~`archive/.../notebook/date.py` slettet.~~
+- [x] **`dim_time`** — portet til `transformation_logic/databricks/silver/dim_time.py`. Kører MERGE INTO `health_dw.silver.dim_time`. ~~`archive/.../notebook/time.py` slettet.~~
+- [ ] **Lokalisering `dim_date`** — `month_name` og `day_name` er aktuelt på engelsk (Spark default). Tilføj dansk lokale: `month_name` → januar/februar/.../december, `day_name` → mandag/tirsdag/.../søndag. Implementering: enten `F.when()` lookup-kæde eller Spark session locale `spark.conf.set("spark.sql.session.timeZone", ...)` + custom mapping dict.
+- [ ] **Lokalisering `dim_time`** — `ampm_code` er AM/PM (engelsk). Overvej dansk dagsperiode-kolonne: `dagsperiode` → nat (00-06), morgen (06-09), formiddag (09-12), middag (12-14), eftermiddag (14-17), aften (17-22), sen aften (22-00).
 - [ ] **YAML-config** — tilføj `dim_date` og `dim_time` som entries i `sources_config.yaml` (type: `generated`, ikke parquet-source). Følg metadata-driven mønster.
 - [ ] **Gold joins** — når dim_date og dim_time er i silver, tilføj dato/tid join til relevante gold-views (heart_rate, sleep, activity).
+
+### Legacy SQL — skal portes fra `archive/legacy_databricks_pipeline/silver/`
+
+Følgende SQL-filer eksisterer i arkivet og er **ikke** portet endnu. Port til `.py` Databricks notebooks i `transformation_logic/databricks/silver/` med MERGE-mønster:
+
+| Fil | Kilde (notebook/) | DDL (table/) | Status |
+|-----|-------------------|--------------|--------|
+| `blood_oxygen` | `blood_oxygen.sql` | `blood_oxygen.sql` | [ ] |
+| `blood_pressure` | `blood_pressure.sql` | `blood_pressure.sql` | [ ] |
+| `daily_activity` | `daily_activity.sql` | `daily_activity.sql` | [ ] |
+| `daily_annotations` | — | `daily_annotations.sql` | [ ] |
+| `daily_meal` | `daily_meal.sql` | `daily_meal.sql` | [ ] |
+| `daily_readiness` | `daily_readiness.sql` | `daily_readiness.sql` | [ ] |
+| `daily_sleep` | `daily_sleep.sql` | `daily_sleep.sql` | [ ] |
+| `heart_rate` | `heart_rate.sql` | `heart_rate.sql` | [ ] |
+| `weight` | `weight.sql` | `weight.sql` | [ ] |
+
+**Gold views** (port til `transformation_logic/databricks/gold/`):
+- [ ] `vw_daily_annotations.sql` → gold view notebook
+- [ ] `vw_heart_rate_avg_per_day.sql` → gold view notebook
 
 ## Scheduled Databricks Jobs — Fuld Automatisk Data Load
 
