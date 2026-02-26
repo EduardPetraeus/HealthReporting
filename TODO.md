@@ -4,6 +4,7 @@
 
 - [ ] **`databricks.yml` workspace URLs** — replace placeholder hosts with real Databricks workspace URLs for `dev` and `prd` targets in `health_unified_platform/health_environment/deployment/databricks/databricks.yml`
 - [ ] **`.env.example`** — document required environment variables (Oura OAuth client ID/secret, Databricks host, token, catalog name, `HEALTH_ENV`)
+- [ ] **Re-enable branch protection status check** — add `Validate bundle` as required check on `main` once `DATABRICKS_HOST_DEV` and `DATABRICKS_TOKEN_DEV` GitHub secrets are configured. Disabled 2026-02-26 pending Databricks setup.
 
 ## Databricks Framework — Complete Coverage
 
