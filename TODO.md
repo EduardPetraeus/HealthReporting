@@ -15,6 +15,13 @@ Work in progress. Currently only example configs exist.
 
 See `README.md` files in each folder for the specific remaining items.
 
+## Apple Health Connector
+
+- [ ] **Workout elements** — XML contains `Workout`, `WorkoutEvent`, `WorkoutStatistics` elements that are currently ignored. Add parsing alongside `Record` elements.
+- [ ] **Partition consistency** — Apple Health uses `domain/type/year=YYYY/`, Oura uses `year=YYYY/month=MM/day=DD/`. Consider aligning to one scheme.
+- [ ] **End-to-end wrapper script** — single shell script that runs: XML → parquet → bronze ingestion → silver merge for all Apple Health types
+- [ ] **State file** — track last ingested export date (`~/.config/health_reporting/apple_health_state.json`) to enable true incremental runs
+
 ## Quality & Testing
 
 - [ ] **dbt tests** — add `schema.yml` with not-null, unique, accepted-values tests per silver entity
