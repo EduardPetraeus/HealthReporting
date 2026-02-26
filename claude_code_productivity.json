@@ -21,13 +21,13 @@
     "period": {
       "from": "2026-02-16"
     },
-    "total_commits": 30,
+    "total_commits": 32,
     "active_weeks": 2,
-    "avg_commits_per_active_week": 15.0,
+    "avg_commits_per_active_week": 16.0,
     "avg_files_per_commit": 18.1
   },
   "factors": {
-    "velocity_factor": 3.66,
+    "velocity_factor": 3.9,
     "files_per_commit_factor": 1.81,
     "description": "velocity_factor = commits/active_week (Claude) / commits/active_week (baseline). files_per_commit_factor = avg_files (Claude) / avg_files (baseline)."
   },
@@ -481,6 +481,36 @@
       "refactor_ratio": 0.416,
       "code_density": 39.1,
       "time_since_prev_commit_minutes": 8142,
+      "streak_days": 1
+    },
+    {
+      "commit_sha": "9a7f6b1",
+      "date": "2026-02-26",
+      "message": "Dissolve databricks_framework: distribute files to logical homes",
+      "task_type": "other",
+      "commit_hour": 8,
+      "files_changed": 31,
+      "lines_added": 973,
+      "lines_removed": 947,
+      "files_factor": 3.1,
+      "refactor_ratio": 0.493,
+      "code_density": 31.4,
+      "time_since_prev_commit_minutes": 17,
+      "streak_days": 1
+    },
+    {
+      "commit_sha": "7960ade",
+      "date": "2026-02-26",
+      "message": "Update docs to reflect new repo structure",
+      "task_type": "docs",
+      "commit_hour": 8,
+      "files_changed": 4,
+      "lines_added": 77,
+      "lines_removed": 73,
+      "files_factor": 0.4,
+      "refactor_ratio": 0.487,
+      "code_density": 19.2,
+      "time_since_prev_commit_minutes": 3,
       "streak_days": 1
     }
   ]

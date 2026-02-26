@@ -2,16 +2,18 @@
 
 ## Configuration
 
-- [ ] **`databricks.yml` workspace URLs** — replace placeholder hosts with real Databricks workspace URLs for `dev` and `prd` targets in `health_unified_platform/databricks_framework/bundles/databricks.yml` (lines 70 + 77)
+- [ ] **`databricks.yml` workspace URLs** — replace placeholder hosts with real Databricks workspace URLs for `dev` and `prd` targets in `health_unified_platform/health_environment/deployment/databricks/databricks.yml`
 - [ ] **`.env.example`** — document required environment variables (Oura OAuth client ID/secret, Databricks host, token, catalog name, `HEALTH_ENV`)
 
 ## Databricks Framework — Complete Coverage
 
-Currently only example configs exist. Need to add for all sources:
+Work in progress. Currently only example configs exist.
 
-- [ ] Source YAML configs for all 27 bronze sources in `databricks_framework/config/sources/`
-- [ ] Silver SQL transforms for all 18 entities in `databricks_framework/notebooks/silver/sql/`
-- [ ] Gold configs and SQL for remaining gold views in `databricks_framework/config/gold/` + `notebooks/gold/sql/`
+- [ ] **Source YAML configs** — 2 / 27 configured in `health_environment/config/databricks/sources/`
+- [ ] **Silver SQL transforms** — 1 / 18 implemented in `transformation_logic/databricks/silver/sql/`
+- [ ] **Gold configs + SQL** — 1 entity in `health_environment/config/databricks/gold/` + `transformation_logic/databricks/gold/sql/`
+
+See `README.md` files in each folder for the specific remaining items.
 
 ## Quality & Testing
 
@@ -21,5 +23,4 @@ Currently only example configs exist. Need to add for all sources:
 
 ## Cleanup
 
-- [ ] **`health_environment/deployment/databricks/`** — legacy catalog/schema DDL, consider moving to `archive/`
-- [ ] **`databricks_framework/bundles/workflows/`** — clarify relationship between `bundles/workflows/` (empty) and `databricks_framework/workflows/` (active YAMLs)
+- [ ] **`health_environment/deployment/databricks/`** — catalog/schema DDL scripts (`create_catalog__health_dw.sql`, `create_schemas__health_dw.sql`) may be superseded by `init.py` — consider archiving
