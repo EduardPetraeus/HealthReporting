@@ -126,4 +126,4 @@ Agents (`.claude/agents/`):
 ## Usage Optimization
 - **Be concise**: Provide brief explanations and avoid repeating project context unless asked.
 - **Targeted Reading**: Only read files in `docs/` if the user's request requires specific architectural or path knowledge.
-- **Ignore Legacy**: Never index or read the `legacy_on_premise_dw/` directory.
+- **Ignore Legacy**: Never index or read the `archive/legacy_on_premise_dw/` directory.
