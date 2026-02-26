@@ -113,6 +113,15 @@ Agents (`.claude/agents/`):
 - `code-simplifier` — clean up generated code after a feature
 - `build-validator` — validate Databricks bundle completeness
 - `medallion-reviewer` — review a new source against architecture standards
+- `code-reviewer` — PR review against conventions and PoC quality standards
+- `test-writer` — write dbt schema tests and pytest scaffolding
+- `yaml-config-writer` — generate YAML config for a new data source
+- `silver-transform-writer` — write complete silver SQL MERGE transforms
+- `gold-view-writer` — build gold layer views from silver tables
+- `data-quality-checker` — freshness, row count, null rate, anomaly checks
+- `documentation-writer` — write/update docs and architecture decisions
+- `poc-presenter` — prepare Pandora PoC demo materials
+- `security-reviewer` — check secrets, data handling, code safety
 
 ## Usage Optimization
 - **Be concise**: Provide brief explanations and avoid repeating project context unless asked.
