@@ -252,6 +252,28 @@ Controlled by DAB targets in `health_environment/deployment/databricks/databrick
 
 ---
 
+## Scale-Up Path — Lakeflow Declarative Pipelines (DLT)
+
+The current framework uses Autoloader + MERGE INTO Jobs — well-suited for personal scale and PoC work.
+
+At enterprise scale (100+ sources, SLAs, data quality monitoring, SCD Type 2), consider migrating to **Lakeflow Declarative Pipelines** (formerly Delta Live Tables):
+
+| Current (Jobs + Autoloader) | Scale-up (DLT) |
+|---|---|
+| `@dlt.expect` as comment in SQL | `@dlt.expect` / `@dlt.expect_or_drop` — built-in quality metrics |
+| Failed rows silently dropped | `expect_or_quarantine` → `bronze.quarantine_<source>` |
+| Manual `depends_on` in YAML | DLT infers DAG automatically |
+| SCD Type 1 MERGE only | `dlt.apply_changes()` → SCD Type 1 and Type 2 native |
+| Job-level retry | Pipeline-level retry + event log |
+
+**Reference architecture**: [yasarkocyigit/daq-databricks-dab](https://github.com/yasarkocyigit/daq-databricks-dab) demonstrates DLT + SCD2 + data quality patterns at enterprise scale.
+
+**Migration trigger**: when any of these apply — (1) >10 sources with different SLAs, (2) SCD Type 2 needed, (3) data quality dashboards required, (4) multiple teams reading the same silver tables.
+
+The YAML-driven, metadata-first design of this framework is intentionally compatible with a DLT migration — the SQL files and column conventions stay the same; only the runner changes.
+
+---
+
 ## Relationship to Local Pipeline
 
 The local DuckDB pipeline (`health_platform/`) and this Databricks framework are parallel implementations of the same medallion architecture. They share:

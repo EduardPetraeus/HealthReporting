@@ -50,6 +50,15 @@ See `README.md` files in each folder for the specific remaining items.
 - [ ] **Health data platform template** — sælg hele arkitekturen (medallion + connectors + dashboard) som Databricks-template til data engineers der vil tracke eget helbred. Udgangspunkt: dette repo poleret og generaliseret.
 - [ ] **Anonymiseret benchmark** — "Din søvnscore er i top 30% for mænd 35-45." Kræver opt-in data fra andre brugere og privacy-arkitektur.
 
+## Databricks Framework — Enterprise Scale-Up
+
+Inspireret af [yasarkocyigit/daq-databricks-dab](https://github.com/yasarkocyigit/daq-databricks-dab) som PoC reference for enterprise-grade Databricks arkitektur.
+
+- [ ] **DLT data quality expectations** — tilføj `@dlt.expect` / `@dlt.expect_or_drop` på silver entities. Giver automatisk row-level quality metrics i Databricks UI uden ekstra kode.
+- [ ] **Quarantine tables** — rut fejlede rækker til `bronze.quarantine_<source>` i stedet for at droppe dem. Kræver én ekstra `WHEN NOT MATCHED BY SOURCE` arm i MERGE eller `expect_or_quarantine` i DLT.
+- [ ] **DLT pipeline monitoring job** — separat DAB job der kører efter silver/gold og validerer: antal rækker, freshness (`max(_ingested_at) < NOW() - INTERVAL 25 HOURS`), og null-rate på nøglekolonner. Sender alert hvis threshold overskrides.
+- [ ] **Gold `depends_on` ordering** — tilføj eksplicit `depends_on: [silver_pipeline]` i gold DAB job config. Sikrer korrekt rækkefølge og undgår stale gold views ved fejl i silver.
+
 ## Quality & Testing
 
 - [ ] **dbt tests** — add `schema.yml` with not-null, unique, accepted-values tests per silver entity

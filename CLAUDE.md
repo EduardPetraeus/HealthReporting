@@ -62,6 +62,17 @@ After every git commit, automatically run:
 
 This updates `claude_code_productivity.json` with git-derived metrics (files changed, lines added/removed, refactor ratio, code density, commit hour, time between commits, streak days, task type). Never ask the user to do this manually — it is always Claude Code's responsibility.
 
+## Scalability & PoC Mindset
+
+This repo is used as a **PoC platform for enterprise architecture demonstrations** (Pandora lead engineer context). Every design decision should be made with scalability in mind — even when the current scale is personal/small.
+
+Principles:
+- **Build for extension, not just current need** — YAML-driven configs, generic runners, clear separation of concerns
+- **Document the scale-up path** — when a simpler approach is chosen, note what the enterprise-grade alternative would be (e.g., DLT vs Jobs, SCD2 vs SCD1, DQ expectations)
+- **Avoid hard-coded assumptions** — no hardcoded user IDs, paths, or single-source logic
+- **Think multi-tenant** — `source_system` isolation, `user_id` dimension readiness, catalog/schema separation
+- **PoC patterns worth demonstrating**: medallion architecture, metadata-driven pipelines, CI/CD for data, dev/prd environment separation, data quality gates
+
 ## Usage Optimization
 - **Be concise**: Provide brief explanations and avoid repeating project context unless asked.
 - **Targeted Reading**: Only read files in `docs/` if the user's request requires specific architectural or path knowledge.
