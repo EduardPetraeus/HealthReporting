@@ -13,6 +13,8 @@
 #   DATABRICKS_TOKEN_DEV   — Databricks PAT or service principal token (dev)
 #   DATABRICKS_HOST_PRD    — e.g. https://your-prd-workspace.azuredatabricks.net
 #   DATABRICKS_TOKEN_PRD   — Databricks PAT or service principal token (prd)
+#
+# Until secrets are configured, all jobs exit cleanly with a skip message.
 # =============================================================================
 
 name: Deploy Databricks Bundle
@@ -65,10 +67,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Check if Databricks dev credentials are configured
+        id: check-dev
+        run: |
+          if [ -z "$DATABRICKS_HOST" ] || [ "$DATABRICKS_HOST" = "https://your-dev-workspace.azuredatabricks.net" ]; then
+            echo "configured=false" >> $GITHUB_OUTPUT
+            echo "⚠️  DATABRICKS_HOST_DEV not configured — skipping bundle validate. Add secrets to enable."
+          else
+            echo "configured=true" >> $GITHUB_OUTPUT
+          fi
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_DEV }}
+
       - name: Set up Databricks CLI
+        if: steps.check-dev.outputs.configured == 'true'
         uses: databricks/setup-cli@main
 
       - name: Validate bundle (dev)
+        if: steps.check-dev.outputs.configured == 'true'
         working-directory: health_unified_platform/health_environment/deployment/databricks
         run: databricks bundle validate --target dev
         env:
@@ -89,10 +105,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Check if Databricks dev credentials are configured
+        id: check-dev
+        run: |
+          if [ -z "$DATABRICKS_HOST" ] || [ "$DATABRICKS_HOST" = "https://your-dev-workspace.azuredatabricks.net" ]; then
+            echo "configured=false" >> $GITHUB_OUTPUT
+            echo "⚠️  DATABRICKS_HOST_DEV not configured — skipping deploy to dev. Add secrets to enable."
+          else
+            echo "configured=true" >> $GITHUB_OUTPUT
+          fi
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_DEV }}
+
       - name: Set up Databricks CLI
+        if: steps.check-dev.outputs.configured == 'true'
         uses: databricks/setup-cli@main
 
       - name: Deploy bundle to dev
+        if: steps.check-dev.outputs.configured == 'true'
         working-directory: health_unified_platform/health_environment/deployment/databricks
         run: databricks bundle deploy --target dev
         env:
@@ -114,10 +144,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Check if Databricks prd credentials are configured
+        id: check-prd
+        run: |
+          if [ -z "$DATABRICKS_HOST" ] || [ "$DATABRICKS_HOST" = "https://your-prd-workspace.azuredatabricks.net" ]; then
+            echo "configured=false" >> $GITHUB_OUTPUT
+            echo "⚠️  DATABRICKS_HOST_PRD not configured — skipping deploy to prd. Add secrets to enable."
+          else
+            echo "configured=true" >> $GITHUB_OUTPUT
+          fi
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_PRD }}
+
       - name: Set up Databricks CLI
+        if: steps.check-prd.outputs.configured == 'true'
         uses: databricks/setup-cli@main
 
       - name: Deploy bundle to production
+        if: steps.check-prd.outputs.configured == 'true'
         working-directory: health_unified_platform/health_environment/deployment/databricks
         run: databricks bundle deploy --target prd
         env:
