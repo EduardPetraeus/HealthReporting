@@ -1,0 +1,45 @@
+# claude.yml — GitHub Actions Claude bot
+#
+# Enables @claude mentions in PRs and issues.
+# Claude can respond to comments, update CLAUDE.md, and make code changes.
+#
+# Required GitHub secret:
+#   ANTHROPIC_API_KEY — your Anthropic API key
+#
+# Usage in a PR comment:
+#   @claude fix the failing test
+#   @claude add this pattern to CLAUDE.md so it doesn't happen again
+#   @claude review this PR for medallion architecture compliance
+
+name: Claude Code Bot
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  claude:
+    name: Claude Code
+    if: |
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Claude Code
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}

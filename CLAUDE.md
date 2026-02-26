@@ -83,6 +83,46 @@ Claude Code has three built-in subagent patterns — use them proactively:
 | **Researcher** (`general-purpose`) | Fetch external docs, search Databricks/Synapse references, investigate unfamiliar APIs |
 | **Historian** (memory system) | Cross-session context lives in `~/.claude/projects/.../memory/`. Read `MEMORY.md` at session start for project state. |
 
+## Verification
+
+Before considering a task done, verify:
+- **Python scripts** — run the script, check output is correct
+- **SQL transforms** — run a row count / sample query on the result table
+- **Databricks bundle** — use the `build-validator` agent to check completeness
+- **New connectors** — ingest a small sample and verify bronze table output
+
+If you cannot verify it, say so explicitly.
+
+## Context Management
+
+When compacting, always preserve:
+- Current branch name and what we were working on
+- List of modified files
+- `HEALTH_ENV` value in use
+- Any pending TODO items from the current task
+
+## Custom Commands & Agents
+
+Slash commands (`.claude/commands/`):
+- `/commit-push-pr` — stage, commit, push, open PR, run productivity tracker
+- `/new-feature <name>` — checkout main, pull, create feature branch
+- `/new-silver <source>` — scaffold silver transform for a source
+- `/health-digest` — summarize DuckDB silver table freshness
+
+Agents (`.claude/agents/`):
+- `code-simplifier` — clean up generated code after a feature
+- `build-validator` — validate Databricks bundle completeness
+- `medallion-reviewer` — review a new source against architecture standards
+- `code-reviewer` — PR review against conventions and PoC quality standards
+- `test-writer` — write dbt schema tests and pytest scaffolding
+- `yaml-config-writer` — generate YAML config for a new data source
+- `silver-transform-writer` — write complete silver SQL MERGE transforms
+- `gold-view-writer` — build gold layer views from silver tables
+- `data-quality-checker` — freshness, row count, null rate, anomaly checks
+- `documentation-writer` — write/update docs and architecture decisions
+- `poc-presenter` — prepare Pandora PoC demo materials
+- `security-reviewer` — check secrets, data handling, code safety
+
 ## Usage Optimization
 - **Be concise**: Provide brief explanations and avoid repeating project context unless asked.
 - **Targeted Reading**: Only read files in `docs/` if the user's request requires specific architectural or path knowledge.
