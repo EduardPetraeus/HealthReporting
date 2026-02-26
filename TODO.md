@@ -131,9 +131,9 @@ Opsæt via `/schedule` i Cowork.
 
 ## Claude Code subagents
 
-- Explorer — scan codebase for snippets og afhængigheder
-- Researcher — hent ekstern docs (Synapse, Databricks)
-- Historian — context/hukommelse på tværs af sessions
+- ~~Explorer — scan codebase for snippets og afhængigheder~~ — built-in, dokumenteret i CLAUDE.md
+- ~~Researcher — hent ekstern docs (Synapse, Databricks)~~ — built-in, dokumenteret i CLAUDE.md
+- ~~Historian — context/hukommelse på tværs af sessions~~ — built-in via memory-system
 
 ## Figma
 
