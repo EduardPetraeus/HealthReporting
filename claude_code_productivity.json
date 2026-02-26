@@ -21,14 +21,14 @@
     "period": {
       "from": "2026-02-16"
     },
-    "total_commits": 36,
+    "total_commits": 40,
     "active_weeks": 2,
-    "avg_commits_per_active_week": 18.0,
-    "avg_files_per_commit": 16.3
+    "avg_commits_per_active_week": 20.0,
+    "avg_files_per_commit": 14.9
   },
   "factors": {
-    "velocity_factor": 4.39,
-    "files_per_commit_factor": 1.63,
+    "velocity_factor": 4.88,
+    "files_per_commit_factor": 1.49,
     "description": "velocity_factor = commits/active_week (Claude) / commits/active_week (baseline). files_per_commit_factor = avg_files (Claude) / avg_files (baseline)."
   },
   "entries": [
@@ -571,6 +571,66 @@
       "refactor_ratio": null,
       "code_density": null,
       "time_since_prev_commit_minutes": 1,
+      "streak_days": 1
+    },
+    {
+      "commit_sha": "b301e57",
+      "date": "2026-02-26",
+      "message": "Update productivity tracker",
+      "task_type": "fix",
+      "commit_hour": 18,
+      "files_changed": 1,
+      "lines_added": 65,
+      "lines_removed": 5,
+      "files_factor": 0.1,
+      "refactor_ratio": 0.071,
+      "code_density": 65.0,
+      "time_since_prev_commit_minutes": 0,
+      "streak_days": 1
+    },
+    {
+      "commit_sha": "9846983",
+      "date": "2026-02-26",
+      "message": "Add prioritized feature backlog to TODO.md",
+      "task_type": "docs",
+      "commit_hour": 18,
+      "files_changed": 1,
+      "lines_added": 27,
+      "lines_removed": 0,
+      "files_factor": 0.1,
+      "refactor_ratio": 0.0,
+      "code_density": 27.0,
+      "time_since_prev_commit_minutes": 2,
+      "streak_days": 1
+    },
+    {
+      "commit_sha": "212e466",
+      "date": "2026-02-26",
+      "message": "Add Streamlit and Databricks AI/BI dashboard to TODO",
+      "task_type": "new_feature",
+      "commit_hour": 18,
+      "files_changed": 1,
+      "lines_added": 2,
+      "lines_removed": 1,
+      "files_factor": 0.1,
+      "refactor_ratio": 0.333,
+      "code_density": 2.0,
+      "time_since_prev_commit_minutes": 1,
+      "streak_days": 1
+    },
+    {
+      "commit_sha": "5a8586f",
+      "date": "2026-02-26",
+      "message": "Add enterprise scale-up notes and PoC mindset principles",
+      "task_type": "new_feature",
+      "commit_hour": 19,
+      "files_changed": 4,
+      "lines_added": 92,
+      "lines_removed": 5,
+      "files_factor": 0.4,
+      "refactor_ratio": 0.052,
+      "code_density": 23.0,
+      "time_since_prev_commit_minutes": 60,
       "streak_days": 1
     }
   ]
