@@ -123,8 +123,8 @@ for f in silver/merge_oura_*.sql; do HEALTH_ENV=dev python run_merge.py "$f"; do
 
 - Databricks CLI >= 0.200 installed
 - `health_dw` catalog exists in Unity Catalog
-- Storage account paths filled in — edit `config/sources/*.yml` and replace `yourstorageaccount` with the real account name and container paths
-- Workspace URLs filled in — edit `bundles/databricks.yml` targets
+- Storage account paths filled in — edit `health_environment/config/databricks/sources/*.yml` and replace `yourstorageaccount` with the real account name and container paths
+- Workspace URLs filled in — edit `health_environment/deployment/databricks/databricks.yml` targets
 
 ```bash
 # Authenticate (or use ~/.databrickscfg profile)
@@ -132,7 +132,7 @@ export DATABRICKS_HOST=https://your-workspace.azuredatabricks.net
 export DATABRICKS_TOKEN=<pat-or-service-principal-token>
 
 # Deploy bundle to dev
-cd health_unified_platform/databricks_framework/bundles
+cd health_unified_platform/health_environment/deployment/databricks
 databricks bundle deploy --target dev
 
 # Run one-time schema init (from workspace UI: open init.py and run)
@@ -153,9 +153,9 @@ After first deploy: check the workspace file browser to find where configs and n
 
 ## Databricks Framework: Onboarding a New Source
 
-1. Create `config/sources/<source_name>.yml` — copy an existing one and fill in paths
-2. Create or reuse a SQL file in `notebooks/silver/sql/`
-3. Add a task block to `workflows/bronze_job.yml`
+1. Create `health_environment/config/databricks/sources/<source_name>.yml` — copy an existing one and fill in paths
+2. Create or reuse a SQL file in `transformation_logic/databricks/silver/sql/`
+3. Add a task block to `health_environment/orchestration/bronze_job.yml`
 4. `git push` → GitHub Actions deploys to production automatically
 
 No Python changes required.

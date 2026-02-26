@@ -28,8 +28,12 @@ Silver (local, DuckDB):
      (staging table -> dedup -> MERGE INTO silver -> drop staging)
   -> health_dw_{env}.db :: silver.* tables
 
-Gold:
-  -> Views defined in transformation_logic/databricks/gold/view/ (Databricks target)
+Gold (local):
+  -> Views defined in DuckDB (ad hoc queries)
+
+Gold (Databricks):
+  -> transformation_logic/databricks/gold/gold_runner.py
+  -> SQL in transformation_logic/databricks/gold/sql/
 ```
 
 ## Metadata-Driven Ingestion
@@ -107,10 +111,10 @@ Every pipeline behaviour is controlled by YAML files and SQL files. The Python r
 
 | File type | Location | Controls |
 |---|---|---|
-| Source YAML | `config/sources/*.yml` | Bronze paths, load mode, silver SQL reference, unique key |
-| Silver SQL | `notebooks/silver/sql/*.sql` | Transformation logic, DDL, merge strategy |
-| Gold YAML | `config/gold/*.yml` | Gold entity type, target, SQL reference |
-| Gold SQL | `notebooks/gold/sql/*.sql` | View or table definition |
+| Source YAML | `health_environment/config/databricks/sources/*.yml` | Bronze paths, load mode, silver SQL reference, unique key |
+| Silver SQL | `transformation_logic/databricks/silver/sql/*.sql` | Transformation logic, DDL, merge strategy |
+| Gold YAML | `health_environment/config/databricks/gold/*.yml` | Gold entity type, target, SQL reference |
+| Gold SQL | `transformation_logic/databricks/gold/sql/*.sql` | View or table definition |
 
 ### Source Isolation
 
@@ -128,7 +132,7 @@ If a source requires different transformation logic, it points to a different `s
 
 ### Dev / Production Separation
 
-Controlled by DAB targets in `bundles/databricks.yml`. Dev mode prefixes job names and uses an isolated workspace path. Production deploys automatically on merge to main via GitHub Actions.
+Controlled by DAB targets in `health_environment/deployment/databricks/databricks.yml`. Dev mode prefixes job names and uses an isolated workspace path. Production deploys automatically on merge to main via GitHub Actions.
 
 For full detail: see `docs/databricks_framework.md`.
 

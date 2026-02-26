@@ -19,37 +19,42 @@ CI/CD: **GitHub Actions** → auto-deploy to production on merge to main
 
 ## Folder Structure
 
+Files are distributed across the repo by concern — not bundled in a single folder.
+
 ```
-health_unified_platform/databricks_framework/
-├── bundles/
-│   └── databricks.yml              ← DAB entry point
-├── config/
-│   ├── sources/                    ← one YAML per source (bronze + silver)
-│   │   ├── apple_health_heart_rate.yml
-│   │   └── oura_heart_rate.yml
-│   └── gold/                       ← one YAML per gold entity
-│       └── daily_heart_rate_summary.yml
-├── notebooks/
-│   ├── setup/
-│   │   └── init.py                 ← one-time schema creation (run once)
-│   ├── bronze/
-│   │   └── bronze_autoloader.py    ← generic Autoloader notebook
-│   ├── silver/
-│   │   ├── silver_runner.py        ← generic silver runner
-│   │   └── sql/
-│   │       ├── heart_rate.sql
-│   │       └── _template_insert_overwrite.sql
-│   └── gold/
-│       ├── gold_runner.py          ← generic gold runner
-│       └── sql/
-│           └── daily_heart_rate_summary.sql
-├── workflows/
-│   ├── bronze_job.yml              ← DAB job: daily bronze ingestion
-│   ├── silver_job.yml              ← DAB job: daily silver merge
-│   └── gold_job.yml                ← DAB job: daily gold refresh
-└── .github/
-    └── workflows/
-        └── deploy.yml              ← GitHub Actions CI/CD
+health_unified_platform/
+├── health_environment/
+│   ├── config/
+│   │   └── databricks/
+│   │       ├── sources/            ← one YAML per source (bronze + silver)
+│   │       │   ├── apple_health_heart_rate.yml
+│   │       │   └── oura_heart_rate.yml
+│   │       └── gold/               ← one YAML per gold entity
+│   │           └── daily_heart_rate_summary.yml
+│   ├── deployment/
+│   │   └── databricks/
+│   │       ├── databricks.yml      ← DAB entry point (run bundle commands here)
+│   │       └── init.py             ← one-time schema creation (run once)
+│   └── orchestration/
+│       ├── bronze_job.yml          ← DAB job: daily bronze ingestion
+│       ├── silver_job.yml          ← DAB job: daily silver merge
+│       └── gold_job.yml            ← DAB job: daily gold refresh
+└── health_platform/
+    └── transformation_logic/
+        └── databricks/
+            ├── bronze/
+            │   └── bronze_autoloader.py    ← generic Autoloader notebook
+            ├── silver/
+            │   ├── silver_runner.py        ← generic silver runner
+            │   └── sql/
+            │       ├── heart_rate.sql
+            │       └── _template_insert_overwrite.sql
+            └── gold/
+                ├── gold_runner.py          ← generic gold runner
+                └── sql/
+                    └── daily_heart_rate_summary.sql
+
+.github/workflows/deploy.yml        ← GitHub Actions CI/CD
 ```
 
 ---
@@ -58,7 +63,7 @@ health_unified_platform/databricks_framework/
 
 ### Source Config (YAML)
 
-Each source is described by a single YAML file in `config/sources/`. The file covers both bronze ingestion and silver transformation — no Python changes needed.
+Each source is described by a single YAML file in `health_environment/config/databricks/sources/`. The file covers both bronze ingestion and silver transformation — no Python changes needed.
 
 ```yaml
 name: apple_health_heart_rate
@@ -85,7 +90,7 @@ silver:
 
 ### Silver SQL Files
 
-SQL files live in `notebooks/silver/sql/`. They receive three template variables from `silver_runner.py`:
+SQL files live in `transformation_logic/databricks/silver/sql/`. They receive three template variables from `silver_runner.py`:
 
 | Variable | Example value |
 |---|---|
@@ -128,9 +133,9 @@ Gold SQL files receive one template variable: `{target}`. The SQL contains the f
 
 ## Adding a New Source
 
-1. Create `config/sources/<source_name>.yml` — fill in bronze paths and silver SQL reference
-2. Create or reuse a SQL file in `notebooks/silver/sql/`
-3. Add one task block to `workflows/bronze_job.yml`:
+1. Create `health_environment/config/databricks/sources/<source_name>.yml` — fill in bronze paths and silver SQL reference
+2. Create or reuse a SQL file in `transformation_logic/databricks/silver/sql/`
+3. Add one task block to `health_environment/orchestration/bronze_job.yml`:
    ```yaml
    - task_key: bronze_<source_name>
      job_cluster_key: bronze_cluster
@@ -148,8 +153,8 @@ No Python changes. No runner changes. The framework is closed for modification, 
 
 ## Adding a New Gold Entity
 
-1. Create `config/gold/<entity_name>.yml`
-2. Create `notebooks/gold/sql/<entity_name>.sql` with `CREATE OR REPLACE VIEW {target} AS ...`
+1. Create `health_environment/config/databricks/gold/<entity_name>.yml`
+2. Create `transformation_logic/databricks/gold/sql/<entity_name>.sql` with `CREATE OR REPLACE VIEW {target} AS ...`
 
 The gold job picks it up automatically on the next run (`entity_name: ""` processes all configs).
 
@@ -174,7 +179,7 @@ export DATABRICKS_HOST=https://your-workspace.azuredatabricks.net
 export DATABRICKS_TOKEN=<your-token>
 
 # 3. Deploy the bundle to dev
-cd health_unified_platform/databricks_framework/bundles
+cd health_unified_platform/health_environment/deployment/databricks
 databricks bundle deploy --target dev
 
 # 4. Find the deployed workspace path and update variables in databricks.yml
@@ -225,7 +230,7 @@ Required GitHub secrets:
 
 ## Dev / Production Separation
 
-Controlled by DAB targets in `bundles/databricks.yml`. Key differences:
+Controlled by DAB targets in `health_environment/deployment/databricks/databricks.yml`. Key differences:
 
 | Setting | Dev | Prd |
 |---|---|---|
