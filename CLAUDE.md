@@ -64,6 +64,8 @@ After every git commit, automatically run:
 
 This updates `claude_code_productivity.json` with git-derived metrics (files changed, lines added/removed, refactor ratio, code density, commit hour, time between commits, streak days, task type). Never ask the user to do this manually — it is always Claude Code's responsibility.
 
+`claude_code_productivity.json` may be committed directly to `main` without a PR — it is a tracking file, not code.
+
 ## Scalability & PoC Mindset
 
 This repo is used as a **PoC platform for enterprise architecture demonstrations** (Pandora lead engineer context). Every design decision should be made with scalability in mind — even when the current scale is personal/small.
