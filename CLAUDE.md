@@ -51,7 +51,11 @@ Workflow:
 4. Merge to main → auto-deploys to Databricks prd
 5. After merging: `git checkout main && git pull && git branch -d <branch>`
 
-Feature branches auto-deploy to Databricks dev on push (once secrets are configured).
+Feature branches should be deployed to dev before opening a PR:
+```bash
+cd health_unified_platform && databricks bundle deploy --target dev
+```
+This deploys directly from the feature branch — no merge to `main` required for dev testing.
 GitHub is configured to automatically delete remote head branches after merge.
 
 ## Productivity Tracking
