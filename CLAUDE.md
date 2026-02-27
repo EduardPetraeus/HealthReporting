@@ -94,6 +94,18 @@ After completing any task that involves an architectural decision, a mistake fix
 
 Do this proactively — do not wait to be asked.
 
+## Security Review
+
+Run the `security-reviewer` agent (via `/security-review`) before every PR merge and before every Databricks deployment. This is mandatory, not optional.
+
+What to check:
+- No secrets, tokens, PAT tokens, passwords, or workspace URLs in committed files
+- No sensitive data in print/log statements
+- No PII in sample data or test fixtures
+- GitHub Secrets used for all credentials — never hardcoded
+
+If a security issue is found: fix it before merging. Never bypass with `--no-verify`.
+
 ## Verification
 
 Before considering a task done, verify:
