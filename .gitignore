@@ -34,6 +34,10 @@ logs/
 # Environment & secrets
 .env
 *.env
+*.token
+
+# Databricks local state
+.databricks-resources.json
 
 # Mac / IDE
 .DS_Store

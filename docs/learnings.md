@@ -18,9 +18,7 @@ Running DuckDB locally and Databricks in the cloud is the right pattern for a pe
 New data sources require zero code changes — add one YAML file, everything else flows automatically through `silver_runner` and `gold_runner`. This is the correct pattern for a metadata-driven platform.
 
 ### Dev/prd separation via separate workspaces (not catalogs)
-Initially planned to use two Unity Catalogs (`health_dw_dev` / `health_dw_prd`) within one workspace. Upgraded to two separate AWS Databricks workspaces:
-- dev: `dbc-23749322-8818.cloud.databricks.com`
-- prd: separate workspace (to be provisioned)
+Initially planned to use two Unity Catalogs (`health_dw_dev` / `health_dw_prd`) within one workspace. Upgraded to two separate AWS Databricks workspaces (URLs stored in `~/.databrickscfg` and GitHub Secrets — never committed to repo):
 - **Why**: separate workspaces give cleaner IAM, billing, and access isolation — closer to enterprise standard
 - **Catalog inside each workspace**: `health_dw` with schemas `bronze`, `silver`, `gold`
 
