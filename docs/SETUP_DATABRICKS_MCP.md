@@ -111,6 +111,17 @@ execute_sql: SELECT count(*) FROM health_dw.silver.heart_rate → 1,004,696 ✅
 
 This is a workflow convention — the MCP server has no technical lock. The `DATABRICKS_DEFAULT_CATALOG` env var documents the intended safe default.
 
+## Deploy workflow: feature branches → dev
+
+When working on feature branches, deploy changes directly to the dev environment before opening a PR:
+
+```bash
+# From health_unified_platform/
+databricks bundle deploy --target dev
+```
+
+This deploys the current branch's notebooks, jobs, and config to `health-platform-dev`. You do **not** need to merge to `main` first — dev deployments are safe to run from any branch. The GitHub Actions pipeline handles auto-deploy to prd after merging to `main`.
+
 ---
 
 ## Why self-hosted stdio vs Databricks Managed MCP
