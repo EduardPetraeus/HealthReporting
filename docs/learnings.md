@@ -1,81 +1,127 @@
 # Learnings & Architecture Notes
 
-Løbende log over indsigter, beslutninger og "ville-gøre-anderledes" refleksioner.
-Bruges som reference ved fremtidige projekter og PoC-præsentationer.
+Running log of insights, decisions, and "would-do-differently" reflections.
+Used as reference for future projects and PoC presentations.
 
 ---
 
-## Hvad der fungerer særligt godt i dette setup
+## Architecture Decisions
 
-- **YAML-drevet metalag** — zero-code for nye datakilder. Tilføj én YAML-fil, resten sker automatisk via silver_runner og gold_runner. Det er det rigtige mønster for et metadata-driven platform.
-- **Catalog-baseret dev/prd separation** — ét Databricks workspace, to Unity Catalogs (`health-platform-dev` / `health-platform-prd`). Simpelt, billigt og tilstrækkeligt for PoC-skala. Enterprise-alternativet er separate workspaces, men det er overkill her.
-- **CI/CD fra dag 1** — `bundle validate` på PR + auto-deploy på merge. Giver tryghed og demonstrerer enterprise-modenhed selv på et personligt projekt.
-- **Medallion med klare ansvarsgrænser** — bronze er rådata, silver er standardiseret, gold er forretningslogik. Ingen blanding. Nemt at forklare og nemt at vedligeholde.
-- **Serverless compute** — ingen cluster-management, ingen opstartstid, ingen pris for inaktivitet. Rigtig valg for et job der kører 3 gange om dagen.
+### DuckDB + Databricks dual-stack
+Running DuckDB locally and Databricks in the cloud is the right pattern for a personal PoC:
+- DuckDB handles local dev, exploration, and testing — zero cost, zero setup
+- Databricks handles production ingestion, storage (Delta), and scheduled jobs
+- The same SQL logic runs in both environments without modification
+- **Enterprise upgrade path**: replace DuckDB with a shared dev Databricks workspace
 
----
+### YAML-driven metadata layer
+New data sources require zero code changes — add one YAML file, everything else flows automatically through `silver_runner` and `gold_runner`. This is the correct pattern for a metadata-driven platform.
 
-## Ville gøre anderledes fra dag 1
+### Dev/prd separation via separate workspaces (not catalogs)
+Initially planned to use two Unity Catalogs (`health_dw_dev` / `health_dw_prd`) within one workspace. Upgraded to two separate AWS Databricks workspaces:
+- dev: `dbc-23749322-8818.cloud.databricks.com`
+- prd: separate workspace (to be provisioned)
+- **Why**: separate workspaces give cleaner IAM, billing, and access isolation — closer to enterprise standard
+- **Catalog inside each workspace**: `health_dw` with schemas `bronze`, `silver`, `gold`
 
-### 1. dbt i stedet for rå SQL runners
-`silver_runner.py` + SQL-filer er elegant, men **dbt** giver gratis:
-- Incremental logic (`{{ config(materialized='incremental') }}`)
-- Schema tests (not-null, unique, accepted-values)
-- Auto-genereret dokumentation og lineage-graf
-- Kører identisk på DuckDB lokalt og Databricks i cloud
+### Silver runner pattern (SQL files + Python runner)
+`silver_runner.py` reads YAML configs and executes SQL MERGE files. Elegant and transparent, but dbt would give this for free plus lineage, tests, and incremental materializations. Kept as-is for PoC speed — port to dbt is the documented next step.
 
-Prisen er lidt mere initial setup. Næste skridt: port silver-laget til dbt models.
-
-### 2. Service principals i stedet for PAT tokens
-PAT tokens er personbundne og udløber. Fra dag 1 i enterprise:
-- Opret en **Databricks service principal** til CI/CD
-- Brug **OAuth M2M** (machine-to-machine) i stedet for PAT
-- Gem credentials i Databricks Secrets API eller HashiCorp Vault — ikke i `~/.databrickscfg`
-
-PAT tokens er fine til PoC, men dokumentér upgrade-stien.
-
-### 3. Data quality som gate, ikke eftertanke
-DLT expectations eller Great Expectations bør være en **hård gate** i bronze → silver:
-- Dårlig data må aldrig nå silver
-- Fejlede rækker rutes til `bronze.quarantine_<source>` med fejlbeskrivelse
-- DQ-metrics logges til `gold.data_quality_metrics` dagligt
-
-Nuværende setup: DQ er en TODO. Ideelt: bygget ind fra første connector.
-
-### 4. Governance og tagging fra starten
-Unity Catalog tags, PII-klassifikation og data lineage er let at tilføje løbende, men **sværere at retrofitte** på mange tabeller. Næste gang: tag første tabel fra dag 1 og hold standarden.
+### Medallion architecture with strict layer boundaries
+Bronze = raw data. Silver = standardised. Gold = business logic. No mixing between layers. Easy to explain, easy to maintain, easy to extend.
 
 ---
 
-## Databricks-specifikke læringer
+## Migrations Done
 
-### Bundle root skal omfavne alle notebooks
-DAB (`databricks.yml`) skal ligge i den mappe der er **fælles rod** for alle notebooks og config-filer der synkroniseres. Notebook paths i job YAML er relative til orchestration-filens placering — ikke til bundle root.
+### Python notebooks → pure SQL files
+Early silver/gold transforms were Python notebooks with embedded SQL strings. Migrated to:
+- Pure `.sql` files for all transforms
+- Python runner scripts (`silver_runner.py`, `gold_runner.py`) that execute the SQL
+- **Why**: SQL files are version-controlled cleanly, diff-readable, and portable
 
-**Fejlen vi lavede:** `databricks.yml` lå i `health_environment/deployment/databricks/` — notebooks lå i `health_platform/transformation_logic/databricks/`. Bundle sync root kunne ikke nå notebooks.
+### `workspace.default` → `health_dw.bronze` as source for silver
+Early silver queries read from `workspace.default.*` (the Databricks default catalog). Migrated all silver SQL to read from `health_dw.bronze.*`:
+- Consistent catalog reference across all transforms
+- Eliminates hidden dependency on workspace default catalog setting
 
-**Fix:** Flyt `databricks.yml` op til `health_unified_platform/` så alt er inden for sync root.
+### Bundle root moved up to `health_unified_platform/`
+`databricks.yml` originally lived in `health_environment/deployment/databricks/`. Notebooks lived in `health_platform/transformation_logic/databricks/`. Bundle sync could not reach the notebooks.
 
-### Serverless compute kræver ingen `job_clusters` sektion
-Workspaces med kun serverless compute (typisk nye Databricks-workspaces på AWS) afviser jobs med `new_cluster` konfiguration. Fjern `job_clusters` blokken helt — Databricks vælger serverless automatisk.
+**Fix**: moved `databricks.yml` up to `health_unified_platform/` so all assets are within sync root.
 
-### `environment_variables` på task-niveau er ikke understøttet i DAB schema
-Databricks bundle validate giver "unknown field" warning på `environment_variables` direkte på en task. Brug i stedet:
-- `base_parameters` i `notebook_task` (bedste løsning)
-- `environments` sektion på job-niveau med `environment_key` reference
+### Removed `job_clusters` from all orchestration YAMLs
+AWS Databricks workspaces with serverless compute reject jobs that specify `new_cluster` configuration. Error: `Only serverless compute is supported in this workspace`.
+
+**Fix**: remove `job_clusters` section entirely from `bronze_job.yml`, `silver_job.yml`, `gold_job.yml`. Databricks selects serverless automatically. No cluster config needed.
+
+---
+
+## CI/CD Setup
+
+### GitHub Actions → Databricks deploy pipeline
+- Feature branches auto-deploy to dev on push
+- Merge to main auto-deploys to prd
+- `bundle validate` runs on every PR as a gate
+- **Secrets required**: `DATABRICKS_HOST_DEV`, `DATABRICKS_TOKEN_DEV`, `DATABRICKS_HOST_PRD`, `DATABRICKS_TOKEN_PRD`
 
 ### PAT token scope
-Til CI/CD og bundle deployment: vælg `all-apis` scope. Bundling bruger Workspace API, Jobs API, Clusters API og Unity Catalog API simultant.
+Use `all-apis` scope for CI/CD and bundle deployment. The bundle uses Workspace API, Jobs API, Clusters API, and Unity Catalog API simultaneously.
+
+### GitHub Secrets — always use interactive prompt
+```bash
+gh secret set SECRET_NAME
+# paste value at prompt — never use --body flag
+```
+The `--body` flag exposes the secret in shell history. Always use the interactive prompt.
 
 ---
 
-## Sikkerhed — regler for dette projekt
+## Databricks Quirks
 
-- Tokens, passwords og secrets deles **aldrig** i chat
-- GitHub Secrets sættes via `gh secret set <NAME>` interaktiv prompt (ingen `--body` flag)
-- Databricks credentials i `~/.databrickscfg` (globalt, aldrig i repo)
-- PII-data (genetik, blodprøver, diagnoser) klassificeres `sensitive` i UC tags
+| Issue | Root Cause | Fix |
+|---|---|---|
+| `bundle sync root cannot reach notebook` | `databricks.yml` too deep in folder structure | Move `databricks.yml` to common ancestor of all assets |
+| `Only serverless compute is supported` | `job_clusters` / `new_cluster` block present in job YAML | Remove `job_clusters` section entirely |
+| `unknown field: environment_variables` | Task-level `environment_variables` not supported in DAB schema | Use `base_parameters` in `notebook_task` instead |
+| `option 'host' already exists` in MCP | Duplicate `[DEFAULT]` section in `~/.databrickscfg` | Rewrite file with single clean `[DEFAULT]` section |
+| `Standard_DS3_v2` node type rejected | Azure node type used in AWS workspace | Use `i3.xlarge` (AWS) or remove `node_type_id` for serverless |
 
 ---
 
-*Sidst opdateret: 2026-02-27*
+## Would Do Differently From Day 1
+
+### 1. dbt instead of raw SQL runners
+`silver_runner.py` + SQL files works, but dbt gives for free:
+- Incremental logic (`{{ config(materialized='incremental') }}`)
+- Schema tests (not-null, unique, accepted-values)
+- Auto-generated documentation and lineage graph
+- Runs identically on DuckDB locally and Databricks in the cloud
+
+### 2. Service principals instead of PAT tokens
+PAT tokens are personal and expire. Enterprise standard from day 1:
+- Create a **Databricks service principal** for CI/CD
+- Use **OAuth M2M** (machine-to-machine) instead of PAT
+- Store credentials in Databricks Secrets API or HashiCorp Vault — not in `~/.databrickscfg`
+
+### 3. Data quality as a gate, not an afterthought
+DLT expectations or Great Expectations should be a hard gate in bronze → silver:
+- Bad data must never reach silver
+- Failed rows routed to `bronze.quarantine_<source>` with error description
+- DQ metrics logged to `gold.data_quality_metrics` daily
+
+### 4. Governance and tagging from the start
+Unity Catalog tags, PII classification, and data lineage are easy to add incrementally but **harder to retrofit** across many tables. Tag the first table on day 1 and hold the standard.
+
+---
+
+## Security Rules
+
+- Tokens, passwords, and secrets are **never** shared in chat
+- GitHub Secrets set via `gh secret set <NAME>` interactive prompt (no `--body` flag)
+- Databricks credentials in `~/.databrickscfg` (global, never in repo)
+- PII data (genetics, blood tests, diagnoses) classified as `sensitive` in UC tags
+
+---
+
+*Last updated: 2026-02-27*

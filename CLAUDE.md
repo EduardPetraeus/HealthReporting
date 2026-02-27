@@ -13,7 +13,7 @@ Personal health data platform (owner: Claus Eduard Petraeus) that ingests, trans
 ## Conventions
 
 - **snake_case** for all names (tables, columns, variables, files)
-- **All code in English** (variable names, comments, docstrings, print messages)
+- **All code and documentation in English** — this includes `.md` files, comments, docstrings, variable names, and print messages. No Danish in any repo file.
 - Prefix bronze tables with `stg_`
 - Individual files over monolithic scripts
 - Tech-agnostic: local logic uses DuckDB/Python; cloud logic uses Databricks SQL/PySpark
@@ -82,6 +82,17 @@ Claude Code has three built-in subagent patterns — use them proactively:
 | **Explorer** (`Explore`) | Scan codebase for snippets, dependencies, patterns — e.g. "find all silver SQL transforms", "which files use source_system" |
 | **Researcher** (`general-purpose`) | Fetch external docs, search Databricks/Synapse references, investigate unfamiliar APIs |
 | **Historian** (memory system) | Cross-session context lives in `~/.claude/projects/.../memory/`. Read `MEMORY.md` at session start for project state. |
+
+## Learnings Log
+
+After completing any task that involves an architectural decision, a mistake fixed, or a pattern worth remembering, append a note to `docs/learnings.md`. This includes:
+- Architectural decisions and the reasoning behind them
+- Mistakes made and how they were fixed (with concrete example)
+- Databricks/DuckDB/dbt quirks discovered in practice
+- "Would do differently" reflections
+- Security decisions
+
+Do this proactively — do not wait to be asked.
 
 ## Verification
 
