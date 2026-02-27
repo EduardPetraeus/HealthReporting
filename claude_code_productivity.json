@@ -21,14 +21,14 @@
     "period": {
       "from": "2026-02-16"
     },
-    "total_commits": 101,
+    "total_commits": 104,
     "active_weeks": 2,
-    "avg_commits_per_active_week": 50.5,
-    "avg_files_per_commit": 10.1
+    "avg_commits_per_active_week": 52.0,
+    "avg_files_per_commit": 9.8
   },
   "factors": {
-    "velocity_factor": 12.32,
-    "files_per_commit_factor": 1.01,
+    "velocity_factor": 12.68,
+    "files_per_commit_factor": 0.98,
     "description": "velocity_factor = commits/active_week (Claude) / commits/active_week (baseline). files_per_commit_factor = avg_files (Claude) / avg_files (baseline)."
   },
   "entries": [
@@ -1546,6 +1546,51 @@
       "refactor_ratio": null,
       "code_density": null,
       "time_since_prev_commit_minutes": 10,
+      "streak_days": 2
+    },
+    {
+      "commit_sha": "dc90930",
+      "date": "2026-02-27",
+      "message": "Update productivity metrics to 99 commits",
+      "task_type": "fix",
+      "commit_hour": 19,
+      "files_changed": 1,
+      "lines_added": 50,
+      "lines_removed": 5,
+      "files_factor": 0.1,
+      "refactor_ratio": 0.091,
+      "code_density": 50.0,
+      "time_since_prev_commit_minutes": 0,
+      "streak_days": 2
+    },
+    {
+      "commit_sha": "0b17d0a",
+      "date": "2026-02-27",
+      "message": "Fix: remove path filter from PR trigger so Validate bundle always runs",
+      "task_type": "fix",
+      "commit_hour": 19,
+      "files_changed": 1,
+      "lines_added": 3,
+      "lines_removed": 5,
+      "files_factor": 0.1,
+      "refactor_ratio": 0.625,
+      "code_density": 3.0,
+      "time_since_prev_commit_minutes": 1,
+      "streak_days": 2
+    },
+    {
+      "commit_sha": "c4901af",
+      "date": "2026-02-27",
+      "message": "Merge pull request #32 from EduardPetraeus/fix/branch-protection-always-validate",
+      "task_type": "other",
+      "commit_hour": 19,
+      "files_changed": 0,
+      "lines_added": 0,
+      "lines_removed": 0,
+      "files_factor": 0,
+      "refactor_ratio": null,
+      "code_density": null,
+      "time_since_prev_commit_minutes": 1,
       "streak_days": 2
     }
   ]
