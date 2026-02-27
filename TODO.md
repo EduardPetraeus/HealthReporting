@@ -228,25 +228,34 @@ Port fra `archive/legacy_databricks_pipeline/silver/` — bevar alle navngivning
 - [ ] **YAML-config** — tilføj `dim_date` og `dim_time` som entries i `sources_config.yaml` (type: `generated`, ikke parquet-source). Følg metadata-driven mønster.
 - [ ] **Gold joins** — når dim_date og dim_time er i silver, tilføj dato/tid join til relevante gold-views (heart_rate, sleep, activity).
 
-### Legacy SQL — skal portes fra `archive/legacy_databricks_pipeline/silver/`
+### Legacy SQL — portet og slettet fra archive
 
-Følgende SQL-filer eksisterer i arkivet og er **ikke** portet endnu. Port til `.py` Databricks notebooks i `transformation_logic/databricks/silver/` med MERGE-mønster:
+Alle filer er portet som `.py` Databricks notebooks og archive-kopierne er slettet.
 
-| Fil | Kilde (notebook/) | DDL (table/) | Status |
-|-----|-------------------|--------------|--------|
-| `blood_oxygen` | `blood_oxygen.sql` | `blood_oxygen.sql` | [ ] |
-| `blood_pressure` | `blood_pressure.sql` | `blood_pressure.sql` | [ ] |
-| `daily_activity` | `daily_activity.sql` | `daily_activity.sql` | [ ] |
-| `daily_annotations` | — | `daily_annotations.sql` | [ ] |
-| `daily_meal` | `daily_meal.sql` | `daily_meal.sql` | [ ] |
-| `daily_readiness` | `daily_readiness.sql` | `daily_readiness.sql` | [ ] |
-| `daily_sleep` | `daily_sleep.sql` | `daily_sleep.sql` | [ ] |
-| `heart_rate` | `heart_rate.sql` | `heart_rate.sql` | [ ] |
-| `weight` | `weight.sql` | `weight.sql` | [ ] |
+| Fil | Portet til | Archive slettet |
+|-----|-----------|-----------------|
+| `blood_oxygen` | `silver/blood_oxygen.py` | [x] |
+| `blood_pressure` | `silver/blood_pressure.py` | [x] |
+| `daily_activity` | `silver/daily_activity.py` | [x] |
+| `daily_annotations` | `silver/daily_annotations.py` | [x] |
+| `daily_meal` | `silver/daily_meal.py` | [x] |
+| `daily_readiness` | `silver/daily_readiness.py` | [x] |
+| `daily_sleep` | `silver/daily_sleep.py` | [x] |
+| `heart_rate` | `silver/heart_rate.py` | [x] |
+| `weight` | `silver/weight.py` | [x] |
 
-**Gold views** (port til `transformation_logic/databricks/gold/`):
-- [ ] `vw_daily_annotations.sql` → gold view notebook
-- [ ] `vw_heart_rate_avg_per_day.sql` → gold view notebook
+**Gold views** portet:
+- [x] `vw_daily_annotations.sql` → `gold/vw_daily_annotations.py`
+- [x] `vw_heart_rate_avg_per_day.sql` → `gold/vw_heart_rate_avg_per_day.py`
+
+### Silver notebooks — oprydning og migrering til SQL + dbt
+
+De portede notebooks er aktuelt `.py` filer med `# MAGIC %sql` blokke (Databricks notebook-format). Dette er en mellemløsning — målet er rene SQL-filer:
+
+- [ ] **Ryd op i Python-wrappere** — konverter `.py` magic-notebook filer til rene `.sql` filer der kan køres direkte (Databricks SQL notebook format eller `databricks bundle run --sql`). Ingen Python wrapper nødvendig da logikken er 100% SQL.
+- [ ] **dbt-version** — skriv alle 9 silver-tabeller som dbt models (`models/silver/*.sql`) med `{{ config(materialized='incremental', unique_key=...) }}`. Dette er enterprise-mønsteret og understøtter både DuckDB (lokalt) og Databricks (cloud). dbt håndterer MERGE/INSERT OVERWRITE automatisk via incremental strategy.
+- [ ] **Opdater kildereferencer** — alle notebooks peger på `workspace.default.*` (legacy Databricks workspace). Opdater til `health_dw.bronze.stg_*` når bronze-laget er klart.
+- [ ] **Vælg langsigtet strategi** — beslut om silver-laget skal køres som (a) rene Databricks SQL notebooks, (b) dbt-core med dbt-databricks adapter, eller (c) begge parallelt (dbt lokalt på DuckDB + Databricks notebooks i cloud). Dokumentér valget i `docs/architecture.md`.
 
 ## Scheduled Databricks Jobs — Fuld Automatisk Data Load
 
