@@ -8,13 +8,13 @@
 #   main
 #     → deploy to production on merge
 #
-# Required GitHub secrets (add when Databricks workspaces are ready):
-#   DATABRICKS_HOST_DEV    — e.g. https://your-dev-workspace.azuredatabricks.net
+# Required GitHub secrets (configured in GitHub → Settings → Secrets):
+#   DATABRICKS_HOST_DEV    — https://<dev-workspace>.azuredatabricks.net
 #   DATABRICKS_TOKEN_DEV   — Databricks PAT or service principal token (dev)
-#   DATABRICKS_HOST_PRD    — e.g. https://your-prd-workspace.azuredatabricks.net
+#   DATABRICKS_HOST_PRD    — https://<prd-workspace>.azuredatabricks.net
 #   DATABRICKS_TOKEN_PRD   — Databricks PAT or service principal token (prd)
 #
-# Until secrets are configured, all jobs exit cleanly with a skip message.
+# If a secret is missing, the job exits cleanly with a skip message (safety fallback).
 # =============================================================================
 
 name: Deploy Databricks Bundle

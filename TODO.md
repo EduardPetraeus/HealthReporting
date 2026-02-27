@@ -6,7 +6,7 @@ Overordnet rækkefølge — arbejd oppefra ned. Hver blok er afhængig af dem ov
 
 | # | Opgave | Blocker for | Sektion |
 |---|--------|-------------|---------|
-| 1 | Databricks workspace URLs + secrets | Alt på Databricks | Configuration |
+| ~~1~~ | ~~Databricks workspace URLs + secrets~~ | ~~Alt på Databricks~~ | ✅ Løst |
 | 2 | Fuld data model (alle kilder) | Connectors + gold design | Data Model |
 | 3 | P0 quick wins (logging, path-validering) | Stabil lokal pipeline | Optimering |
 | 4 | Withings API connector | Withings scheduled job | Withings Connector |
@@ -20,9 +20,10 @@ Overordnet rækkefølge — arbejd oppefra ned. Hver blok er afhængig af dem ov
 
 ## Configuration
 
-- [ ] **`databricks.yml` workspace URLs** — replace placeholder hosts with real Databricks workspace URLs for `dev` and `prd` targets in `health_unified_platform/health_environment/deployment/databricks/databricks.yml`
+- [x] **`databricks.yml` workspace URLs** — dev og prd workspace URLs konfigureret
+- [x] **GitHub Secrets** — `DATABRICKS_HOST_DEV`, `DATABRICKS_TOKEN_DEV`, `DATABRICKS_HOST_PRD`, `DATABRICKS_TOKEN_PRD` sat op. CI/CD kører fuldt.
 - [ ] **`.env.example`** — document required environment variables (Oura OAuth client ID/secret, Databricks host, token, catalog name, `HEALTH_ENV`)
-- [ ] **Re-enable branch protection status check** — add `Validate bundle` as required check on `main` once `DATABRICKS_HOST_DEV` and `DATABRICKS_TOKEN_DEV` GitHub secrets are configured. Disabled 2026-02-26 pending Databricks setup.
+- [ ] **Re-enable branch protection status check** — tilføj `Validate bundle` som required check på `main`. GitHub UI: Settings → Branches → main → Edit → Required status checks.
 
 ## Databricks Framework — Complete Coverage
 
