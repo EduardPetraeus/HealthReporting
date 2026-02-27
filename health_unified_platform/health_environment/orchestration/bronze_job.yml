@@ -16,23 +16,11 @@ resources:
         timezone_id: UTC
         pause_status: UNPAUSED
 
-      job_clusters:
-        - job_cluster_key: bronze_cluster
-          new_cluster:
-            spark_version: 15.4.x-scala2.12
-            node_type_id: ${var.cluster_node_type}
-            num_workers: 2
-            spark_conf:
-              spark.databricks.delta.preview.enabled: "true"
-            spark_env_vars:
-              HEALTH_ENV: ${var.env}
-
       tasks:
         # ------------------------------------------------------------------
         # apple_health — heart rate
         # ------------------------------------------------------------------
         - task_key: bronze_apple_health_heart_rate
-          job_cluster_key: bronze_cluster
           notebook_task:
             notebook_path: ../../health_platform/transformation_logic/databricks/bronze/bronze_autoloader.py
             base_parameters:
@@ -43,7 +31,6 @@ resources:
         # oura — heart rate
         # ------------------------------------------------------------------
         - task_key: bronze_oura_heart_rate
-          job_cluster_key: bronze_cluster
           notebook_task:
             notebook_path: ../../health_platform/transformation_logic/databricks/bronze/bronze_autoloader.py
             base_parameters:
