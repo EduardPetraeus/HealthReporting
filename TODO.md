@@ -77,6 +77,54 @@ See `README.md` files in each folder for the specific remaining items.
 - [ ] **Personal health API som SaaS** — hosted version af health API med Oura/Apple Health integration. Månedlig subscription for andre der vil have det samme setup uden selv at bygge det.
 - [ ] **Anonymiseret benchmark** — "Din søvnscore er i top 30% for mænd 35-45." Kræver opt-in data fra andre brugere og privacy-arkitektur.
 
+## Data Governance, MDM & Best Practices
+
+Planlæg og implementér enterprise-grade data governance. Høj PoC-værdi til Pandora-konteksten.
+
+### Data Governance
+
+- [ ] **Data Owner** — dokumentér ejerskab per datakilde: `source_system`, ansvarlig person, opdateringsfrekvens, sensitivitetsniveau
+- [ ] **Data Lineage** — spor data fra råkilde → bronze → silver → gold. Implementér via Unity Catalog Lineage (automatisk i Databricks) + manuelt Mermaid-diagram i `docs/data_lineage.md`
+- [ ] **Data Retention policy** — definer hvor længe rådata (bronze parquet) og transformerede data (silver/gold Delta) gemmes. Implementér TTL-sletning eller arkivering
+- [ ] **Access Control** — Unity Catalog GRANT-statements: hvem må læse bronze/silver/gold? Implementér `GRANT SELECT ON SCHEMA` per lag. Dokumentér i `docs/access_control.md`
+- [ ] **Audit log** — aktivér Unity Catalog audit log i Databricks. Spor hvem der læser/skriver hvad og hvornår
+- [ ] **GDPR compliance** — kortlæg personhenførbare data (PII) per tabel. Definer `right_to_erasure`-procedure: hvilke tabeller skal slettes hvis bruger beder om det?
+- [ ] **Data Classification** — tagging af følsomhedsniveau per tabel/kolonne: `public`, `internal`, `confidential`, `sensitive` (f.eks. genetik, blodprøver)
+
+### Master Data Management (MDM)
+
+- [ ] **`user_id` dimension** — definer master `user_id` på tværs af alle kilder. Oura, Withings, Apple Health bruger alle forskellige bruger-identifikatorer — mapp dem til én canonical `user_id` i en `dim_user` tabel
+- [ ] **`dim_user`** — master tabel: `user_id`, `user_name`, `date_of_birth`, `biological_sex`, `source_system_ids` (JSON map). Fundament for multi-tenant + familie-platform
+- [ ] **`dim_source_system`** — master tabel over datakilder: `source_system`, `display_name`, `category` (wearable/nutrition/clinical/genetic), `ingest_frequency`, `owner`, `sla_hours`
+- [ ] **Metric standardisering** — definer kanoniske metriknavne på tværs af kilder: `heart_rate_bpm` (ikke `hr`, ikke `bpm`, ikke `heartRate`). Dokumentér i `docs/metric_dictionary.md`
+- [ ] **Enhedsstandardisering** — all distance i km, vægt i kg, temperatur i Celsius. Silver-laget konverterer ved ingest. Dokumentér konverteringsregler
+
+### Data Tagging Plan
+
+- [ ] **Unity Catalog Tags** — tag tabeller og kolonner med metadata i Databricks UC: `source_system`, `pii_level`, `freshness_sla`, `domain` (health/fitness/clinical/nutrition)
+- [ ] **Kolonne-level PII tagging** — tag kolonner med `pii=true` for: navn, fødselsdato, GPS-koordinater, genetiske markører, diagnose-koder. Fundament for GDPR-maskering
+- [ ] **Domæne-tagging** — gruppér tabeller i domæner: `vitals`, `sleep`, `activity`, `nutrition`, `clinical`, `genetic`. Bruges til governance-rapportering og Genie Space context
+- [ ] **Databricks `manage_uc_tags` MCP tool** — implementér tagging via MCP: `mcp__databricks__manage_uc_tags` på alle eksisterende tabeller
+- [ ] **Tag-konventioner** — dokumentér alle godkendte tags og værdier i `docs/tagging_conventions.md`. Undgå fri-tekst tags
+
+### Data Quality Framework
+
+- [ ] **`gold.data_quality_metrics`** — daglig DQ-tabel: `table_name`, `column_name`, `null_rate`, `distinct_count`, `min_value`, `max_value`, `anomaly_flag`, `checked_at`
+- [ ] **DLT Expectations** — `@dlt.expect_or_drop` på silver-laget: heart_rate_bpm BETWEEN 30 AND 250, sleep_score BETWEEN 0 AND 100, weight_kg BETWEEN 20 AND 300
+- [ ] **Schema enforcement** — aktivér Delta schema evolution policies: `mergeSchema=false` i prd, `mergeSchema=true` i dev. Breaking schema changes fejler explicit
+- [ ] **Quarantine tables** — `bronze.quarantine_<source>` per kilde. Rækker der fejler DQ-tjek rutes hertil i stedet for at blive droppet. Audit-trail på hvad der gik galt
+- [ ] **Freshness SLA** — se "Data SLA" sektion nedenfor — hænger direkte sammen med governance
+
+### Best Practices — PoC Dokumentation
+
+- [ ] **`docs/governance.md`** — samlet governance-dokument: ejerskab, klassifikation, retention, access control, GDPR-procedure
+- [ ] **`docs/metric_dictionary.md`** — alle kanoniske metriknavne, enheder, beregningsregler, kildedefinitioner
+- [ ] **`docs/data_lineage.md`** — Mermaid-diagram over data-flow fra kilde til gold
+- [ ] **`docs/tagging_conventions.md`** — godkendte tags, værdier og anvendelse
+- [ ] **`docs/access_control.md`** — GRANT-matrix: hvem har adgang til hvad
+
+---
+
 ## Databricks Framework — Enterprise Scale-Up
 
 Inspireret af [yasarkocyigit/daq-databricks-dab](https://github.com/yasarkocyigit/daq-databricks-dab) som PoC reference for enterprise-grade Databricks arkitektur.
