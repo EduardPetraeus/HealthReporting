@@ -79,9 +79,18 @@ See `README.md` files in each folder for the specific remaining items.
 - [ ] **Personal health API som SaaS** — hosted version af health API med Oura/Apple Health integration. Månedlig subscription for andre der vil have det samme setup uden selv at bygge det.
 - [ ] **Anonymiseret benchmark** — "Din søvnscore er i top 30% for mænd 35-45." Kræver opt-in data fra andre brugere og privacy-arkitektur.
 
+## Data Strategy
+
+The overarching direction for the platform — why we build it, where it goes, and how decisions are made. Foundation for all governance, MDM, and quality work below.
+
+- [ ] **Write `docs/data_strategy.md`** — one-pager covering: platform vision, guiding principles, target audience (personal + PoC demo), data domains (vitals, sleep, activity, nutrition, clinical, genetic), and the 3-horizon roadmap (1: stable bronze/silver/gold; 2: quality gates + governance; 3: AI/Genie/multi-tenant)
+- [ ] **Define data domains** — formally name and bound each domain: which sources belong, who owns it, what questions it answers. Drives tagging, lineage, and Genie Space organisation.
+- [ ] **Define decision framework** — when do we use DuckDB vs Databricks? When do we use dbt vs raw SQL? When do we use DLT vs Jobs? Document the criteria so future decisions are consistent.
+- [ ] **Align strategy with PoC narrative** — every architectural decision should have a "why this demonstrates enterprise readiness" sentence. Document in `docs/data_strategy.md` so it can be used directly in Pandora presentations.
+
 ## Data Governance, MDM & Best Practices
 
-Planlæg og implementér enterprise-grade data governance. Høj PoC-værdi til Pandora-konteksten.
+Plan and implement enterprise-grade data governance. High PoC value for the Pandora context.
 
 ### Data Governance
 
