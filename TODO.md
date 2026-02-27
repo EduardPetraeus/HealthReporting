@@ -81,9 +81,16 @@ See `README.md` files in each folder for the specific remaining items.
 
 ## Data Strategy
 
+> ⚠️ **This section requires a dedicated interview session — do not build from this draft alone.**
+> The items below are a rough draft created without proper input. Before any implementation,
+> schedule a structured interview/workshop session where the owner (Claus) defines vision,
+> priorities, and principles from scratch. Use the draft as a starting point for questions,
+> not as a specification.
+
 The overarching direction for the platform — why we build it, where it goes, and how decisions are made. Foundation for all governance, MDM, and quality work below.
 
-- [ ] **Write `docs/data_strategy.md`** — one-pager covering: platform vision, guiding principles, target audience (personal + PoC demo), data domains (vitals, sleep, activity, nutrition, clinical, genetic), and the 3-horizon roadmap (1: stable bronze/silver/gold; 2: quality gates + governance; 3: AI/Genie/multi-tenant)
+- [ ] **Schedule data strategy interview session** — dedicated session where Claude interviews Claus on: platform vision, target audience, data domains, guiding principles, 3-horizon roadmap, and PoC narrative. Output: `docs/data_strategy.md`.
+- [ ] **Write `docs/data_strategy.md`** *(draft only — rewrite after interview)* — platform vision, guiding principles, target audience (personal + PoC demo), data domains (vitals, sleep, activity, nutrition, clinical, genetic), 3-horizon roadmap (1: stable bronze/silver/gold; 2: quality gates + governance; 3: AI/Genie/multi-tenant)
 - [ ] **Define data domains** — formally name and bound each domain: which sources belong, who owns it, what questions it answers. Drives tagging, lineage, and Genie Space organisation.
 - [ ] **Define decision framework** — when do we use DuckDB vs Databricks? When do we use dbt vs raw SQL? When do we use DLT vs Jobs? Document the criteria so future decisions are consistent.
 - [ ] **Align strategy with PoC narrative** — every architectural decision should have a "why this demonstrates enterprise readiness" sentence. Document in `docs/data_strategy.md` so it can be used directly in Pandora presentations.
