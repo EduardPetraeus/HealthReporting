@@ -3,7 +3,7 @@
     "project": "HealthReporting",
     "owner": "Claus Eduard Petraeus",
     "claude_code_start_date": "2026-02-16",
-    "last_updated": "2026-02-26",
+    "last_updated": "2026-02-27",
     "methodology": "See claude_code_productivity.md"
   },
   "baseline": {
@@ -21,14 +21,14 @@
     "period": {
       "from": "2026-02-16"
     },
-    "total_commits": 67,
+    "total_commits": 71,
     "active_weeks": 2,
-    "avg_commits_per_active_week": 33.5,
-    "avg_files_per_commit": 13.6
+    "avg_commits_per_active_week": 35.5,
+    "avg_files_per_commit": 13.7
   },
   "factors": {
-    "velocity_factor": 8.17,
-    "files_per_commit_factor": 1.36,
+    "velocity_factor": 8.66,
+    "files_per_commit_factor": 1.37,
     "description": "velocity_factor = commits/active_week (Claude) / commits/active_week (baseline). files_per_commit_factor = avg_files (Claude) / avg_files (baseline)."
   },
   "entries": [
@@ -1037,6 +1037,66 @@
       "code_density": null,
       "time_since_prev_commit_minutes": 0,
       "streak_days": 1
+    },
+    {
+      "commit_sha": "2a2e8f5",
+      "date": "2026-02-27",
+      "message": "Port legacy silver SQL to Databricks notebooks, delete archive copies",
+      "task_type": "archive",
+      "commit_hour": 3,
+      "files_changed": 34,
+      "lines_added": 1220,
+      "lines_removed": 1143,
+      "files_factor": 3.4,
+      "refactor_ratio": 0.484,
+      "code_density": 35.9,
+      "time_since_prev_commit_minutes": 287,
+      "streak_days": 2
+    },
+    {
+      "commit_sha": "cde9c87",
+      "date": "2026-02-27",
+      "message": "Merge pull request #18 from EduardPetraeus/feature/port-legacy-silver-sql",
+      "task_type": "archive",
+      "commit_hour": 3,
+      "files_changed": 0,
+      "lines_added": 0,
+      "lines_removed": 0,
+      "files_factor": 0,
+      "refactor_ratio": null,
+      "code_density": null,
+      "time_since_prev_commit_minutes": 1,
+      "streak_days": 2
+    },
+    {
+      "commit_sha": "f5adf4d",
+      "date": "2026-02-27",
+      "message": "Convert silver/gold Python notebooks to pure SQL files",
+      "task_type": "other",
+      "commit_hour": 3,
+      "files_changed": 22,
+      "lines_added": 912,
+      "lines_removed": 902,
+      "files_factor": 2.2,
+      "refactor_ratio": 0.497,
+      "code_density": 41.5,
+      "time_since_prev_commit_minutes": 6,
+      "streak_days": 2
+    },
+    {
+      "commit_sha": "0d49cdd",
+      "date": "2026-02-27",
+      "message": "Update README and TODO to reflect SQL migration completion",
+      "task_type": "docs",
+      "commit_hour": 3,
+      "files_changed": 4,
+      "lines_added": 74,
+      "lines_removed": 21,
+      "files_factor": 0.4,
+      "refactor_ratio": 0.221,
+      "code_density": 18.5,
+      "time_since_prev_commit_minutes": 2,
+      "streak_days": 2
     }
   ]
 }

@@ -6,3 +6,6 @@ sources:
     tables:
       - name: stg_apple_health_heart_rate
       - name: stg_apple_health_step_count
+      - name: stg_oura_blood_oxygen
+      - name: stg_withings_blood_pressure
+      - name: stg_withings_weight
