@@ -33,14 +33,12 @@ on:
       - health_unified_platform/health_environment/orchestration/**
       - health_unified_platform/health_platform/transformation_logic/databricks/**
 
+  # Validate runs on every PR — no path filter.
+  # This ensures the required status check always runs regardless of which files changed.
+  # Deploy jobs (push) still use path filters to avoid unnecessary deployments.
   pull_request:
     branches:
       - main
-    paths:
-      - health_unified_platform/health_environment/deployment/databricks/**
-      - health_unified_platform/health_environment/config/databricks/**
-      - health_unified_platform/health_environment/orchestration/**
-      - health_unified_platform/health_platform/transformation_logic/databricks/**
 
   # Manual trigger from Actions tab
   workflow_dispatch:

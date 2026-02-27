@@ -21,14 +21,14 @@
     "period": {
       "from": "2026-02-16"
     },
-    "total_commits": 98,
+    "total_commits": 101,
     "active_weeks": 2,
-    "avg_commits_per_active_week": 49.0,
-    "avg_files_per_commit": 10.3
+    "avg_commits_per_active_week": 50.5,
+    "avg_files_per_commit": 10.1
   },
   "factors": {
-    "velocity_factor": 11.95,
-    "files_per_commit_factor": 1.03,
+    "velocity_factor": 12.32,
+    "files_per_commit_factor": 1.01,
     "description": "velocity_factor = commits/active_week (Claude) / commits/active_week (baseline). files_per_commit_factor = avg_files (Claude) / avg_files (baseline)."
   },
   "entries": [
@@ -1501,6 +1501,51 @@
       "refactor_ratio": 0.5,
       "code_density": 1.0,
       "time_since_prev_commit_minutes": 437,
+      "streak_days": 2
+    },
+    {
+      "commit_sha": "402f505",
+      "date": "2026-02-27",
+      "message": "Update productivity metrics to 97 commits",
+      "task_type": "fix",
+      "commit_hour": 19,
+      "files_changed": 1,
+      "lines_added": 35,
+      "lines_removed": 5,
+      "files_factor": 0.1,
+      "refactor_ratio": 0.125,
+      "code_density": 35.0,
+      "time_since_prev_commit_minutes": 0,
+      "streak_days": 2
+    },
+    {
+      "commit_sha": "da79ae2",
+      "date": "2026-02-27",
+      "message": "Add .env.example and check off Configuration section",
+      "task_type": "config",
+      "commit_hour": 19,
+      "files_changed": 2,
+      "lines_added": 53,
+      "lines_removed": 1,
+      "files_factor": 0.2,
+      "refactor_ratio": 0.019,
+      "code_density": 26.5,
+      "time_since_prev_commit_minutes": 2,
+      "streak_days": 2
+    },
+    {
+      "commit_sha": "736ac3b",
+      "date": "2026-02-27",
+      "message": "Merge pull request #31 from EduardPetraeus/feature/env-example",
+      "task_type": "other",
+      "commit_hour": 19,
+      "files_changed": 0,
+      "lines_added": 0,
+      "lines_removed": 0,
+      "files_factor": 0,
+      "refactor_ratio": null,
+      "code_density": null,
+      "time_since_prev_commit_minutes": 10,
       "streak_days": 2
     }
   ]
