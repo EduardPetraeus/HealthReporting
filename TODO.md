@@ -68,6 +68,8 @@ See `README.md` files in each folder for the specific remaining items.
 
 - [ ] **Databricks AI/BI dashboard** — BI-værktøj direkte på gold-laget. Viser trends, scores og anomalier. Ingen ekstra infrastruktur når Databricks er konfigureret.
 - [ ] **Databricks Genie Space** — natural language interface til gold-data. "Hvad var min bedste uge i januar?" Killer demo til Pandora. Kræver kun gold-tabeller + Databricks konfiguration.
+- [ ] **Genie Everywhere — Microsoft Teams** — embed Genie Space i Teams via Copilot Studio. Ingen kode, få klik, OAuth per bruger. Relevant for dag-job: eliminerer ad-hoc "kan du trække..."-forespørgsler. Kræver Pro SQL warehouse (ikke Free Edition).
+- [ ] **Claude API + SQL backend** — alternativ til Genie uden Databricks-afhængighed. FastAPI + DuckDB/Postgres backend med Claude API til natural language → SQL. Ejer hele stacken, ingen vendor lock-in. Kan sælges som produkt — Genie-integration gemmes til konsulent-engagementer.
 - [ ] **Databricks PoC accelerator** — pak dette repo som en "30-minute Databricks PoC starter": medallion, CI/CD, dev/prd, metadata-driven. Brug internt hos Pandora som accelerator til nye dataprojekter.
 - [ ] **Forudsigelsesmodel** — baseret på gårsdagens søvn + aktivitet, forudsig dagens readiness. Simpel lineær regression. Kræver minimum 6 måneders historisk data.
 
@@ -77,9 +79,25 @@ See `README.md` files in each folder for the specific remaining items.
 - [ ] **Personal health API som SaaS** — hosted version af health API med Oura/Apple Health integration. Månedlig subscription for andre der vil have det samme setup uden selv at bygge det.
 - [ ] **Anonymiseret benchmark** — "Din søvnscore er i top 30% for mænd 35-45." Kræver opt-in data fra andre brugere og privacy-arkitektur.
 
+## Data Strategy
+
+> ⚠️ **This section requires a dedicated interview session — do not build from this draft alone.**
+> The items below are a rough draft created without proper input. Before any implementation,
+> schedule a structured interview/workshop session where the owner (Claus) defines vision,
+> priorities, and principles from scratch. Use the draft as a starting point for questions,
+> not as a specification.
+
+The overarching direction for the platform — why we build it, where it goes, and how decisions are made. Foundation for all governance, MDM, and quality work below.
+
+- [ ] **Schedule data strategy interview session** — dedicated session where Claude interviews Claus on: platform vision, target audience, data domains, guiding principles, 3-horizon roadmap, and PoC narrative. Output: `docs/data_strategy.md`.
+- [ ] **Write `docs/data_strategy.md`** *(draft only — rewrite after interview)* — platform vision, guiding principles, target audience (personal + PoC demo), data domains (vitals, sleep, activity, nutrition, clinical, genetic), 3-horizon roadmap (1: stable bronze/silver/gold; 2: quality gates + governance; 3: AI/Genie/multi-tenant)
+- [ ] **Define data domains** — formally name and bound each domain: which sources belong, who owns it, what questions it answers. Drives tagging, lineage, and Genie Space organisation.
+- [ ] **Define decision framework** — when do we use DuckDB vs Databricks? When do we use dbt vs raw SQL? When do we use DLT vs Jobs? Document the criteria so future decisions are consistent.
+- [ ] **Align strategy with PoC narrative** — every architectural decision should have a "why this demonstrates enterprise readiness" sentence. Document in `docs/data_strategy.md` so it can be used directly in Pandora presentations.
+
 ## Data Governance, MDM & Best Practices
 
-Planlæg og implementér enterprise-grade data governance. Høj PoC-værdi til Pandora-konteksten.
+Plan and implement enterprise-grade data governance. High PoC value for the Pandora context.
 
 ### Data Governance
 
@@ -233,12 +251,37 @@ Fundinger fra repo-gennemgang 2026-02-26.
 - [ ] Test Claude Code → Figma MCP flow
 - [ ] Brug til design-samarbejde med kone på HR-produkter
 
+## Learning & Certification
+
+### Free badges (quick wins — tag dem nu)
+
+- [ ] **Lakehouse Fundamentals** — 4 korte videoer + quiz → LinkedIn badge. [databricks.com/learn/training](https://www.databricks.com/learn/training/home)
+- [ ] **Generative AI Fundamentals** — 4 korte videoer → LinkedIn badge
+- [ ] **AI Agent Fundamentals** — LinkedIn badge
+- [ ] **AWS Platform Architect accreditation** — gratis assessment → badge
+- [ ] **Platform Administrator accreditation** — gratis learning pathway + assessment
+
+### Betalte certificeringer (~$200 pr. stk)
+
+- [ ] **Data Engineer Associate** — direkte relevant, første prioritet. Forbered med free training + Databricks Academy.
+- [ ] **Data Engineer Professional** — efter Associate er bestået.
+
+### Events
+
+- [ ] **Data + AI Summit 2026** — 15-18 juni, San Francisco. Sæt i kalenderen. Overvej om det er værd at deltage (community edition tickets / remote stream).
+
+---
+
 ## Content idéer
 
 - "How I use Claude Code subagents as a data engineer"
 - "My Mac Mini runs 24/7 with Claude Cowork"
 - Claude Code + GSD workflow dokumentation
 - Build in public om hele setuptet
+- "How I set up Databricks Genie in Teams in 30 minutes" (LinkedIn)
+- "3 OAuth patterns for embedding Genie in your apps" (technical authority)
+- "Why your data team should stop answering ad-hoc questions" (problem-aware)
+- Screen recording: Genie + Copilot Studio → Teams setup (YouTube/TikTok)
 
 ## Droppet
 
