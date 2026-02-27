@@ -35,7 +35,7 @@ resources:
         - task_key: silver_all_sources
           job_cluster_key: silver_cluster
           notebook_task:
-            notebook_path: ../notebooks/silver/silver_runner
+            notebook_path: ../../health_platform/transformation_logic/databricks/silver/silver_runner.py
             base_parameters:
               source_name: ""   # empty = process all sources in config_root
               config_root: ${var.config_root}

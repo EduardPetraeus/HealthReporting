@@ -26,7 +26,7 @@ resources:
         - task_key: gold_all_entities
           job_cluster_key: gold_cluster
           notebook_task:
-            notebook_path: ../notebooks/gold/gold_runner
+            notebook_path: ../../health_platform/transformation_logic/databricks/gold/gold_runner.py
             base_parameters:
               entity_name: ""   # empty = process all gold entities in config_root
               config_root: ${var.gold_config_root}
