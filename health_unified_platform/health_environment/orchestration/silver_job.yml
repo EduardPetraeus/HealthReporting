@@ -16,24 +16,12 @@ resources:
         timezone_id: UTC
         pause_status: UNPAUSED
 
-      job_clusters:
-        - job_cluster_key: silver_cluster
-          new_cluster:
-            spark_version: 15.4.x-scala2.12
-            node_type_id: ${var.cluster_node_type}
-            num_workers: 2
-            spark_conf:
-              spark.databricks.delta.preview.enabled: "true"
-            spark_env_vars:
-              HEALTH_ENV: ${var.env}
-
       tasks:
         # ------------------------------------------------------------------
         # Run all silver sources (leave source_name empty to process all)
         # Split into separate tasks if you need per-source control.
         # ------------------------------------------------------------------
         - task_key: silver_all_sources
-          job_cluster_key: silver_cluster
           notebook_task:
             notebook_path: ../../health_platform/transformation_logic/databricks/silver/silver_runner.py
             base_parameters:
