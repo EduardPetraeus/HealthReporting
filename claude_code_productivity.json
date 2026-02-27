@@ -21,14 +21,14 @@
     "period": {
       "from": "2026-02-16"
     },
-    "total_commits": 104,
+    "total_commits": 107,
     "active_weeks": 2,
-    "avg_commits_per_active_week": 52.0,
-    "avg_files_per_commit": 9.8
+    "avg_commits_per_active_week": 53.5,
+    "avg_files_per_commit": 9.6
   },
   "factors": {
-    "velocity_factor": 12.68,
-    "files_per_commit_factor": 0.98,
+    "velocity_factor": 13.05,
+    "files_per_commit_factor": 0.96,
     "description": "velocity_factor = commits/active_week (Claude) / commits/active_week (baseline). files_per_commit_factor = avg_files (Claude) / avg_files (baseline)."
   },
   "entries": [
@@ -1591,6 +1591,51 @@
       "refactor_ratio": null,
       "code_density": null,
       "time_since_prev_commit_minutes": 1,
+      "streak_days": 2
+    },
+    {
+      "commit_sha": "54a2828",
+      "date": "2026-02-27",
+      "message": "Update productivity metrics to 102 commits",
+      "task_type": "fix",
+      "commit_hour": 19,
+      "files_changed": 1,
+      "lines_added": 50,
+      "lines_removed": 5,
+      "files_factor": 0.1,
+      "refactor_ratio": 0.091,
+      "code_density": 50.0,
+      "time_since_prev_commit_minutes": 0,
+      "streak_days": 2
+    },
+    {
+      "commit_sha": "2ab7ae7",
+      "date": "2026-02-27",
+      "message": "docs: add Databricks MCP setup documentation",
+      "task_type": "docs",
+      "commit_hour": 20,
+      "files_changed": 1,
+      "lines_added": 126,
+      "lines_removed": 0,
+      "files_factor": 0.1,
+      "refactor_ratio": 0.0,
+      "code_density": 126.0,
+      "time_since_prev_commit_minutes": 14,
+      "streak_days": 2
+    },
+    {
+      "commit_sha": "ed3bb0f",
+      "date": "2026-02-27",
+      "message": "docs: add dev deploy note for feature branches + expand MCP doc",
+      "task_type": "docs",
+      "commit_hour": 20,
+      "files_changed": 2,
+      "lines_added": 16,
+      "lines_removed": 1,
+      "files_factor": 0.2,
+      "refactor_ratio": 0.059,
+      "code_density": 8.0,
+      "time_since_prev_commit_minutes": 0,
       "streak_days": 2
     }
   ]
