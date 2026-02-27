@@ -232,27 +232,27 @@ Port fra `archive/legacy_databricks_pipeline/silver/` — bevar alle navngivning
 
 Alle filer er portet som `.py` Databricks notebooks og archive-kopierne er slettet.
 
-| Fil | Portet til | Archive slettet |
-|-----|-----------|-----------------|
-| `blood_oxygen` | `silver/blood_oxygen.py` | [x] |
-| `blood_pressure` | `silver/blood_pressure.py` | [x] |
-| `daily_activity` | `silver/daily_activity.py` | [x] |
-| `daily_annotations` | `silver/daily_annotations.py` | [x] |
-| `daily_meal` | `silver/daily_meal.py` | [x] |
-| `daily_readiness` | `silver/daily_readiness.py` | [x] |
-| `daily_sleep` | `silver/daily_sleep.py` | [x] |
-| `heart_rate` | `silver/heart_rate.py` | [x] |
-| `weight` | `silver/weight.py` | [x] |
+| Fil | Portet til (SQL) | Archive slettet |
+|-----|-----------------|-----------------|
+| `blood_oxygen` | `silver/sql/blood_oxygen.sql` | [x] |
+| `blood_pressure` | `silver/sql/blood_pressure.sql` | [x] |
+| `daily_activity` | `silver/sql/daily_activity.sql` | [x] |
+| `daily_annotations` | `silver/sql/daily_annotations.sql` | [x] |
+| `daily_meal` | `silver/sql/daily_meal.sql` | [x] |
+| `daily_readiness` | `silver/sql/daily_readiness.sql` | [x] |
+| `daily_sleep` | `silver/sql/daily_sleep.sql` | [x] |
+| `heart_rate` | `silver/sql/oura_heart_rate.sql` (renamed — `heart_rate.sql` er YAML-template) | [x] |
+| `weight` | `silver/sql/weight.sql` | [x] |
 
 **Gold views** portet:
-- [x] `vw_daily_annotations.sql` → `gold/vw_daily_annotations.py`
-- [x] `vw_heart_rate_avg_per_day.sql` → `gold/vw_heart_rate_avg_per_day.py`
+- [x] `vw_daily_annotations.sql` → `gold/sql/vw_daily_annotations.sql`
+- [x] `vw_heart_rate_avg_per_day.sql` → `gold/sql/vw_heart_rate_avg_per_day.sql`
 
 ### Silver notebooks — oprydning og migrering til SQL + dbt
 
 De portede notebooks er aktuelt `.py` filer med `# MAGIC %sql` blokke (Databricks notebook-format). Dette er en mellemløsning — målet er rene SQL-filer:
 
-- [ ] **Ryd op i Python-wrappere** — konverter `.py` magic-notebook filer til rene `.sql` filer der kan køres direkte (Databricks SQL notebook format eller `databricks bundle run --sql`). Ingen Python wrapper nødvendig da logikken er 100% SQL.
+- [x] **Ryd op i Python-wrappere** — konverteret alle 9 silver + 2 gold `.py` magic-notebook filer til rene `.sql` filer i `silver/sql/` og `gold/sql/`. `.py` wrappers slettet (PR #19).
 - [ ] **dbt-version** — skriv alle 9 silver-tabeller som dbt models (`models/silver/*.sql`) med `{{ config(materialized='incremental', unique_key=...) }}`. Dette er enterprise-mønsteret og understøtter både DuckDB (lokalt) og Databricks (cloud). dbt håndterer MERGE/INSERT OVERWRITE automatisk via incremental strategy.
 - [ ] **Opdater kildereferencer** — alle notebooks peger på `workspace.default.*` (legacy Databricks workspace). Opdater til `health_dw.bronze.stg_*` når bronze-laget er klart.
 - [ ] **Vælg langsigtet strategi** — beslut om silver-laget skal køres som (a) rene Databricks SQL notebooks, (b) dbt-core med dbt-databricks adapter, eller (c) begge parallelt (dbt lokalt på DuckDB + Databricks notebooks i cloud). Dokumentér valget i `docs/architecture.md`.
