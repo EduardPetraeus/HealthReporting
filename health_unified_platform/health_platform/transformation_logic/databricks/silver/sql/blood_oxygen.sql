@@ -1,9 +1,8 @@
 -- =============================================================================
 -- blood_oxygen.sql
--- Silver: Oura blood oxygen (SpO2) levels
+-- Silver: Oura daily blood oxygen (SpO2) summary
 --
--- Source: workspace.default.oura_blood_oxygen_level
--- TODO: Update source to health_dw.bronze.stg_oura_blood_oxygen when bronze is ready
+-- Source: health_dw.bronze.stg_oura_blood_oxygen
 --
 -- Business key: (id, day)
 -- Change detection: row_hash over measurement_type, spo2_percentage, breathing_disturbance_index
@@ -30,8 +29,8 @@ CREATE OR REPLACE TABLE health_dw.silver.blood_oxygen_staging AS
 WITH deduped AS (
     SELECT
         *,
-        ROW_NUMBER() OVER (PARTITION BY id, day ORDER BY id, day) AS rn
-    FROM workspace.default.oura_blood_oxygen_level
+        ROW_NUMBER() OVER (PARTITION BY id, day ORDER BY _ingested_at DESC) AS rn
+    FROM health_dw.bronze.stg_oura_blood_oxygen
     WHERE id IS NOT NULL
 )
 SELECT

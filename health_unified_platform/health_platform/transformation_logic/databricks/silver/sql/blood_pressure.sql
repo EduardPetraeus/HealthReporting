@@ -2,11 +2,10 @@
 -- blood_pressure.sql
 -- Silver: Withings blood pressure measurements
 --
--- Source: workspace.default.withings_blood_pressure
--- TODO: Update source to health_dw.bronze.stg_withings_blood_pressure when bronze is ready
+-- Source: health_dw.bronze.stg_withings_blood_pressure
 --
--- Business key: sha2(Date || Systolic || Diastolic)
--- Change detection: row_hash over Systolic, Diastolic, Comments
+-- Business key: sha2(datetime || systolic || diastolic)
+-- Change detection: row_hash over systolic, diastolic, pulse, comments
 -- =============================================================================
 
 -- COMMAND ----------
@@ -17,6 +16,7 @@ CREATE TABLE IF NOT EXISTS health_dw.silver.blood_pressure (
     datetime          TIMESTAMP NOT NULL,
     systolic          BIGINT    NOT NULL,
     diastolic         BIGINT    NOT NULL,
+    pulse             BIGINT,
     comments          STRING,
     business_key_hash STRING    NOT NULL,
     row_hash          STRING    NOT NULL,
@@ -31,28 +31,30 @@ CREATE OR REPLACE TABLE health_dw.silver.blood_pressure_staging AS
 WITH deduped AS (
     SELECT
         *,
-        ROW_NUMBER() OVER (PARTITION BY Date, Systolic, Diastolic ORDER BY Date) AS rn
-    FROM workspace.default.withings_blood_pressure
-    WHERE Date IS NOT NULL AND Systolic IS NOT NULL AND Diastolic IS NOT NULL
+        ROW_NUMBER() OVER (PARTITION BY datetime ORDER BY _ingested_at DESC) AS rn
+    FROM health_dw.bronze.stg_withings_blood_pressure
+    WHERE datetime IS NOT NULL AND systolic IS NOT NULL AND diastolic IS NOT NULL
 )
 SELECT
-    year(Date) * 10000 + month(Date) * 100 + dayofmonth(Date) AS sk_date,
-    lpad(hour(Date), 2, '0') || lpad(minute(Date), 2, '0')    AS sk_time,
-    Date                                                        AS datetime,
-    Systolic                                                    AS systolic,
-    Diastolic                                                   AS diastolic,
-    Comments                                                    AS comments,
+    year(datetime) * 10000 + month(datetime) * 100 + dayofmonth(datetime) AS sk_date,
+    lpad(hour(datetime), 2, '0') || lpad(minute(datetime), 2, '0')        AS sk_time,
+    datetime,
+    systolic,
+    diastolic,
+    pulse,
+    comments,
     sha2(concat_ws('||',
-        coalesce(cast(Date AS STRING), ''),
-        coalesce(cast(Systolic AS STRING), ''),
-        coalesce(cast(Diastolic AS STRING), '')
-    ), 256)                                                     AS business_key_hash,
+        coalesce(cast(datetime AS STRING), ''),
+        coalesce(cast(systolic AS STRING), ''),
+        coalesce(cast(diastolic AS STRING), '')
+    ), 256)                                                                AS business_key_hash,
     sha2(concat_ws('||',
-        coalesce(cast(Systolic AS STRING), ''),
-        coalesce(cast(Diastolic AS STRING), ''),
-        coalesce(Comments, '')
-    ), 256)                                                     AS row_hash,
-    current_timestamp()                                         AS load_datetime
+        coalesce(cast(systolic AS STRING), ''),
+        coalesce(cast(diastolic AS STRING), ''),
+        coalesce(cast(pulse AS STRING), ''),
+        coalesce(comments, '')
+    ), 256)                                                                AS row_hash,
+    current_timestamp()                                                    AS load_datetime
 FROM deduped
 WHERE rn = 1;
 
@@ -69,16 +71,17 @@ WHEN MATCHED AND target.row_hash <> source.row_hash THEN
         target.datetime          = source.datetime,
         target.systolic          = source.systolic,
         target.diastolic         = source.diastolic,
+        target.pulse             = source.pulse,
         target.comments          = source.comments,
         target.business_key_hash = source.business_key_hash,
         target.row_hash          = source.row_hash,
         target.update_datetime   = current_timestamp()
 
 WHEN NOT MATCHED THEN
-    INSERT (sk_date, sk_time, datetime, systolic, diastolic, comments,
+    INSERT (sk_date, sk_time, datetime, systolic, diastolic, pulse, comments,
             business_key_hash, row_hash, load_datetime, update_datetime)
     VALUES (source.sk_date, source.sk_time, source.datetime, source.systolic,
-            source.diastolic, source.comments, source.business_key_hash,
+            source.diastolic, source.pulse, source.comments, source.business_key_hash,
             source.row_hash, current_timestamp(), current_timestamp());
 
 -- COMMAND ----------
