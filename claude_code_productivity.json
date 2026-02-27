@@ -21,14 +21,14 @@
     "period": {
       "from": "2026-02-16"
     },
-    "total_commits": 87,
+    "total_commits": 91,
     "active_weeks": 2,
-    "avg_commits_per_active_week": 43.5,
-    "avg_files_per_commit": 11.5
+    "avg_commits_per_active_week": 45.5,
+    "avg_files_per_commit": 11.1
   },
   "factors": {
-    "velocity_factor": 10.61,
-    "files_per_commit_factor": 1.15,
+    "velocity_factor": 11.1,
+    "files_per_commit_factor": 1.11,
     "description": "velocity_factor = commits/active_week (Claude) / commits/active_week (baseline). files_per_commit_factor = avg_files (Claude) / avg_files (baseline)."
   },
   "entries": [
@@ -1294,6 +1294,21 @@
       "streak_days": 2
     },
     {
+      "commit_sha": "7291e30",
+      "date": "2026-02-27",
+      "message": "Merge pull request #27 from EduardPetraeus/docs/security-review-rule",
+      "task_type": "docs",
+      "commit_hour": 6,
+      "files_changed": 0,
+      "lines_added": 0,
+      "lines_removed": 0,
+      "files_factor": 0,
+      "refactor_ratio": null,
+      "code_density": null,
+      "time_since_prev_commit_minutes": 7,
+      "streak_days": 2
+    },
+    {
       "commit_sha": "4d4cade",
       "date": "2026-02-27",
       "message": "Add learning/certification section and Genie ideas to TODO",
@@ -1305,7 +1320,7 @@
       "files_factor": 0.1,
       "refactor_ratio": 0.0,
       "code_density": 27.0,
-      "time_since_prev_commit_minutes": 9,
+      "time_since_prev_commit_minutes": 2,
       "streak_days": 2
     },
     {
@@ -1336,6 +1351,51 @@
       "refactor_ratio": 0.111,
       "code_density": 8.0,
       "time_since_prev_commit_minutes": 2,
+      "streak_days": 2
+    },
+    {
+      "commit_sha": "ae91a8f",
+      "date": "2026-02-27",
+      "message": "Merge pull request #28 from EduardPetraeus/docs/todo-learning-genie",
+      "task_type": "docs",
+      "commit_hour": 6,
+      "files_changed": 0,
+      "lines_added": 0,
+      "lines_removed": 0,
+      "files_factor": 0,
+      "refactor_ratio": null,
+      "code_density": null,
+      "time_since_prev_commit_minutes": 0,
+      "streak_days": 2
+    },
+    {
+      "commit_sha": "a601c89",
+      "date": "2026-02-27",
+      "message": "Add branch cleanup workflow and update productivity metrics",
+      "task_type": "refactor",
+      "commit_hour": 6,
+      "files_changed": 3,
+      "lines_added": 265,
+      "lines_removed": 22,
+      "files_factor": 0.3,
+      "refactor_ratio": 0.077,
+      "code_density": 88.3,
+      "time_since_prev_commit_minutes": 7,
+      "streak_days": 2
+    },
+    {
+      "commit_sha": "0c0b427",
+      "date": "2026-02-27",
+      "message": "Merge pull request #29 from EduardPetraeus/docs/branch-cleanup-workflow",
+      "task_type": "refactor",
+      "commit_hour": 6,
+      "files_changed": 0,
+      "lines_added": 0,
+      "lines_removed": 0,
+      "files_factor": 0,
+      "refactor_ratio": null,
+      "code_density": null,
+      "time_since_prev_commit_minutes": 1,
       "streak_days": 2
     }
   ]
