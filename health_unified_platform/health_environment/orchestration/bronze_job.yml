@@ -34,7 +34,7 @@ resources:
         - task_key: bronze_apple_health_heart_rate
           job_cluster_key: bronze_cluster
           notebook_task:
-            notebook_path: ../notebooks/bronze/bronze_autoloader
+            notebook_path: ../../health_platform/transformation_logic/databricks/bronze/bronze_autoloader.py
             base_parameters:
               source_name: apple_health_heart_rate
               config_root: ${var.config_root}
@@ -45,7 +45,7 @@ resources:
         - task_key: bronze_oura_heart_rate
           job_cluster_key: bronze_cluster
           notebook_task:
-            notebook_path: ../notebooks/bronze/bronze_autoloader
+            notebook_path: ../../health_platform/transformation_logic/databricks/bronze/bronze_autoloader.py
             base_parameters:
               source_name: oura_heart_rate
               config_root: ${var.config_root}

@@ -123,6 +123,25 @@ Agents (`.claude/agents/`):
 - `poc-presenter` — prepare Pandora PoC demo materials
 - `security-reviewer` — check secrets, data handling, code safety
 
+## Databricks Skills
+
+Skills-base-sti: `/Users/clauseduardpetraeus/.ai-dev-kit/repo/databricks-skills/`
+
+Load disse skills som kontekst ved relevante opgaver:
+
+| Skill | Sti | Relevans |
+|---|---|---|
+| Asset Bundles | `databricks-asset-bundles/SKILL.md` | DAB deployment — aktivt i brug |
+| Jobs | `databricks-jobs/SKILL.md` | Job scheduling og workflows |
+| Unity Catalog | `databricks-unity-catalog/SKILL.md` | UC governance og catalog |
+| DBSQL | `databricks-dbsql/SKILL.md` | SQL warehouse queries |
+| Config | `databricks-config/SKILL.md` | Authentication og profile setup |
+| Metric Views | `databricks-metric-views/SKILL.md` | Metrics og BI-lag (gold) |
+| AIBI Dashboards | `databricks-aibi-dashboards/SKILL.md` | Dashboards og visualisering |
+| Docs | `databricks-docs/SKILL.md` | Doc lookup via MCP |
+
+MCP-server konfigureret i `.mcp.json` (projektniveau). Tools tilgængelige som `mcp__databricks__*`.
+
 ## Usage Optimization
 - **Be concise**: Provide brief explanations and avoid repeating project context unless asked.
 - **Targeted Reading**: Only read files in `docs/` if the user's request requires specific architectural or path knowledge.

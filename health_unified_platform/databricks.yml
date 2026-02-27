@@ -1,10 +1,10 @@
 # =============================================================================
 # databricks.yml — Health Platform Asset Bundle
 # =============================================================================
-# Bundle root: health_environment/deployment/databricks/
+# Bundle root: health_unified_platform/
 #
 # Run all `databricks bundle` commands from this directory:
-#   cd health_unified_platform/health_environment/deployment/databricks
+#   cd health_unified_platform
 #   databricks bundle deploy --target dev
 #   databricks bundle deploy --target prd
 #
@@ -18,13 +18,13 @@ bundle:
 
 # Include job resource YAML files from orchestration/
 include:
-  - ../../orchestration/*.yml
+  - health_environment/orchestration/*.yml
 
-# Sync notebooks and config files relative to this databricks.yml.
+# Sync notebooks and config files relative to this databricks.yml (health_unified_platform/).
 sync:
   include:
-    - ../../config/databricks/**
-    - ../../../health_platform/transformation_logic/databricks/**
+    - health_environment/config/databricks/**
+    - health_platform/transformation_logic/databricks/**
 
 # ---------------------------------------------------------------------------
 # Variables — overridden per target
@@ -36,11 +36,11 @@ variables:
 
   catalog:
     description: "Unity Catalog name"
-    default: health_dw
+    default: health-platform-dev
 
   cluster_node_type:
-    description: "Node type for job clusters (Azure: Standard_DS3_v2 | AWS: i3.xlarge)"
-    default: Standard_DS3_v2
+    description: "Node type for job clusters (AWS: i3.xlarge | Azure: Standard_DS3_v2)"
+    default: i3.xlarge
 
   config_root:
     description: "Workspace path to source YAML configs after bundle deployment"
@@ -59,20 +59,23 @@ variables:
     default: /Workspace/Shared/health_platform/notebooks/gold/sql
 
 # ---------------------------------------------------------------------------
-# Targets
+# Targets — both use the same workspace, separated by Unity Catalog
 # ---------------------------------------------------------------------------
 targets:
   dev:
     mode: development
     default: true
     workspace:
-      host: https://your-dev-workspace.azuredatabricks.net  # TODO: replace
+      host: https://dbc-23749322-8818.cloud.databricks.com
     variables:
       env: dev
+      catalog: health-platform-dev
 
   prd:
     mode: production
     workspace:
-      host: https://your-prd-workspace.azuredatabricks.net  # TODO: replace
+      host: https://dbc-23749322-8818.cloud.databricks.com
+      root_path: /Workspace/Shared/${bundle.name}/${bundle.target}
     variables:
       env: prd
+      catalog: health-platform-prd
