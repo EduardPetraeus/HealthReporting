@@ -49,8 +49,10 @@ Workflow:
 2. Commit and push
 3. Open PR → GitHub Actions validates bundle
 4. Merge to main → auto-deploys to Databricks prd
+5. After merging: `git checkout main && git pull && git branch -d <branch>`
 
 Feature branches auto-deploy to Databricks dev on push (once secrets are configured).
+GitHub is configured to automatically delete remote head branches after merge.
 
 ## Productivity Tracking
 

@@ -7,3 +7,4 @@ Commit, push, and open a PR for the current branch.
 5. Push to remote
 6. Open PR with `gh pr create` — short title, bullet summary, test plan
 7. Run `.venv/bin/python update_productivity.py`
+8. After the PR is merged: `git checkout main && git pull && git branch -d <branch>`
