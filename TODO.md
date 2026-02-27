@@ -68,6 +68,8 @@ See `README.md` files in each folder for the specific remaining items.
 
 - [ ] **Databricks AI/BI dashboard** — BI-værktøj direkte på gold-laget. Viser trends, scores og anomalier. Ingen ekstra infrastruktur når Databricks er konfigureret.
 - [ ] **Databricks Genie Space** — natural language interface til gold-data. "Hvad var min bedste uge i januar?" Killer demo til Pandora. Kræver kun gold-tabeller + Databricks konfiguration.
+- [ ] **Genie Everywhere — Microsoft Teams** — embed Genie Space i Teams via Copilot Studio. Ingen kode, få klik, OAuth per bruger. Relevant for dag-job: eliminerer ad-hoc "kan du trække..."-forespørgsler. Kræver Pro SQL warehouse (ikke Free Edition).
+- [ ] **Claude API + SQL backend** — alternativ til Genie uden Databricks-afhængighed. FastAPI + DuckDB/Postgres backend med Claude API til natural language → SQL. Ejer hele stacken, ingen vendor lock-in. Kan sælges som produkt — Genie-integration gemmes til konsulent-engagementer.
 - [ ] **Databricks PoC accelerator** — pak dette repo som en "30-minute Databricks PoC starter": medallion, CI/CD, dev/prd, metadata-driven. Brug internt hos Pandora som accelerator til nye dataprojekter.
 - [ ] **Forudsigelsesmodel** — baseret på gårsdagens søvn + aktivitet, forudsig dagens readiness. Simpel lineær regression. Kræver minimum 6 måneders historisk data.
 
@@ -233,12 +235,37 @@ Fundinger fra repo-gennemgang 2026-02-26.
 - [ ] Test Claude Code → Figma MCP flow
 - [ ] Brug til design-samarbejde med kone på HR-produkter
 
+## Learning & Certification
+
+### Free badges (quick wins — tag dem nu)
+
+- [ ] **Lakehouse Fundamentals** — 4 korte videoer + quiz → LinkedIn badge. [databricks.com/learn/training](https://www.databricks.com/learn/training/home)
+- [ ] **Generative AI Fundamentals** — 4 korte videoer → LinkedIn badge
+- [ ] **AI Agent Fundamentals** — LinkedIn badge
+- [ ] **AWS Platform Architect accreditation** — gratis assessment → badge
+- [ ] **Platform Administrator accreditation** — gratis learning pathway + assessment
+
+### Betalte certificeringer (~$200 pr. stk)
+
+- [ ] **Data Engineer Associate** — direkte relevant, første prioritet. Forbered med free training + Databricks Academy.
+- [ ] **Data Engineer Professional** — efter Associate er bestået.
+
+### Events
+
+- [ ] **Data + AI Summit 2026** — 15-18 juni, San Francisco. Sæt i kalenderen. Overvej om det er værd at deltage (community edition tickets / remote stream).
+
+---
+
 ## Content idéer
 
 - "How I use Claude Code subagents as a data engineer"
 - "My Mac Mini runs 24/7 with Claude Cowork"
 - Claude Code + GSD workflow dokumentation
 - Build in public om hele setuptet
+- "How I set up Databricks Genie in Teams in 30 minutes" (LinkedIn)
+- "3 OAuth patterns for embedding Genie in your apps" (technical authority)
+- "Why your data team should stop answering ad-hoc questions" (problem-aware)
+- Screen recording: Genie + Copilot Studio → Teams setup (YouTube/TikTok)
 
 ## Droppet
 
