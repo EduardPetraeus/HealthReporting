@@ -21,14 +21,14 @@
     "period": {
       "from": "2026-02-16"
     },
-    "total_commits": 93,
+    "total_commits": 98,
     "active_weeks": 2,
-    "avg_commits_per_active_week": 46.5,
-    "avg_files_per_commit": 10.8
+    "avg_commits_per_active_week": 49.0,
+    "avg_files_per_commit": 10.3
   },
   "factors": {
-    "velocity_factor": 11.34,
-    "files_per_commit_factor": 1.08,
+    "velocity_factor": 11.95,
+    "files_per_commit_factor": 1.03,
     "description": "velocity_factor = commits/active_week (Claude) / commits/active_week (baseline). files_per_commit_factor = avg_files (Claude) / avg_files (baseline)."
   },
   "entries": [
@@ -1426,6 +1426,81 @@
       "refactor_ratio": 0.0,
       "code_density": 2.0,
       "time_since_prev_commit_minutes": 1,
+      "streak_days": 2
+    },
+    {
+      "commit_sha": "90e5087",
+      "date": "2026-02-27",
+      "message": "Update productivity metrics to 93 commits (velocity 11.34x)",
+      "task_type": "fix",
+      "commit_hour": 6,
+      "files_changed": 1,
+      "lines_added": 35,
+      "lines_removed": 5,
+      "files_factor": 0.1,
+      "refactor_ratio": 0.125,
+      "code_density": 35.0,
+      "time_since_prev_commit_minutes": 0,
+      "streak_days": 2
+    },
+    {
+      "commit_sha": "da37c08",
+      "date": "2026-02-27",
+      "message": "Mark Databricks deployment as configured — update comments and TODO",
+      "task_type": "config",
+      "commit_hour": 12,
+      "files_changed": 2,
+      "lines_added": 8,
+      "lines_removed": 7,
+      "files_factor": 0.2,
+      "refactor_ratio": 0.467,
+      "code_density": 4.0,
+      "time_since_prev_commit_minutes": 355,
+      "streak_days": 2
+    },
+    {
+      "commit_sha": "78289e8",
+      "date": "2026-02-27",
+      "message": "Merge pull request #30 from EduardPetraeus/feature/databricks-deployment-enabled",
+      "task_type": "other",
+      "commit_hour": 12,
+      "files_changed": 0,
+      "lines_added": 0,
+      "lines_removed": 0,
+      "files_factor": 0,
+      "refactor_ratio": null,
+      "code_density": null,
+      "time_since_prev_commit_minutes": 3,
+      "streak_days": 2
+    },
+    {
+      "commit_sha": "bf78fba",
+      "date": "2026-02-27",
+      "message": "Update productivity metrics to 96 commits (velocity 11.59x)",
+      "task_type": "fix",
+      "commit_hour": 12,
+      "files_changed": 1,
+      "lines_added": 50,
+      "lines_removed": 5,
+      "files_factor": 0.1,
+      "refactor_ratio": 0.091,
+      "code_density": 50.0,
+      "time_since_prev_commit_minutes": 0,
+      "streak_days": 2
+    },
+    {
+      "commit_sha": "0895f3b",
+      "date": "2026-02-27",
+      "message": "Check off branch protection — Validate bundle now required on main",
+      "task_type": "other",
+      "commit_hour": 19,
+      "files_changed": 1,
+      "lines_added": 1,
+      "lines_removed": 1,
+      "files_factor": 0.1,
+      "refactor_ratio": 0.5,
+      "code_density": 1.0,
+      "time_since_prev_commit_minutes": 437,
       "streak_days": 2
     }
   ]

@@ -22,8 +22,8 @@ Overordnet rækkefølge — arbejd oppefra ned. Hver blok er afhængig af dem ov
 
 - [x] **`databricks.yml` workspace URLs** — dev og prd workspace URLs konfigureret
 - [x] **GitHub Secrets** — `DATABRICKS_HOST_DEV`, `DATABRICKS_TOKEN_DEV`, `DATABRICKS_HOST_PRD`, `DATABRICKS_TOKEN_PRD` sat op. CI/CD kører fuldt.
-- [ ] **`.env.example`** — document required environment variables (Oura OAuth client ID/secret, Databricks host, token, catalog name, `HEALTH_ENV`)
-- [ ] **Re-enable branch protection status check** — tilføj `Validate bundle` som required check på `main`. GitHub UI: Settings → Branches → main → Edit → Required status checks.
+- [x] **`.env.example`** — dokumenteret: `HEALTH_ENV`, Oura, Databricks (lokal), Withings/Strava placeholders
+- [x] **Re-enable branch protection status check** — `Validate bundle` aktiveret som required check på `main`.
 
 ## Databricks Framework — Complete Coverage
 
