@@ -21,14 +21,14 @@
     "period": {
       "from": "2026-02-16"
     },
-    "total_commits": 110,
+    "total_commits": 113,
     "active_weeks": 2,
-    "avg_commits_per_active_week": 55.0,
-    "avg_files_per_commit": 9.4
+    "avg_commits_per_active_week": 56.5,
+    "avg_files_per_commit": 9.2
   },
   "factors": {
-    "velocity_factor": 13.41,
-    "files_per_commit_factor": 0.94,
+    "velocity_factor": 13.78,
+    "files_per_commit_factor": 0.92,
     "description": "velocity_factor = commits/active_week (Claude) / commits/active_week (baseline). files_per_commit_factor = avg_files (Claude) / avg_files (baseline)."
   },
   "entries": [
@@ -1674,6 +1674,51 @@
       "message": "Merge pull request #34 from EduardPetraeus/feature/audit-logging-framework",
       "task_type": "other",
       "commit_hour": 5,
+      "files_changed": 0,
+      "lines_added": 0,
+      "lines_removed": 0,
+      "files_factor": 0,
+      "refactor_ratio": null,
+      "code_density": null,
+      "time_since_prev_commit_minutes": 13,
+      "streak_days": 3
+    },
+    {
+      "commit_sha": "e23990c",
+      "date": "2026-02-28",
+      "message": "Update productivity metrics to 110 commits",
+      "task_type": "fix",
+      "commit_hour": 5,
+      "files_changed": 1,
+      "lines_added": 35,
+      "lines_removed": 5,
+      "files_factor": 0.1,
+      "refactor_ratio": 0.125,
+      "code_density": 35.0,
+      "time_since_prev_commit_minutes": 0,
+      "streak_days": 3
+    },
+    {
+      "commit_sha": "db0ba76",
+      "date": "2026-02-28",
+      "message": "Fix: remove DEFAULT constraint from audit.job_runs Delta DDL",
+      "task_type": "fix",
+      "commit_hour": 5,
+      "files_changed": 3,
+      "lines_added": 26,
+      "lines_removed": 3,
+      "files_factor": 0.3,
+      "refactor_ratio": 0.103,
+      "code_density": 8.7,
+      "time_since_prev_commit_minutes": 10,
+      "streak_days": 3
+    },
+    {
+      "commit_sha": "a1d0e8f",
+      "date": "2026-02-28",
+      "message": "Merge pull request #35 from EduardPetraeus/fix/audit-delta-default-constraint",
+      "task_type": "other",
+      "commit_hour": 6,
       "files_changed": 0,
       "lines_added": 0,
       "lines_removed": 0,
