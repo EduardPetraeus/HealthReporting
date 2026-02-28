@@ -79,6 +79,71 @@ A feature is done when:
 
 ---
 
+## model_routing
+
+### Routing table
+Different tasks require different models. Know your strengths.
+
+| Task type                        | Optimal model | Why                                    |
+|----------------------------------|---------------|----------------------------------------|
+| Write new code (connectors, SQL) | Sonnet        | Fast execution, follows instructions   |
+| Config changes, formatting       | Haiku/Sonnet  | Simple tasks, speed matters            |
+| Refactor existing code           | Sonnet        | Pattern application, not deep analysis |
+| Write/update documentation       | Sonnet        | Good enough quality, fast              |
+| Review code for logic errors     | Opus          | Deep reasoning, catches edge cases     |
+| Review architecture decisions    | Opus          | Cross-system thinking required         |
+| Security review (secrets, PII)   | Opus          | Zero tolerance for misses              |
+| Debug complex issues             | Opus          | Root cause analysis needs depth        |
+| Write ADRs                       | Opus          | Requires weighing tradeoffs            |
+| Framework/strategy documents     | Opus          | Nuanced thinking, contradiction check  |
+| Simple tests, lint fixes         | Haiku/Sonnet  | Mechanical, no reasoning needed        |
+
+### Active model awareness (mandatory)
+
+At the start of every session, after governance_sync, identify yourself:
+"🤖 Running as [your model name]. Optimal for: [list task types from table]."
+
+During the session, if a task comes up that the routing table assigns to a DIFFERENT model:
+"⚠️ Model mismatch: [task description] is optimally handled by [recommended model].
+I can attempt it, but results may be better with [model]. Switch, or continue?"
+
+You MUST flag this. Do not silently attempt tasks outside your optimal range.
+
+### Session end: next session routing
+
+At the end of every session, look at what's next in PROJECT_PLAN.md and recommend:
+"📋 Next session tasks: [list 2-3 upcoming tasks]
+🤖 Recommended model: [model] because [reason]"
+
+### Review triggers (automatic)
+
+If ANY of these happened during the session, generate a ready-to-paste Opus review prompt:
+- New files created > 5
+- Architecture changed (new layer, connector, or pattern)
+- Governance files modified (CLAUDE.md, ARCHITECTURE.md, PROJECT_PLAN.md)
+- A full document was written or significantly expanded
+- Security-sensitive code was touched
+
+Generate this block:
+
+```
+🔍 Opus review recommended for this session's output
+Paste this into a new Opus session:
+
+Read [list affected files with full paths].
+Review as a senior engineering leader. Be critical. Find:
+1. Internal contradictions
+2. Logic errors or edge cases missed
+3. Architecture violations against ARCHITECTURE.md
+4. Security concerns
+5. Gaps or incomplete implementations
+Give numbered issues with file references and fixes. Do not rewrite.
+```
+
+If none of the triggers are met, skip silently.
+
+---
+
 ## Environment Separation
 
 `HEALTH_ENV` env var controls dev vs prd. The DuckDB file is named `health_dw_{env}.db`. The Databricks catalog is `health_dw` with schemas: bronze, silver, gold.
