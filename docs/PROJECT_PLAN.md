@@ -1,7 +1,7 @@
 # PROJECT_PLAN.md — HealthReporting
 
-> Last updated: 2026-02-28
-> Current phase: **Phase 2 — Silver Layer + Phase 5 (Databricks, parallel)**
+> Last updated: 2026-02-28 (Session 007)
+> Current phase: **Phase 2 — Silver Layer + Phase 5 (Databricks, parallel) + Phase 7 (AI Governance, active)**
 
 ---
 
@@ -162,9 +162,15 @@
 | docs/COST_LOG.md (Layer 4) | ✅ done | AI cost tracking |
 | docs/SPRINT_LOG.md (Layer 2) | ✅ done | Sprint planning and retrospectives |
 | AI_GOVERNANCE.md → full 7-layer framework | ✅ done | Rewritten from PoC to complete framework doc |
-| ANTHROPIC_API_KEY → GitHub Secrets | ⬜ not started | Manual: `gh secret set ANTHROPIC_API_KEY` |
 | Claude Code hooks as enforcement layer | ✅ done | pre_commit_guard.sh (PreToolUse) + post_commit.sh (PostToolUse) in scripts/hooks/ |
+| CLAUDE.md: governance_sync block | ✅ done | PR #41 — first action in on_session_start; auto-detects governance file drift before session begins |
+| CLAUDE.md: model_routing section | ✅ done | PR #42 — 11-task routing table; agent self-identifies model; flags mismatches; end-of-session routing recommendation |
+| CLAUDE.md: security_protocol section | ✅ done | PR #43 — continuous security awareness; 3 scan levels (per-file, per-session, periodic); health data special rules |
+| ai-ledelse.md: governance sync observation (s.25) | ✅ done | PR #41 — added to Observationer fra praksis |
+| ai-ledelse.md: section 19 Dynamic Model Routing | ✅ done | PR #42 — inserted; sections 19-26 renumbered to 20-27 |
+| ai-ledelse.md: section 24 Security som infrastruktur | ✅ done | PR #43 — inserted; sections 24-27 renumbered to 25-28; now 28 sections total |
+| ANTHROPIC_API_KEY → GitHub Secrets | ⬜ not started | Manual: `gh secret set ANTHROPIC_API_KEY` — required for AI PR review to function |
 | Master agent PoC (supervisor spawning sub-agents) | ⬜ not started | Reads all MD files, acts as architecture guard rail |
-| ai-ledelse.md merge (external → internal sync) | ⬜ not started | When ~/ai-ledelse.md updated externally, sync insights |
+| ai-ledelse.md bidirectional sync process | 🔵 in progress | 3 delta-file syncs completed; formal sync protocol defined in AI_GOVERNANCE.md Layer 7 |
 
 **Exit criteria:** `/prioritize` produces a ranked Top 3 that reflects P0 strategic items from TODO.md — not just technical backlog from PROJECT_PLAN.md.
