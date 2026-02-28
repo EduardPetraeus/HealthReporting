@@ -11,6 +11,13 @@ import sys
 from pathlib import Path
 from datetime import datetime, timezone
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from health_platform.utils.logging_config import get_logger
+from health_platform.utils.audit_logger import AuditLogger
+
+logger = get_logger("csv_to_parquet")
+
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -65,52 +72,57 @@ def main():
 
     # Validate input
     if not input_path.exists():
-        print(f"Error: Input file not found: {input_path}")
+        logger.error(f"Input file not found: {input_path}")
         sys.exit(1)
 
     if not input_path.is_file():
-        print(f"Error: Input path is not a file: {input_path}")
+        logger.error(f"Input path is not a file: {input_path}")
         sys.exit(1)
 
     output_dir = output_base / source_name
     output_file = output_dir / "data.parquet"
 
-    print(f"Source:      {input_path.resolve()}")
-    print(f"Source name: {source_name}")
-    print(f"Target:      {output_file.resolve()}")
-    print(f"Delimiter:   '{args.delimiter}'")
-    print(f"Encoding:    {args.encoding}")
-    print(f"Compression: {compression or 'none'}")
+    logger.info(f"csv_to_parquet starting: {input_path.name} -> {output_file}")
+    logger.debug(f"Source: {input_path.resolve()}")
+    logger.debug(f"Source name: {source_name}")
+    logger.debug(f"Compression: {compression or 'none'}")
 
-    # Read CSV
-    try:
-        df = pd.read_csv(
-            input_path,
-            delimiter=args.delimiter,
-            encoding=args.encoding,
+    with AuditLogger("csv_to_parquet", "extract", source_name) as audit:
+        # Read CSV
+        try:
+            df = pd.read_csv(
+                input_path,
+                delimiter=args.delimiter,
+                encoding=args.encoding,
+            )
+        except Exception as e:
+            logger.error(f"Failed to read CSV: {e}")
+            sys.exit(1)
+
+        logger.info(f"Rows read: {len(df):,} | Columns: {list(df.columns)}")
+
+        # Add load metadata
+        if not args.no_metadata:
+            df["_loaded_at"] = datetime.now(timezone.utc).isoformat()
+            df["_source_file"] = input_path.name
+
+        # Write Parquet (full load — always overwrite)
+        output_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            df.to_parquet(output_file, index=False, compression=compression)
+        except Exception as e:
+            logger.error(f"Failed to write Parquet: {e}")
+            sys.exit(1)
+
+        size_kb = output_file.stat().st_size / 1024
+        logger.info(f"Done: {output_file.resolve()} ({size_kb:.1f} KB)")
+
+        audit.log_table(
+            str(output_file),
+            "WRITE_PARQUET",
+            rows_after=len(df),
+            status="success",
         )
-    except Exception as e:
-        print(f"Error: Failed to read CSV: {e}")
-        sys.exit(1)
-
-    print(f"Rows read:   {len(df):,}")
-    print(f"Columns:     {list(df.columns)}")
-
-    # Add load metadata
-    if not args.no_metadata:
-        df["_loaded_at"] = datetime.now(timezone.utc).isoformat()
-        df["_source_file"] = input_path.name
-
-    # Write Parquet (full load — always overwrite)
-    output_dir.mkdir(parents=True, exist_ok=True)
-    try:
-        df.to_parquet(output_file, index=False, compression=compression)
-    except Exception as e:
-        print(f"Error: Failed to write Parquet: {e}")
-        sys.exit(1)
-
-    size_kb = output_file.stat().st_size / 1024
-    print(f"Done: {output_file.resolve()} ({size_kb:.1f} KB)")
 
 
 if __name__ == "__main__":

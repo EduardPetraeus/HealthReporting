@@ -14,6 +14,13 @@ from pathlib import Path
 import duckdb
 import yaml
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
+
+from health_platform.utils.logging_config import get_logger
+from health_platform.utils.audit_logger import AuditLogger
+
+logger = get_logger("run_merge")
+
 
 def load_config() -> dict:
     """Load environment_config.yaml from the standard config location."""
@@ -47,6 +54,14 @@ def split_statements(sql: str) -> list[str]:
     return statements
 
 
+def _source_system_from_path(sql_file_name: str) -> str:
+    """Extract source system from merge file name, e.g. merge_oura_heartrate -> oura."""
+    parts = sql_file_name.replace(".sql", "").split("_")
+    if len(parts) >= 2:
+        return parts[1]
+    return "unknown"
+
+
 def main():
     parser = argparse.ArgumentParser(description="Run a merge SQL script against DuckDB")
     parser.add_argument("sql_file", help="Path to the merge SQL file (relative to merge/ dir)")
@@ -59,25 +74,30 @@ def main():
 
     config = load_config()
     db_path = get_db_path(config)
-    print(f"Database: {db_path}")
-    print(f"SQL file: {sql_path.name}")
+    source_system = _source_system_from_path(sql_path.name)
+
+    logger.info(f"run_merge starting: {sql_path.name}")
+    logger.info(f"Database: {db_path}")
 
     sql = sql_path.read_text()
     statements = split_statements(sql)
 
-    con = duckdb.connect(db_path)
-    try:
-        for i, stmt in enumerate(statements, 1):
-            first_line = stmt.lstrip().split("\n")[0][:80]
-            print(f"\n[{i}/{len(statements)}] {first_line}...")
-            result = con.execute(stmt)
-            if result and result.description:
-                rows = result.fetchall()
-                print(f"  -> {len(rows)} rows returned")
-    finally:
-        con.close()
+    with AuditLogger("run_merge", "silver", source_system) as audit:
+        con = duckdb.connect(db_path)
+        try:
+            for i, stmt in enumerate(statements, 1):
+                first_line = stmt.lstrip().split("\n")[0][:80]
+                logger.info(f"[{i}/{len(statements)}] {first_line}...")
+                result = con.execute(stmt)
+                if result and result.description:
+                    rows = result.fetchall()
+                    logger.debug(f"  -> {len(rows)} rows returned")
+        finally:
+            con.close()
 
-    print("\nDone.")
+        audit.log_table(sql_path.stem, "MERGE", status="success")
+
+    logger.info("Done.")
 
 
 if __name__ == "__main__":
