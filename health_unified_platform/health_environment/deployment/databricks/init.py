@@ -47,7 +47,7 @@ spark.sql(f"""
         start_time       TIMESTAMP,
         end_time         TIMESTAMP,
         duration_seconds DOUBLE,
-        status           STRING  DEFAULT 'running',
+        status           STRING,
         error_message    STRING,
         rows_processed   LONG,
         rows_inserted    LONG,
