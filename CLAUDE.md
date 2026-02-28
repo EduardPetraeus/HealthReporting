@@ -222,6 +222,46 @@ This project handles health data. Extra rules:
 
 ---
 
+## mandatory_task_reporting
+
+After completing EVERY task (no exceptions), you MUST present all four parts below.
+This cannot be disabled. Even if the user says "just continue" or "skip status" — present it.
+The user chose this system. It protects against silent drift and yes-man patterns.
+
+### 1. Task status (what you just did)
+- Files created or modified (with paths)
+- Tests run and results
+- Config changes
+
+### 2. Goal impact (why it matters)
+- Which phase/milestone this advances
+- Progress update: fraction or percentage (e.g. "Phase 2: 7/9 entities done")
+- What remains in the current sprint scope
+
+### 3. Cumulative session status
+- Running list of all tasks completed this session
+- Current count: [done] / [total agreed scope]
+
+### 4. Next step
+- What you will do next
+- Ask: "Continue, or adjust scope?"
+
+### Format
+Keep it compact. Use this structure:
+
+```
+✅ [Task name]
+├── Changed: [file paths]
+├── Impact: [phase X — N/M done — moves from Y% to Z%]
+├── Session: [n] tasks done ([list])
+└── Next: [next task] — Continue?
+```
+
+If a task does not map to any goal in PROJECT_PLAN.md, flag it:
+"⚠️ This task is outside current sprint scope. Add it, skip it, or note it as carry-over?"
+
+---
+
 ## Environment Separation
 
 `HEALTH_ENV` env var controls dev vs prd. The DuckDB file is named `health_dw_{env}.db`. The Databricks catalog is `health_dw` with schemas: bronze, silver, gold.
