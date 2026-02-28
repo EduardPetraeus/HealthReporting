@@ -16,6 +16,7 @@
 | 4 | Visualization & Reporting | ⬜ not started | Jun 2026 |
 | 5 | Cloud Migration (Databricks) | 🔵 in progress | Q2 2026 |
 | 6 | CI/CD & Automation | 🔵 in progress | Q2 2026 |
+| 7 | AI Governance Framework | 🔵 in progress | Q2 2026 |
 
 ---
 
@@ -135,3 +136,24 @@
 | Automated tests | ⬜ not started | pytest TDD framework |
 | Oura daily job (cron) | ⬜ not started | Automated bronze → silver pipeline |
 | Code-reviewer agent as PR gate | ⬜ not started | AI governance experiment |
+
+---
+
+## Phase 7 — AI Governance Framework
+
+**Goal:** Structured control layer for AI agents — ensuring agents follow strategic priorities (TODO.md), not just nearest instruction (PROJECT_PLAN.md). PoC showcase for enterprise Pandora context.
+
+| Task | Status | Notes |
+|------|--------|-------|
+| /prioritize command (merges TODO + PROJECT_PLAN) | ✅ done | .claude/commands/prioritize.md |
+| docs/AI_GOVERNANCE.md (internal governance framework) | ✅ done | PoC version of ~/ai-ledelse.md |
+| MEMORY.md cross-session context | ✅ done | ~/.claude/projects/.../memory/MEMORY.md |
+| Mandatory session protocol (CLAUDE.md) | ✅ done | on_session_start / during / end |
+| Specialised agents (12 agents) | ✅ done | code-reviewer, security-reviewer, build-validator, etc. |
+| CI/CD as unenforced gate (GitHub Actions) | ✅ done | deploy.yml — bundle validation + deploy |
+| code-reviewer agent as automatic PR gate | ⬜ not started | GitHub Actions step, not just manual slash command |
+| Claude Code hooks as enforcement layer | ⬜ not started | pre/post tool-call hooks in settings.json |
+| Master agent PoC (supervisor spawning sub-agents) | ⬜ not started | Reads all MD files, acts as architecture guard rail |
+| ai-ledelse.md merge (external → internal sync) | ⬜ not started | When ~/ai-ledelse.md updated externally, sync insights |
+
+**Exit criteria:** `/prioritize` produces a ranked Top 3 that reflects P0 strategic items from TODO.md — not just technical backlog from PROJECT_PLAN.md.
