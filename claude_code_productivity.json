@@ -21,14 +21,14 @@
     "period": {
       "from": "2026-02-16"
     },
-    "total_commits": 120,
+    "total_commits": 123,
     "active_weeks": 2,
-    "avg_commits_per_active_week": 60.0,
-    "avg_files_per_commit": 8.9
+    "avg_commits_per_active_week": 61.5,
+    "avg_files_per_commit": 8.7
   },
   "factors": {
-    "velocity_factor": 14.63,
-    "files_per_commit_factor": 0.89,
+    "velocity_factor": 15.0,
+    "files_per_commit_factor": 0.87,
     "description": "velocity_factor = commits/active_week (Claude) / commits/active_week (baseline). files_per_commit_factor = avg_files (Claude) / avg_files (baseline)."
   },
   "entries": [
@@ -1831,6 +1831,51 @@
       "refactor_ratio": 0.037,
       "code_density": 75.0,
       "time_since_prev_commit_minutes": 13,
+      "streak_days": 3
+    },
+    {
+      "commit_sha": "cae1f43",
+      "date": "2026-02-28",
+      "message": "chore: update productivity metrics — 120 commits, 14.63x velocity",
+      "task_type": "other",
+      "commit_hour": 7,
+      "files_changed": 1,
+      "lines_added": 80,
+      "lines_removed": 5,
+      "files_factor": 0.1,
+      "refactor_ratio": 0.059,
+      "code_density": 80.0,
+      "time_since_prev_commit_minutes": 4,
+      "streak_days": 3
+    },
+    {
+      "commit_sha": "0cd44e0",
+      "date": "2026-02-28",
+      "message": "Merge pull request #38 from EduardPetraeus/feature/ai-governance-enforcement",
+      "task_type": "other",
+      "commit_hour": 7,
+      "files_changed": 0,
+      "lines_added": 0,
+      "lines_removed": 0,
+      "files_factor": 0,
+      "refactor_ratio": null,
+      "code_density": null,
+      "time_since_prev_commit_minutes": 1,
+      "streak_days": 3
+    },
+    {
+      "commit_sha": "1a9ade5",
+      "date": "2026-02-28",
+      "message": "chore(ci): disable ai-review workflow — API costs money",
+      "task_type": "other",
+      "commit_hour": 7,
+      "files_changed": 1,
+      "lines_added": 4,
+      "lines_removed": 0,
+      "files_factor": 0.1,
+      "refactor_ratio": 0.0,
+      "code_density": 4.0,
+      "time_since_prev_commit_minutes": 4,
       "streak_days": 3
     }
   ]
