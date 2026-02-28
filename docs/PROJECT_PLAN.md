@@ -166,6 +166,7 @@
 | CLAUDE.md: governance_sync block | ✅ done | PR #41 — first action in on_session_start; auto-detects governance file drift before session begins |
 | CLAUDE.md: model_routing section | ✅ done | PR #42 — 11-task routing table; agent self-identifies model; flags mismatches; end-of-session routing recommendation |
 | CLAUDE.md: security_protocol section | ✅ done | PR #43 — continuous security awareness; 3 scan levels (per-file, per-session, periodic); health data special rules |
+| CLAUDE.md: mandatory_task_reporting section | ✅ done | PR #44 — 4-part post-task reporting; cannot be disabled; flags out-of-scope tasks; ports ai-ledelse.md s.6.4 |
 | ai-ledelse.md: governance sync observation (s.25) | ✅ done | PR #41 — added to Observationer fra praksis |
 | ai-ledelse.md: section 19 Dynamic Model Routing | ✅ done | PR #42 — inserted; sections 19-26 renumbered to 20-27 |
 | ai-ledelse.md: section 24 Security som infrastruktur | ✅ done | PR #43 — inserted; sections 24-27 renumbered to 25-28; now 28 sections total |
