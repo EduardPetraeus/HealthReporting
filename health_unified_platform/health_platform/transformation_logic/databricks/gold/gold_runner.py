@@ -49,6 +49,10 @@ sql_root    = dbutils.widgets.get("sql_root").strip()
 
 # COMMAND ----------
 
+# MAGIC %run ../audit_logger_notebook
+
+# COMMAND ----------
+
 import glob as _glob
 import yaml
 
@@ -75,7 +79,7 @@ def load_gold_configs(config_root: str, entity_name: str = "") -> list:
     return configs
 
 
-def run_gold_entity(config: dict, sql_root: str) -> None:
+def run_gold_entity(config: dict, sql_root: str, audit: AuditLogger) -> None:
     """
     Load and execute the gold SQL for one entity config.
 
@@ -112,6 +116,8 @@ def run_gold_entity(config: dict, sql_root: str) -> None:
         print(f"[{name}] Executing statement {i}/{len(statements)}…")
         spark.sql(statement)
 
+    operation = "CREATE_OR_REPLACE_VIEW" if entity_type == "view" else "CREATE_OR_REPLACE_TABLE"
+    audit.log_table(target, operation)
     print(f"[{name}] Done.")
 
 
@@ -125,7 +131,8 @@ if not configs:
 
 print(f"Entities to process: {[c['name'] for c in configs]}\n")
 
-for cfg in configs:
-    run_gold_entity(cfg, sql_root)
+with AuditLogger("gold_runner", "gold", entity_name or "all") as audit:
+    for cfg in configs:
+        run_gold_entity(cfg, sql_root, audit)
 
 print(f"\nAll done. Processed {len(configs)} gold entity/entities.")

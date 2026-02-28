@@ -31,6 +31,10 @@ if not source_name:
 
 # COMMAND ----------
 
+# MAGIC %run ../audit_logger_notebook
+
+# COMMAND ----------
+
 import yaml
 from pyspark.sql.functions import current_timestamp, lit
 
@@ -59,66 +63,70 @@ print(f"Target table:  {target_table}")
 
 # COMMAND ----------
 
-if load_mode == "incremental":
-    # -------------------------------------------------------------------
-    # Incremental: streaming Autoloader with trigger.availableNow=True
-    # Processes all new files since the last checkpoint, then exits.
-    # -------------------------------------------------------------------
-    reader_options = {
-        "cloudFiles.format":          file_format,
-        "cloudFiles.schemaLocation":  schema_location,
-        "cloudFiles.inferColumnTypes": "true",
-        **{f"cloudFiles.{k}" if not k.startswith("cloudFiles.") else k: v
-           for k, v in extra_options.items()},
-    }
+with AuditLogger("bronze_autoloader", "bronze", source_system) as audit:
 
-    df = (
-        spark.readStream
-        .format("cloudFiles")
-        .options(**reader_options)
-        .load(source_path)
-        .withColumn("source_system", lit(source_system))
-        .withColumn("_ingested_at", current_timestamp())
-    )
+    if load_mode == "incremental":
+        # -------------------------------------------------------------------
+        # Incremental: streaming Autoloader with trigger.availableNow=True
+        # Processes all new files since the last checkpoint, then exits.
+        # -------------------------------------------------------------------
+        reader_options = {
+            "cloudFiles.format":          file_format,
+            "cloudFiles.schemaLocation":  schema_location,
+            "cloudFiles.inferColumnTypes": "true",
+            **{f"cloudFiles.{k}" if not k.startswith("cloudFiles.") else k: v
+               for k, v in extra_options.items()},
+        }
 
-    (
-        df.writeStream
-        .format("delta")
-        .outputMode("append")
-        .option("checkpointLocation", checkpoint_location)
-        .option("mergeSchema", "true")
-        .trigger(availableNow=True)
-        .toTable(target_table)
-        .awaitTermination()
-    )
+        df = (
+            spark.readStream
+            .format("cloudFiles")
+            .options(**reader_options)
+            .load(source_path)
+            .withColumn("source_system", lit(source_system))
+            .withColumn("_ingested_at", current_timestamp())
+        )
 
-elif load_mode == "full":
-    # -------------------------------------------------------------------
-    # Full: batch read and overwrite.
-    # Re-reads all files and replaces the entire bronze table.
-    # Use for sources where incremental detection is not reliable.
-    # -------------------------------------------------------------------
-    df = (
-        spark.read
-        .format(file_format)
-        .options(**extra_options)
-        .load(source_path)
-        .withColumn("source_system", lit(source_system))
-        .withColumn("_ingested_at", current_timestamp())
-    )
+        (
+            df.writeStream
+            .format("delta")
+            .outputMode("append")
+            .option("checkpointLocation", checkpoint_location)
+            .option("mergeSchema", "true")
+            .trigger(availableNow=True)
+            .toTable(target_table)
+            .awaitTermination()
+        )
 
-    (
-        df.write
-        .format("delta")
-        .mode("overwrite")
-        .option("mergeSchema", "true")
-        .saveAsTable(target_table)
-    )
+    elif load_mode == "full":
+        # -------------------------------------------------------------------
+        # Full: batch read and overwrite.
+        # Re-reads all files and replaces the entire bronze table.
+        # Use for sources where incremental detection is not reliable.
+        # -------------------------------------------------------------------
+        df = (
+            spark.read
+            .format(file_format)
+            .options(**extra_options)
+            .load(source_path)
+            .withColumn("source_system", lit(source_system))
+            .withColumn("_ingested_at", current_timestamp())
+        )
 
-else:
-    raise ValueError(
-        f"Unknown load_mode '{load_mode}' in config '{source_name}'. "
-        "Expected 'incremental' or 'full'."
-    )
+        (
+            df.write
+            .format("delta")
+            .mode("overwrite")
+            .option("mergeSchema", "true")
+            .saveAsTable(target_table)
+        )
 
-print(f"Bronze load complete: {source_name} -> {target_table}")
+    else:
+        raise ValueError(
+            f"Unknown load_mode '{load_mode}' in config '{source_name}'. "
+            "Expected 'incremental' or 'full'."
+        )
+
+    rows_after = spark.table(target_table).count()
+    audit.log_table(target_table, "AUTOLOADER_WRITE", rows_after=rows_after)
+    print(f"Bronze load complete: {source_name} -> {target_table} ({rows_after:,} rows)")

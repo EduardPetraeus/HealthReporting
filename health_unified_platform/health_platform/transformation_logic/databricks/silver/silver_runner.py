@@ -38,6 +38,10 @@ sql_root    = dbutils.widgets.get("sql_root").strip()
 
 # COMMAND ----------
 
+# MAGIC %run ../audit_logger_notebook
+
+# COMMAND ----------
+
 import glob as _glob
 import yaml
 
@@ -66,7 +70,7 @@ def load_source_configs(config_root: str, source_name: str = "") -> list:
     return configs
 
 
-def run_silver_for_source(config: dict, sql_root: str) -> None:
+def run_silver_for_source(config: dict, sql_root: str, audit: AuditLogger) -> None:
     """
     Load and execute the silver SQL for one source config.
 
@@ -115,7 +119,9 @@ def run_silver_for_source(config: dict, sql_root: str) -> None:
         print(f"[{name}] Executing statement {i}/{len(statements)}…")
         spark.sql(statement)
 
-    print(f"[{name}] Done.")
+    rows_after = spark.table(target_table).count()
+    audit.log_table(target_table, "MERGE", rows_after=rows_after)
+    print(f"[{name}] Done. {rows_after:,} rows in {target_table}.")
 
 
 # COMMAND ----------
@@ -128,7 +134,8 @@ if not configs:
 
 print(f"Sources to process: {[c['name'] for c in configs]}\n")
 
-for cfg in configs:
-    run_silver_for_source(cfg, sql_root)
+with AuditLogger("silver_runner", "silver", source_name or "all") as audit:
+    for cfg in configs:
+        run_silver_for_source(cfg, sql_root, audit)
 
 print(f"\nAll done. Processed {len(configs)} source(s).")

@@ -11,12 +11,21 @@ Usage:
 from __future__ import annotations
 
 import os
+import sys
 from datetime import date
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from auth import get_access_token
 from client import OuraClient
 from state import get_start_date, load_state, save_state, update_state
 from writer import write_records
+
+from health_platform.utils.logging_config import get_logger
+from health_platform.utils.audit_logger import AuditLogger
+
+logger = get_logger("run_oura")
 
 SOURCE_ENV = os.getenv("HEALTH_ENV", "dev")
 END_DATE = date.today()
@@ -47,35 +56,45 @@ def _normalize_records(endpoint_name: str, records: list[dict]) -> list[dict]:
 
 
 def main() -> None:
-    print(f"--- Oura pipeline starting [env: {SOURCE_ENV}] ---")
+    logger.info(f"Oura pipeline starting [env: {SOURCE_ENV}]")
 
-    access_token = get_access_token()
-    client = OuraClient(access_token)
-    state = load_state()
+    with AuditLogger("run_oura", "extract", "oura") as audit:
+        access_token = get_access_token()
+        client = OuraClient(access_token)
+        state = load_state()
 
-    # Fetch all dated endpoints
-    for endpoint_name, method_name, date_field in ENDPOINTS:
+        # Fetch all dated endpoints
+        for endpoint_name, method_name, date_field in ENDPOINTS:
 
-        start_date = get_start_date(endpoint_name, state)
+            start_date = get_start_date(endpoint_name, state)
 
-        if start_date > END_DATE:
-            print(f"{endpoint_name}: already up to date, skipping.")
-            continue
+            if start_date > END_DATE:
+                logger.info(f"{endpoint_name}: already up to date, skipping.")
+                continue
 
-        print(f"{endpoint_name}: fetching {start_date} -> {END_DATE}...")
-        records = getattr(client, method_name)(start_date, END_DATE)
-        print(f"  Fetched {len(records):,} records.")
-        records = _normalize_records(endpoint_name, records)
-        write_records(records, endpoint_name, date_field, source_env=SOURCE_ENV)
-        update_state(endpoint_name, END_DATE, state)
+            logger.info(f"{endpoint_name}: fetching {start_date} -> {END_DATE}...")
+            records = getattr(client, method_name)(start_date, END_DATE)
+            logger.info(f"  Fetched {len(records):,} records.")
+            records = _normalize_records(endpoint_name, records)
+            write_records(records, endpoint_name, date_field, source_env=SOURCE_ENV)
+            update_state(endpoint_name, END_DATE, state)
 
-    # personal_info has no date range — always refresh
-    print("personal_info: fetching...")
-    personal_info = client.fetch_personal_info()
-    write_records([personal_info], "personal_info", date_field="", source_env=SOURCE_ENV)
+            audit.log_table(
+                f"oura.{endpoint_name}",
+                "WRITE_PARQUET",
+                rows_after=len(records),
+                status="success",
+            )
 
-    save_state(state)
-    print("--- Oura pipeline complete ---")
+        # personal_info has no date range — always refresh
+        logger.info("personal_info: fetching...")
+        personal_info = client.fetch_personal_info()
+        write_records([personal_info], "personal_info", date_field="", source_env=SOURCE_ENV)
+        audit.log_table("oura.personal_info", "WRITE_PARQUET", rows_after=1, status="success")
+
+        save_state(state)
+
+    logger.info("Oura pipeline complete")
 
 
 if __name__ == "__main__":
