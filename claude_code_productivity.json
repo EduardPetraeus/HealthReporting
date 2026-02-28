@@ -21,14 +21,14 @@
     "period": {
       "from": "2026-02-16"
     },
-    "total_commits": 124,
+    "total_commits": 126,
     "active_weeks": 2,
-    "avg_commits_per_active_week": 62.0,
-    "avg_files_per_commit": 8.7
+    "avg_commits_per_active_week": 63.0,
+    "avg_files_per_commit": 8.6
   },
   "factors": {
-    "velocity_factor": 15.12,
-    "files_per_commit_factor": 0.87,
+    "velocity_factor": 15.37,
+    "files_per_commit_factor": 0.86,
     "description": "velocity_factor = commits/active_week (Claude) / commits/active_week (baseline). files_per_commit_factor = avg_files (Claude) / avg_files (baseline)."
   },
   "entries": [
@@ -1891,6 +1891,36 @@
       "refactor_ratio": 0.091,
       "code_density": 50.0,
       "time_since_prev_commit_minutes": 10,
+      "streak_days": 3
+    },
+    {
+      "commit_sha": "4ec804d",
+      "date": "2026-02-28",
+      "message": "chore: update productivity metrics post-session",
+      "task_type": "other",
+      "commit_hour": 7,
+      "files_changed": 1,
+      "lines_added": 18,
+      "lines_removed": 3,
+      "files_factor": 0.1,
+      "refactor_ratio": 0.143,
+      "code_density": 18.0,
+      "time_since_prev_commit_minutes": 31,
+      "streak_days": 3
+    },
+    {
+      "commit_sha": "9180dc3",
+      "date": "2026-02-28",
+      "message": "feat(governance): add Claude Code hooks as enforcement layer (Phase 7) (#40)",
+      "task_type": "other",
+      "commit_hour": 8,
+      "files_changed": 5,
+      "lines_added": 134,
+      "lines_removed": 1,
+      "files_factor": 0.5,
+      "refactor_ratio": 0.007,
+      "code_density": 26.8,
+      "time_since_prev_commit_minutes": 11,
       "streak_days": 3
     }
   ]
