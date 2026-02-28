@@ -4,6 +4,30 @@
 
 ---
 
+## 2026-02-28 — Session 003: AI Governance Framework
+
+**Phase:** Phase 7 (AI Governance) — new phase
+**Goal:** Struktureret kontrollag for AI-agenter — merger TODO.md + PROJECT_PLAN.md siloer
+
+### What was done
+- Added Phase 7: AI Governance Framework to docs/PROJECT_PLAN.md (10 tasks, 5 done, 5 planned)
+- Created docs/AI_GOVERNANCE.md — PoC governance framework document (problem, what IS built, next level, open questions)
+- Created .claude/commands/prioritize.md — slash command that merges ~/TODO.md + PROJECT_PLAN.md into ranked priority table with Top 3
+- Added ai-ledelse.md merge note to ~/TODO.md (outside repo)
+- Phase 7 Phase Overview row added to project plan table
+
+### What changed in architecture
+- New command: /prioritize — bridges strategic backlog (TODO.md) with technical backlog (PROJECT_PLAN.md)
+- New doc: docs/AI_GOVERNANCE.md — documents existing governance patterns + next-level roadmap
+- Project plan: Phase 7 added with 10 tasks covering AI agent governance
+
+### What's next
+- code-reviewer as automatic GitHub Actions PR gate
+- Claude Code hooks as enforcement layer
+- Master agent PoC (supervisor pattern)
+
+---
+
 ## 2026-02-28 — Session 002: Audit Framework + Governance Setup
 
 **Phase:** Phase 2 (Silver) + Phase 5 (Databricks) — parallel
