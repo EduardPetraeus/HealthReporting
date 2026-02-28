@@ -21,14 +21,14 @@
     "period": {
       "from": "2026-02-16"
     },
-    "total_commits": 133,
+    "total_commits": 137,
     "active_weeks": 2,
-    "avg_commits_per_active_week": 66.5,
-    "avg_files_per_commit": 8.2
+    "avg_commits_per_active_week": 68.5,
+    "avg_files_per_commit": 8.0
   },
   "factors": {
-    "velocity_factor": 16.22,
-    "files_per_commit_factor": 0.82,
+    "velocity_factor": 16.71,
+    "files_per_commit_factor": 0.8,
     "description": "velocity_factor = commits/active_week (Claude) / commits/active_week (baseline). files_per_commit_factor = avg_files (Claude) / avg_files (baseline)."
   },
   "entries": [
@@ -2026,6 +2026,66 @@
       "refactor_ratio": 0.0,
       "code_density": 78.0,
       "time_since_prev_commit_minutes": 7,
+      "streak_days": 3
+    },
+    {
+      "commit_sha": "736d2ad",
+      "date": "2026-02-28",
+      "message": "chore: update productivity metrics to 133 commits",
+      "task_type": "other",
+      "commit_hour": 8,
+      "files_changed": 1,
+      "lines_added": 35,
+      "lines_removed": 5,
+      "files_factor": 0.1,
+      "refactor_ratio": 0.125,
+      "code_density": 35.0,
+      "time_since_prev_commit_minutes": 0,
+      "streak_days": 3
+    },
+    {
+      "commit_sha": "b51b3e4",
+      "date": "2026-02-28",
+      "message": "docs: update PROJECT_PLAN.md with Session 007 governance work",
+      "task_type": "docs",
+      "commit_hour": 8,
+      "files_changed": 1,
+      "lines_added": 10,
+      "lines_removed": 4,
+      "files_factor": 0.1,
+      "refactor_ratio": 0.286,
+      "code_density": 10.0,
+      "time_since_prev_commit_minutes": 3,
+      "streak_days": 3
+    },
+    {
+      "commit_sha": "eacef0b",
+      "date": "2026-02-28",
+      "message": "docs: add Session 007 to CHANGELOG.md",
+      "task_type": "docs",
+      "commit_hour": 8,
+      "files_changed": 1,
+      "lines_added": 27,
+      "lines_removed": 0,
+      "files_factor": 0.1,
+      "refactor_ratio": 0.0,
+      "code_density": 27.0,
+      "time_since_prev_commit_minutes": 0,
+      "streak_days": 3
+    },
+    {
+      "commit_sha": "7932882",
+      "date": "2026-02-28",
+      "message": "feat(governance): add mandatory_task_reporting section to CLAUDE.md (#44)",
+      "task_type": "docs",
+      "commit_hour": 8,
+      "files_changed": 1,
+      "lines_added": 40,
+      "lines_removed": 0,
+      "files_factor": 0.1,
+      "refactor_ratio": 0.0,
+      "code_density": 40.0,
+      "time_since_prev_commit_minutes": 10,
       "streak_days": 3
     }
   ]
