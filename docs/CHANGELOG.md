@@ -4,6 +4,28 @@
 
 ---
 
+## 2026-02-28 — Session 006: Claude Code Hooks + ai-ledelse.md expansion
+
+**Phase:** Phase 7 — AI Governance Framework
+**Goal:** Implement Claude Code in-process hooks (enforcement layer) + expand ~/ai-ledelse.md with 10 new sections
+
+### What was done
+- Expanded `~/ai-ledelse.md` from 16 → 26 sections (10 new: prompt engineering, status reporting, data governance, rollback, metrics, AI productivity measurement, training, code ownership, vendor strategy, compliance)
+- Created `scripts/hooks/pre_commit_guard.sh` — PreToolUse hook: warns on direct main commits (soft enforcement)
+- Created `scripts/hooks/post_commit.sh` — PostToolUse hook: auto-runs productivity tracker after every git commit
+- Updated `.claude/settings.json` with PreToolUse (Bash) + PostToolUse (Bash) hook configuration
+- Updated `docs/AI_GOVERNANCE.md` — Layer 3 section with full Claude Code Hooks architecture and hook execution model
+- Merged PR #40 (feature/claude-code-hooks) — all GitHub Actions checks passed
+- 127 commits, velocity 15.37x
+
+### Carried over
+- ANTHROPIC_API_KEY → GitHub Secrets (manual: `gh secret set ANTHROPIC_API_KEY`)
+- Master agent PoC (supervisor spawning sub-agents)
+- TDD setup — pytest framework for silver validation
+- Bronze → Databricks live data (Autoloader source path setup)
+
+---
+
 ## 2026-02-28 — Session 005: AI Governance Enforcement Layer
 
 **Phase:** Phase 7 — AI Governance Framework
