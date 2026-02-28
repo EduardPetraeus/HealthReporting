@@ -122,4 +122,27 @@ Unity Catalog tags, PII classification, and data lineage are easy to add increme
 
 ---
 
-*Last updated: 2026-02-27*
+### Audit logging: platform-agnostic context manager
+Added `AuditLogger` as a context manager that auto-detects backend:
+- **DuckDB (local)**: direct INSERT/UPDATE via `duckdb.connect()`
+- **Databricks**: `spark.sql()` INSERT/UPDATE against Unity Catalog Delta tables
+- **Non-fatal design**: all audit errors are `warnings.warn()` — never stop the pipeline
+- **Identical schema** in both backends makes local dev fully representative of cloud behaviour
+- **Databricks limitation**: notebooks can't import from local utils/ packages. Solution: `audit_logger_notebook.py` as inline copy, loaded via `%run`. Enterprise pattern: package as wheel, install on cluster.
+- **Delta UPDATE caveat**: `UPDATE job_runs SET status='success'` is expensive at high frequency because Delta re-writes files. Enterprise alternative: append-only + reconciliation view.
+- **Python 3.9 gotcha**: `str | None` union type syntax requires Python 3.10+. Use `Optional[str]` from `typing` for 3.9 compatibility.
+
+### Delta `DEFAULT` column constraint requires feature flag
+`CREATE TABLE ... status STRING DEFAULT 'running'` fails on Databricks Serverless SQL with:
+`WRONG_COLUMN_DEFAULTS_FOR_DELTA_FEATURE_NOT_ENABLED`.
+**Fix**: remove `DEFAULT` from DDL — AuditLogger always writes `'running'` explicitly on INSERT anyway. Enterprise alternative: enable via `ALTER TABLE SET TBLPROPERTIES('delta.feature.allowColumnDefaults' = 'supported')` after creation.
+
+### Audit schema deployment (2026-02-28)
+Deployed `health-platform-dev.audit` with `job_runs`, `table_runs`, `v_platform_overview`.
+Verified: JOIN on `job_id` FK works, view aggregates correctly across 7-day window.
+Data landscape after deployment:
+- `workspace.default`: 14 raw tables (old pipeline — lifesum, oura, strava, withings)
+- `health_dw.silver`: 11 silver tables (old pipeline — still has data)
+- `health-platform-dev`: new catalog — audit schema live, bronze/silver/gold empty (no autoloader yet)
+
+*Last updated: 2026-02-28*
