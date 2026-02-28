@@ -4,6 +4,33 @@
 
 ---
 
+## 2026-02-28 — Session 007: CLAUDE.md Governance Extensions + ai-ledelse.md Sync
+
+**Phase:** Phase 7 — AI Governance Framework
+**Goal:** Execute three delta-file instructions: governance_sync, model_routing, security_protocol — add to CLAUDE.md + mirror in ~/ai-ledelse.md
+
+### What was done
+- Added `governance_sync` block to CLAUDE.md `on_session_start` — auto-detects drift between codebase and governance files before every session (PR #41)
+- Added observation to `~/ai-ledelse.md` section 25 (Observationer fra praksis) — governance sync as drift-detection pattern (PR #41)
+- Added `model_routing` section to CLAUDE.md — 11-task routing table (Sonnet/Opus/Haiku), agent self-identification, mismatch flagging, session-end model recommendation (PR #42)
+- Added section 19 "Dynamic Model Routing" to `~/ai-ledelse.md` — renumbered sections 19-26 → 20-27 (PR #42)
+- Added `security_protocol` section to CLAUDE.md — continuous security awareness, 3 scan levels (per-file/session/periodic), health data rules, incident response (PR #43)
+- Added section 24 "Security som infrastruktur" to `~/ai-ledelse.md` — renumbered sections 24-27 → 25-28; now 28 sections total (PR #43)
+- Updated `docs/PROJECT_PLAN.md` — 6 new ✅ tasks, ai-ledelse.md sync → 🔵 in progress
+- 133 commits, velocity 16.22x
+
+### Architecture changes
+- CLAUDE.md now has 3 new top-level governance sections: `governance_sync`, `model_routing`, `security_protocol`
+- ai-ledelse.md expanded from 26 → 28 sections
+
+### Carried over
+- ANTHROPIC_API_KEY → GitHub Secrets (manual: `gh secret set ANTHROPIC_API_KEY`) — blocks AI PR review
+- Master agent PoC (supervisor spawning sub-agents)
+- TDD setup — pytest framework for silver validation
+- Bronze → Databricks live data (Autoloader source path setup)
+
+---
+
 ## 2026-02-28 — Session 006: Claude Code Hooks + ai-ledelse.md expansion
 
 **Phase:** Phase 7 — AI Governance Framework
