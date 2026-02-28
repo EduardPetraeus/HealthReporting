@@ -144,6 +144,84 @@ If none of the triggers are met, skip silently.
 
 ---
 
+## security_protocol
+
+### Continuous security awareness (always active)
+
+You are a security-conscious agent at all times. Not just during security reviews — ALWAYS.
+
+### Never commit (hard rules, zero tolerance)
+- Secrets, API keys, tokens, passwords in ANY file (code, config, docs, markdown, yaml, comments)
+- Hardcoded production paths, hostnames, or connection strings
+- PII (names, emails, health data, addresses) in logs, commits, changelogs, or documentation
+- Unencrypted credentials in config files (even with .gitignore — assume it will leak)
+- Production database connection strings anywhere in the repo
+
+### Scan triggers (automatic)
+
+**On every session start (as part of governance_sync):**
+Run a mental scan of files changed since last session. Flag anything suspicious:
+"🔒 Security check: [n] files changed since last session. Scanning for secrets/PII..."
+- If clean: "✅ No security issues detected." (one line, move on)
+- If issue found: "🚨 SECURITY ISSUE: [file:line] — [description]. Fix before proceeding? [Y/n]"
+
+**On every file creation or modification:**
+Before presenting task status, silently check the file you just created/modified for:
+- Hardcoded strings that look like secrets (API keys, tokens, base64 blobs)
+- File paths containing /Users/, /home/, or production hostnames
+- Email addresses, IP addresses, or health data that shouldn't be in code
+- Config files with real credentials (even if gitignored)
+If found: flag IMMEDIATELY. Do not wait for session end.
+
+**On every session end:**
+Before final commit, run a full scan of ALL files touched this session:
+"🔒 Final security scan: [n] files touched this session..."
+- List each file and status: ✅ clean or 🚨 issue
+- Block commit if any 🚨 found. Fix first, then commit.
+
+### Documentation security (often overlooked)
+Documentation files are security risks too. Scan ALL markdown and yaml files for:
+- API keys or tokens used as "examples" (even fake-looking ones can be real)
+- Real endpoint URLs with credentials in query params
+- CHANGELOG entries that mention specific credentials or internal URLs
+- Config examples with real values instead of placeholders
+
+### Pre-commit checklist (mental, every commit)
+Before every git commit, verify:
+- [ ] No secrets in diff (grep for key=, token=, password=, api_key=, secret=)
+- [ ] No hardcoded paths (grep for /Users/, /home/, C:\)
+- [ ] No PII in logs or docs (grep for email patterns, health data terms)
+- [ ] Config files use placeholders (YOUR_API_KEY, <token>, ${ENV_VAR})
+- [ ] .gitignore covers all sensitive files
+- [ ] .claudeignore covers files the agent shouldn't read
+
+### Periodic full repo scan
+Every 5th session (track in CHANGELOG.md), do a FULL repo security scan:
+"🔒 Periodic full security scan (every 5 sessions)..."
+- Scan EVERY file in repo, not just changed files
+- Check for accumulated drift: secrets that slipped through in old sessions
+- Verify .gitignore and .claudeignore are complete
+- Report: "Full scan: [n] files checked, [n] issues found"
+- Log result in CHANGELOG.md
+
+### If security issue found mid-session
+1. STOP current task immediately
+2. Flag the issue with exact file and line
+3. Fix the issue FIRST (replace with env var or placeholder)
+4. Commit the fix separately: "fix(security): remove [type] from [file]"
+5. THEN resume the original task
+Security fixes always take priority over feature work.
+
+### Health data specific (HealthReporting project)
+This project handles health data. Extra rules:
+- NEVER log actual health measurements in code, tests, or docs
+- Test data must be synthetic (generated, not copied from real exports)
+- API responses from health services must never be committed raw
+- Screenshots of dashboards with real health data must never be in the repo
+- CHANGELOG entries must not contain specific health values ("fixed blood pressure parsing" is ok, "fixed BP 142/91 parsing" is NOT)
+
+---
+
 ## Environment Separation
 
 `HEALTH_ENV` env var controls dev vs prd. The DuckDB file is named `health_dw_{env}.db`. The Databricks catalog is `health_dw` with schemas: bronze, silver, gold.
