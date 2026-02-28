@@ -1,146 +1,261 @@
-# Architecture
+# ARCHITECTURE.md — HealthReporting
 
-## Data Flow
-
-```
-Apple Health XML export
-  -> source_connectors/apple_health/process_health_data.py
-     (stream-parse, categorize by domain, hive-partitioned parquet)
-  -> /Users/Shared/data_lake/apple_health_data/{Domain}/{DataType}/year=YYYY/...
-
-Oura Ring API (OAuth 2.0, V2 API)
-  -> source_connectors/oura/run_oura.py
-     (incremental fetch per endpoint, chunked for heartrate)
-  -> /Users/Shared/data_lake/oura/raw/{endpoint}/year=YYYY/month=MM/day=DD/
-
-CSV exports (e.g. Lifesum)
-  -> source_connectors/csv_to_parquet.py
-     (generic converter, adds metadata columns, optional hive partitioning)
-  -> /Users/Shared/data_lake/{source}/parquet/
-
-All sources:
-  -> ingestion_engine.py (reads sources_config.yaml, loads parquet into DuckDB bronze schema)
-  -> health_dw_{env}.db :: bronze.stg_* tables
-
-Silver (local, DuckDB):
-  -> dbt run --select <model>   (creates empty schema-only table)
-  -> python run_merge.py silver/merge_<source>_<entity>.sql
-     (staging table -> dedup -> MERGE INTO silver -> drop staging)
-  -> health_dw_{env}.db :: silver.* tables
-
-Gold (local):
-  -> Views defined in DuckDB (ad hoc queries)
-
-Gold (Databricks):
-  -> transformation_logic/databricks/gold/gold_runner.py
-  -> SQL in transformation_logic/databricks/gold/sql/
-```
-
-## Metadata-Driven Ingestion
-
-The ingestion engine is config-driven: `sources_config.yaml` maps each source to a glob pattern and target bronze table. Adding a new source = adding a YAML entry — no code changes needed for bronze ingestion.
-
-## Silver Layer Pattern (Local DuckDB)
-
-- **Schema definition**: dbt models in `dbt/models/silver/` define the table schema via `SELECT ... WHERE false`. Run once with `dbt run --select <model>`.
-- **Data loading**: Merge scripts in `dbt/merge/silver/` do the actual data movement. Each script:
-  1. `CREATE OR REPLACE TABLE silver.<entity>__staging AS` — dedup with ROW_NUMBER, cast types, compute hashes
-  2. `MERGE INTO silver.<entity>` — insert new rows, update changed rows (hash comparison)
-  3. `DROP TABLE IF EXISTS silver.<entity>__staging`
-- **Surrogate keys**: `sk_date` (YYYYMMDD int) and `sk_time` (HHMM string) link facts to date/time dimensions.
-- **Change detection**: `business_key_hash` (md5 of business key) + `row_hash` (md5 of all measured columns). Update only fires when row_hash differs.
-- **Audit columns**: `load_datetime` (first insert) and `update_datetime` (last change) on all silver tables.
-- **One table per entity**: Silver tables are source-agnostic. Multiple sources can merge into the same table (e.g., Oura + Apple Health both write to `silver.heart_rate`).
-
-## Hive Partition Gotcha (Oura daily endpoints)
-
-Oura daily endpoints are stored with Hive partitioning (`year=YYYY/month=MM/day=DD`). When DuckDB reads these with `hive_partitioning=true`, the `day` partition key (just the day-of-month integer, e.g. "21") overwrites the `day` column from the parquet file (the full ISO date "2025-11-21"). Merge scripts for these endpoints reconstruct the full date using `make_date(year::INTEGER, month::VARCHAR::INTEGER, day::VARCHAR::INTEGER)`.
-
-## Silver Tables (17 entities)
-
-| Table | Sources | Key |
-|---|---|---|
-| `heart_rate` | Apple Health, Oura | timestamp + source_name |
-| `step_count` | Apple Health | date + source_name |
-| `toothbrushing` | Apple Health | start_datetime |
-| `daily_meal` | Lifesum | date + meal_name + food_name |
-| `daily_walking_gait` | Apple Health | date (6 mobility metrics aggregated) |
-| `mindful_session` | Apple Health | start_datetime |
-| `body_temperature` | Apple Health | start_datetime |
-| `respiratory_rate` | Apple Health | start_datetime |
-| `water_intake` | Apple Health | date |
-| `daily_energy_by_source` | Apple Health | date + source_name |
-| `daily_sleep` | Oura | date |
-| `daily_activity` | Oura | date |
-| `daily_readiness` | Oura | date |
-| `daily_spo2` | Oura | date |
-| `daily_stress` | Oura | date |
-| `workout` | Oura | workout_id (UUID) |
-| `personal_info` | Oura | user_id |
-
-## Gold Layer (Local)
-
-Views defined for DuckDB. Minimal — designed for reporting/BI consumption.
+> Last updated: 2026-02-28
+> For technical implementation details (silver pattern, merge scripts, hive partitioning), see `docs/architecture.md`.
 
 ---
 
-## Databricks Cloud Pipeline
+## High-Level Data Flow
 
-The Databricks framework is a production-grade, metadata-driven implementation of the same medallion architecture. It runs on Spark/Delta Lake and is deployed via Databricks Asset Bundles (DAB).
+```mermaid
+graph LR
+    subgraph Sources
+        AH[Apple Health<br/>XML export]
+        OU[Oura<br/>API]
+        WI[Withings<br/>API]
+        ST[Strava<br/>API]
+        LI[Lifesum<br/>Export]
+        GT[GetTested<br/>Manual]
+    end
 
-### Data Flow
+    subgraph Connectors
+        C1[process_health_data.py]
+        C2[oura/ connector<br/>OAuth 2.0, incremental]
+        C3[withings_connector — planned]
+        C4[strava_connector — planned]
+        C5[csv_to_parquet.py]
+        C6[gettested_connector — planned]
+    end
 
+    subgraph Storage
+        PQ[Parquet Files<br/>Hive-partitioned]
+    end
+
+    subgraph Medallion["Medallion Architecture"]
+        B[Bronze<br/>Raw ingestion]
+        S[Silver<br/>Cleaned and typed]
+        G[Gold<br/>Reporting-ready]
+    end
+
+    subgraph Engine
+        IE[ingestion_engine.py<br/>+ sources_config.yaml]
+    end
+
+    subgraph Runtime
+        DDB[DuckDB — local dev]
+        DBX[Databricks — cloud prd]
+    end
+
+    subgraph Reporting
+        RP[TBD<br/>Streamlit / Databricks AI/BI]
+    end
+
+    AH --> C1 --> PQ
+    OU --> C2 --> PQ
+    WI --> C3 --> PQ
+    ST --> C4 --> PQ
+    LI --> C5 --> PQ
+    GT --> C6 --> PQ
+
+    PQ --> IE --> B
+    B --> S --> G
+    G --> RP
+
+    B -.-> DDB
+    B -.-> DBX
+    S -.-> DDB
+    S -.-> DBX
 ```
-Cloud storage (parquet, same format as local)
-  → bronze_autoloader.py
-    (cloudFiles Autoloader, incremental or full, adds source_system + _ingested_at)
-  → health_dw.bronze.stg_<source_name> (Delta table)
-
-  → silver_runner.py
-    (reads YAML config → reads SQL file → substitutes variables → spark.sql())
-  → health_dw.silver.<entity> (Delta table, MERGE INTO or INSERT INTO REPLACE WHERE)
-
-  → gold_runner.py
-    (reads YAML config → reads SQL file → substitutes {target} → spark.sql())
-  → health_dw.gold.<entity> (Delta view or table)
-```
-
-### Config-Driven Design
-
-Every pipeline behaviour is controlled by YAML files and SQL files. The Python runners are generic executors that never change.
-
-| File type | Location | Controls |
-|---|---|---|
-| Source YAML | `health_environment/config/databricks/sources/*.yml` | Bronze paths, load mode, silver SQL reference, unique key |
-| Silver SQL | `transformation_logic/databricks/silver/sql/*.sql` | Transformation logic, DDL, merge strategy |
-| Gold YAML | `health_environment/config/databricks/gold/*.yml` | Gold entity type, target, SQL reference |
-| Gold SQL | `transformation_logic/databricks/gold/sql/*.sql` | View or table definition |
-
-### Source Isolation
-
-Each source system owns its rows. The composite unique key `(source_system, record_id)` prevents cross-source collisions. A full reload of one source (e.g. Oura) never modifies another source's rows (e.g. Apple Health) in the same silver table.
-
-Enforced at the SQL level:
-- **Merge mode**: `MERGE ON (source_system, record_id)` + `WHERE source_system = '{source_system}'` in the USING clause
-- **Insert overwrite mode**: `INSERT INTO ... REPLACE WHERE source_system = '{source_system}'`
-
-### Multiple Sources → Same Silver Table
-
-Both `apple_health_heart_rate` and `oura_heart_rate` write to `health_dw.silver.heart_rate` using the same `heart_rate.sql` file. This works because source connectors normalise bronze output to a shared column schema before writing to parquet.
-
-If a source requires different transformation logic, it points to a different `sql_file` in its YAML while keeping the same `target_table`.
-
-### Dev / Production Separation
-
-Controlled by DAB targets in `health_environment/deployment/databricks/databricks.yml`. Dev mode prefixes job names and uses an isolated workspace path. Production deploys automatically on merge to main via GitHub Actions.
-
-For full detail: see `docs/databricks_framework.md`.
 
 ---
 
-## Oura Connector
+## Current State (What Exists Today)
 
-- OAuth 2.0 Authorization Code flow; tokens stored in `~/.config/health_reporting/oura_tokens.json`
-- State tracking per endpoint in `~/.config/health_reporting/oura_state.json` (incremental fetch)
-- Heartrate endpoint chunked in 7-day windows (API limit)
-- 8 endpoints: daily_sleep, daily_activity, daily_readiness, heartrate, workout, daily_spo2, daily_stress, personal_info
+```mermaid
+graph TD
+    subgraph "Built"
+        AH_C[Apple Health Connector<br/>15 types to Parquet]
+        OU_C[Oura Connector<br/>OAuth 2.0, 8 endpoints, incremental]
+        LI_C[Lifesum Connector<br/>csv_to_parquet.py]
+        IE[Ingestion Engine<br/>sources_config.yaml to DuckDB<br/>27 sources configured]
+        B_AH[Bronze: Apple Health 15 tables]
+        B_OU[Bronze: Oura 8 tables]
+        B_LI[Bronze: Lifesum 1 table]
+        S_DDB[Silver: 21 dbt models + merge scripts<br/>18 entities fully populated locally]
+        S_DB[Silver SQL: 10 Databricks files<br/>deployed via DAB]
+        G_DB[Gold: 3 SQL views<br/>deployed to Databricks]
+        AUD[Audit: job_runs + table_runs<br/>AuditLogger context manager<br/>Delta tables live in health-platform-dev]
+        DAB[Databricks Asset Bundle<br/>bronze/silver/gold jobs<br/>deployed to dev]
+        CICD[GitHub Actions CI/CD<br/>Bundle validation on PRs<br/>Auto-deploy dev and prd]
+    end
+
+    subgraph "In Progress"
+        WITH_S[Withings silver<br/>blood_pressure + weight scripts]
+        DBX_LIVE[Live data flow to cloud<br/>Autoloader not yet running live data]
+    end
+
+    subgraph "Not Built"
+        WITH_C[Withings connector]
+        STRA[Strava connector]
+        GETT[GetTested connector]
+        G_FULL[Gold: full reporting entities<br/>cross-source joins, composite score]
+        VIZ[Visualization layer]
+        TDD[Test framework — pytest TDD]
+    end
+
+    AH_C --> IE --> B_AH
+    OU_C --> IE --> B_OU
+    LI_C --> IE --> B_LI
+    B_AH -.->|dbt + run_merge.py| S_DDB
+    B_OU -.->|dbt + run_merge.py| S_DDB
+    B_LI -.->|dbt + run_merge.py| S_DDB
+    S_DDB --> G_DB
+    DAB -.->|deployed| S_DB
+    CICD -.->|automates| DAB
+```
+
+---
+
+## Medallion Layer Detail
+
+### Bronze (Raw Ingestion)
+
+| Table | Source | Status |
+|-------|--------|--------|
+| stg_apple_health_heart_rate | Apple Health | done |
+| stg_apple_health_step_count | Apple Health | done |
+| stg_apple_health_toothbrushing | Apple Health | done |
+| stg_apple_health_body_temperature | Apple Health | done |
+| stg_apple_health_respiratory_rate | Apple Health | done |
+| stg_apple_health_water_intake | Apple Health | done |
+| stg_apple_health_mindful_session | Apple Health | done |
+| stg_apple_health_daily_walking_gait | Apple Health | done |
+| stg_apple_health_daily_energy_by_source | Apple Health | done |
+| stg_apple_health_* (6 more) | Apple Health | done |
+| stg_oura_daily_sleep | Oura | done |
+| stg_oura_daily_activity | Oura | done |
+| stg_oura_daily_readiness | Oura | done |
+| stg_oura_heartrate | Oura | done |
+| stg_oura_workout | Oura | done |
+| stg_oura_daily_spo2 | Oura | done |
+| stg_oura_daily_stress | Oura | done |
+| stg_oura_personal_info | Oura | done |
+| stg_lifesum_food | Lifesum | done |
+| stg_withings_* | Withings | not started |
+| stg_strava_* | Strava | not started |
+| stg_gettested_* | GetTested | not started |
+
+### Silver (Cleaned and Transformed)
+
+21 dbt schema models + 21 merge scripts. All run locally via DuckDB. 10 SQL files deployed to Databricks.
+
+| Entity | Sources | Local | Databricks |
+|--------|---------|-------|------------|
+| heart_rate | Apple Health + Oura | done | SQL file |
+| step_count | Apple Health | done | — |
+| toothbrushing | Apple Health | done | — |
+| body_temperature | Apple Health | done | — |
+| respiratory_rate | Apple Health | done | — |
+| water_intake | Apple Health | done | — |
+| mindful_session | Apple Health | done | — |
+| daily_walking_gait | Apple Health | done | — |
+| daily_energy_by_source | Apple Health | done | — |
+| daily_sleep | Oura | done | SQL file |
+| daily_activity | Oura | done | SQL file |
+| daily_readiness | Oura | done | SQL file |
+| workout | Oura | done | — |
+| daily_spo2 | Oura | done | — |
+| daily_stress | Oura | done | — |
+| personal_info | Oura | done | — |
+| daily_meal | Lifesum | done | SQL file |
+| blood_pressure | Withings | partial | — |
+| weight | Withings | partial | — |
+| daily_annotations | Manual | done | SQL file |
+
+### Gold (Reporting-Ready)
+
+| View | Description | Status |
+|------|-------------|--------|
+| daily_heart_rate_summary | Aggregated HR per day | done |
+| vw_daily_annotations | Manual daily annotations | done |
+| vw_heart_rate_avg_per_day | HR avg per day | done |
+
+---
+
+## Audit Layer
+
+| Component | Description | Status |
+|-----------|-------------|--------|
+| AuditLogger | Python context manager, auto-detects DuckDB/Databricks | done |
+| audit.job_runs | Delta table — pipeline run metadata | live in health-platform-dev |
+| audit.table_runs | Delta table — per-table row counts | live in health-platform-dev |
+| audit.v_platform_overview | View — 7-day success/error summary | done |
+
+---
+
+## File Structure Map
+
+```
+HealthReporting/
+├── CLAUDE.md                              # session governance + conventions
+├── docs/
+│   ├── CONTEXT.md                         # project scope and data sources
+│   ├── PROJECT_PLAN.md                    # phases and milestones
+│   ├── ARCHITECTURE.md                    # this file — governance view
+│   ├── CHANGELOG.md                       # session log
+│   ├── architecture.md                    # technical reference (silver pattern, merge scripts)
+│   ├── learnings.md                       # architectural decisions and lessons
+│   ├── paths.md                           # key file paths
+│   └── runbook.md                         # how to run the platform locally
+├── .claude/
+│   ├── commands/                          # 10 slash commands
+│   └── agents/                            # 12 custom agents
+└── health_unified_platform/
+    ├── health_environment/
+    │   ├── config/
+    │   │   ├── environment_config.yaml
+    │   │   └── sources_config.yaml        # 27 sources configured
+    │   ├── connectors/
+    │   │   └── oura/                      # OAuth 2.0 connector (auth, client, writer, state)
+    │   └── deployment/
+    │       └── databricks/
+    │           ├── databricks.yml          # DAB bundle root
+    │           ├── init.py                 # one-time schema + audit setup
+    │           ├── orchestration/          # bronze_job.yml, silver_job.yml, gold_job.yml
+    │           └── setup_audit_tables.sql
+    └── health_platform/
+        ├── source_connectors/
+        │   ├── csv_to_parquet.py           # Lifesum and generic CSV
+        │   ├── apple_health/
+        │   │   └── process_health_data.py
+        │   └── oura/                       # run_oura.py, auth.py, client.py, state.py, writer.py
+        ├── utils/
+        │   ├── audit_logger.py             # AuditLogger context manager
+        │   └── logging_config.py           # Python logging setup
+        └── transformation_logic/
+            ├── ingestion_engine.py
+            ├── dbt/
+            │   ├── models/silver/          # 21 schema-only dbt models
+            │   └── merge/silver/           # 21 merge scripts
+            └── databricks/
+                ├── bronze/                 # bronze_autoloader.py
+                ├── silver/sql/             # 10 Databricks SQL files
+                ├── gold/sql/               # 3 SQL views
+                └── audit_logger_notebook.py
+```
+
+---
+
+## Technology Stack
+
+| Layer | Local (dev) | Cloud (prd) |
+|-------|-------------|-------------|
+| Runtime | DuckDB | Databricks |
+| Storage | Parquet (hive-partitioned) | Delta Lake (Unity Catalog) |
+| Orchestration | Python | Databricks Workflows (DAB) |
+| Config | YAML (sources_config.yaml) | YAML |
+| Catalog | — | health-platform-dev / health-platform-prd |
+| Schemas | bronze, silver, gold | bronze, silver, gold, audit |
+| CI/CD | — | GitHub Actions (deploy.yml) |
+| Reporting | — (TBD) | Databricks AI/BI (planned) |
+| Audit | AuditLogger to DuckDB | AuditLogger to Delta |
