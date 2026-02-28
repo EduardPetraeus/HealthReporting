@@ -196,6 +196,53 @@ Setup: `gh secret set ANTHROPIC_API_KEY` (interactive prompt, key never shown in
 ### Tier 4 — Human Review (highest trust)
 Human reviews PR with agent comments as input. Final approval always human.
 
+### Claude Code Hooks (Tier 0 — In-process enforcement)
+
+**Status: IMPLEMENTED**
+
+Claude Code hooks execute inside the agent's own process — before or after every tool call.
+Unlike CI/CD (which catches violations after commit), hooks catch violations at the moment of action.
+
+**Architecture:** `.claude/settings.json` → `scripts/hooks/`
+
+| Hook | Type | Trigger | Action |
+|------|------|---------|--------|
+| `pre_commit_guard.sh` | PreToolUse / Bash | `git commit` detected | Warn on direct main commits |
+| `post_commit.sh` | PostToolUse / Bash | `git commit` detected | Auto-run productivity tracker |
+| Black formatter | PostToolUse / Write\|Edit | `.py` file written | Auto-format Python (in-place) |
+
+**Hook execution model:**
+
+```
+Agent decides to call Bash("git commit -m ...")
+  ↓
+PreToolUse hook fires: pre_commit_guard.sh
+  → Checks branch: is it main?
+  → If main AND not productivity tracker: prints governance warning
+  → Exits 0 (soft enforcement) — tool is allowed to proceed
+  ↓
+Bash tool executes: git commit runs
+  ↓
+PostToolUse hook fires: post_commit.sh
+  → Detects 'git commit' in tool input
+  → Runs update_productivity.py automatically
+  → Prints: [GOVERNANCE] Productivity tracker updated after commit.
+```
+
+**Enforcement levels:**
+
+| Level | Mechanism | Override possible? |
+|-------|-----------|-------------------|
+| Exit 0 (warning) | Prints to model context — agent sees it | Yes (agent may ignore) |
+| Exit 2 (block) | Tool call is cancelled — command never runs | No (hard block) |
+
+Current hooks use exit 0 (warning level). Upgrade path: change exit 0 → exit 2 for hard blocks
+on specific violations (e.g., accidental `git push --force origin main`).
+
+**Why in-process hooks over pre-commit alone:**
+Pre-commit hooks only run on `git commit` — they miss agent actions that don't go through git.
+Claude Code hooks intercept every tool call, including: Write, Edit, Bash, WebFetch, MCP calls.
+
 ---
 
 ## Layer 4: Observability — What Is Happening?

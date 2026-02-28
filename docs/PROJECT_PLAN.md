@@ -163,7 +163,7 @@
 | docs/SPRINT_LOG.md (Layer 2) | ✅ done | Sprint planning and retrospectives |
 | AI_GOVERNANCE.md → full 7-layer framework | ✅ done | Rewritten from PoC to complete framework doc |
 | ANTHROPIC_API_KEY → GitHub Secrets | ⬜ not started | Manual: `gh secret set ANTHROPIC_API_KEY` |
-| Claude Code hooks as enforcement layer | ⬜ not started | pre/post tool-call hooks in settings.json |
+| Claude Code hooks as enforcement layer | ✅ done | pre_commit_guard.sh (PreToolUse) + post_commit.sh (PostToolUse) in scripts/hooks/ |
 | Master agent PoC (supervisor spawning sub-agents) | ⬜ not started | Reads all MD files, acts as architecture guard rail |
 | ai-ledelse.md merge (external → internal sync) | ⬜ not started | When ~/ai-ledelse.md updated externally, sync insights |
 
