@@ -21,13 +21,13 @@
     "period": {
       "from": "2026-02-16"
     },
-    "total_commits": 123,
+    "total_commits": 124,
     "active_weeks": 2,
-    "avg_commits_per_active_week": 61.5,
+    "avg_commits_per_active_week": 62.0,
     "avg_files_per_commit": 8.7
   },
   "factors": {
-    "velocity_factor": 15.0,
+    "velocity_factor": 15.12,
     "files_per_commit_factor": 0.87,
     "description": "velocity_factor = commits/active_week (Claude) / commits/active_week (baseline). files_per_commit_factor = avg_files (Claude) / avg_files (baseline)."
   },
@@ -1876,6 +1876,21 @@
       "refactor_ratio": 0.0,
       "code_density": 4.0,
       "time_since_prev_commit_minutes": 4,
+      "streak_days": 3
+    },
+    {
+      "commit_sha": "ec8da60",
+      "date": "2026-02-28",
+      "message": "chore: update productivity metrics post-session-005",
+      "task_type": "other",
+      "commit_hour": 7,
+      "files_changed": 1,
+      "lines_added": 50,
+      "lines_removed": 5,
+      "files_factor": 0.1,
+      "refactor_ratio": 0.091,
+      "code_density": 50.0,
+      "time_since_prev_commit_minutes": 10,
       "streak_days": 3
     }
   ]
