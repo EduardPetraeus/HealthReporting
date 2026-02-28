@@ -67,7 +67,9 @@ A feature is done when:
 - **Databricks MCP server** configured in `.mcp.json` for Claude Code integration
 - **VS Code** with DuckDB file viewer for parquet/csv and SQL Tools connection
 - Python 3.9 venv (`.venv/`) — key packages: `duckdb`, `pandas`, `pyyaml`, `dbt-core`, `dbt-duckdb`
-- CI/CD via GitHub Actions (`deploy.yml`) — bundle validation on PRs, auto-deploy on merge to main. No test framework or linter currently configured.
+- CI/CD via GitHub Actions — bundle validation, AI PR review, governance checks on every PR
+- **Pre-commit hooks** — install with `pip install pre-commit && pre-commit install` (naming, black, ruff, gitleaks)
+- **Architecture Decision Records** — `docs/adr/` — accepted decisions agents must not reopen without human approval
 
 ## Further Context
 

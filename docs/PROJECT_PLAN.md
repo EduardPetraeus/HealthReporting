@@ -151,7 +151,18 @@
 | Mandatory session protocol (CLAUDE.md) | ✅ done | on_session_start / during / end |
 | Specialised agents (12 agents) | ✅ done | code-reviewer, security-reviewer, build-validator, etc. |
 | CI/CD as unenforced gate (GitHub Actions) | ✅ done | deploy.yml — bundle validation + deploy |
-| code-reviewer agent as automatic PR gate | ⬜ not started | GitHub Actions step, not just manual slash command |
+| ADRs as agent guardrails (docs/adr/) | ✅ done | 4 ADRs: DuckDB, Medallion, YAML, Feature branch |
+| scripts/validate_naming.py (Layer 3, Tier 1) | ✅ done | snake_case + hardcoded path enforcement |
+| scripts/governance_check.py (Layer 3, Tier 1) | ✅ done | CHANGELOG + ARCHITECTURE update gate |
+| scripts/ai_pr_review.py (Layer 3, Tier 3) | ✅ done | Claude Haiku PR reviewer, PASS/WARN/FAIL verdict |
+| .github/workflows/ai-review.yml | ✅ done | GitHub Actions AI PR gate |
+| .github/workflows/governance-check.yml | ✅ done | GitHub Actions governance gate |
+| .pre-commit-config.yaml (Tier 1, local) | ✅ done | naming + black + ruff + gitleaks |
+| docs/decisions/DECISIONS.md (Layer 4) | ✅ done | Session-level decision log |
+| docs/COST_LOG.md (Layer 4) | ✅ done | AI cost tracking |
+| docs/SPRINT_LOG.md (Layer 2) | ✅ done | Sprint planning and retrospectives |
+| AI_GOVERNANCE.md → full 7-layer framework | ✅ done | Rewritten from PoC to complete framework doc |
+| ANTHROPIC_API_KEY → GitHub Secrets | ⬜ not started | Manual: `gh secret set ANTHROPIC_API_KEY` |
 | Claude Code hooks as enforcement layer | ⬜ not started | pre/post tool-call hooks in settings.json |
 | Master agent PoC (supervisor spawning sub-agents) | ⬜ not started | Reads all MD files, acts as architecture guard rail |
 | ai-ledelse.md merge (external → internal sync) | ⬜ not started | When ~/ai-ledelse.md updated externally, sync insights |

@@ -1,0 +1,34 @@
+# Pre-commit hooks — Layer 3 enforcement (Tier 1, deterministic, local)
+# Install: pip install pre-commit && pre-commit install
+# Run manually: pre-commit run --all-files
+
+repos:
+  # Naming conventions + hardcoded path check (local script)
+  - repo: local
+    hooks:
+      - id: validate-naming
+        name: Validate naming conventions
+        entry: python scripts/validate_naming.py --staged
+        language: python
+        types: [python, sql]
+        pass_filenames: false
+
+  # Standard Python formatting checks
+  - repo: https://github.com/psf/black
+    rev: 24.3.0
+    hooks:
+      - id: black
+        language_version: python3.9
+
+  # Python linting
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.3.4
+    hooks:
+      - id: ruff
+        args: [--fix]
+
+  # Secret scanning (gitleaks)
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.4
+    hooks:
+      - id: gitleaks
