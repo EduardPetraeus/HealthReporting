@@ -21,14 +21,14 @@
     "period": {
       "from": "2026-02-16"
     },
-    "total_commits": 115,
+    "total_commits": 120,
     "active_weeks": 2,
-    "avg_commits_per_active_week": 57.5,
-    "avg_files_per_commit": 9.1
+    "avg_commits_per_active_week": 60.0,
+    "avg_files_per_commit": 8.9
   },
   "factors": {
-    "velocity_factor": 14.02,
-    "files_per_commit_factor": 0.91,
+    "velocity_factor": 14.63,
+    "files_per_commit_factor": 0.89,
     "description": "velocity_factor = commits/active_week (Claude) / commits/active_week (baseline). files_per_commit_factor = avg_files (Claude) / avg_files (baseline)."
   },
   "entries": [
@@ -1756,6 +1756,81 @@
       "refactor_ratio": 0.182,
       "code_density": 82.0,
       "time_since_prev_commit_minutes": 25,
+      "streak_days": 3
+    },
+    {
+      "commit_sha": "1c88136",
+      "date": "2026-02-28",
+      "message": "Update productivity metrics to 115 commits",
+      "task_type": "fix",
+      "commit_hour": 6,
+      "files_changed": 1,
+      "lines_added": 35,
+      "lines_removed": 5,
+      "files_factor": 0.1,
+      "refactor_ratio": 0.125,
+      "code_density": 35.0,
+      "time_since_prev_commit_minutes": 0,
+      "streak_days": 3
+    },
+    {
+      "commit_sha": "7d91d39",
+      "date": "2026-02-28",
+      "message": "Merge pull request #36 from EduardPetraeus/feature/governance-framework",
+      "task_type": "other",
+      "commit_hour": 6,
+      "files_changed": 0,
+      "lines_added": 0,
+      "lines_removed": 0,
+      "files_factor": 0,
+      "refactor_ratio": null,
+      "code_density": null,
+      "time_since_prev_commit_minutes": 2,
+      "streak_days": 3
+    },
+    {
+      "commit_sha": "a8e2983",
+      "date": "2026-02-28",
+      "message": "feat: add AI governance framework and /prioritize command",
+      "task_type": "other",
+      "commit_hour": 6,
+      "files_changed": 4,
+      "lines_added": 188,
+      "lines_removed": 0,
+      "files_factor": 0.4,
+      "refactor_ratio": 0.0,
+      "code_density": 47.0,
+      "time_since_prev_commit_minutes": 14,
+      "streak_days": 3
+    },
+    {
+      "commit_sha": "d934069",
+      "date": "2026-02-28",
+      "message": "Merge pull request #37 from EduardPetraeus/feature/ai-governance-framework",
+      "task_type": "other",
+      "commit_hour": 6,
+      "files_changed": 0,
+      "lines_added": 0,
+      "lines_removed": 0,
+      "files_factor": 0,
+      "refactor_ratio": null,
+      "code_density": null,
+      "time_since_prev_commit_minutes": 1,
+      "streak_days": 3
+    },
+    {
+      "commit_sha": "e8ecd21",
+      "date": "2026-02-28",
+      "message": "feat(governance): implement full AI governance enforcement layer (7-layer framework)",
+      "task_type": "other",
+      "commit_hour": 6,
+      "files_changed": 17,
+      "lines_added": 1275,
+      "lines_removed": 49,
+      "files_factor": 1.7,
+      "refactor_ratio": 0.037,
+      "code_density": 75.0,
+      "time_since_prev_commit_minutes": 13,
       "streak_days": 3
     }
   ]
