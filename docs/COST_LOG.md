@@ -55,3 +55,5 @@
 - `claude_code_productivity.json` tracks commit-level metrics (not token-level)
 - Token estimates based on typical context window usage — not measured precisely
 - Future: instrument `ai_pr_review.py` to log actual token usage from API response
+
+<!-- smoke test 2026-02-28 — validates ANTHROPIC_API_KEY + ai-review workflow -->

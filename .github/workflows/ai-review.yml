@@ -10,7 +10,6 @@ on:
 jobs:
   ai-review:
     name: AI Code Review (claude-haiku)
-    if: false  # Disabled — API costs money. Remove this line to enable.
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
