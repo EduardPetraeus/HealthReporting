@@ -21,14 +21,14 @@
     "period": {
       "from": "2026-02-16"
     },
-    "total_commits": 129,
+    "total_commits": 131,
     "active_weeks": 2,
-    "avg_commits_per_active_week": 64.5,
-    "avg_files_per_commit": 8.4
+    "avg_commits_per_active_week": 65.5,
+    "avg_files_per_commit": 8.3
   },
   "factors": {
-    "velocity_factor": 15.73,
-    "files_per_commit_factor": 0.84,
+    "velocity_factor": 15.98,
+    "files_per_commit_factor": 0.83,
     "description": "velocity_factor = commits/active_week (Claude) / commits/active_week (baseline). files_per_commit_factor = avg_files (Claude) / avg_files (baseline)."
   },
   "entries": [
@@ -1966,6 +1966,36 @@
       "refactor_ratio": 0.0,
       "code_density": 30.0,
       "time_since_prev_commit_minutes": 10,
+      "streak_days": 3
+    },
+    {
+      "commit_sha": "88c50da",
+      "date": "2026-02-28",
+      "message": "chore: update productivity metrics to 129 commits",
+      "task_type": "other",
+      "commit_hour": 8,
+      "files_changed": 1,
+      "lines_added": 50,
+      "lines_removed": 5,
+      "files_factor": 0.1,
+      "refactor_ratio": 0.091,
+      "code_density": 50.0,
+      "time_since_prev_commit_minutes": 0,
+      "streak_days": 3
+    },
+    {
+      "commit_sha": "cd508c9",
+      "date": "2026-02-28",
+      "message": "feat(governance): add dynamic model routing to CLAUDE.md (#42)",
+      "task_type": "docs",
+      "commit_hour": 8,
+      "files_changed": 1,
+      "lines_added": 65,
+      "lines_removed": 0,
+      "files_factor": 0.1,
+      "refactor_ratio": 0.0,
+      "code_density": 65.0,
+      "time_since_prev_commit_minutes": 7,
       "streak_days": 3
     }
   ]
