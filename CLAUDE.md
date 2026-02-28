@@ -13,6 +13,36 @@ Personal health data platform (owner: Claus Eduard Petraeus) that ingests, trans
 These rules are NOT optional. Follow them automatically without being asked.
 
 ### on_session_start (always, before any coding)
+
+#### governance_sync (first action — runs automatically before anything else)
+
+Silently verify governance files match reality:
+
+1. Scan the actual codebase:
+   - Count files per layer (bronze/silver/gold SQL transforms)
+   - List all connectors/sources that exist in code
+   - Check `sources_config.yaml` entries vs actual connector files
+
+2. Compare against governance files:
+   - `PROJECT_PLAN.md`: are task statuses accurate? Mark completed tasks still showing ⬜
+   - `ARCHITECTURE.md`: does the diagram match what's actually built?
+   - `CHANGELOG.md`: is the last session logged?
+
+3. If drift detected — present a short drift report BEFORE sprint status:
+   ```
+   ⚠️ Governance drift detected:
+   - PROJECT_PLAN.md shows X as ⬜ but code exists at path/to/file
+   - ARCHITECTURE.md missing Y integration
+   Fix now before we start? [Y/n]
+   ```
+   Fix drift first, commit as `docs: governance sync`, then proceed.
+
+4. If no drift: proceed silently to sprint status presentation.
+
+This check runs automatically. The user does not need to request it.
+It takes priority over all other session start activities.
+
+#### Then, after governance_sync:
 1. Read `docs/PROJECT_PLAN.md`, `docs/ARCHITECTURE.md`, last 3 entries in `docs/CHANGELOG.md`
 2. Present a sprint status to the user:
    - Current phase and progress
