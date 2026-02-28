@@ -1,0 +1,27 @@
+name: Governance Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  governance:
+    name: Governance File Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run governance check
+        run: python scripts/governance_check.py
+
+      - name: Run naming conventions check
+        run: python scripts/validate_naming.py

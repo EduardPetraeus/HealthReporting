@@ -1,83 +1,384 @@
 # AI Governance Framework
 
-> PoC version — HealthReporting as blueprint
-> External reference: `~/ai-ledelse.md` (living document, updated independently)
-> Last updated: 2026-02-28
+> HealthReporting implementation of the 7-layer AI governance blueprint.
+> External reference (living document, not in repo): `~/ai-ledelse.md`
+> Last updated: 2026-02-28 — Session 005
 
 ---
 
-## Problem
+## The Problem
 
-AI agents follow the nearest instruction, not overarching intent.
+**AI agents are obedient, not intelligent.**
+They optimise for the nearest instruction — not the organisation's overarching goals.
 
-Concrete symptom: `/plan-session` reads `docs/PROJECT_PLAN.md` and proposes technical backlog tasks — while `~/TODO.md` contains P0 strategic items (income, momentum, blockers) that are never surfaced. Result: the agent optimizes for the wrong thing.
+At solo scale: agent proposes technical backlog tasks while `~/TODO.md` contains P0 strategic items (income, momentum, blockers) that are never surfaced.
+At team scale (50 developers): 50 diverging implementations of the same pattern.
+At enterprise scale (500+): organisational chaos without a governance layer.
 
-At team scale (50 developers, each with their own Claude Code), this diverges into 50 different architectures, conventions, and priorities. The question this framework answers: **how do you govern AI agents the same way you govern a software system?**
-
----
-
-## What IS built (HealthReporting PoC)
-
-### 1. CLAUDE.md as constitution
-`CLAUDE.md` and `CLAUDE.local.md` define non-negotiable rules: language, branching, security, session protocol, commit discipline. The agent must follow these before any user instruction. This is the equivalent of a corporate code of conduct enforced at the tool level.
-
-### 2. Mandatory session protocol
-`CLAUDE.md` defines three lifecycle hooks:
-- `on_session_start` — read governance files, present sprint status, confirm scope before coding
-- `during_session` — automatic checkpoints after each major task
-- `on_session_end` — update CHANGELOG, PROJECT_PLAN, ARCHITECTURE before closing
-
-This prevents sessions from starting or ending without governance state being updated.
-
-### 3. Specialised agents (12 agents)
-`.claude/agents/` contains purpose-built agents with bounded scope:
-- `security-reviewer` — mandatory before every PR merge
-- `code-reviewer` — conventions + medallion quality check
-- `build-validator` — DAB bundle completeness
-- `medallion-reviewer`, `test-writer`, `yaml-config-writer`, etc.
-
-Specialisation prevents generalist agents from making broad, unchecked changes.
-
-### 4. MEMORY.md as cross-session context
-`~/.claude/projects/.../memory/MEMORY.md` persists architectural decisions, gotchas, and conventions across sessions. Without this, every session starts from scratch and re-discovers the same mistakes.
-
-### 5. /prioritize command (strategic → tactical bridge)
-`.claude/commands/prioritize.md` merges `~/TODO.md` (strategic backlog) with `docs/PROJECT_PLAN.md` (technical backlog) into a single ranked list. Ensures P0 items from TODO.md are surfaced alongside in-progress technical tasks. Closes the silo between strategic intent and agent execution.
-
-### 6. CI/CD as unenforced gate
-GitHub Actions (`deploy.yml`) runs bundle validation on every PR and auto-deploys to dev/prd on merge. This is a structural guardrail: broken bundles cannot deploy. It is not probabilistic — it is deterministic enforcement.
+The solution is not more documentation. It is *active enforcement*.
 
 ---
 
-## Next level (not built yet)
+## Framework Overview — 7 Layers
 
-### code-reviewer as automatic PR gate
-Currently, `code-reviewer` is a manual slash command. The next step: run it as a GitHub Actions step on every PR, posting a structured review comment. The agent becomes a mandatory reviewer — not optional.
+```
+┌─────────────────────────────────────────────────────────┐
+│  Layer 7: EVOLUTION — Who updates the rules?            │
+│  ADR lifecycle, constitution reviews, framework drift   │
+├─────────────────────────────────────────────────────────┤
+│  Layer 6: TEAM GOVERNANCE — Multi-agent, multi-human    │
+│  Roles, ownership, conflict resolution, escalation      │
+├─────────────────────────────────────────────────────────┤
+│  Layer 5: KNOWLEDGE — Continuity & memory               │
+│  MEMORY.md, ADRs, context propagation, onboarding       │
+├─────────────────────────────────────────────────────────┤
+│  Layer 4: OBSERVABILITY — What is happening?            │
+│  Audit trails, decision logs, cost tracking, metrics    │
+├─────────────────────────────────────────────────────────┤
+│  Layer 3: ENFORCEMENT — Automated gates                 │
+│  CI/CD checks, AI PR review, pre-commit, security scan  │
+├─────────────────────────────────────────────────────────┤
+│  Layer 2: ORCHESTRATION — Session & Sprint              │
+│  Session protocols, sprint planning, scope management   │
+├─────────────────────────────────────────────────────────┤
+│  Layer 1: CONSTITUTION — Static rules                   │
+│  CLAUDE.md, ADRs, security policy, naming conventions  │
+└─────────────────────────────────────────────────────────┘
+```
 
-### Claude Code hooks as enforcement layer
-`settings.json` supports pre/post tool-call hooks. Example: before every `git push`, run `/security-review`. Before every file write, validate against CLAUDE.md conventions. This moves governance from advisory to enforced.
-
-### Master agent (supervisor pattern)
-A supervisor agent that reads all governance MD files (CLAUDE.md, ARCHITECTURE.md, AI_GOVERNANCE.md, ai-ledelse.md) and acts as a guard rail for all other agents. Every sub-agent spawned by the master is bounded by the master's context. This is the "AI master agent" concept — one agent that knows the full architectural intent and can veto or redirect other agents.
+Each layer depends on the one below. No enforcement without constitution.
+No team governance without observability. Implement bottom-up.
 
 ---
 
-## Open questions
+## Layer 1: Constitution — Static Rules
 
-1. **Who owns CLAUDE.md in a team?** In a solo project, the developer owns it. In a team, it needs a review process — like a Terms of Service that all contributors accept.
+**Status: IMPLEMENTED**
 
-2. **Deterministic vs probabilistic governance?** CI/CD gates are deterministic (pass/fail). Agent-based review is probabilistic (good/bad judgment). The right architecture uses both: CI for structural rules, agents for contextual review.
+### CLAUDE.md — Agent constitution
+The most important file in the framework. All agents read it before acting.
+CLAUDE.md is not guidance — it is law.
 
-3. **How do you prevent CLAUDE.md drift?** If the file is never updated, it becomes stale. Need a process: after every architectural decision, update CLAUDE.md. This is currently manual — could be automated via `on_session_end`.
+Contents:
+- Project identity (what we build, who owns it)
+- Code conventions (naming, language, formatting)
+- Architecture principles (patterns, layers, boundaries)
+- Session protocol (start, during, end)
+- Forbidden list (what agents must never do)
+- Definition of done
 
-4. **Cross-agent memory?** Currently, MEMORY.md is read by the main agent. Sub-agents (spawned via Task tool) do not inherit it. Shared memory across agent instances is an open problem.
+Rules:
+- Max ~200 lines — agent must parse it fast
+- No prose — bullet points and short rules
+- No "nice to have" — only hard rules
+- Versioned in git — changes require review
+- Critical rules go at the TOP — not buried at the bottom
+
+### Architecture Decision Records (ADRs)
+Accepted decisions that agents must not reopen without explicit human approval.
+Location: `docs/adr/`
+
+Current ADRs:
+- ADR-001: DuckDB as local runtime
+- ADR-002: Medallion architecture (bronze → silver → gold)
+- ADR-003: YAML-driven pipeline configuration
+- ADR-004: Feature branch workflow
+
+### Security Constitution
+Rules that apply regardless of context (enforced via pre-commit + CI):
+- No secrets, tokens, passwords, or workspace URLs in committed files
+- No hardcoded user paths (`/Users/`) in Python code
+- No PII in logs, sample data, or test fixtures
+- GitHub Secrets for all credentials
+- No direct commits to main
+
+### Naming Constitution
+Deterministic rules enforced by `scripts/validate_naming.py`:
+- `snake_case` for all names (files, variables, tables, columns)
+- Bronze tables prefixed with `stg_`
+- Gold views prefixed with `vw_`
+- All code and documentation in English (no Danish in repo files)
+- Branch names: `feature/`, `fix/`, `docs/`, `refactor/`
 
 ---
 
-## Reference
+## Layer 2: Orchestration — Session & Sprint
 
-- `~/ai-ledelse.md` — the living external document (updated independently, not committed to repo)
-- `CLAUDE.md` — primary governance file for this project
-- `.claude/commands/prioritize.md` — strategic/tactical bridge command
-- `.claude/agents/` — specialised agent definitions
-- `docs/PROJECT_PLAN.md` — Phase 7: AI Governance Framework tasks
+**Status: IMPLEMENTED**
+
+### Session Protocol (CLAUDE.md)
+
+Three mandatory lifecycle hooks per session:
+
+**on_session_start:**
+1. Read `docs/PROJECT_PLAN.md`, `docs/ARCHITECTURE.md`, last 3 `docs/CHANGELOG.md` entries
+2. Present sprint status: phase, last session summary, top 3 suggested tasks
+3. Confirm scope — no coding before scope is agreed
+4. Restate agreed scope as mini sprint goal
+
+**during_session:**
+- After each major task: 1-2 line summary → state what is next
+- After 3+ tasks: pause and show ✅ Done / 🔵 In progress / ⬜ Remaining
+
+**on_session_end:**
+1. Full session summary (built, carried over, new issues)
+2. Auto-update: CHANGELOG.md, PROJECT_PLAN.md, ARCHITECTURE.md
+3. Final message: "Session [NNN] closed. [X] tasks completed, [Y] carried over."
+
+### /prioritize Command
+`.claude/commands/prioritize.md` — strategic/tactical bridge.
+
+Merges `~/TODO.md` (strategic backlog) with `docs/PROJECT_PLAN.md` (technical backlog)
+into a single ranked list: BLOCKER → P0 → ACTIVE → P1 → BACKLOG.
+Ends with "Top 3 for this session" — not blocked, highest impact, single-session completable.
+
+### Sprint Structure
+`docs/SPRINT_LOG.md` tracks sprint goals, scope, and retrospectives.
+
+```
+Sprint = 1 week or 1 logical milestone
+Session = 1 sitting (1-3 hours)
+Sprint goal = single sentence: what does "done" look like?
+Sprint scope = 5-8 concrete tasks from /prioritize output
+```
+
+Sprint ceremonies (automated via session protocol):
+- Sprint start: `/prioritize` → confirm scope
+- Daily standup: session protocol on_session_start
+- Sprint review: session summary at on_session_end
+- Sprint retro: retro note in SPRINT_LOG.md
+
+---
+
+## Layer 3: Enforcement — Automated Gates
+
+**Status: IMPLEMENTED**
+
+The only enforcement that cannot be overridden by an agent is GitHub Actions.
+CLAUDE.md is probabilistic (agent *should* follow it). CI/CD is deterministic (code *cannot* merge without it).
+
+### Tier 1 — Deterministic (fast, local + CI)
+
+**Pre-commit hooks** (`.pre-commit-config.yaml`):
+- `validate-naming` — snake_case filenames, no hardcoded `/Users/` paths
+- `black` — Python formatting (24.3.0)
+- `ruff` — Python linting with auto-fix (v0.3.4)
+- `gitleaks` — secret scanning (v8.18.4)
+
+Install: `pip install pre-commit && pre-commit install`
+
+**GitHub Actions: Governance Check** (`.github/workflows/governance-check.yml`):
+- Code changed but CHANGELOG.md not updated → warning
+- Connector/bronze files changed but ARCHITECTURE.md not updated → warning
+- Workflow files changed but CHANGELOG.md not updated → **hard fail**
+
+**GitHub Actions: Naming Check** (same workflow):
+- Runs `scripts/validate_naming.py` on every PR
+
+### Tier 2 — Tests (not yet implemented)
+- Unit tests (pytest)
+- Silver data validation (row counts, null checks, schema match)
+- dbt schema tests on all 17 silver entities
+
+### Tier 3 — AI Review (probabilistic)
+
+**GitHub Actions: AI PR Review** (`.github/workflows/ai-review.yml`):
+- Model: `claude-haiku-4-5-20251001` (cost-efficient, high-frequency)
+- Feeds: PR diff + CLAUDE.md + ARCHITECTURE.md + ADRs
+- Posts structured PR comment with verdict:
+  - **PASS** — follows all conventions, governance updated, no security issues
+  - **WARN** — minor issues, can merge but developer should be aware (exit 0)
+  - **FAIL** — security violation, hardcoded secret, ADR breach (exit 1 → blocks CI)
+
+Requires: `ANTHROPIC_API_KEY` in GitHub Secrets.
+Setup: `gh secret set ANTHROPIC_API_KEY` (interactive prompt, key never shown in terminal)
+
+### Tier 4 — Human Review (highest trust)
+Human reviews PR with agent comments as input. Final approval always human.
+
+---
+
+## Layer 4: Observability — What Is Happening?
+
+**Status: IMPLEMENTED (tracking files created)**
+
+### Audit Trail
+- `docs/CHANGELOG.md` — session-level: what was done, by whom, when
+- Git commit messages — change-level: `feat(bronze): add oura connector`
+- `docs/SPRINT_LOG.md` — sprint-level: goals, scope, retro notes
+
+### Decision Log
+`docs/decisions/DECISIONS.md` — when agents make non-trivial choices not covered by ADRs.
+
+Format:
+```
+| Date | Session | Decision | Rationale | Alternatives considered |
+```
+
+### Cost Tracking
+`docs/COST_LOG.md` — token usage and estimated API costs per session.
+
+Guardrails:
+- Monthly cost > $20 → review and optimise prompt sizes
+- Single session > $2 → split into smaller sessions
+- PR review cost > $0.05 → switch to lighter model
+
+### Quality Metrics (target state)
+- Test coverage (%)
+- Lint errors per commit
+- AI review pass rate (% PRs passing first time)
+- Governance compliance (% sessions with correct start/end protocol)
+- Architecture drift score (deviations from ARCHITECTURE.md)
+
+---
+
+## Layer 5: Knowledge — Continuity & Memory
+
+**Status: IMPLEMENTED**
+
+### Memory Hierarchy
+
+```
+Level 1: CLAUDE.md          → Permanent, rarely changed (constitution)
+Level 2: ARCHITECTURE.md    → Updated at milestones (system state)
+Level 3: PROJECT_PLAN.md    → Updated every session (tactical)
+Level 4: CHANGELOG.md       → Append-only (history)
+Level 5: MEMORY.md          → Auto-generated cross-session context
+Level 6: Session context    → Disappears when session closes
+```
+
+`~/.claude/projects/.../memory/MEMORY.md` gives agents cross-session context.
+Without it, every session starts from scratch.
+PROJECT_PLAN.md + CHANGELOG.md are the explicit version — instruction set for the agent.
+
+### Architecture Decision Records
+Accepted decisions that agents cannot reopen without human approval.
+See `docs/adr/`. ADR lifecycle: `Proposed → Accepted → Superseded | Deprecated`.
+
+### Why ADRs are critical with AI
+Without ADRs, an agent will suggest "a better solution" — which is the same solution
+evaluated and rejected 3 weeks ago. ADRs prevent decision loops.
+
+### Context Propagation
+```
+Session N ends → CHANGELOG + PROJECT_PLAN updated
+Session N+1 starts → Agent reads CHANGELOG + PROJECT_PLAN → has full context
+```
+
+---
+
+## Layer 6: Team Governance — Multi-Agent, Multi-Human
+
+**Status: DESIGNED (not implemented — solo project)**
+
+### Ownership Model (enterprise target state)
+```
+CLAUDE.md owner → Tech Lead / Platform team
+ADR owner       → Author + reviewer (PR process)
+SESSION protocol → Every developer follows same protocol
+MEMORY.md       → Per-developer, but shared patterns promoted to CLAUDE.md
+```
+
+### Role Matrix
+| Role | Owns | Can change | Cannot change |
+|------|------|------------|---------------|
+| Developer | Feature branch | Own CLAUDE.local.md | Org CLAUDE.md |
+| Tech Lead | CLAUDE.md | Architecture ADRs | Security constitution |
+| Platform | CI/CD gates | Enforcement rules | Individual ADRs |
+| Security | Security constitution | All security rules | — |
+
+### Conflict Resolution
+If agent recommendation contradicts an existing ADR:
+1. Agent flags the conflict explicitly
+2. Human reviews (does the ADR need updating, or is the agent wrong?)
+3. If ADR superseded: create new ADR, reference old one
+4. If agent wrong: no action, session note added to DECISIONS.md
+
+---
+
+## Layer 7: Evolution — Who Updates the Rules?
+
+**Status: DESIGNED (protocol defined)**
+
+### Constitution Review Cadence
+- CLAUDE.md → reviewed at each major phase milestone
+- ADRs → reviewed when a new decision would contradict an accepted one
+- Security constitution → reviewed when new tooling or connectors are added
+- AI_GOVERNANCE.md → reviewed when `~/ai-ledelse.md` is updated externally
+
+### Framework Drift Prevention
+Risk: governance files become stale and lose authority.
+
+Prevention:
+- `on_session_end` protocol mandates governance file updates
+- `governance_check.py` CI gate enforces CHANGELOG update with every code change
+- Quarterly review prompt in SPRINT_LOG.md
+
+### Meta-Governance Process
+1. New pattern observed in practice → note in `docs/learnings.md`
+2. Pattern validated across 3+ sessions → promote to CLAUDE.md or new ADR
+3. CLAUDE.md change → PR with review (no direct commit to main)
+4. ADR superseded → create new ADR referencing old one, mark old as Superseded
+
+### Sync with ~/ai-ledelse.md
+`~/ai-ledelse.md` is the living external document (not in repo).
+When updated externally:
+1. Read both files side by side
+2. Identify new patterns or decisions in ai-ledelse.md not yet in this repo
+3. Merge relevant insights: new ADRs, updated CLAUDE.md rules, new governance patterns
+4. Commit as `docs: sync AI governance framework with ai-ledelse.md`
+
+---
+
+## Maturity Model
+
+| Level | Name | Description | What we have |
+|-------|------|-------------|--------------|
+| 0 | Ad-hoc | No governance, agents do whatever | — |
+| 1 | Foundation | CLAUDE.md exists, basic session protocol | ✅ Done |
+| 2 | Structured | ADRs, MEMORY.md, specialised agents, /prioritize | ✅ Done |
+| **3** | **Enforced** | **Pre-commit, CI gates, AI PR review, cost tracking** | **✅ Done (Feb 2026)** |
+| 4 | Measured | Dashboard, quality metrics, drift score, test coverage >70% | ⬜ Next |
+| 5 | Self-optimising | Master agent, automated retro, framework updates itself | ⬜ Future |
+
+**Current maturity: Level 3 — Enforced**
+
+---
+
+## Open Questions
+
+1. **Who owns CLAUDE.md in a team?** Needs a review process — like a Terms of Service
+   that all contributors accept. Currently sole owner.
+
+2. **Deterministic vs probabilistic governance?** CI/CD gates are deterministic (pass/fail).
+   Agent-based review is probabilistic (judgment). Architecture uses both.
+
+3. **How to prevent CLAUDE.md drift?** Currently manual. Could automate via on_session_end:
+   agent suggests additions based on decisions made during session.
+
+4. **Cross-agent memory?** Sub-agents spawned via Task tool do not inherit MEMORY.md.
+   Shared memory across agent instances is an open problem.
+
+5. **Master agent pattern?** A supervisor agent that reads all governance MD files and
+   acts as a guardrail for all sub-agents. Every spawned agent is bounded by master context.
+   This is the next level beyond current implementation.
+
+---
+
+## References
+
+| Resource | Description |
+|----------|-------------|
+| `~/ai-ledelse.md` | Living external document (updated independently, not in repo) |
+| `CLAUDE.md` | Primary governance file for this project |
+| `docs/adr/` | Architecture Decision Records (4 ADRs) |
+| `docs/decisions/DECISIONS.md` | Session-level decision log |
+| `docs/SPRINT_LOG.md` | Sprint planning and retrospectives |
+| `docs/COST_LOG.md` | AI usage and cost tracking |
+| `.claude/commands/prioritize.md` | Strategic/tactical bridge command |
+| `scripts/validate_naming.py` | Layer 3 Tier 1 enforcement |
+| `scripts/governance_check.py` | Layer 3 Tier 1 governance gate |
+| `scripts/ai_pr_review.py` | Layer 3 Tier 3 AI PR review |
+| `.pre-commit-config.yaml` | Local enforcement hooks |
+| `.github/workflows/ai-review.yml` | GitHub Actions AI gate |
+| `.github/workflows/governance-check.yml` | GitHub Actions governance gate |

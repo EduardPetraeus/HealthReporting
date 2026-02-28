@@ -4,6 +4,43 @@
 
 ---
 
+## 2026-02-28 — Session 005: AI Governance Enforcement Layer
+
+**Phase:** Phase 7 — AI Governance Framework
+**Goal:** Full 7-layer AI governance enforcement — ADRs, pre-commit, AI PR review, GitHub Actions gates, observability docs
+
+### What was done
+- Created `docs/adr/` with 4 ADRs: DuckDB, Medallion, YAML-driven pipeline, Feature branch workflow
+- Created `scripts/validate_naming.py` — Layer 3 Tier 1: snake_case + hardcoded path enforcement (pre-commit + CI)
+- Created `scripts/governance_check.py` — Layer 3 Tier 1: CHANGELOG/ARCHITECTURE update gate (CI)
+- Created `scripts/ai_pr_review.py` — Layer 3 Tier 3: Claude Haiku PR reviewer, posts PASS/WARN/FAIL comment
+- Created `.github/workflows/ai-review.yml` — GitHub Actions AI PR gate (requires ANTHROPIC_API_KEY secret)
+- Created `.github/workflows/governance-check.yml` — GitHub Actions governance + naming check
+- Created `.pre-commit-config.yaml` — local enforcement: validate-naming, black, ruff, gitleaks
+- Created `docs/decisions/DECISIONS.md` — Layer 4 decision log (13 historical decisions documented)
+- Created `docs/COST_LOG.md` — Layer 4 cost tracking (sessions + PR review costs)
+- Created `docs/SPRINT_LOG.md` — Layer 2 sprint planning and retrospectives (Sprints 001-004)
+- Rewrote `docs/AI_GOVERNANCE.md` — full 7-layer framework (Constitution → Evolution), maturity model, references
+- Updated `CLAUDE.md` — added pre-commit + ADR references to Tooling section
+- Updated `docs/PROJECT_PLAN.md` — Phase 7 expanded with 11 new tasks (10 ✅ done, 4 ⬜ remaining)
+
+### Architecture changes
+- Layer 3 enforcement fully implemented: Tier 1 (deterministic) + Tier 3 (probabilistic) + pre-commit (local)
+- Layer 4 observability: decision log, cost tracking, sprint log all live
+- Project maturity: Level 1 (Foundation) → Level 3 (Enforced)
+- GitHub Actions gates: 3 workflows (deploy.yml existing + ai-review.yml + governance-check.yml)
+
+### Manual action required
+- `gh secret set ANTHROPIC_API_KEY` — required for ai-review.yml to function
+
+### What's next
+- ANTHROPIC_API_KEY to GitHub Secrets (manual)
+- Claude Code hooks (pre/post tool-call enforcement in settings.json)
+- Master agent PoC (supervisor pattern)
+- TDD setup (pytest framework for silver validation)
+
+---
+
 ## 2026-02-28 — Session 003: AI Governance Framework
 
 **Phase:** Phase 7 (AI Governance) — new phase
