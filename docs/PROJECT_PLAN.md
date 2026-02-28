@@ -1,0 +1,137 @@
+# PROJECT_PLAN.md — HealthReporting
+
+> Last updated: 2026-02-28
+> Current phase: **Phase 2 — Silver Layer + Phase 5 (Databricks, parallel)**
+
+---
+
+## Phase Overview
+
+| Phase | Name | Status | Target |
+|-------|------|--------|--------|
+| 0 | Governance & Project Setup | ✅ done | Feb 2026 |
+| 1 | Foundation & Bronze Layer | ✅ done | Feb 2026 |
+| 2 | Silver Layer — Core Transformations | 🔵 in progress | Mar 2026 |
+| 3 | Gold Layer — Reporting Entities | 🔵 in progress | Apr 2026 |
+| 4 | Visualization & Reporting | ⬜ not started | Jun 2026 |
+| 5 | Cloud Migration (Databricks) | 🔵 in progress | Q2 2026 |
+| 6 | CI/CD & Automation | 🔵 in progress | Q2 2026 |
+
+---
+
+## Phase 0 — Governance & Project Setup
+
+**Goal:** Establish project structure, governance files, and working conventions.
+
+| Task | Status | Notes |
+|------|--------|-------|
+| CLAUDE.md session rules | ✅ done | Includes mandatory_session_protocol |
+| PROJECT_PLAN.md | ✅ done | This file |
+| ARCHITECTURE.md | ✅ done | docs/ARCHITECTURE.md |
+| CHANGELOG.md | ✅ done | docs/CHANGELOG.md |
+| Claude Code custom commands | ✅ done | /status, /plan-session, /end-session |
+| CONTEXT.md | ✅ done | docs/CONTEXT.md |
+| Custom agents (12) | ✅ done | code-reviewer, build-validator, etc. |
+| AI governance framework | ✅ done | ~/ai-ledelse.md + session protocol |
+
+---
+
+## Phase 1 — Foundation & Bronze Layer
+
+**Goal:** All data sources ingested into bronze with consistent schema and metadata.
+
+| Task | Status | Notes |
+|------|--------|-------|
+| Apple Health XML → parquet | ✅ done | 15 types via process_health_data.py |
+| Oura connector | ✅ done | OAuth 2.0, incremental, 8 endpoints |
+| Lifesum connector | ✅ done | csv_to_parquet.py |
+| Withings connector | ⬜ not started | API-based — planned |
+| Strava connector | ⬜ not started | API-based — planned |
+| GetTested connector | ⬜ not started | Manual/export — planned |
+| sources_config.yaml — full schema | ✅ done | 27 sources defined (19 Apple Health + 8 Oura + 1 Lifesum) |
+| Ingestion engine — all active sources | ✅ done | Works for Apple Health, Oura, Lifesum |
+| Bronze validation tests | ⬜ not started | Row counts, null checks |
+
+**Exit criteria:** All 3 active sources ingested into bronze, validated, repeatable. *(Withings/Strava/GetTested are stretch goals.)*
+
+---
+
+## Phase 2 — Silver Layer — Core Transformations
+
+**Goal:** Cleaned, typed, deduplicated entities for all active sources.
+
+| Task | Status | Notes |
+|------|--------|-------|
+| Silver schema design (all entities) | ✅ done | 21 dbt models |
+| Apple Health silver transforms | ✅ done | 9 entities: heart_rate, step_count, toothbrushing, body_temperature, respiratory_rate, water_intake, daily_energy_by_source, daily_walking_gait, mindful_session |
+| Oura silver transforms | ✅ done | 9 entities: daily_sleep, daily_activity, daily_readiness, heart_rate (shared), workout, daily_spo2, daily_stress, personal_info |
+| Lifesum silver transforms | ✅ done | daily_meal |
+| Withings silver transforms | 🔵 partial | blood_pressure + weight merge scripts exist |
+| DuckDB local silver runner | ✅ done | run_merge.py — 21 merge scripts working locally |
+| Silver validation tests | ⬜ not started | TDD framework — pytest + conftest.py |
+| dbt schema tests on all 17 entities | ⬜ not started | not-null, unique, accepted-values |
+
+**Exit criteria:** All active source entities in silver, validated, repeatable locally.
+
+---
+
+## Phase 3 — Gold Layer — Reporting Entities
+
+**Goal:** Aggregated, cross-source entities ready for reporting.
+
+| Task | Status | Notes |
+|------|--------|-------|
+| Gold entity design | 🔵 partial | 3 views exist (daily_heart_rate_summary, vw_daily_annotations, vw_heart_rate_avg_per_day) |
+| Cross-source joins (sleep + activity + nutrition) | ⬜ not started | |
+| Composite health score | ⬜ not started | Weighted: sleep + activity + stress |
+| Biomarker tracking views | ⬜ not started | Lab results over time |
+| Gold validation tests | ⬜ not started | |
+
+**Exit criteria:** Reporting-ready views covering all key health dimensions.
+
+---
+
+## Phase 4 — Visualization & Reporting
+
+**Goal:** Choose and implement reporting destination.
+
+| Task | Status | Notes |
+|------|--------|-------|
+| Evaluate options | ⬜ not started | Streamlit, Evidence, Superset, Power BI, Databricks AI/BI |
+| Build dashboards | ⬜ not started | |
+| Connect to gold layer | ⬜ not started | |
+| Databricks Genie Space | ⬜ not started | "What was my best week in January?" |
+
+---
+
+## Phase 5 — Cloud Migration (Databricks)
+
+**Goal:** Full platform running on Databricks with Unity Catalog.
+
+| Task | Status | Notes |
+|------|--------|-------|
+| Catalog + schemas DDL | ✅ done | health-platform-dev/prd, schemas: bronze, silver, gold, audit |
+| Audit framework (job_runs, table_runs) | ✅ done | AuditLogger context manager, Delta tables live |
+| Databricks Asset Bundle (DAB) | ✅ done | Bundle deployed to dev, deploy.yml CI/CD |
+| Orchestration workflows | ✅ done | bronze_job.yml, silver_job.yml, gold_job.yml |
+| Silver SQL (Databricks) | 🔵 partial | 10 SQL files deployed; autoloader not running live data |
+| Bronze → Databricks live data | ⬜ not started | Autoloader config needs source path setup |
+| Full end-to-end run in cloud | ⬜ not started | |
+| DLT Expectations (data quality gates) | ⬜ not started | Bronze → silver quarantine pattern |
+| Unity Catalog Tags (pii_level, domain) | ⬜ not started | |
+
+---
+
+## Phase 6 — CI/CD & Automation
+
+**Goal:** Automated testing, deployment, and data refresh.
+
+| Task | Status | Notes |
+|------|--------|-------|
+| GitHub Actions setup | ✅ done | deploy.yml live |
+| Bundle validation on PRs | ✅ done | Runs build-validator on every PR |
+| Auto-deploy to dev on push | ✅ done | Feature branches → dev |
+| Auto-deploy to prd on merge | ✅ done | Main → prd |
+| Automated tests | ⬜ not started | pytest TDD framework |
+| Oura daily job (cron) | ⬜ not started | Automated bronze → silver pipeline |
+| Code-reviewer agent as PR gate | ⬜ not started | AI governance experiment |

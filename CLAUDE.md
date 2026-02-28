@@ -6,6 +6,49 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Personal health data platform (owner: Claus Eduard Petraeus) that ingests, transforms, and surfaces data from wearable devices and nutrition apps. Uses a **medallion architecture** (bronze -> silver -> gold) with a local-first approach on DuckDB, targeting Databricks as the cloud platform.
 
+---
+
+## Mandatory Session Protocol
+
+These rules are NOT optional. Follow them automatically without being asked.
+
+### on_session_start (always, before any coding)
+1. Read `docs/PROJECT_PLAN.md`, `docs/ARCHITECTURE.md`, last 3 entries in `docs/CHANGELOG.md`
+2. Present a sprint status to the user:
+   - Current phase and progress
+   - What was done last session
+   - Top 3 suggested tasks for this session (based on project plan priority)
+3. Ask: "What should we tackle today?" — do NOT start coding until scope is confirmed
+4. After confirmation, restate the agreed scope as a mini sprint goal
+
+### during_session (automatic checkpoints)
+After completing each major task or subtask:
+1. Briefly confirm what was just completed (1-2 lines)
+2. State what you are moving to next
+3. If you have completed 3+ tasks, pause and present: ✅ Done / 🔵 In progress / ⬜ Remaining
+
+### on_session_end (always, before closing)
+When the user says they are done, or when the agreed scope is completed:
+1. Present a full session summary (what was built, what carried over, new issues)
+2. Update automatically:
+   - `docs/CHANGELOG.md` — new entry at top
+   - `docs/PROJECT_PLAN.md` — update task statuses
+   - `docs/ARCHITECTURE.md` — update if components were added/changed
+3. Final message: "Session [NNN] closed. [X] tasks completed, [Y] carried over."
+
+### if_user_forgets
+- If the user starts coding without a session start: pause and run the start protocol first
+- If the user says "bye", "done", "tak for nu" or similar: run end protocol before closing
+- Never let a session end without updating the governance files
+
+### definition_of_done
+A feature is done when:
+1. Code works locally with DuckDB (`HEALTH_ENV=dev`)
+2. Config is updated (`sources_config.yaml`)
+3. Governance files are updated (via end-session protocol)
+
+---
+
 ## Environment Separation
 
 `HEALTH_ENV` env var controls dev vs prd. The DuckDB file is named `health_dw_{env}.db`. The Databricks catalog is `health_dw` with schemas: bronze, silver, gold.
@@ -24,7 +67,7 @@ Personal health data platform (owner: Claus Eduard Petraeus) that ingests, trans
 - **Databricks MCP server** configured in `.mcp.json` for Claude Code integration
 - **VS Code** with DuckDB file viewer for parquet/csv and SQL Tools connection
 - Python 3.9 venv (`.venv/`) — key packages: `duckdb`, `pandas`, `pyyaml`, `dbt-core`, `dbt-duckdb`
-- No CI/CD, no test framework, no linter currently configured
+- CI/CD via GitHub Actions (`deploy.yml`) — bundle validation on PRs, auto-deploy on merge to main. No test framework or linter currently configured.
 
 ## Further Context
 
