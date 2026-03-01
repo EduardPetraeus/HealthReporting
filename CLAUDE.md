@@ -435,3 +435,34 @@ MCP-server konfigureret i `.mcp.json` (projektniveau). Tools tilgængelige som `
 - **Be concise**: Provide brief explanations and avoid repeating project context unless asked.
 - **Targeted Reading**: Only read files in `docs/` if the user's request requires specific architectural or path knowledge.
 - **Ignore Legacy**: Never index or read the `archive/legacy_on_premise_dw/` directory.
+
+## Kill Switch
+
+Stop conditions — halt immediately if ANY of these occur:
+- Health data exposed in logs, commits, or output
+- Database migration running against production without explicit approval
+- Test suite failing on >3 consecutive runs with same error
+- Session exceeding 200K tokens without measurable progress
+- Any credential or connection string appearing in code diff
+- Unexpected data deletion or modification in any environment
+
+On trigger: stop all work, commit current safe state, report to Claus.
+
+## Confidence Scoring
+
+- Default ceiling: 85%
+- Health data operations: ceiling 80% (safety-critical domain)
+- Documentation/config changes: ceiling 90%
+- Always list what was NOT verified
+- Always list assumptions made about data format or schema
+
+## Inherits From
+
+```yaml
+inherits_from:
+  - org: ~/ai-governance-framework/templates/CLAUDE.org.md
+  - framework: ~/ai-governance-framework/templates/CLAUDE.md
+```
+
+Constitutional inheritance: org security rules cannot be weakened at repo level.
+Repo-specific rules (health data handling, Databricks conventions) extend the framework.
