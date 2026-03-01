@@ -1,0 +1,34 @@
+id: TASK-001
+title: "Set up pytest framework with conftest and fixtures"
+description: |
+  Create a proper test foundation: conftest.py with shared fixtures,
+  test directory structure mirroring src, and RED tests for bronze and
+  silver layer transforms. Use pytest with coverage reporting.
+  Reference ai-engineering-standards/testing/ for conventions.
+
+status: ready
+priority: high
+agent: code
+review: agent-review
+assignee: null
+sprint: null
+
+depends_on: []
+blocks: [TASK-002]
+
+definition_of_done:
+  - "tests/ directory with conftest.py and initial test files"
+  - "pytest runs successfully (tests may be RED — that's expected)"
+  - "Coverage config in pyproject.toml"
+  - "At least 3 test files for bronze/silver transforms"
+
+tags: [testing, tdd, python]
+estimate: m
+
+actual_tokens: null
+actual_duration_minutes: null
+completed: null
+
+created: 2026-03-01
+updated: 2026-03-01
+notes: "From TODO.md — TDD setup has been pending."

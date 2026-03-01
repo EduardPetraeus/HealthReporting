@@ -1,0 +1,35 @@
+id: TASK-003
+title: "Add path validation to csv_to_parquet"
+description: |
+  Add input_path.exists() validation in csv_to_parquet.py before
+  processing. Raise a clear FileNotFoundError with the attempted
+  path in the message. Also validate output directory exists or
+  create it. Use structured logging (depends on TASK-002 pattern
+  but can be done independently).
+
+status: ready
+priority: high
+agent: code
+review: agent-review
+assignee: null
+sprint: null
+
+depends_on: []
+blocks: []
+
+definition_of_done:
+  - "input_path validated before processing"
+  - "Clear error message on missing file"
+  - "Output directory created if missing"
+  - "Test covering the validation path"
+
+tags: [data-pipeline, validation, quick-win]
+estimate: xs
+
+actual_tokens: null
+actual_duration_minutes: null
+completed: null
+
+created: 2026-03-01
+updated: 2026-03-01
+notes: "From TODO.md quick wins — P0 priority."
