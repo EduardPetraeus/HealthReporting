@@ -6,8 +6,8 @@ description: |
   silver layer transforms. Use pytest with coverage reporting.
   Reference ai-engineering-standards/testing/ for conventions.
 
-status: ready
-priority: high
+status: backlog
+priority: low
 agent: code
 review: agent-review
 assignee: null
@@ -31,4 +31,4 @@ completed: null
 
 created: 2026-03-01
 updated: 2026-03-01
-notes: "From TODO.md — TDD setup has been pending."
+notes: "PAUSED — frameworks first. Resume when Claus says so."

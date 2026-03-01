@@ -7,8 +7,8 @@ description: |
   message, and context fields. Add run_id to all log entries for
   traceability.
 
-status: ready
-priority: high
+status: backlog
+priority: low
 agent: code
 review: agent-review
 assignee: null
@@ -32,4 +32,4 @@ completed: null
 
 created: 2026-03-01
 updated: 2026-03-01
-notes: "From TODO.md quick wins — P0 priority."
+notes: "PAUSED — frameworks first. Resume when Claus says so."
