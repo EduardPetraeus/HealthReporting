@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Overview
+## Project Context
 
 Personal health data platform that ingests, transforms, and surfaces data from wearable devices and nutrition apps. Uses a **medallion architecture** (bronze -> silver -> gold) with a local-first approach on DuckDB, targeting Databricks as the cloud platform.
 
@@ -455,6 +455,15 @@ On trigger: stop all work, commit current safe state, report to the user.
 - Documentation/config changes: ceiling 90%
 - Always list what was NOT verified
 - Always list assumptions made about data format or schema
+
+## Quality Standards
+
+- No empty files — every file has real, usable content before commit
+- No placeholder sections — if it cannot be written yet, do not create it
+- SQL transforms must be tested with at least a row count check
+- Config changes must be valid YAML (parse after writing)
+- Health data pipelines must use synthetic test data, never real measurements
+- Could a new Claude Code session read this repo and run the platform correctly? If not, documentation is incomplete.
 
 ## Inherits From
 
