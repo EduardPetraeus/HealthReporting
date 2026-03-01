@@ -1,9 +1,9 @@
 {
   "meta": {
     "project": "HealthReporting",
-    "owner": "Claus Eduard Petraeus",
+    "owner": "project_owner",
     "claude_code_start_date": "2026-02-16",
-    "last_updated": "2026-02-28",
+    "last_updated": "2026-03-01",
     "methodology": "See claude_code_productivity.md"
   },
   "baseline": {
@@ -21,14 +21,14 @@
     "period": {
       "from": "2026-02-16"
     },
-    "total_commits": 137,
+    "total_commits": 140,
     "active_weeks": 2,
-    "avg_commits_per_active_week": 68.5,
-    "avg_files_per_commit": 8.0
+    "avg_commits_per_active_week": 70.0,
+    "avg_files_per_commit": 7.8
   },
   "factors": {
-    "velocity_factor": 16.71,
-    "files_per_commit_factor": 0.8,
+    "velocity_factor": 17.07,
+    "files_per_commit_factor": 0.78,
     "description": "velocity_factor = commits/active_week (Claude) / commits/active_week (baseline). files_per_commit_factor = avg_files (Claude) / avg_files (baseline)."
   },
   "entries": [
@@ -2087,6 +2087,51 @@
       "code_density": 40.0,
       "time_since_prev_commit_minutes": 10,
       "streak_days": 3
+    },
+    {
+      "commit_sha": "334fbfd",
+      "date": "2026-02-28",
+      "message": "chore: update productivity metrics post PR #44 merge",
+      "task_type": "other",
+      "commit_hour": 8,
+      "files_changed": 1,
+      "lines_added": 65,
+      "lines_removed": 5,
+      "files_factor": 0.1,
+      "refactor_ratio": 0.071,
+      "code_density": 65.0,
+      "time_since_prev_commit_minutes": 0,
+      "streak_days": 3
+    },
+    {
+      "commit_sha": "edc2f74",
+      "date": "2026-02-28",
+      "message": "docs: update Session 007 CHANGELOG + PROJECT_PLAN with PR #44 mandatory_task_reporting",
+      "task_type": "docs",
+      "commit_hour": 8,
+      "files_changed": 2,
+      "lines_added": 7,
+      "lines_removed": 5,
+      "files_factor": 0.2,
+      "refactor_ratio": 0.417,
+      "code_density": 3.5,
+      "time_since_prev_commit_minutes": 1,
+      "streak_days": 3
+    },
+    {
+      "commit_sha": "e4832b6",
+      "date": "2026-03-01",
+      "message": "feat: align CLAUDE.md with governance framework — add kill switch, confidence scoring, inheritance",
+      "task_type": "docs",
+      "commit_hour": 14,
+      "files_changed": 1,
+      "lines_added": 32,
+      "lines_removed": 1,
+      "files_factor": 0.1,
+      "refactor_ratio": 0.03,
+      "code_density": 32.0,
+      "time_since_prev_commit_minutes": 1762,
+      "streak_days": 4
     }
   ]
 }

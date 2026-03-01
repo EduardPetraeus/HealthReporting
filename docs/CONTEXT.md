@@ -6,7 +6,7 @@ and nutrition sources. Goal is a unified view of physical activity, sleep, nutri
 and recovery metrics.
 
 ## owner
-Claus Eduard Petraeus
+(project owner)
 
 ## repository
 https://github.com/EduardPetraeus/HealthReporting

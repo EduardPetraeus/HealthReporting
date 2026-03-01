@@ -1,6 +1,6 @@
 # HealthReporting
 
-Personal health data platform (owner: Claus Eduard Petraeus) that ingests, transforms, and surfaces data from wearable devices and nutrition apps.
+A personal health data platform that ingests, transforms, and surfaces data from wearable devices and nutrition apps.
 
 ## Architecture
 

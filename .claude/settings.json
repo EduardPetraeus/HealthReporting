@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash /Users/clauseduardpetraeus/HealthReporting/scripts/hooks/pre_commit_guard.sh"
+            "command": "bash ./scripts/hooks/pre_commit_guard.sh"
           }
         ]
       }
@@ -37,7 +37,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash /Users/clauseduardpetraeus/HealthReporting/scripts/hooks/post_commit.sh"
+            "command": "bash ./scripts/hooks/post_commit.sh"
           }
         ]
       }

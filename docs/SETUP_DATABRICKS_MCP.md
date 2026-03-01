@@ -12,8 +12,8 @@ A **self-hosted stdio MCP server** from the [databricks-mcp-server](https://gith
 {
   "mcpServers": {
     "databricks": {
-      "command": "/Users/clauseduardpetraeus/.ai-dev-kit/.venv/bin/python",
-      "args": ["/Users/clauseduardpetraeus/.ai-dev-kit/repo/databricks-mcp-server/run_server.py"],
+      "command": "$HOME/.ai-dev-kit/.venv/bin/python",
+      "args": ["$HOME/.ai-dev-kit/repo/databricks-mcp-server/run_server.py"],
       "env": {
         "DATABRICKS_CONFIG_PROFILE": "DEFAULT",
         "DATABRICKS_DEFAULT_CATALOG": "health-platform-dev"
@@ -93,7 +93,7 @@ SELECT * FROM health_dw.silver.heart_rate LIMIT 10
 ## Verification (run to confirm setup)
 
 ```
-mcp__databricks__get_current_user        → clauspetraeus@hotmail.com ✅
+mcp__databricks__get_current_user        → <your-databricks-email> ✅
 mcp__databricks__manage_uc_objects       → lists health-platform-dev, prd, health_dw ✅
 execute_sql: SHOW SCHEMAS IN `health-platform-dev`  → bronze, silver, gold ✅
 execute_sql: SELECT count(*) FROM health_dw.silver.heart_rate → 1,004,696 ✅

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Personal health data platform (owner: Claus Eduard Petraeus) that ingests, transforms, and surfaces data from wearable devices and nutrition apps. Uses a **medallion architecture** (bronze -> silver -> gold) with a local-first approach on DuckDB, targeting Databricks as the cloud platform.
+Personal health data platform that ingests, transforms, and surfaces data from wearable devices and nutrition apps. Uses a **medallion architecture** (bronze -> silver -> gold) with a local-first approach on DuckDB, targeting Databricks as the cloud platform.
 
 ---
 
@@ -330,7 +330,7 @@ This updates `claude_code_productivity.json` with git-derived metrics (files cha
 
 ## Scalability & PoC Mindset
 
-This repo is used as a **PoC platform for enterprise architecture demonstrations** (Pandora lead engineer context). Every design decision should be made with scalability in mind — even when the current scale is personal/small.
+This repo is used as a **PoC platform for enterprise architecture demonstrations** (enterprise context). Every design decision should be made with scalability in mind — even when the current scale is personal/small.
 
 Principles:
 - **Build for extension, not just current need** — YAML-driven configs, generic runners, clear separation of concerns
@@ -409,27 +409,27 @@ Agents (`.claude/agents/`):
 - `gold-view-writer` — build gold layer views from silver tables
 - `data-quality-checker` — freshness, row count, null rate, anomaly checks
 - `documentation-writer` — write/update docs and architecture decisions
-- `poc-presenter` — prepare Pandora PoC demo materials
+- `poc-presenter` — prepare enterprise PoC demo materials
 - `security-reviewer` — check secrets, data handling, code safety
 
 ## Databricks Skills
 
-Skills-base-sti: `/Users/clauseduardpetraeus/.ai-dev-kit/repo/databricks-skills/`
+Skills base path: `$HOME/.ai-dev-kit/repo/databricks-skills/`
 
-Load disse skills som kontekst ved relevante opgaver:
+Load these skills as context for relevant tasks:
 
-| Skill | Sti | Relevans |
+| Skill | Path | Relevance |
 |---|---|---|
-| Asset Bundles | `databricks-asset-bundles/SKILL.md` | DAB deployment — aktivt i brug |
-| Jobs | `databricks-jobs/SKILL.md` | Job scheduling og workflows |
-| Unity Catalog | `databricks-unity-catalog/SKILL.md` | UC governance og catalog |
+| Asset Bundles | `databricks-asset-bundles/SKILL.md` | DAB deployment — actively used |
+| Jobs | `databricks-jobs/SKILL.md` | Job scheduling and workflows |
+| Unity Catalog | `databricks-unity-catalog/SKILL.md` | UC governance and catalog |
 | DBSQL | `databricks-dbsql/SKILL.md` | SQL warehouse queries |
-| Config | `databricks-config/SKILL.md` | Authentication og profile setup |
-| Metric Views | `databricks-metric-views/SKILL.md` | Metrics og BI-lag (gold) |
-| AIBI Dashboards | `databricks-aibi-dashboards/SKILL.md` | Dashboards og visualisering |
+| Config | `databricks-config/SKILL.md` | Authentication and profile setup |
+| Metric Views | `databricks-metric-views/SKILL.md` | Metrics and BI layer (gold) |
+| AIBI Dashboards | `databricks-aibi-dashboards/SKILL.md` | Dashboards and visualization |
 | Docs | `databricks-docs/SKILL.md` | Doc lookup via MCP |
 
-MCP-server konfigureret i `.mcp.json` (projektniveau). Tools tilgængelige som `mcp__databricks__*`.
+MCP server configured in `.mcp.json` (project level). Tools available as `mcp__databricks__*`.
 
 ## Usage Optimization
 - **Be concise**: Provide brief explanations and avoid repeating project context unless asked.
@@ -446,7 +446,7 @@ Stop conditions — halt immediately if ANY of these occur:
 - Any credential or connection string appearing in code diff
 - Unexpected data deletion or modification in any environment
 
-On trigger: stop all work, commit current safe state, report to Claus.
+On trigger: stop all work, commit current safe state, report to the user.
 
 ## Confidence Scoring
 

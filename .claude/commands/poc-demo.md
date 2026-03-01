@@ -1,4 +1,4 @@
-Generate a Pandora PoC demo document using the poc-presenter agent.
+Generate an enterprise PoC demo document using the poc-presenter agent.
 
 Use the poc-presenter agent to:
 1. Read docs/architecture.md for current architecture state

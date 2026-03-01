@@ -1,7 +1,7 @@
 name: AI Code Review
 
 # DISABLED — requires ANTHROPIC_API_KEY which incurs API costs (~$0.003/PR).
-# Kept as PoC pattern for enterprise demonstrations (Pandora context).
+# Kept as PoC pattern for enterprise demonstrations (enterprise context).
 # To enable: add ANTHROPIC_API_KEY to GitHub Secrets and remove the `if: false` below.
 on:
   pull_request:

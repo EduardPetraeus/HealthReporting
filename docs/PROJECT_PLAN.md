@@ -141,7 +141,7 @@
 
 ## Phase 7 — AI Governance Framework
 
-**Goal:** Structured control layer for AI agents — ensuring agents follow strategic priorities (TODO.md), not just nearest instruction (PROJECT_PLAN.md). PoC showcase for enterprise Pandora context.
+**Goal:** Structured control layer for AI agents — ensuring agents follow strategic priorities (TODO.md), not just nearest instruction (PROJECT_PLAN.md). PoC showcase for enterprise enterprise context.
 
 | Task | Status | Notes |
 |------|--------|-------|

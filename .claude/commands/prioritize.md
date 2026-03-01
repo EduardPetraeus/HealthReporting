@@ -23,13 +23,13 @@ Assign a priority tier:
 
 Present a merged, deduplicated table:
 
-| Prioritet | Task | Kilde | Anbefalet nu? |
+| Priority | Task | Source | Recommended now? |
 |-----------|------|-------|---------------|
-| BLOCKER | ... | TODO / PROJECT_PLAN phase X | ✅ Ja |
-| P0 | ... | ... | ✅ Ja |
-| ACTIVE | ... | ... | 🔵 Allerede igangværende |
-| P1 | ... | ... | Næste sprint |
-| BACKLOG | ... | ... | Senere |
+| BLOCKER | ... | TODO / PROJECT_PLAN phase X | ✅ Yes |
+| P0 | ... | ... | ✅ Yes |
+| ACTIVE | ... | ... | 🔵 Already in progress |
+| P1 | ... | ... | Next sprint |
+| BACKLOG | ... | ... | Later |
 
 Rules:
 - If the same task appears in both sources, show it once with source=BOTH
@@ -42,7 +42,7 @@ After the table, output:
 
 ---
 
-### Top 3 for denne session
+### Top 3 for this session
 
 Select 3 tasks that are:
 1. Not blocked by anything
@@ -50,7 +50,7 @@ Select 3 tasks that are:
 3. Completable in a single session
 
 Format:
-1. **[Task name]** — [1-sentence rationale] *(Kilde: TODO/PROJECT_PLAN)*
+1. **[Task name]** — [1-sentence rationale] *(Source: TODO/PROJECT_PLAN)*
 2. ...
 3. ...
 

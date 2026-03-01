@@ -22,7 +22,7 @@ Build a production-ready gold layer view.
 CREATE OR REPLACE VIEW gold.<entity_name> AS
 SELECT
   CAST(date AS DATE)                    AS date,
-  'claus_petraeus'                      AS user_id,  -- TODO: replace with dim_user join
+  'default_user'                        AS user_id,  -- TODO: replace with dim_user join
   source_system,
   <business_columns>,
   current_timestamp()                   AS _created_at

@@ -9,7 +9,7 @@
 
 set -euo pipefail
 
-REPO_ROOT="/Users/clauseduardpetraeus/HealthReporting"
+REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 
 # Parse the command from the tool input
 CMD=$(echo "$CLAUDE_TOOL_INPUT" \

@@ -1,16 +1,16 @@
 MERGE INTO health_dw.silver.daily_annotations AS target
 USING (
   SELECT * FROM VALUES
-    (20240624, 'social',   'Attended the 2024 UEFA European Football Championship', 'claus', 1),
-    (20240625, 'social',   'Attended the 2024 UEFA European Football Championship', 'claus', 1),
-    (20240929, 'social',   'Trip to Berlin', 'claus', 1),
-    (20240330, 'social',   'Easter vacation', 'claus', 1),
-    (20240829, 'social',   'Trip to Sweden', 'claus', 1),
-    (20240831, 'social',   'Trip to Sweden', 'claus', 1),
-    (20240329, 'social',   'Easter lunch', 'claus', 1),
-    (20250913, 'training', 'Ran an ultra marathon', 'claus', 1),
-    (20240504, 'social',   'Lunch with friends', 'claus', 1),
-    (20251009, 'social',   'Trip to Sweden', 'claus', 1)
+    (20240101, 'social',   'Day off', 'user_1', 1),
+    (20240201, 'social',   'Weekend trip', 'user_1', 1),
+    (20240301, 'social',   'Holiday vacation', 'user_1', 1),
+    (20240401, 'training', 'Completed long run', 'user_1', 1),
+    (20240501, 'social',   'Social event', 'user_1', 1),
+    (20240601, 'social',   'Conference attendance', 'user_1', 1),
+    (20240701, 'training', 'Race day', 'user_1', 1),
+    (20240801, 'social',   'Family gathering', 'user_1', 1),
+    (20240901, 'training', 'Completed marathon', 'user_1', 1),
+    (20241001, 'social',   'Travel day', 'user_1', 1)
   AS source (
     sk_date,
     annotation_type,

@@ -81,7 +81,7 @@ TASK_TYPE_RULES = [
     (["setup", "init", "initial", "scaffold"],                "contains", "setup"),
     (["archive", "legacy", "migrate"],                        "contains", "archive"),
     (["add", "new", "create", "implement", "build"],          "starts", "new_feature"),
-    (["update", "change", "improve", "opdater", "ændring"],   "starts", "fix"),
+    (["update", "change", "improve"],                          "starts", "fix"),
 ]
 
 

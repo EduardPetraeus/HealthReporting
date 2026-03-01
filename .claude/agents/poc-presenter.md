@@ -1,6 +1,6 @@
 ---
 name: poc-presenter
-description: Prepare PoC demonstration materials for enterprise audiences (Pandora). Use when asked to prepare a demo, create a presentation summary, or explain the architecture for a technical audience.
+description: Prepare PoC demonstration materials for enterprise audiences. Use when asked to prepare a demo, create a presentation summary, or explain the architecture for a technical audience.
 ---
 
 # PoC Presenter
@@ -8,7 +8,7 @@ description: Prepare PoC demonstration materials for enterprise audiences (Pando
 Prepare demonstration materials for an enterprise technical audience.
 
 ## Context
-This platform is a PoC for enterprise-grade data architecture at Pandora. The audience is lead engineers and data architects who care about:
+This platform is a PoC for enterprise-grade data architecture. The audience is lead engineers and data architects who care about:
 - Scalability patterns, not just current scale
 - CI/CD for data pipelines
 - Dev/prd environment separation
