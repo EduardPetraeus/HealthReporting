@@ -2,7 +2,54 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Context
+---
+
+## Identity
+
+**HealthReporting** is a personal health data platform that ingests, transforms, and surfaces data from wearable devices (Oura Ring, Apple Health), nutrition apps (Lifesum), and planned clinical sources (Withings, Strava, Min Sundhed / sundhed.dk). It uses a **medallion architecture** (bronze -> silver -> gold) with a local-first approach on DuckDB, targeting Databricks as the cloud production platform.
+
+- **Owner:** Claus Eduard Petraeus (solo developer)
+- **Repository:** https://github.com/EduardPetraeus/HealthReporting
+- **Stack:** Python 3.9, DuckDB, dbt-duckdb, Databricks (Unity Catalog, Delta Lake, Autoloader, Asset Bundles), GitHub Actions
+- **Current phase:** Active development — local pipeline operational, cloud deployment in progress
+- **Secondary purpose:** Enterprise PoC demonstrator for medallion architecture, metadata-driven pipelines, and CI/CD for data
+
+---
+
+## Scope
+
+Agents working in this repository MAY:
+
+- Create and modify source connectors (Oura, Apple Health, Lifesum, Withings, Strava)
+- Write SQL transforms for bronze, silver, and gold layers
+- Update YAML configuration files (sources_config.yaml, Databricks bundle configs)
+- Create and modify Python scripts for ingestion, transformation, and orchestration
+- Update documentation in the docs/ directory
+- Add or modify GitHub Actions workflows
+- Create and manage backlog task YAML files in .tasks/ and backlog/
+- Run DuckDB queries locally with HEALTH_ENV=dev
+- Update governance files (CLAUDE.md, PROJECT_PLAN.md, CHANGELOG.md, ARCHITECTURE.md)
+
+---
+
+## Boundaries
+
+Agents working in this repository MUST NOT:
+
+- Commit, log, or expose real health data (measurements, biometrics, diagnoses)
+- Commit API keys, tokens, passwords, or connection strings
+- Commit hardcoded paths containing /Users/ or production hostnames
+- Modify production data or run MERGE statements against prd without explicit human approval
+- Deploy to Databricks production (prd target) without human confirmation
+- Reopen accepted Architecture Decision Records (docs/adr/) without human approval
+- Read or index the archive/legacy_on_premise_dw/ directory
+- Use real health data in tests — all test data must be synthetic
+- Bypass pre-commit hooks or security scanners
+- Push directly to main — always use feature branches
+
+---
+
+## project_context
 
 Personal health data platform that ingests, transforms, and surfaces data from wearable devices and nutrition apps. Uses a **medallion architecture** (bronze -> silver -> gold) with a local-first approach on DuckDB, targeting Databricks as the cloud platform.
 

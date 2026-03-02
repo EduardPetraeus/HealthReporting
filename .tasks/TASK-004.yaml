@@ -1,0 +1,37 @@
+id: TASK-004
+title: "Implement Withings API connector with OAuth2 flow"
+description: |
+  Build a connector for the Withings Health API to ingest weight, body
+  composition, and blood pressure data. Withings uses OAuth2 with refresh
+  tokens. Follow the same pattern as the Oura connector: API client class,
+  incremental fetch with state tracking, output to hive-partitioned parquet.
+  Add a YAML config entry in sources_config.yaml.
+
+status: backlog
+priority: high
+agent: code
+review: human-review
+assignee: null
+sprint: null
+
+depends_on: []
+blocks: [TASK-009]
+
+definition_of_done:
+  - "Withings OAuth2 token refresh implemented"
+  - "Fetches weight, body composition, and blood pressure"
+  - "Outputs hive-partitioned parquet files"
+  - "sources_config.yaml entry added"
+  - "Incremental state tracking via state file"
+  - "No real health data in code or tests"
+
+tags: [connector, withings, api, oauth2]
+estimate: l
+
+actual_tokens: null
+actual_duration_minutes: null
+completed: null
+
+created: 2026-03-02
+updated: 2026-03-02
+notes: "Withings uses OAuth2 — more complex than Oura's PAT-based auth. Needs manual token setup first."

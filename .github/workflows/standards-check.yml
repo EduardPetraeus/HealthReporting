@@ -1,0 +1,122 @@
+# Standards and governance validation for HealthReporting
+# Adapted from ai-governance-framework/templates/ci-cd/github-actions-governance-gate.yml
+#
+# Runs on push to feature/dogfood-framework and PRs to main.
+# Checks: CLAUDE.md existence, secret scanning, .gitignore safety.
+
+name: Standards & Governance Check
+
+on:
+  push:
+    branches:
+      - feature/dogfood-framework
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  governance-check:
+    name: Governance Files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify CLAUDE.md exists
+        run: |
+          if [ ! -f CLAUDE.md ]; then
+            echo "GOVERNANCE FAIL: CLAUDE.md not found at repository root."
+            exit 1
+          fi
+          echo "CLAUDE.md found."
+
+      - name: Verify CLAUDE.md has required sections
+        run: |
+          MISSING=""
+          for section in Identity Scope Boundaries; do
+            if ! grep -qiE "^#{1,6}\s+.*${section}" CLAUDE.md; then
+              MISSING="${MISSING} ${section}"
+            fi
+          done
+          if [ -n "$MISSING" ]; then
+            echo "GOVERNANCE FAIL: CLAUDE.md missing sections:${MISSING}"
+            exit 1
+          fi
+          echo "CLAUDE.md contains Identity, Scope, and Boundaries sections."
+
+      - name: Verify backlog tasks exist
+        run: |
+          TASK_COUNT=0
+          for dir in .tasks backlog; do
+            if [ -d "$dir" ]; then
+              COUNT=$(find "$dir" -name "TASK-*.yaml" | wc -l)
+              TASK_COUNT=$((TASK_COUNT + COUNT))
+            fi
+          done
+          echo "Found ${TASK_COUNT} task files."
+          if [ "$TASK_COUNT" -lt 1 ]; then
+            echo "WARNING: No task files found in .tasks/ or backlog/"
+          fi
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for secrets in codebase
+        run: |
+          PATTERNS=(
+            'AKIA[0-9A-Z]{16}'
+            'sk-[a-zA-Z0-9]{48}'
+            'sk-ant-[a-zA-Z0-9\-]{80,}'
+            'ghp_[a-zA-Z0-9]{36}'
+          )
+
+          FOUND=0
+          for pattern in "${PATTERNS[@]}"; do
+            if grep -rPl "$pattern" --include="*.py" --include="*.yaml" --include="*.yml" --include="*.md" --include="*.json" . 2>/dev/null | grep -v '.git/'; then
+              echo "SECURITY: Potential secret detected matching pattern: $pattern"
+              FOUND=1
+            fi
+          done
+
+          if [ "$FOUND" -eq 1 ]; then
+            echo "Secrets detected. Remove them before merging."
+            exit 1
+          fi
+          echo "No secrets detected."
+
+      - name: Check .gitignore includes .env
+        run: |
+          if [ -f .gitignore ]; then
+            if grep -qE '^\s*\.env\s*$|^\s*\.env\*|^\s*\.env/' .gitignore; then
+              echo ".gitignore includes .env entries."
+            else
+              echo "WARNING: .gitignore does not include .env."
+              exit 1
+            fi
+          else
+            echo "WARNING: No .gitignore found."
+            exit 1
+          fi
+
+  lint:
+    name: Python Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+
+      - name: Install ruff
+        run: pip install ruff
+
+      - name: Run ruff (non-blocking)
+        run: ruff check . --exit-zero || true
+        # Non-blocking until ruff.toml is configured and existing issues are fixed

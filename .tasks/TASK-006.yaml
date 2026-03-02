@@ -1,0 +1,37 @@
+id: TASK-006
+title: "Complete remaining Databricks silver SQL transforms (16 of 17 missing)"
+description: |
+  Only 1 of 17 silver SQL transforms is implemented for Databricks.
+  The local DuckDB silver layer has all 17 via dbt models, but the cloud
+  pipeline needs individual SQL MERGE files driven by YAML config.
+  Each transform requires: a source YAML config in
+  health_environment/config/databricks/sources/ and a SQL MERGE file in
+  transformation_logic/databricks/silver/sql/. Use the existing
+  merge_oura_daily_sleep.sql as the reference pattern.
+
+status: backlog
+priority: high
+agent: code
+review: human-review
+assignee: null
+sprint: null
+
+depends_on: []
+blocks: [TASK-008]
+
+definition_of_done:
+  - "All 17 silver SQL MERGE files exist in databricks/silver/sql/"
+  - "Corresponding YAML configs exist in databricks/sources/"
+  - "SQL follows the existing MERGE INTO pattern"
+  - "Column mappings match the local dbt silver models"
+
+tags: [databricks, silver, sql, data-pipeline]
+estimate: xl
+
+actual_tokens: null
+actual_duration_minutes: null
+completed: null
+
+created: 2026-03-02
+updated: 2026-03-02
+notes: "This is a large task — consider splitting into per-source subtasks (Oura, Apple Health, Lifesum)."
