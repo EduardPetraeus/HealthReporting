@@ -4,6 +4,50 @@
 
 ---
 
+## 2026-03-04 — Session 008: AI-Native Data Model — Full Implementation
+
+**Phase:** Phase 3b — AI-Native Data Model
+**Goal:** Implement complete 2+2 architecture replacing local Gold layer with Agent Memory + Semantic Contracts + MCP tools
+
+### What was done
+- Created `agent` schema with 5 tables: patient_profile, daily_summaries, health_graph, health_graph_edges, knowledge_base
+- Added `silver.metric_relationships` table for computed correlations
+- Applied COMMENT ON to all 21 silver tables (269 column descriptions)
+- Seeded health knowledge graph: 67 nodes, 108 edges (biomarkers, supplements, conditions, concepts, activities)
+- Built `ai/text_generator.py` — template-based daily health summaries from silver tables
+- Built `ai/embedding_engine.py` — sentence-transformers (all-MiniLM-L6-v2, 384-dim) with DuckDB VSS
+- Built `ai/baseline_computer.py` — 6 rolling baselines + demographics → patient_profile
+- Built `ai/correlation_engine.py` — Pearson correlations with lag support
+- Built `mcp/server.py` — FastMCP server with 8 tools (query_health, search_memory, get_profile, etc.)
+- Built `mcp/health_tools.py`, `query_builder.py`, `formatter.py`, `schema_pruner.py`
+- Created 18 metric YAML contracts + `_index.yml` + `_business_rules.yml`
+- Created `setup/setup_agent_schema.py` — idempotent schema setup runner
+- Created 7 test files with 55 tests (all green)
+- Modified `ingestion_engine.py` — post-merge daily summary trigger
+- Ran setup against real dev database (296MB): 7 DDL, 269 comments, 67 nodes + 108 edges
+- Backfilled 91 daily summaries (2025-11-21 to 2026-02-19) with embeddings
+- Computed 9 patient profile entries (5 baselines + 4 demographics)
+- Created HNSW index on daily_summaries (experimental persistence)
+- Verified vector search returns semantically relevant results
+- Created ADR-005 documenting 2+2 architecture decision
+- 47 new files, 6,814 lines added, 2 files modified
+
+### Architecture changes
+- **Major:** Local stack redesigned from 5-layer medallion to 2+2 AI-native architecture
+- Gold layer eliminated locally, replaced by Semantic Contracts (YAML)
+- New `agent` schema with MemGPT-inspired tiered memory
+- MCP server exposes 8 typed tools — AI never writes raw SQL
+- Dual-stack: local AI-native + cloud traditional medallion (unchanged)
+- sentence-transformers + DuckDB VSS for vector similarity search
+
+### Carried over
+- Wire MCP server into Claude Code for live queries
+- Deprecate local Gold views
+- ANTHROPIC_API_KEY → GitHub Secrets
+- Bronze → Databricks live data
+
+---
+
 ## 2026-02-28 — Session 007: CLAUDE.md Governance Extensions + ai-ledelse.md Sync
 
 **Phase:** Phase 7 — AI Governance Framework

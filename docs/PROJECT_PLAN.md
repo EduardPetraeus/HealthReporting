@@ -1,7 +1,7 @@
 # PROJECT_PLAN.md — HealthReporting
 
-> Last updated: 2026-02-28 (Session 007)
-> Current phase: **Phase 2 — Silver Layer + Phase 5 (Databricks, parallel) + Phase 7 (AI Governance, active)**
+> Last updated: 2026-03-04 (Session 008)
+> Current phase: **Phase 3b — AI-Native Data Model (COMPLETE) + Phase 5 (Databricks, parallel) + Phase 7 (AI Governance, active)**
 
 ---
 
@@ -12,7 +12,8 @@
 | 0 | Governance & Project Setup | ✅ done | Feb 2026 |
 | 1 | Foundation & Bronze Layer | ✅ done | Feb 2026 |
 | 2 | Silver Layer — Core Transformations | 🔵 in progress | Mar 2026 |
-| 3 | Gold Layer — Reporting Entities | 🔵 in progress | Apr 2026 |
+| 3 | Gold Layer — Reporting Entities | 🔵 cloud only | Apr 2026 |
+| 3b | AI-Native Data Model (Local) | ✅ done | Mar 2026 |
 | 4 | Visualization & Reporting | ⬜ not started | Jun 2026 |
 | 5 | Cloud Migration (Databricks) | 🔵 in progress | Q2 2026 |
 | 6 | CI/CD & Automation | 🔵 in progress | Q2 2026 |
@@ -80,15 +81,51 @@
 
 **Goal:** Aggregated, cross-source entities ready for reporting.
 
+**Note:** Gold layer is now **cloud-only** (Databricks). Locally, Gold is replaced by the AI-Native Data Model (Phase 3b). See ADR-005.
+
 | Task | Status | Notes |
 |------|--------|-------|
-| Gold entity design | 🔵 partial | 3 views exist (daily_heart_rate_summary, vw_daily_annotations, vw_heart_rate_avg_per_day) |
-| Cross-source joins (sleep + activity + nutrition) | ⬜ not started | |
-| Composite health score | ⬜ not started | Weighted: sleep + activity + stress |
-| Biomarker tracking views | ⬜ not started | Lab results over time |
+| Gold entity design (Databricks) | 🔵 partial | 3 views exist (daily_heart_rate_summary, vw_daily_annotations, vw_heart_rate_avg_per_day) |
+| Cross-source joins (sleep + activity + nutrition) | ⬜ not started | Databricks Gold only |
+| Composite health score | ✅ done locally | YAML recipe in `_business_rules.yml`; Databricks Gold TBD |
+| Biomarker tracking views | ⬜ not started | |
 | Gold validation tests | ⬜ not started | |
 
-**Exit criteria:** Reporting-ready views covering all key health dimensions.
+**Exit criteria:** Reporting-ready views covering all key health dimensions (cloud) + Semantic Contracts (local).
+
+---
+
+## Phase 3b — AI-Native Data Model (Local Stack)
+
+**Goal:** Replace local Gold layer with AI-native 2+2 architecture: Agent Memory + Semantic Contracts + MCP tools. See ADR-005.
+
+| Task | Status | Notes |
+|------|--------|-------|
+| M0: Agent schema DDL (5 tables + metric_relationships) | ✅ done | `setup/create_agent_schema.sql` |
+| M0: COMMENT ON all 21 silver tables (~269 column descriptions) | ✅ done | `setup/add_column_comments.sql` |
+| M0: Initial YAML contracts (expanded to 18 in M4) | ✅ done | `contracts/metrics/` |
+| M1: text_generator.py (template-based daily summaries) | ✅ done | `ai/text_generator.py` (373 lines) |
+| M1: baseline_computer.py (6 baselines + demographics) | ✅ done | `ai/baseline_computer.py` (337 lines) |
+| M1: Health knowledge graph (67 nodes, 108 edges) | ✅ done | `setup/seed_health_graph.sql` |
+| M1: Backfill daily summaries (91 days) | ✅ done | 2025-11-21 to 2026-02-19 |
+| M2: embedding_engine.py (sentence-transformers) | ✅ done | `ai/embedding_engine.py` (277 lines) |
+| M2: DuckDB VSS + HNSW indexes | ✅ done | Experimental persistence enabled |
+| M2: Backfill embeddings (91 summaries) | ✅ done | all-MiniLM-L6-v2, 384-dim |
+| M3: MCP server (8 tools) | ✅ done | `mcp/server.py` (168 lines) |
+| M3: health_tools.py (tool implementations) | ✅ done | `mcp/health_tools.py` (621 lines) |
+| M3: query_builder.py (YAML → SQL) | ✅ done | `mcp/query_builder.py` (247 lines) |
+| M3: formatter.py (markdown output) | ✅ done | `mcp/formatter.py` (205 lines) |
+| M3: schema_pruner.py (category-based pruning) | ✅ done | `mcp/schema_pruner.py` (235 lines) |
+| M4: 18 metric YAML contracts | ✅ done | `contracts/metrics/*.yml` (~1,500 lines) |
+| M4: _index.yml + _business_rules.yml | ✅ done | Master index + composite score + alerts |
+| M5: ingestion_engine.py post-merge trigger | ✅ done | Auto-generates daily summary after ingest |
+| M5: .mcp.json updated (local, gitignored) | ✅ done | Health MCP server config |
+| M5: ADR-005 | ✅ done | `docs/adr/ADR-005-ai-native-data-model.md` |
+| M5: 55/55 pytest tests green | ✅ done | All phases validated |
+| Wire MCP server into Claude Code | ⬜ not started | Start server, test live queries |
+| Deprecate local Gold views | ⬜ not started | Keep Databricks Gold |
+
+**Exit criteria:** AI agent queries health data via MCP tools with >80% accuracy. All memory tiers populated. ✅ ACHIEVED (pending MCP live wire-up).
 
 ---
 
