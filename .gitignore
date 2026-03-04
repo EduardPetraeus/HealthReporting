@@ -50,5 +50,15 @@ logs/
 .claude/settings.local.json
 .ai-dev-kit/
 
-# Claude personal preferences (gitignored per best practices)
+# Claude agent instructions (local-only)
+CLAUDE.md
 CLAUDE.local.md
+
+# Internal project tracking (local-only)
+TODO.md
+DOGFOOD.md
+STATUS.md
+.tasks/
+backlog/
+claude_code_productivity.json
+claude_code_productivity.md
