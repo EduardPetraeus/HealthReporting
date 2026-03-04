@@ -1,0 +1,96 @@
+metric:
+  name: respiratory_rate
+  display_name: "Respiratory Rate"
+  description: >
+    Breathing rate measured in breaths per minute, typically captured during sleep by Oura
+    Ring or Apple Health sensors. Normal adult respiratory rate at rest is 12-20 breaths
+    per minute. Elevated rates during sleep may indicate respiratory infection, sleep apnea,
+    or autonomic stress. Consistently low rates generally indicate good cardiovascular
+    fitness and parasympathetic dominance.
+  category: vitals
+  source_table: silver.respiratory_rate
+  source_column: breaths_per_min
+  grain: per_measurement
+  business_key: timestamp
+  unit: "breaths/min"
+
+  computations:
+    daily_value:
+      sql: >
+        SELECT DATE(timestamp) AS day,
+               ROUND(AVG(breaths_per_min), 1) AS avg_resp_rate,
+               MIN(breaths_per_min) AS min_resp_rate,
+               MAX(breaths_per_min) AS max_resp_rate,
+               COUNT(*) AS readings
+        FROM silver.respiratory_rate
+        WHERE DATE(timestamp) = :date
+        GROUP BY DATE(timestamp)
+    period_average:
+      sql: >
+        SELECT ROUND(AVG(daily_avg), 1) AS avg_resp_rate,
+               MIN(daily_avg) AS min_daily_avg,
+               MAX(daily_avg) AS max_daily_avg,
+               COUNT(*) AS days
+        FROM (
+          SELECT DATE(timestamp) AS day, ROUND(AVG(breaths_per_min), 1) AS daily_avg
+          FROM silver.respiratory_rate
+          WHERE DATE(timestamp) BETWEEN :start AND :end
+          GROUP BY DATE(timestamp)
+        ) daily
+    trend:
+      sql: >
+        SELECT day, daily_avg,
+          ROUND(AVG(daily_avg) OVER (ORDER BY day ROWS 6 PRECEDING), 1) AS rolling_7d
+        FROM (
+          SELECT DATE(timestamp) AS day,
+                 ROUND(AVG(breaths_per_min), 1) AS daily_avg
+          FROM silver.respiratory_rate
+          WHERE DATE(timestamp) BETWEEN :start AND :end
+          GROUP BY DATE(timestamp)
+        ) daily
+        ORDER BY day
+    elevated_days:
+      description: "Days where average respiratory rate exceeded 20 breaths/min"
+      sql: >
+        SELECT day, daily_avg
+        FROM (
+          SELECT DATE(timestamp) AS day,
+                 ROUND(AVG(breaths_per_min), 1) AS daily_avg
+          FROM silver.respiratory_rate
+          WHERE DATE(timestamp) BETWEEN :start AND :end
+          GROUP BY DATE(timestamp)
+        ) daily
+        WHERE daily_avg > 20
+        ORDER BY daily_avg DESC
+
+  thresholds:
+    optimal: { min: 12, max: 16, label: "Optimal — healthy respiratory rate" }
+    normal: { min: 17, max: 20, label: "Normal — within healthy range" }
+    elevated: { min: 21, max: 25, label: "Elevated — monitor for respiratory issues" }
+    high: { min: 26, label: "High — possible illness or respiratory stress" }
+
+  baseline:
+    compute_sql: >
+      SELECT PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY daily_avg) AS median_resp_rate
+      FROM (
+        SELECT DATE(timestamp) AS day, AVG(breaths_per_min) AS daily_avg
+        FROM silver.respiratory_rate
+        WHERE DATE(timestamp) >= CURRENT_DATE - 90
+        GROUP BY DATE(timestamp)
+      ) daily
+
+  related_metrics:
+    - { metric: blood_oxygen, relationship: "Respiratory rate compensates for low SpO2", lag: 0 }
+    - { metric: resting_heart_rate, relationship: "Both respond to autonomic nervous system state", lag: 0 }
+    - { metric: sleep_score, relationship: "Elevated nocturnal respiratory rate disrupts sleep", lag: 0 }
+    - { metric: body_temperature, relationship: "Fever increases respiratory rate", lag: 0 }
+
+  examples:
+    - question: "What's my respiratory rate today?"
+      tool: "query_health(metric='respiratory_rate', date_range='today')"
+    - question: "Is my breathing rate normal?"
+      tool: "query_health(metric='respiratory_rate', date_range='last_7_days', computation='period_average')"
+    - question: "Have I had any elevated respiratory rate days?"
+      tool: "query_health(metric='respiratory_rate', date_range='last_30_days', computation='elevated_days')"
+    - question: "What's my respiratory rate trend?"
+      tool: "query_health(metric='respiratory_rate', date_range='last_90_days', computation='trend')"

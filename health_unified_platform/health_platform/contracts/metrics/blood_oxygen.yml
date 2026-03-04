@@ -1,0 +1,68 @@
+metric:
+  name: blood_oxygen
+  display_name: "Blood Oxygen (SpO2)"
+  description: >
+    Blood oxygen saturation percentage measured by Oura Ring during sleep. SpO2 reflects
+    how effectively oxygen is being transported through the bloodstream. Normal values are
+    95-100%. Consistently low readings below 95% may indicate respiratory issues, sleep
+    apnea, or altitude effects. Oura provides both average and lowest nightly SpO2 values.
+  category: vitals
+  source_table: silver.daily_spo2
+  source_column: spo2_avg_pct
+  grain: daily
+  business_key: day
+  unit: "%"
+
+  computations:
+    daily_value:
+      sql: >
+        SELECT day, spo2_avg_pct, spo2_min_pct
+        FROM silver.daily_spo2
+        WHERE day = :date
+    period_average:
+      sql: >
+        SELECT ROUND(AVG(spo2_avg_pct), 1) AS avg_spo2,
+               MIN(spo2_min_pct) AS lowest_spo2,
+               MAX(spo2_avg_pct) AS highest_avg_spo2,
+               COUNT(*) AS days
+        FROM silver.daily_spo2
+        WHERE day BETWEEN :start AND :end
+    trend:
+      sql: >
+        SELECT day, spo2_avg_pct,
+          ROUND(AVG(spo2_avg_pct) OVER (ORDER BY day ROWS 6 PRECEDING), 1) AS rolling_7d
+        FROM silver.daily_spo2
+        WHERE day BETWEEN :start AND :end
+        ORDER BY day
+    low_nights:
+      description: "Nights where SpO2 dropped below 95%"
+      sql: >
+        SELECT day, spo2_avg_pct, spo2_min_pct
+        FROM silver.daily_spo2
+        WHERE day BETWEEN :start AND :end
+          AND spo2_min_pct < 95
+        ORDER BY spo2_min_pct ASC
+
+  thresholds:
+    normal: { min: 95, label: "Normal — healthy oxygen saturation" }
+    low: { min: 90, max: 94, label: "Low — possible respiratory concern" }
+    critical: { max: 89, label: "Critical — seek medical attention" }
+
+  baseline:
+    compute_sql: >
+      SELECT PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY spo2_avg_pct) AS median_spo2
+      FROM silver.daily_spo2
+      WHERE day >= CURRENT_DATE - 90
+
+  related_metrics:
+    - { metric: sleep_score, relationship: "Low SpO2 during sleep reduces sleep quality", lag: 0 }
+    - { metric: respiratory_rate, relationship: "Respiratory rate compensates for low oxygen", lag: 0 }
+    - { metric: resting_heart_rate, relationship: "Heart rate increases to compensate for low SpO2", lag: 0 }
+
+  examples:
+    - question: "What was my blood oxygen last night?"
+      tool: "query_health(metric='blood_oxygen', date_range='yesterday')"
+    - question: "Have I had any low oxygen nights recently?"
+      tool: "query_health(metric='blood_oxygen', date_range='last_30_days', computation='low_nights')"
+    - question: "What's my SpO2 trend?"
+      tool: "query_health(metric='blood_oxygen', date_range='last_90_days', computation='trend')"

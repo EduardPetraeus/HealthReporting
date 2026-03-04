@@ -1,0 +1,74 @@
+metric:
+  name: sleep_score
+  display_name: "Sleep Score"
+  description: >
+    Oura Ring composite sleep quality score ranging from 0 to 100. Derived from total sleep
+    duration, sleep efficiency, restfulness, REM sleep, deep sleep, latency, and timing.
+    Higher scores indicate better overall sleep quality. Strongly predictive of next-day
+    readiness and cognitive performance.
+  category: sleep
+  source_table: silver.daily_sleep
+  source_column: sleep_score
+  grain: daily
+  business_key: day
+  unit: "score (0-100)"
+
+  computations:
+    daily_value:
+      sql: "SELECT day, sleep_score FROM silver.daily_sleep WHERE day = :date"
+    period_average:
+      sql: >
+        SELECT ROUND(AVG(sleep_score), 1) AS avg_sleep_score,
+               MIN(sleep_score) AS min_sleep_score,
+               MAX(sleep_score) AS max_sleep_score,
+               COUNT(*) AS days
+        FROM silver.daily_sleep
+        WHERE day BETWEEN :start AND :end
+    trend:
+      sql: >
+        SELECT day, sleep_score,
+          ROUND(AVG(sleep_score) OVER (ORDER BY day ROWS 6 PRECEDING), 1) AS rolling_7d
+        FROM silver.daily_sleep
+        WHERE day BETWEEN :start AND :end
+        ORDER BY day
+    distribution:
+      sql: >
+        SELECT
+          CASE
+            WHEN sleep_score >= 85 THEN 'excellent'
+            WHEN sleep_score >= 70 THEN 'good'
+            WHEN sleep_score >= 55 THEN 'fair'
+            ELSE 'poor'
+          END AS category,
+          COUNT(*) AS days,
+          ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER (), 1) AS pct
+        FROM silver.daily_sleep
+        WHERE day BETWEEN :start AND :end
+        GROUP BY 1 ORDER BY MIN(sleep_score) DESC
+
+  thresholds:
+    optimal: { min: 85, label: "Excellent" }
+    good: { min: 70, max: 84, label: "Good" }
+    fair: { min: 55, max: 69, label: "Fair" }
+    poor: { max: 54, label: "Needs attention" }
+
+  baseline:
+    compute_sql: >
+      SELECT PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY sleep_score) AS median_sleep_score
+      FROM silver.daily_sleep
+      WHERE day >= CURRENT_DATE - 90
+
+  related_metrics:
+    - { metric: readiness_score, relationship: "Sleep score strongly predicts next-day readiness", lag: 1 }
+    - { metric: resting_heart_rate, relationship: "Poor sleep correlates with elevated resting HR same night", lag: 0 }
+    - { metric: daily_stress, relationship: "Low sleep scores associate with higher stress next day", lag: 1 }
+
+  examples:
+    - question: "How did I sleep last night?"
+      tool: "query_health(metric='sleep_score', date_range='yesterday')"
+    - question: "What's my average sleep score this month?"
+      tool: "query_health(metric='sleep_score', date_range='this_month', computation='period_average')"
+    - question: "Is my sleep getting worse?"
+      tool: "query_health(metric='sleep_score', date_range='last_90_days', computation='trend')"
+    - question: "How often do I sleep well?"
+      tool: "query_health(metric='sleep_score', date_range='last_30_days', computation='distribution')"

@@ -1,0 +1,95 @@
+metric:
+  name: calories
+  display_name: "Daily Calories"
+  description: >
+    Total daily caloric intake tracked via Lifesum food logging. Calories are logged per
+    meal and aggregated to daily totals. Accuracy depends on consistent logging discipline.
+    Combined with activity data, caloric intake determines energy balance for weight
+    management. Typical adult maintenance is 2000-2500 kcal/day depending on activity level.
+  category: nutrition
+  source_table: silver.daily_meal
+  source_column: calories
+  grain: per_meal
+  aggregate_to: daily
+  business_key: date
+  unit: "kcal"
+
+  computations:
+    daily_value:
+      sql: >
+        SELECT date, SUM(calories) AS total_calories,
+               COUNT(*) AS meals_logged,
+               SUM(protein) AS total_protein,
+               SUM(carbs) AS total_carbs,
+               SUM(fat) AS total_fat
+        FROM silver.daily_meal
+        WHERE date = :date
+        GROUP BY date
+    period_average:
+      sql: >
+        SELECT ROUND(AVG(daily_cal), 0) AS avg_calories,
+               MIN(daily_cal) AS min_calories,
+               MAX(daily_cal) AS max_calories,
+               COUNT(*) AS days_logged
+        FROM (
+          SELECT date, SUM(calories) AS daily_cal
+          FROM silver.daily_meal
+          WHERE date BETWEEN :start AND :end
+          GROUP BY date
+        ) daily
+    trend:
+      sql: >
+        SELECT date, daily_cal,
+          ROUND(AVG(daily_cal) OVER (ORDER BY date ROWS 6 PRECEDING), 0) AS rolling_7d
+        FROM (
+          SELECT date, SUM(calories) AS daily_cal
+          FROM silver.daily_meal
+          WHERE date BETWEEN :start AND :end
+          GROUP BY date
+        ) daily
+        ORDER BY date
+    macro_breakdown:
+      description: "Daily macro split as percentages"
+      sql: >
+        SELECT date,
+               SUM(calories) AS total_cal,
+               ROUND(SUM(protein) * 4.0 / NULLIF(SUM(calories), 0) * 100, 1) AS protein_pct,
+               ROUND(SUM(carbs) * 4.0 / NULLIF(SUM(calories), 0) * 100, 1) AS carbs_pct,
+               ROUND(SUM(fat) * 9.0 / NULLIF(SUM(calories), 0) * 100, 1) AS fat_pct
+        FROM silver.daily_meal
+        WHERE date BETWEEN :start AND :end
+        GROUP BY date
+        ORDER BY date
+
+  thresholds:
+    note: "Caloric targets are personal based on goals, weight, and activity"
+    high: { min: 3000, label: "High intake — surplus for most adults" }
+    moderate: { min: 2000, max: 2999, label: "Moderate — typical maintenance range" }
+    low: { min: 1200, max: 1999, label: "Low — deficit for most adults" }
+    very_low: { max: 1199, label: "Very low — possible under-logging or restriction" }
+
+  baseline:
+    compute_sql: >
+      SELECT PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY daily_cal) AS median_calories
+      FROM (
+        SELECT date, SUM(calories) AS daily_cal
+        FROM silver.daily_meal
+        WHERE date >= CURRENT_DATE - 90
+        GROUP BY date
+      ) daily
+
+  related_metrics:
+    - { metric: weight, relationship: "Sustained caloric surplus/deficit drives weight change", lag: 14 }
+    - { metric: protein, relationship: "Protein is a key macronutrient within total calories", lag: 0 }
+    - { metric: activity_score, relationship: "Activity level determines caloric needs", lag: 0 }
+    - { metric: steps, relationship: "Steps contribute to daily energy expenditure (NEAT)", lag: 0 }
+
+  examples:
+    - question: "How many calories did I eat today?"
+      tool: "query_health(metric='calories', date_range='today')"
+    - question: "What's my average calorie intake this week?"
+      tool: "query_health(metric='calories', date_range='last_7_days', computation='period_average')"
+    - question: "What's my macro split looking like?"
+      tool: "query_health(metric='calories', date_range='last_7_days', computation='macro_breakdown')"
+    - question: "Am I eating more or less than usual?"
+      tool: "query_health(metric='calories', date_range='last_90_days', computation='trend')"

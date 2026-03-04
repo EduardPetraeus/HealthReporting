@@ -1,0 +1,70 @@
+metric:
+  name: steps
+  display_name: "Daily Steps"
+  description: >
+    Total daily step count measured by Oura Ring. Steps are the most accessible measure of
+    daily physical activity. The WHO recommends 7000-8000 steps per day for health benefits,
+    with diminishing returns above 10000. Consistently low step counts correlate with
+    increased cardiovascular risk and reduced metabolic health.
+  category: activity
+  source_table: silver.daily_activity
+  source_column: steps
+  grain: daily
+  business_key: day
+  unit: "steps"
+
+  computations:
+    daily_value:
+      sql: "SELECT day, steps FROM silver.daily_activity WHERE day = :date"
+    period_average:
+      sql: >
+        SELECT ROUND(AVG(steps), 0) AS avg_steps,
+               MIN(steps) AS min_steps,
+               MAX(steps) AS max_steps,
+               COUNT(*) AS days
+        FROM silver.daily_activity
+        WHERE day BETWEEN :start AND :end
+    trend:
+      sql: >
+        SELECT day, steps,
+          ROUND(AVG(steps) OVER (ORDER BY day ROWS 6 PRECEDING), 0) AS rolling_7d
+        FROM silver.daily_activity
+        WHERE day BETWEEN :start AND :end
+        ORDER BY day
+    weekly_totals:
+      sql: >
+        SELECT DATE_TRUNC('week', day) AS week,
+               SUM(steps) AS total_steps,
+               ROUND(AVG(steps), 0) AS daily_avg,
+               COUNT(*) AS days_tracked
+        FROM silver.daily_activity
+        WHERE day BETWEEN :start AND :end
+        GROUP BY 1 ORDER BY 1
+
+  thresholds:
+    optimal: { min: 10000, label: "Excellent — very active" }
+    good: { min: 7000, max: 9999, label: "Good — meeting WHO recommendation" }
+    fair: { min: 5000, max: 6999, label: "Fair — somewhat active" }
+    poor: { max: 4999, label: "Needs attention — sedentary" }
+
+  baseline:
+    compute_sql: >
+      SELECT PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY steps) AS median_steps
+      FROM silver.daily_activity
+      WHERE day >= CURRENT_DATE - 90
+
+  related_metrics:
+    - { metric: activity_score, relationship: "Steps are a primary component of activity score", lag: 0 }
+    - { metric: calories, relationship: "More steps burn more calories through NEAT", lag: 0 }
+    - { metric: walking_gait, relationship: "Gait quality affects step efficiency", lag: 0 }
+    - { metric: weight, relationship: "Sustained step increases support weight management", lag: 30 }
+
+  examples:
+    - question: "How many steps did I take today?"
+      tool: "query_health(metric='steps', date_range='today')"
+    - question: "What's my average daily steps this month?"
+      tool: "query_health(metric='steps', date_range='this_month', computation='period_average')"
+    - question: "Are my steps trending up or down?"
+      tool: "query_health(metric='steps', date_range='last_90_days', computation='trend')"
+    - question: "What are my weekly step totals?"
+      tool: "query_health(metric='steps', date_range='last_30_days', computation='weekly_totals')"

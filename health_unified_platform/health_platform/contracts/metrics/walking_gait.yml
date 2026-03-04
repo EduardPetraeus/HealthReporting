@@ -1,0 +1,88 @@
+metric:
+  name: walking_gait
+  display_name: "Walking Gait Metrics"
+  description: >
+    Apple Health gait analysis providing multiple walking quality indicators: walking speed
+    (km/h), step length (cm), walking asymmetry (%), double support time (%), and walking
+    steadiness score. These metrics are captured during daily walking and reflect
+    musculoskeletal health, balance, and fall risk. Declining gait metrics may indicate
+    injury, fatigue, or age-related mobility changes.
+  category: gait
+  source_table: silver.daily_walking_gait
+  source_columns: [walking_speed_kmh, step_length_cm, walking_asymmetry_pct, double_support_pct, walking_steadiness]
+  grain: daily
+  business_key: date
+  unit: "multiple (see individual columns)"
+
+  computations:
+    daily_value:
+      sql: >
+        SELECT date, walking_speed_kmh, step_length_cm,
+               walking_asymmetry_pct, double_support_pct, walking_steadiness
+        FROM silver.daily_walking_gait
+        WHERE date = :date
+    period_average:
+      sql: >
+        SELECT ROUND(AVG(walking_speed_kmh), 2) AS avg_speed,
+               ROUND(AVG(step_length_cm), 1) AS avg_step_length,
+               ROUND(AVG(walking_asymmetry_pct), 1) AS avg_asymmetry,
+               ROUND(AVG(double_support_pct), 1) AS avg_double_support,
+               COUNT(*) AS days
+        FROM silver.daily_walking_gait
+        WHERE date BETWEEN :start AND :end
+    trend:
+      sql: >
+        SELECT date, walking_speed_kmh, step_length_cm,
+               walking_asymmetry_pct, double_support_pct,
+          ROUND(AVG(walking_speed_kmh) OVER (ORDER BY date ROWS 6 PRECEDING), 2) AS speed_7d,
+          ROUND(AVG(step_length_cm) OVER (ORDER BY date ROWS 6 PRECEDING), 1) AS step_len_7d,
+          ROUND(AVG(walking_asymmetry_pct) OVER (ORDER BY date ROWS 6 PRECEDING), 1) AS asym_7d
+        FROM silver.daily_walking_gait
+        WHERE date BETWEEN :start AND :end
+        ORDER BY date
+    steadiness_distribution:
+      description: "Distribution of walking steadiness categories"
+      sql: >
+        SELECT walking_steadiness AS category,
+               COUNT(*) AS days,
+               ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER (), 1) AS pct
+        FROM silver.daily_walking_gait
+        WHERE date BETWEEN :start AND :end
+        GROUP BY walking_steadiness
+        ORDER BY days DESC
+
+  thresholds:
+    walking_speed:
+      healthy: { min: 4.0, label: "Healthy walking speed" }
+      slow: { max: 3.5, label: "Below average — possible mobility concern" }
+    walking_asymmetry:
+      normal: { max: 8, label: "Normal — symmetrical gait" }
+      elevated: { min: 9, max: 15, label: "Mild asymmetry — monitor" }
+      high: { min: 16, label: "High asymmetry — possible injury or imbalance" }
+    double_support:
+      normal: { min: 20, max: 30, label: "Normal double support time" }
+      high: { min: 31, label: "Elevated — reduced balance confidence" }
+
+  baseline:
+    compute_sql: >
+      SELECT
+        PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY walking_speed_kmh) AS median_speed,
+        PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY step_length_cm) AS median_step_length,
+        PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY walking_asymmetry_pct) AS median_asymmetry
+      FROM silver.daily_walking_gait
+      WHERE date >= CURRENT_DATE - 90
+
+  related_metrics:
+    - { metric: steps, relationship: "More steps provide more gait data and may improve gait quality", lag: 0 }
+    - { metric: activity_score, relationship: "Activity level correlates with walking quality", lag: 0 }
+    - { metric: weight, relationship: "Weight changes can affect gait mechanics", lag: 0 }
+
+  examples:
+    - question: "How's my walking gait today?"
+      tool: "query_health(metric='walking_gait', date_range='today')"
+    - question: "Is my walking speed declining?"
+      tool: "query_health(metric='walking_gait', date_range='last_90_days', computation='trend')"
+    - question: "What's my average walking asymmetry?"
+      tool: "query_health(metric='walking_gait', date_range='last_30_days', computation='period_average')"
+    - question: "How steady is my walking usually?"
+      tool: "query_health(metric='walking_gait', date_range='last_90_days', computation='steadiness_distribution')"

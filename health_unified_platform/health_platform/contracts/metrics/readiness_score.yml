@@ -1,0 +1,68 @@
+metric:
+  name: readiness_score
+  display_name: "Readiness Score"
+  description: >
+    Oura Ring readiness score from 0 to 100 measuring how prepared the body is for physical
+    and mental exertion. Combines resting heart rate, HRV, body temperature deviation, sleep
+    balance, previous day activity, and recovery index. A score below 70 suggests reducing
+    training intensity and prioritizing recovery.
+  category: recovery
+  source_table: silver.daily_readiness
+  source_column: readiness_score
+  grain: daily
+  business_key: day
+  unit: "score (0-100)"
+
+  computations:
+    daily_value:
+      sql: "SELECT day, readiness_score FROM silver.daily_readiness WHERE day = :date"
+    period_average:
+      sql: >
+        SELECT ROUND(AVG(readiness_score), 1) AS avg_readiness,
+               MIN(readiness_score) AS min_readiness,
+               MAX(readiness_score) AS max_readiness,
+               COUNT(*) AS days
+        FROM silver.daily_readiness
+        WHERE day BETWEEN :start AND :end
+    trend:
+      sql: >
+        SELECT day, readiness_score,
+          ROUND(AVG(readiness_score) OVER (ORDER BY day ROWS 6 PRECEDING), 1) AS rolling_7d
+        FROM silver.daily_readiness
+        WHERE day BETWEEN :start AND :end
+        ORDER BY day
+    contributors:
+      sql: >
+        SELECT day, readiness_score,
+               resting_heart_rate, hrv_balance, body_temperature,
+               sleep_balance, previous_day_activity, recovery_index
+        FROM silver.daily_readiness
+        WHERE day = :date
+
+  thresholds:
+    optimal: { min: 85, label: "Excellent — peak performance day" }
+    good: { min: 70, max: 84, label: "Good — normal training OK" }
+    fair: { min: 55, max: 69, label: "Fair — moderate activity only" }
+    poor: { max: 54, label: "Needs attention — prioritize recovery" }
+
+  baseline:
+    compute_sql: >
+      SELECT PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY readiness_score) AS median_readiness
+      FROM silver.daily_readiness
+      WHERE day >= CURRENT_DATE - 90
+
+  related_metrics:
+    - { metric: sleep_score, relationship: "Previous night sleep quality directly feeds readiness", lag: 0 }
+    - { metric: activity_score, relationship: "High activity lowers next-day readiness", lag: 1 }
+    - { metric: resting_heart_rate, relationship: "Elevated resting HR is a contributor to low readiness", lag: 0 }
+    - { metric: daily_stress, relationship: "Chronic stress reduces readiness over time", lag: 0 }
+
+  examples:
+    - question: "How's my readiness today?"
+      tool: "query_health(metric='readiness_score', date_range='today')"
+    - question: "Should I train hard today?"
+      tool: "query_health(metric='readiness_score', date_range='today', computation='contributors')"
+    - question: "What's my readiness trend this week?"
+      tool: "query_health(metric='readiness_score', date_range='last_7_days', computation='trend')"
+    - question: "Is my recovery improving?"
+      tool: "query_health(metric='readiness_score', date_range='last_90_days', computation='trend')"

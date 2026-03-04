@@ -1,0 +1,106 @@
+metric:
+  name: workout
+  display_name: "Workout"
+  description: >
+    Structured workout sessions recorded by Oura Ring. Each workout captures activity type,
+    duration, calories burned, distance (if applicable), average heart rate, and intensity.
+    Workouts are key drivers of fitness adaptation but must be balanced with recovery.
+    Multiple workouts can occur per day, each stored as a separate record with a unique
+    combination of day and workout identifier.
+  category: activity
+  source_table: silver.workout
+  source_columns: [activity, duration_seconds, calories, distance_meters, avg_hr]
+  grain: per_workout
+  business_key: "day + start_datetime"
+  unit: "multiple (duration in seconds, calories in kcal, distance in meters)"
+
+  computations:
+    daily_value:
+      sql: >
+        SELECT day, activity, duration_seconds,
+               ROUND(duration_seconds / 60.0, 1) AS duration_minutes,
+               calories, distance_meters, avg_hr
+        FROM silver.workout
+        WHERE day = :date
+        ORDER BY start_datetime
+    period_summary:
+      sql: >
+        SELECT COUNT(*) AS total_workouts,
+               COUNT(DISTINCT day) AS workout_days,
+               ROUND(SUM(duration_seconds) / 3600.0, 1) AS total_hours,
+               SUM(calories) AS total_calories,
+               ROUND(AVG(duration_seconds) / 60.0, 1) AS avg_duration_min
+        FROM silver.workout
+        WHERE day BETWEEN :start AND :end
+    trend:
+      sql: >
+        SELECT week, workouts, total_minutes, total_calories
+        FROM (
+          SELECT DATE_TRUNC('week', day) AS week,
+                 COUNT(*) AS workouts,
+                 ROUND(SUM(duration_seconds) / 60.0, 0) AS total_minutes,
+                 SUM(calories) AS total_calories
+          FROM silver.workout
+          WHERE day BETWEEN :start AND :end
+          GROUP BY 1
+        ) weekly
+        ORDER BY week
+    by_activity:
+      description: "Breakdown by workout type"
+      sql: >
+        SELECT activity,
+               COUNT(*) AS sessions,
+               ROUND(SUM(duration_seconds) / 3600.0, 1) AS total_hours,
+               SUM(calories) AS total_calories,
+               ROUND(AVG(avg_hr), 0) AS avg_heart_rate
+        FROM silver.workout
+        WHERE day BETWEEN :start AND :end
+        GROUP BY activity
+        ORDER BY sessions DESC
+    frequency:
+      description: "Workout frequency per week"
+      sql: >
+        SELECT DATE_TRUNC('week', day) AS week,
+               COUNT(*) AS workouts,
+               COUNT(DISTINCT day) AS active_days,
+               STRING_AGG(DISTINCT activity, ', ') AS activities
+        FROM silver.workout
+        WHERE day BETWEEN :start AND :end
+        GROUP BY 1
+        ORDER BY 1
+
+  thresholds:
+    note: "Workout targets depend on personal goals and fitness level"
+    weekly_frequency:
+      optimal: { min: 4, label: "Excellent — consistent training" }
+      good: { min: 3, max: 3, label: "Good — adequate training stimulus" }
+      low: { max: 2, label: "Low — consider increasing frequency" }
+    session_duration:
+      long: { min: 3600, label: "Long session (60+ min)" }
+      moderate: { min: 1800, max: 3599, label: "Moderate session (30-59 min)" }
+      short: { max: 1799, label: "Short session (<30 min)" }
+
+  baseline:
+    compute_sql: >
+      SELECT
+        ROUND(COUNT(*) / NULLIF(COUNT(DISTINCT DATE_TRUNC('week', day)), 0), 1) AS avg_weekly_workouts,
+        PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY duration_seconds / 60.0) AS median_duration_min
+      FROM silver.workout
+      WHERE day >= CURRENT_DATE - 90
+
+  related_metrics:
+    - { metric: activity_score, relationship: "Workouts significantly boost daily activity score", lag: 0 }
+    - { metric: readiness_score, relationship: "Intense workouts reduce next-day readiness", lag: 1 }
+    - { metric: resting_heart_rate, relationship: "Acute post-exercise RHR elevation for 24-48h", lag: 1 }
+    - { metric: calories, relationship: "Caloric intake should match training load", lag: 0 }
+    - { metric: sleep_score, relationship: "Evening exercise may affect sleep quality", lag: 0 }
+
+  examples:
+    - question: "Did I work out today?"
+      tool: "query_health(metric='workout', date_range='today')"
+    - question: "How many times did I exercise this week?"
+      tool: "query_health(metric='workout', date_range='last_7_days', computation='period_summary')"
+    - question: "What types of workouts do I do most?"
+      tool: "query_health(metric='workout', date_range='last_90_days', computation='by_activity')"
+    - question: "Is my training volume increasing?"
+      tool: "query_health(metric='workout', date_range='last_90_days', computation='trend')"

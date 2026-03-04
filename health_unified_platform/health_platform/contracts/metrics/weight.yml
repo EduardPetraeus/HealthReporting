@@ -1,0 +1,80 @@
+metric:
+  name: weight
+  display_name: "Body Weight"
+  description: >
+    Body weight in kilograms measured by Withings Body+ smart scale. Includes weight,
+    fat mass, muscle mass, bone mass, and hydration percentage. Weight is best interpreted
+    as a long-term trend rather than daily fluctuations, which can vary 1-2kg due to
+    hydration, meals, and time of day. The Withings scale provides body composition
+    breakdown via bioelectrical impedance analysis.
+  category: body
+  source_table: silver.weight
+  source_column: weight_kg
+  grain: per_measurement
+  business_key: datetime
+  unit: "kg"
+
+  computations:
+    daily_value:
+      sql: >
+        SELECT datetime, weight_kg, fat_mass_kg, muscle_mass_kg,
+               bone_mass_kg, hydration_pct
+        FROM silver.weight
+        WHERE DATE(datetime) = :date
+        ORDER BY datetime DESC
+        LIMIT 1
+    period_average:
+      sql: >
+        SELECT ROUND(AVG(weight_kg), 1) AS avg_weight,
+               MIN(weight_kg) AS min_weight,
+               MAX(weight_kg) AS max_weight,
+               ROUND(AVG(fat_mass_kg), 1) AS avg_fat_mass,
+               ROUND(AVG(muscle_mass_kg), 1) AS avg_muscle_mass,
+               COUNT(*) AS measurements
+        FROM silver.weight
+        WHERE DATE(datetime) BETWEEN :start AND :end
+    trend:
+      sql: >
+        SELECT DATE(datetime) AS day, weight_kg,
+          ROUND(AVG(weight_kg) OVER (ORDER BY DATE(datetime) ROWS 6 PRECEDING), 1) AS rolling_7d,
+          ROUND(AVG(weight_kg) OVER (ORDER BY DATE(datetime) ROWS 29 PRECEDING), 1) AS rolling_30d
+        FROM silver.weight
+        WHERE DATE(datetime) BETWEEN :start AND :end
+        ORDER BY day
+    body_composition_trend:
+      description: "Track fat mass vs muscle mass over time"
+      sql: >
+        SELECT DATE(datetime) AS day, weight_kg, fat_mass_kg, muscle_mass_kg,
+               ROUND(fat_mass_kg / NULLIF(weight_kg, 0) * 100, 1) AS fat_pct,
+               ROUND(muscle_mass_kg / NULLIF(weight_kg, 0) * 100, 1) AS muscle_pct
+        FROM silver.weight
+        WHERE DATE(datetime) BETWEEN :start AND :end
+        ORDER BY day
+
+  thresholds:
+    note: "Weight thresholds are personal — no universal good/bad ranges"
+    trend_alert: { weekly_change_kg: 1.0, label: "Rapid change — verify with body composition" }
+
+  baseline:
+    compute_sql: >
+      SELECT PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY weight_kg) AS median_weight,
+             PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY fat_mass_kg) AS median_fat_mass,
+             PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY muscle_mass_kg) AS median_muscle_mass
+      FROM silver.weight
+      WHERE DATE(datetime) >= CURRENT_DATE - 90
+
+  related_metrics:
+    - { metric: calories, relationship: "Caloric surplus/deficit drives weight change over weeks", lag: 14 }
+    - { metric: steps, relationship: "Higher step counts contribute to energy expenditure", lag: 14 }
+    - { metric: protein, relationship: "Adequate protein supports muscle mass retention", lag: 14 }
+    - { metric: blood_pressure, relationship: "Weight gain is associated with blood pressure increase", lag: 0 }
+
+  examples:
+    - question: "What do I weigh today?"
+      tool: "query_health(metric='weight', date_range='today')"
+    - question: "What's my weight trend this year?"
+      tool: "query_health(metric='weight', date_range='this_year', computation='trend')"
+    - question: "How's my body composition changing?"
+      tool: "query_health(metric='weight', date_range='last_90_days', computation='body_composition_trend')"
+    - question: "What's my average weight this month?"
+      tool: "query_health(metric='weight', date_range='this_month', computation='period_average')"

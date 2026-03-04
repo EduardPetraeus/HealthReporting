@@ -1,0 +1,68 @@
+metric:
+  name: activity_score
+  display_name: "Activity Score"
+  description: >
+    Oura Ring daily activity score from 0 to 100 measuring overall movement and exercise
+    quality. Factors include steps, active calories, training frequency, training volume,
+    and inactivity alerts. Balances sufficient movement with avoiding overtraining.
+    Consistently high scores indicate a well-balanced activity pattern.
+  category: activity
+  source_table: silver.daily_activity
+  source_column: activity_score
+  grain: daily
+  business_key: day
+  unit: "score (0-100)"
+
+  computations:
+    daily_value:
+      sql: "SELECT day, activity_score FROM silver.daily_activity WHERE day = :date"
+    period_average:
+      sql: >
+        SELECT ROUND(AVG(activity_score), 1) AS avg_activity,
+               MIN(activity_score) AS min_activity,
+               MAX(activity_score) AS max_activity,
+               COUNT(*) AS days
+        FROM silver.daily_activity
+        WHERE day BETWEEN :start AND :end
+    trend:
+      sql: >
+        SELECT day, activity_score,
+          ROUND(AVG(activity_score) OVER (ORDER BY day ROWS 6 PRECEDING), 1) AS rolling_7d
+        FROM silver.daily_activity
+        WHERE day BETWEEN :start AND :end
+        ORDER BY day
+    with_details:
+      sql: >
+        SELECT day, activity_score, steps,
+               active_calories, total_calories,
+               sedentary_time_seconds, rest_time_seconds
+        FROM silver.daily_activity
+        WHERE day = :date
+
+  thresholds:
+    optimal: { min: 85, label: "Excellent — highly active day" }
+    good: { min: 70, max: 84, label: "Good — meeting activity goals" }
+    fair: { min: 55, max: 69, label: "Fair — below target activity" }
+    poor: { max: 54, label: "Needs attention — too sedentary" }
+
+  baseline:
+    compute_sql: >
+      SELECT PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY activity_score) AS median_activity
+      FROM silver.daily_activity
+      WHERE day >= CURRENT_DATE - 90
+
+  related_metrics:
+    - { metric: readiness_score, relationship: "High activity today may reduce tomorrow's readiness", lag: 1 }
+    - { metric: steps, relationship: "Steps are a primary driver of activity score", lag: 0 }
+    - { metric: calories, relationship: "Active calories burned contribute to activity score", lag: 0 }
+    - { metric: workout, relationship: "Structured workouts boost activity score significantly", lag: 0 }
+
+  examples:
+    - question: "How active was I today?"
+      tool: "query_health(metric='activity_score', date_range='today')"
+    - question: "What's my activity trend this month?"
+      tool: "query_health(metric='activity_score', date_range='this_month', computation='trend')"
+    - question: "Am I moving enough on average?"
+      tool: "query_health(metric='activity_score', date_range='last_30_days', computation='period_average')"
+    - question: "Show me my activity details for today"
+      tool: "query_health(metric='activity_score', date_range='today', computation='with_details')"

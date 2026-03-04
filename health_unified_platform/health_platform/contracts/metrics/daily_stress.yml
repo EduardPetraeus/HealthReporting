@@ -1,0 +1,98 @@
+metric:
+  name: daily_stress
+  display_name: "Daily Stress"
+  description: >
+    Oura Ring daily stress assessment derived from physiological signals including HRV,
+    heart rate, skin temperature, and activity patterns. Categorized into states: restored,
+    rest, normal, high_stress, and stressed. The stress_high and recovery_high fields
+    indicate total seconds spent in high-stress and high-recovery states respectively.
+    Day summary provides a single categorical assessment of the day's stress balance.
+  category: recovery
+  source_table: silver.daily_stress
+  source_columns: [stress_high, recovery_high, day_summary]
+  grain: daily
+  business_key: day
+  unit: "seconds / category"
+
+  computations:
+    daily_value:
+      sql: >
+        SELECT day, day_summary,
+               stress_high AS stress_seconds,
+               recovery_high AS recovery_seconds,
+               ROUND(stress_high / 3600.0, 1) AS stress_hours,
+               ROUND(recovery_high / 3600.0, 1) AS recovery_hours
+        FROM silver.daily_stress
+        WHERE day = :date
+    period_average:
+      sql: >
+        SELECT ROUND(AVG(stress_high / 3600.0), 1) AS avg_stress_hours,
+               ROUND(AVG(recovery_high / 3600.0), 1) AS avg_recovery_hours,
+               COUNT(*) FILTER (WHERE day_summary = 'stressed') AS stressed_days,
+               COUNT(*) FILTER (WHERE day_summary = 'restored') AS restored_days,
+               COUNT(*) AS total_days
+        FROM silver.daily_stress
+        WHERE day BETWEEN :start AND :end
+    trend:
+      sql: >
+        SELECT day,
+               ROUND(stress_high / 3600.0, 1) AS stress_hours,
+               ROUND(recovery_high / 3600.0, 1) AS recovery_hours,
+               ROUND(AVG(stress_high / 3600.0) OVER (ORDER BY day ROWS 6 PRECEDING), 1) AS stress_7d,
+               ROUND(AVG(recovery_high / 3600.0) OVER (ORDER BY day ROWS 6 PRECEDING), 1) AS recovery_7d
+        FROM silver.daily_stress
+        WHERE day BETWEEN :start AND :end
+        ORDER BY day
+    stress_balance:
+      description: "Ratio of recovery to stress time"
+      sql: >
+        SELECT day, day_summary,
+               ROUND(stress_high / 3600.0, 1) AS stress_hours,
+               ROUND(recovery_high / 3600.0, 1) AS recovery_hours,
+               CASE
+                 WHEN stress_high > 0 THEN ROUND(recovery_high::NUMERIC / stress_high, 2)
+                 ELSE NULL
+               END AS recovery_stress_ratio
+        FROM silver.daily_stress
+        WHERE day BETWEEN :start AND :end
+        ORDER BY day
+    distribution:
+      sql: >
+        SELECT day_summary AS category,
+               COUNT(*) AS days,
+               ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER (), 1) AS pct
+        FROM silver.daily_stress
+        WHERE day BETWEEN :start AND :end
+        GROUP BY day_summary
+        ORDER BY days DESC
+
+  thresholds:
+    restored: { label: "Restored — excellent recovery balance" }
+    rest: { label: "Rest — low stress, adequate recovery" }
+    normal: { label: "Normal — balanced stress and recovery" }
+    high_stress: { label: "High stress — recovery needed" }
+    stressed: { label: "Stressed — prioritize rest and recovery" }
+
+  baseline:
+    compute_sql: >
+      SELECT
+        PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY stress_high / 3600.0) AS median_stress_hours,
+        PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY recovery_high / 3600.0) AS median_recovery_hours
+      FROM silver.daily_stress
+      WHERE day >= CURRENT_DATE - 90
+
+  related_metrics:
+    - { metric: readiness_score, relationship: "Chronic stress reduces readiness score", lag: 0 }
+    - { metric: sleep_score, relationship: "High stress disrupts sleep quality", lag: 0 }
+    - { metric: resting_heart_rate, relationship: "Stress elevates resting heart rate", lag: 0 }
+    - { metric: blood_pressure, relationship: "Acute stress temporarily raises blood pressure", lag: 0 }
+
+  examples:
+    - question: "How stressed was I today?"
+      tool: "query_health(metric='daily_stress', date_range='today')"
+    - question: "Am I more stressed than usual lately?"
+      tool: "query_health(metric='daily_stress', date_range='last_30_days', computation='trend')"
+    - question: "How many stressed days have I had this month?"
+      tool: "query_health(metric='daily_stress', date_range='this_month', computation='distribution')"
+    - question: "Is my recovery-to-stress ratio improving?"
+      tool: "query_health(metric='daily_stress', date_range='last_90_days', computation='stress_balance')"
