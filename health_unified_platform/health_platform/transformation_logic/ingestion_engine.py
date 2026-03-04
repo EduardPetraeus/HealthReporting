@@ -9,6 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from health_platform.utils.logging_config import get_logger
 from health_platform.utils.audit_logger import AuditLogger
+from health_platform.utils.path_resolver import get_project_root
 
 logger = get_logger("ingestion_engine")
 
@@ -20,8 +21,9 @@ def load_yaml(path):
 
 def run_ingestion():
     # load_environment_and_source_configurations
-    env_path = 'health_unified_platform/health_environment/config/environment_config.yaml'
-    src_path = 'health_unified_platform/health_environment/config/sources_config.yaml'
+    root = get_project_root()
+    env_path = root / "health_environment" / "config" / "environment_config.yaml"
+    src_path = root / "health_environment" / "config" / "sources_config.yaml"
 
     env_cfg = load_yaml(env_path)
     src_cfg = load_yaml(src_path)

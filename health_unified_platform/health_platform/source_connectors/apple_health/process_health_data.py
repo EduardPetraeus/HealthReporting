@@ -19,6 +19,12 @@ from pathlib import Path
 import pandas as pd
 import xml.etree.ElementTree as ET
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from health_platform.utils.logging_config import get_logger
+
+logger = get_logger("process_health_data")
+
 BATCH_SIZE = 500_000
 
 AREA_MAPPING = {
@@ -129,13 +135,13 @@ def main() -> None:
     output_folder = Path(args.output)
 
     if not xml_path.exists():
-        print(f"Error: input file not found at {xml_path}")
+        logger.error("Input file not found at %s", xml_path)
         sys.exit(1)
 
     ingested_at = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    print(f"Starting Apple Health ingestion — run id: {ingested_at}")
-    print(f"Source: {xml_path.resolve()}")
-    print(f"Target: {output_folder.resolve()}")
+    logger.info("Starting Apple Health ingestion — run id: %s", ingested_at)
+    logger.info("Source: %s", xml_path.resolve())
+    logger.info("Target: %s", output_folder.resolve())
 
     records = []
     total_records = 0
@@ -157,11 +163,11 @@ def main() -> None:
                     total_files += write_batch(records, output_folder, ingested_at, batch_num)
                     total_records += len(records)
                     batch_num += 1
-                    print(f"  Processed {total_records:,} records...")
+                    logger.info("Processed %s records...", f"{total_records:,}")
                     records = []
 
     except Exception as e:
-        print(f"Error during XML parsing: {e}")
+        logger.error("Error during XML parsing: %s", e)
         sys.exit(1)
 
     # Write remaining records
@@ -170,10 +176,10 @@ def main() -> None:
         total_records += len(records)
 
     if total_records == 0:
-        print("No records found in XML file.")
+        logger.warning("No records found in XML file.")
         return
 
-    print(f"Done. {total_records:,} records written to {total_files} parquet files.")
+    logger.info("Done. %s records written to %d parquet files.", f"{total_records:,}", total_files)
 
 
 if __name__ == "__main__":

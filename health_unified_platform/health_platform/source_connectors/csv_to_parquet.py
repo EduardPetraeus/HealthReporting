@@ -79,6 +79,11 @@ def main():
         logger.error(f"Input path is not a file: {input_path}")
         sys.exit(1)
 
+    # Validate output path parent exists
+    if not output_base.parent.exists():
+        logger.error(f"Output directory parent does not exist: {output_base.parent}")
+        sys.exit(1)
+
     output_dir = output_base / source_name
     output_file = output_dir / "data.parquet"
 

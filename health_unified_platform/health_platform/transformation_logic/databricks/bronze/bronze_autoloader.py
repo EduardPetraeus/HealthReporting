@@ -35,11 +35,14 @@ if not source_name:
 
 # COMMAND ----------
 
+import logging
 import yaml
 from pyspark.sql.functions import current_timestamp, lit
 
+logger = logging.getLogger("bronze_autoloader")
+
 config_path = f"{config_root}/{source_name}.yml"
-print(f"Loading config: {config_path}")
+logger.info("Loading config: %s", config_path)
 
 with open(config_path) as f:
     config = yaml.safe_load(f)
@@ -55,11 +58,8 @@ target_table         = bronze_cfg["target_table"]
 load_mode            = bronze_cfg.get("load_mode", "incremental")
 extra_options        = bronze_cfg.get("options", {}) or {}
 
-print(f"Source:        {source_name}")
-print(f"Source system: {source_system}")
-print(f"Load mode:     {load_mode}")
-print(f"Source path:   {source_path}")
-print(f"Target table:  {target_table}")
+logger.info("Source: %s | System: %s | Mode: %s", source_name, source_system, load_mode)
+logger.info("Source path: %s | Target table: %s", source_path, target_table)
 
 # COMMAND ----------
 
@@ -129,4 +129,4 @@ with AuditLogger("bronze_autoloader", "bronze", source_system) as audit:
 
     rows_after = spark.table(target_table).count()
     audit.log_table(target_table, "AUTOLOADER_WRITE", rows_after=rows_after)
-    print(f"Bronze load complete: {source_name} -> {target_table} ({rows_after:,} rows)")
+    logger.info("Bronze load complete: %s -> %s (%s rows)", source_name, target_table, f"{rows_after:,}")

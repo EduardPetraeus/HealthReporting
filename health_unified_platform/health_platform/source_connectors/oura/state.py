@@ -6,8 +6,15 @@ Persisted to ~/.config/health_reporting/oura_state.json between runs.
 from __future__ import annotations
 
 import json
+import sys
 from datetime import date, timedelta
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from health_platform.utils.logging_config import get_logger
+
+logger = get_logger("oura.state")
 
 STATE_FILE = Path.home() / ".config" / "health_reporting" / "oura_state.json"
 DEFAULT_LOOKBACK_DAYS = 90
@@ -24,7 +31,7 @@ def save_state(state: dict) -> None:
     """Persists fetch state to disk."""
     STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
     STATE_FILE.write_text(json.dumps(state, indent=2))
-    print(f"State saved to {STATE_FILE}")
+    logger.info("State saved to %s", STATE_FILE)
 
 
 def get_start_date(endpoint: str, state: dict) -> date:
