@@ -69,6 +69,27 @@
 | `/Users/Shared/data_lake/lifesum/parquet/` | Lifesum CSV → parquet output |
 | `/Users/Shared/data_lake/database/health_dw_{env}.db` | DuckDB file (bronze + silver) |
 
+## AI-Native Data Model
+
+| Path | Purpose |
+|---|---|
+| `health_unified_platform/health_platform/ai/text_generator.py` | Template-based daily health summary generation |
+| `health_unified_platform/health_platform/ai/embedding_engine.py` | sentence-transformers embeddings + vector search |
+| `health_unified_platform/health_platform/ai/baseline_computer.py` | Rolling baselines + demographics → patient_profile |
+| `health_unified_platform/health_platform/ai/correlation_engine.py` | Pearson correlations with lag → metric_relationships |
+| `health_unified_platform/health_platform/contracts/metrics/_index.yml` | Master metric index — 9 categories, query routing |
+| `health_unified_platform/health_platform/contracts/metrics/_business_rules.yml` | Composite score, alerts, anomaly detection |
+| `health_unified_platform/health_platform/contracts/metrics/*.yml` | 18 individual metric semantic contracts |
+| `health_unified_platform/health_platform/mcp/server.py` | FastMCP server — 8 tools for AI data access |
+| `health_unified_platform/health_platform/mcp/health_tools.py` | Tool implementations (query_health, search_memory, etc.) |
+| `health_unified_platform/health_platform/mcp/query_builder.py` | YAML contract → parameterized SQL |
+| `health_unified_platform/health_platform/mcp/formatter.py` | Markdown-table, markdown-kv, yaml output formatting |
+| `health_unified_platform/health_platform/mcp/schema_pruner.py` | Category-based schema context pruning |
+| `health_unified_platform/health_platform/setup/create_agent_schema.sql` | DDL for agent.* tables (5 tables + metric_relationships) |
+| `health_unified_platform/health_platform/setup/add_column_comments.sql` | COMMENT ON for all 21 silver tables (269 descriptions) |
+| `health_unified_platform/health_platform/setup/seed_health_graph.sql` | Knowledge graph seed: 67 nodes, 108 edges |
+| `health_unified_platform/health_platform/setup/setup_agent_schema.py` | Idempotent schema setup runner |
+
 ## State & Tokens
 
 | Path | Purpose |

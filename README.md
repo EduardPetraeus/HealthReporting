@@ -4,17 +4,18 @@ A personal health data platform that ingests, transforms, and surfaces data from
 
 ## Architecture
 
-Medallion architecture (bronze → silver → gold) running on two parallel tracks:
+Dual-stack architecture with shared Silver layer (see [ADR-005](docs/adr/ADR-005-ai-native-data-model.md)):
 
-**Local (DuckDB)** — development and experimentation:
+**Local (DuckDB) — AI-Native 2+2:**
 ```
 Source APIs / files  →  parquet (hive-partitioned)
   →  bronze (DuckDB stg_* tables via ingestion_engine.py)
-  →  silver (dbt-duckdb schema + run_merge.py)
-  →  gold (DuckDB views)
+  →  silver (21 tables, dbt-duckdb + run_merge.py, COMMENT ON every column)
+  →  agent memory (patient profile, daily summaries + embeddings, knowledge graph)
+  →  semantic contracts (18 YAML metrics) → MCP server (8 tools)
 ```
 
-**Cloud (Databricks)** — production pipeline:
+**Cloud (Databricks) — Traditional Medallion:**
 ```
 Cloud storage (parquet)
   →  bronze (Autoloader / cloudFiles → Delta table)
@@ -22,9 +23,9 @@ Cloud storage (parquet)
   →  gold (CREATE OR REPLACE VIEW, driven by YAML + SQL)
 ```
 
-The cloud pipeline is fully generic and metadata-driven: adding a new source requires one YAML config file and one SQL file — no Python changes. Deployed via Databricks Asset Bundles (DAB) with GitHub Actions CI/CD.
+The local stack replaces Gold with AI-native components: an AI agent (Claude Code) queries health data via typed MCP tools backed by YAML semantic contracts — never raw SQL. The cloud pipeline remains traditional medallion for BI dashboards.
 
-See `docs/databricks_framework.md` for the full cloud pipeline reference.
+See `docs/databricks_framework.md` for the cloud pipeline reference and `docs/architecture.md` for the full dual-stack design.
 
 ## Data Sources
 
@@ -37,9 +38,20 @@ See `docs/databricks_framework.md` for the full cloud pipeline reference.
 | Strava | Planned | workouts, GPS activities |
 | GetTested | Planned | lab results, blood tests |
 
-## Silver Tables (17)
+## Silver Tables (21)
 
-`heart_rate` · `step_count` · `toothbrushing` · `daily_meal` · `daily_walking_gait` · `mindful_session` · `body_temperature` · `respiratory_rate` · `water_intake` · `daily_energy_by_source` · `daily_sleep` · `daily_activity` · `daily_readiness` · `daily_spo2` · `daily_stress` · `workout` · `personal_info`
+`heart_rate` · `step_count` · `toothbrushing` · `daily_meal` · `daily_walking_gait` · `mindful_session` · `body_temperature` · `respiratory_rate` · `water_intake` · `daily_energy_by_source` · `daily_sleep` · `daily_activity` · `daily_readiness` · `daily_spo2` · `daily_stress` · `workout` · `personal_info` · `blood_pressure` · `weight` · `daily_annotations` · `metric_relationships`
+
+## AI-Native Components (Local)
+
+| Component | Description |
+|---|---|
+| `agent.patient_profile` | Core memory — 9 entries (demographics + baselines), always in context |
+| `agent.daily_summaries` | Recall memory — 91 daily narratives with 384-dim embeddings |
+| `agent.health_graph` | Knowledge graph — 67 nodes, 108 edges (biomarkers, supplements, conditions) |
+| `agent.knowledge_base` | Archival memory — accumulated insights, vector-searchable |
+| `contracts/metrics/` | 18 YAML semantic contracts + index + business rules |
+| `mcp/server.py` | MCP server with 8 tools (query_health, search_memory, get_profile, etc.) |
 
 ## Quick Start
 
@@ -61,7 +73,8 @@ See `docs/runbook.md` for the full runbook, `docs/architecture.md` for design de
 
 ## Stack
 
-- **Local**: Python 3.9, DuckDB, dbt-duckdb, pyarrow, pandas
+- **Local**: Python 3.9/3.12, DuckDB, dbt-duckdb, sentence-transformers, MCP, pyarrow, pandas
 - **Cloud**: Databricks (Unity Catalog, Delta Lake, Autoloader, Asset Bundles)
+- **AI**: sentence-transformers (all-MiniLM-L6-v2), DuckDB VSS (HNSW), FastMCP
 - **CI/CD**: GitHub Actions → auto-deploy on merge to main
-- **Storage**: Parquet (hive-partitioned) locally at `/Users/Shared/data_lake/`; ADLS/S3 on cloud
+- **Storage**: Parquet (hive-partitioned) locally; ADLS/S3 on cloud

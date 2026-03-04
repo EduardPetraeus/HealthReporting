@@ -172,3 +172,49 @@ Avoid semicolons inside `--` comments in merge scripts.
 
 **Oura `day` column contains day-of-month integer** (e.g. "21") instead of full date:
 This is a Hive partition key conflict. Merge scripts for daily Oura endpoints use `make_date(year, month, day)` to reconstruct the full date. Do not use `day::DATE` directly for these tables.
+
+---
+
+## AI-Native Data Model Setup
+
+One-time setup for the agent schema, knowledge graph, and memory tiers. Requires Python 3.12+ (`.venv-ai/`).
+
+```bash
+# Activate AI venv (Python 3.12, has sentence-transformers + mcp)
+source .venv-ai/bin/activate
+
+# Run idempotent schema setup (creates agent tables, comments, seeds graph)
+HEALTH_ENV=dev python health_unified_platform/health_platform/setup/setup_agent_schema.py
+```
+
+### Backfill Daily Summaries + Embeddings
+
+```bash
+source .venv-ai/bin/activate
+python -c "
+import sys; sys.path.insert(0, 'health_unified_platform')
+import duckdb
+con = duckdb.connect('/Users/Shared/data_lake/database/health_dw_dev.db')
+
+from health_platform.ai.text_generator import backfill_summaries
+from health_platform.ai.baseline_computer import compute_all_baselines, compute_demographics
+from health_platform.ai.embedding_engine import EmbeddingEngine
+
+backfill_summaries(con)
+compute_all_baselines(con)
+compute_demographics(con)
+EmbeddingEngine().backfill_daily_summaries(con)
+
+con.close()
+"
+```
+
+### Start MCP Server (for Claude Code integration)
+
+```bash
+source .venv-ai/bin/activate
+cd health_unified_platform
+HEALTH_ENV=dev python -m health_platform.mcp.server
+```
+
+The MCP server is also configured in `.mcp.json` for automatic startup by Claude Code.
