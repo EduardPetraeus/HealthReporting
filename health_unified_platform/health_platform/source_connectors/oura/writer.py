@@ -20,7 +20,10 @@ from health_platform.utils.logging_config import get_logger
 
 logger = get_logger("oura.writer")
 
-DATA_LAKE_ROOT = Path(os.getenv("OURA_DATA_LAKE_ROOT", "/Users/Shared/data_lake/oura/raw"))
+DATA_LAKE_ROOT = Path(
+    os.environ.get("OURA_DATA_LAKE_ROOT")
+    or str(Path.home() / "data_lake" / "oura" / "raw")
+)
 
 
 def _partition_path(endpoint: str, partition_date: date) -> Path:
