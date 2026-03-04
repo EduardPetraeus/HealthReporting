@@ -18,6 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
 from health_platform.utils.logging_config import get_logger
 from health_platform.utils.audit_logger import AuditLogger
+from health_platform.utils.path_resolver import get_project_root
 
 logger = get_logger("run_merge")
 
@@ -25,7 +26,7 @@ logger = get_logger("run_merge")
 def load_config() -> dict:
     """Load environment_config.yaml from the standard config location."""
     config_path = (
-        Path(__file__).resolve().parents[4]
+        get_project_root()
         / "health_environment"
         / "config"
         / "environment_config.yaml"

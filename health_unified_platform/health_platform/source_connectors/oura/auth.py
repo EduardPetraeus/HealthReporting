@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 import time
 import webbrowser
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -15,6 +16,12 @@ from urllib.parse import parse_qs, urlencode, urlparse
 
 import requests
 from dotenv import load_dotenv
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from health_platform.utils.logging_config import get_logger
+
+logger = get_logger("oura.auth")
 
 CONFIG_DIR = Path.home() / ".config" / "health_reporting"
 ENV_FILE = CONFIG_DIR / ".env"
@@ -56,7 +63,7 @@ def _is_expired(tokens: dict) -> bool:
 
 
 def _refresh_tokens(tokens: dict, client_id: str, client_secret: str) -> dict:
-    print("Refreshing Oura access token...")
+    logger.info("Refreshing Oura access token...")
     response = requests.post(
         TOKEN_URL,
         data={
@@ -70,7 +77,7 @@ def _refresh_tokens(tokens: dict, client_id: str, client_secret: str) -> dict:
     new_tokens = response.json()
     new_tokens["expires_at"] = time.time() + new_tokens.get("expires_in", 86400)
     _save_tokens(new_tokens)
-    print("Token refreshed successfully.")
+    logger.info("Token refreshed successfully.")
     return new_tokens
 
 
@@ -106,10 +113,10 @@ def _run_auth_flow(client_id: str, client_secret: str, redirect_uri: str) -> dic
             "scope": OAUTH_SCOPES,
         })
     )
-    print(f"Opening browser for Oura authorization...")
+    logger.info("Opening browser for Oura authorization...")
     webbrowser.open(auth_url)
 
-    print(f"Waiting for OAuth callback on port {CALLBACK_PORT}...")
+    logger.info("Waiting for OAuth callback on port %d...", CALLBACK_PORT)
     server = HTTPServer(("localhost", CALLBACK_PORT), _CallbackHandler)
     server.handle_request()
 
@@ -131,7 +138,7 @@ def _run_auth_flow(client_id: str, client_secret: str, redirect_uri: str) -> dic
     tokens = response.json()
     tokens["expires_at"] = time.time() + tokens.get("expires_in", 86400)
     _save_tokens(tokens)
-    print(f"Authorization successful. Tokens saved to {TOKEN_FILE}")
+    logger.info("Authorization successful. Tokens saved to %s", TOKEN_FILE)
     return tokens
 
 

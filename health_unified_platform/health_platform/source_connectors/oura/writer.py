@@ -12,6 +12,13 @@ from pathlib import Path
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from health_platform.utils.logging_config import get_logger
+
+logger = get_logger("oura.writer")
 
 DATA_LAKE_ROOT = Path(os.getenv("OURA_DATA_LAKE_ROOT", "/Users/Shared/data_lake/oura/raw"))
 
@@ -31,7 +38,7 @@ def _write_partition(df: pd.DataFrame, endpoint: str, partition_date: date) -> N
     path.mkdir(parents=True, exist_ok=True)
     table = pa.Table.from_pandas(df, preserve_index=False)
     pq.write_table(table, path / "data.parquet", compression="snappy")
-    print(f"  Written {len(df):,} rows -> {path}/data.parquet")
+    logger.info("Written %s rows -> %s/data.parquet", f"{len(df):,}", path)
 
 
 def write_records(
@@ -45,7 +52,7 @@ def write_records(
     Each distinct date gets its own parquet file (overwrites on re-run).
     """
     if not records:
-        print(f"  No records for {endpoint}.")
+        logger.warning("No records for %s.", endpoint)
         return
 
     ingested_at = datetime.now(timezone.utc).isoformat()
@@ -67,7 +74,7 @@ def write_records(
 
     missing = df["_partition_date"].isna().sum()
     if missing:
-        print(f"  Warning: {missing} records with unparseable {date_field} skipped.")
+        logger.warning("%d records with unparseable %s skipped.", missing, date_field)
 
     for partition_date, group in df.dropna(subset=["_partition_date"]).groupby("_partition_date"):
         _write_partition(group.drop(columns=["_partition_date"]), endpoint, partition_date)
