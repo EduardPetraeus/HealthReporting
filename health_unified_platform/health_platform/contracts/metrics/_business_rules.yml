@@ -1,0 +1,76 @@
+# Business Rules — Composite scores and alert thresholds
+version: "1.0"
+
+composite_scores:
+  daily_health_score:
+    description: "Overall daily health score combining sleep, readiness, and activity"
+    computation: >
+      SELECT
+        COALESCE(s.day, r.day, a.day) AS day,
+        s.sleep_score,
+        r.readiness_score,
+        a.activity_score,
+        ROUND(
+          (COALESCE(s.sleep_score, 0) * 0.35 +
+           COALESCE(r.readiness_score, 0) * 0.35 +
+           COALESCE(a.activity_score, 0) * 0.30), 1
+        ) AS health_score,
+        CASE
+          WHEN COALESCE(s.sleep_score, 0) * 0.35 + COALESCE(r.readiness_score, 0) * 0.35 + COALESCE(a.activity_score, 0) * 0.30 >= 85 THEN 'excellent'
+          WHEN COALESCE(s.sleep_score, 0) * 0.35 + COALESCE(r.readiness_score, 0) * 0.35 + COALESCE(a.activity_score, 0) * 0.30 >= 70 THEN 'good'
+          WHEN COALESCE(s.sleep_score, 0) * 0.35 + COALESCE(r.readiness_score, 0) * 0.35 + COALESCE(a.activity_score, 0) * 0.30 >= 55 THEN 'fair'
+          ELSE 'poor'
+        END AS health_status
+      FROM silver.daily_sleep s
+      FULL OUTER JOIN silver.daily_readiness r ON s.day = r.day
+      FULL OUTER JOIN silver.daily_activity a ON COALESCE(s.day, r.day) = a.day
+      WHERE COALESCE(s.day, r.day, a.day) BETWEEN :start AND :end
+      ORDER BY day
+    weights:
+      sleep: 0.35
+      readiness: 0.35
+      activity: 0.30
+
+alerts:
+  low_sleep:
+    condition: "sleep_score < 60"
+    severity: "warning"
+    message: "Sleep score below 60 — consider recovery focus today"
+  low_readiness:
+    condition: "readiness_score < 60"
+    severity: "warning"
+    message: "Readiness below 60 — reduce training intensity"
+  high_resting_hr:
+    condition: "resting_hr > baseline + 5"
+    severity: "warning"
+    message: "Resting heart rate elevated above baseline — possible illness or overtraining"
+  low_hrv:
+    condition: "hrv < baseline * 0.7"
+    severity: "warning"
+    message: "HRV significantly below baseline — autonomic stress detected"
+  dehydration_risk:
+    condition: "water_ml < 1500"
+    severity: "info"
+    message: "Water intake below 1.5L — increase hydration"
+
+anomaly_detection:
+  method: "z_score"
+  window_days: 90
+  thresholds:
+    anomaly: 2.0
+    unusual: 1.5
+  template: >
+    WITH stats AS (
+      SELECT AVG({column}) AS mean, STDDEV({column}) AS sd
+      FROM {table}
+      WHERE {date_column} >= :end - INTERVAL '90 days'
+    )
+    SELECT d.{date_column}, d.{column},
+      ROUND((d.{column} - s.mean) / NULLIF(s.sd, 0), 2) AS z_score,
+      CASE
+        WHEN ABS((d.{column} - s.mean) / NULLIF(s.sd, 0)) > 2.0 THEN 'anomaly'
+        WHEN ABS((d.{column} - s.mean) / NULLIF(s.sd, 0)) > 1.5 THEN 'unusual'
+        ELSE 'normal'
+      END AS status
+    FROM {table} d, stats s
+    WHERE d.{date_column} BETWEEN :start AND :end

@@ -1,0 +1,87 @@
+# Semantic Contract Index — AI reads this first for schema pruning
+# Maps question categories to relevant tables and columns
+
+version: "1.0"
+
+metrics:
+  sleep:
+    metrics: [sleep_score, deep_sleep, sleep_efficiency, sleep_latency, rem_sleep, restfulness, timing, total_sleep]
+    source_tables: [silver.daily_sleep]
+    max_columns: 12
+
+  vitals:
+    metrics: [resting_heart_rate, hrv, blood_oxygen, body_temperature, blood_pressure, respiratory_rate]
+    source_tables: [silver.heart_rate, silver.blood_oxygen, silver.daily_spo2, silver.body_temperature, silver.blood_pressure, silver.respiratory_rate]
+    max_columns: 10
+
+  activity:
+    metrics: [steps, active_calories, activity_score, workout_duration, walking_distance, met_minutes]
+    source_tables: [silver.daily_activity, silver.step_count, silver.workout, silver.daily_energy_by_source]
+    max_columns: 12
+
+  recovery:
+    metrics: [readiness_score, stress_level, recovery_index, sleep_balance, hrv_balance]
+    source_tables: [silver.daily_readiness, silver.daily_stress]
+    max_columns: 12
+
+  body:
+    metrics: [weight, fat_mass, muscle_mass, bone_mass, hydration]
+    source_tables: [silver.weight]
+    max_columns: 10
+
+  nutrition:
+    metrics: [calories, protein, carbs, fat, water_intake]
+    source_tables: [silver.daily_meal, silver.water_intake]
+    max_columns: 12
+
+  hygiene:
+    metrics: [toothbrushing_duration, toothbrushing_frequency]
+    source_tables: [silver.toothbrushing]
+    max_columns: 8
+
+  gait:
+    metrics: [walking_speed, step_length, walking_asymmetry, double_support, walking_steadiness]
+    source_tables: [silver.daily_walking_gait]
+    max_columns: 10
+
+  mindfulness:
+    metrics: [mindful_session_duration, mindful_session_count]
+    source_tables: [silver.mindful_session]
+    max_columns: 8
+
+query_routing:
+  sleep_questions:
+    tables: [silver.daily_sleep]
+    max_columns: 12
+    description: "Questions about sleep quality, duration, sleep stages"
+
+  vitals_questions:
+    tables: [silver.heart_rate, silver.daily_spo2, silver.blood_oxygen, silver.body_temperature, silver.blood_pressure]
+    max_columns: 10
+    description: "Questions about heart rate, SpO2, temperature, blood pressure"
+
+  activity_questions:
+    tables: [silver.daily_activity, silver.step_count, silver.workout]
+    max_columns: 12
+    description: "Questions about exercise, steps, calories burned"
+
+  recovery_questions:
+    tables: [silver.daily_readiness, silver.daily_stress]
+    max_columns: 12
+    description: "Questions about readiness, recovery, stress"
+
+  cross_domain:
+    tables: [agent.daily_summaries]
+    max_columns: 12
+    description: "Multi-domain queries spanning sleep, activity, and vitals"
+
+  nutrition_questions:
+    tables: [silver.daily_meal, silver.water_intake]
+    max_columns: 12
+    description: "Questions about food, macros, hydration"
+
+output_format:
+  default: "markdown-table"
+  alternatives: ["markdown-kv", "yaml"]
+  never_use: ["csv"]
+  reasoning: "markdown-table gives 60.7% accuracy vs CSV 44.3% per ImprovingAgents benchmark"

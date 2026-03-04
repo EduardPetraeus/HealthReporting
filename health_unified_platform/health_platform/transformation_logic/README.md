@@ -15,6 +15,14 @@ Used for production runs on Databricks.
 - `gold/` — Gold runner + SQL transforms
 - SQL dialect: Spark SQL
 
+## AI Pipeline (local post-Silver)
+After silver merge, `ingestion_engine.py` triggers daily summary generation:
+- `ai/text_generator.py` — generates natural language summary for the day
+- `ai/embedding_engine.py` — embeds summary with sentence-transformers
+- `ai/baseline_computer.py` — updates rolling baselines in `agent.patient_profile`
+
+These are queried via MCP tools in `mcp/server.py`, not directly.
+
 ## Config lives in
 `health_unified_platform/health_environment/config/`
 - `sources_config.yaml` — DuckDB source mapping

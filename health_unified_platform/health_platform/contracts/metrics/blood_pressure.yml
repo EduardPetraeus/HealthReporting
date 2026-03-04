@@ -1,0 +1,98 @@
+metric:
+  name: blood_pressure
+  display_name: "Blood Pressure"
+  description: >
+    Systolic and diastolic blood pressure readings from Withings BPM Connect, measured in
+    mmHg. Blood pressure is a critical cardiovascular health marker. Optimal is below
+    120/80. Readings are taken as point-in-time measurements, typically morning and evening.
+    Consistent elevation above 130/80 is classified as hypertension by AHA guidelines and
+    warrants medical attention.
+  category: vitals
+  source_table: silver.blood_pressure
+  source_columns: [systolic, diastolic]
+  grain: per_measurement
+  business_key: datetime
+  unit: "mmHg"
+
+  computations:
+    daily_value:
+      sql: >
+        SELECT datetime, systolic, diastolic,
+               CASE
+                 WHEN systolic < 120 AND diastolic < 80 THEN 'optimal'
+                 WHEN systolic BETWEEN 120 AND 129 AND diastolic < 80 THEN 'elevated'
+                 WHEN systolic BETWEEN 130 AND 139 OR diastolic BETWEEN 80 AND 89 THEN 'high_stage1'
+                 WHEN systolic >= 140 OR diastolic >= 90 THEN 'high_stage2'
+                 ELSE 'unknown'
+               END AS category
+        FROM silver.blood_pressure
+        WHERE DATE(datetime) = :date
+        ORDER BY datetime
+    period_average:
+      sql: >
+        SELECT ROUND(AVG(systolic), 1) AS avg_systolic,
+               ROUND(AVG(diastolic), 1) AS avg_diastolic,
+               MIN(systolic) AS min_systolic,
+               MAX(systolic) AS max_systolic,
+               MIN(diastolic) AS min_diastolic,
+               MAX(diastolic) AS max_diastolic,
+               COUNT(*) AS readings
+        FROM silver.blood_pressure
+        WHERE DATE(datetime) BETWEEN :start AND :end
+    trend:
+      sql: >
+        SELECT day, avg_systolic, avg_diastolic,
+          ROUND(AVG(avg_systolic) OVER (ORDER BY day ROWS 6 PRECEDING), 1) AS systolic_7d,
+          ROUND(AVG(avg_diastolic) OVER (ORDER BY day ROWS 6 PRECEDING), 1) AS diastolic_7d
+        FROM (
+          SELECT DATE(datetime) AS day,
+                 ROUND(AVG(systolic), 1) AS avg_systolic,
+                 ROUND(AVG(diastolic), 1) AS avg_diastolic
+          FROM silver.blood_pressure
+          WHERE DATE(datetime) BETWEEN :start AND :end
+          GROUP BY DATE(datetime)
+        ) daily
+        ORDER BY day
+    high_readings:
+      description: "Readings classified as elevated or high"
+      sql: >
+        SELECT datetime, systolic, diastolic,
+               CASE
+                 WHEN systolic >= 140 OR diastolic >= 90 THEN 'high_stage2'
+                 WHEN systolic BETWEEN 130 AND 139 OR diastolic BETWEEN 80 AND 89 THEN 'high_stage1'
+                 WHEN systolic BETWEEN 120 AND 129 THEN 'elevated'
+               END AS category
+        FROM silver.blood_pressure
+        WHERE DATE(datetime) BETWEEN :start AND :end
+          AND (systolic >= 120 OR diastolic >= 80)
+        ORDER BY systolic DESC
+
+  thresholds:
+    optimal: { systolic_max: 119, diastolic_max: 79, label: "Optimal — healthy blood pressure" }
+    elevated: { systolic_min: 120, systolic_max: 129, diastolic_max: 79, label: "Elevated — lifestyle changes recommended" }
+    high_stage1: { systolic_min: 130, systolic_max: 139, diastolic_min: 80, diastolic_max: 89, label: "High Stage 1 — consult healthcare provider" }
+    high_stage2: { systolic_min: 140, diastolic_min: 90, label: "High Stage 2 — medical attention needed" }
+
+  baseline:
+    compute_sql: >
+      SELECT
+        PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY systolic) AS median_systolic,
+        PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY diastolic) AS median_diastolic
+      FROM silver.blood_pressure
+      WHERE DATE(datetime) >= CURRENT_DATE - 90
+
+  related_metrics:
+    - { metric: resting_heart_rate, relationship: "High BP and elevated HR co-occur with cardiovascular stress", lag: 0 }
+    - { metric: weight, relationship: "Weight gain is associated with blood pressure increase", lag: 0 }
+    - { metric: daily_stress, relationship: "Acute stress temporarily raises blood pressure", lag: 0 }
+    - { metric: activity_score, relationship: "Regular exercise lowers resting blood pressure over time", lag: 30 }
+
+  examples:
+    - question: "What's my blood pressure today?"
+      tool: "query_health(metric='blood_pressure', date_range='today')"
+    - question: "What's my average blood pressure this month?"
+      tool: "query_health(metric='blood_pressure', date_range='this_month', computation='period_average')"
+    - question: "Is my blood pressure trending up?"
+      tool: "query_health(metric='blood_pressure', date_range='last_90_days', computation='trend')"
+    - question: "Have I had any high blood pressure readings?"
+      tool: "query_health(metric='blood_pressure', date_range='last_30_days', computation='high_readings')"

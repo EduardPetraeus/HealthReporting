@@ -16,24 +16,28 @@ https://github.com/EduardPetraeus/HealthReporting
 ## architecture
 
 ### design_principles
-- Medallion architecture: bronze → silver → gold
-- Tech-agnostic design (local-first with DuckDB, cloud target is Databricks)
-- Metadata-driven via YAML config files
+- Dual-stack: AI-native locally (DuckDB), traditional medallion in cloud (Databricks)
+- Metadata-driven via YAML config files and semantic contracts
 - Dev/prd separation via `HEALTH_ENV` environment variable
 - Individual files over monolithic scripts
 - snake_case for everything
 - All code (variable names, comments, docstrings, print messages) in English
 - One silver table per data entity — multiple sources can write to the same table
+- AI never writes raw SQL — always via typed MCP tools
 
-### local_stack
+### local_stack (AI-Native 2+2)
 - Runtime: DuckDB (file-based, stored at `/Users/Shared/data_lake/database/`)
 - Storage format: Parquet (hive-partitioned)
 - Data lake root: `/Users/Shared/data_lake/`
 - Orchestration: Python
 - Config: YAML
 - Silver transformation: dbt-duckdb (schema) + run_merge.py (data)
+- Agent Memory: `agent` schema (patient_profile, daily_summaries, health_graph, knowledge_base)
+- Semantic Contracts: YAML metric definitions in `contracts/metrics/`
+- MCP Server: 8 tools (query_health, search_memory, get_profile, etc.)
+- Embeddings: sentence-transformers (all-MiniLM-L6-v2, 384-dim) + DuckDB VSS (HNSW)
 
-### cloud_target
+### cloud_target (Traditional Medallion)
 - Databricks (Unity Catalog)
 - Catalog: `health_dw`
 - Schemas: bronze, silver, gold (DDL exists in `deployment/databricks/`)
@@ -130,17 +134,18 @@ Each merge SQL file contains exactly 3 statements (split on `;`):
 
 ## current_status
 - Bronze ingestion: fully operational for Apple Health (15 types), Oura (8 endpoints), Lifesum (1)
-- Silver layer: 17 tables built and populated locally via dbt + merge scripts
+- Silver layer: 21 tables built and populated locally via dbt + merge scripts, all with COMMENT ON
 - Oura connector: OAuth 2.0, incremental fetch, 8 endpoints live
-- Gold layer: minimal (2 views, Databricks target)
-- Reporting destination: not yet decided
+- Gold layer: cloud-only (Databricks), 3 views. Locally replaced by AI-native data model
+- AI-native data model: COMPLETE — agent memory, semantic contracts, MCP server, embeddings, knowledge graph
+- Agent memory: 91 daily summaries with embeddings, 9 patient profile entries, 67-node knowledge graph
+- CI/CD: GitHub Actions live (bundle validation + deploy)
 
 ---
 
 ## next_steps
-- Add remaining Apple Health silver entities (vo2_max, height, physical_effort)
+- Wire MCP server into Claude Code for live queries
+- Deprecate local Gold views (keep Databricks Gold)
 - Add Withings source connector
-- Design and build gold layer for local DuckDB
-- Decide reporting/visualisation destination (Metabase, Power BI, Streamlit, etc.)
-- Add CI/CD via GitHub Actions
-- Migrate from DuckDB-local to Databricks when ready
+- Bronze → Databricks live data (Autoloader source path setup)
+- Add remaining Apple Health silver entities (vo2_max, height, physical_effort)

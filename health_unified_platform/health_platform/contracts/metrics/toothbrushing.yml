@@ -1,0 +1,123 @@
+metric:
+  name: toothbrushing
+  display_name: "Toothbrushing"
+  description: >
+    Toothbrushing sessions recorded via Apple Health from a connected smart toothbrush.
+    Tracks duration per brushing session in seconds. Dental professionals recommend
+    brushing for at least 120 seconds (2 minutes) twice daily. Consistent brushing
+    duration and frequency are key indicators of oral hygiene compliance. Short sessions
+    below 60 seconds provide inadequate cleaning.
+  category: hygiene
+  source_table: silver.toothbrushing
+  source_column: duration_seconds
+  grain: per_session
+  business_key: timestamp
+  unit: "seconds"
+
+  computations:
+    daily_value:
+      sql: >
+        SELECT DATE(timestamp) AS day,
+               COUNT(*) AS sessions,
+               SUM(duration_seconds) AS total_seconds,
+               ROUND(AVG(duration_seconds), 0) AS avg_session_seconds,
+               MIN(duration_seconds) AS shortest_session,
+               MAX(duration_seconds) AS longest_session
+        FROM silver.toothbrushing
+        WHERE DATE(timestamp) = :date
+        GROUP BY DATE(timestamp)
+    period_average:
+      sql: >
+        SELECT ROUND(AVG(daily_sessions), 1) AS avg_sessions_per_day,
+               ROUND(AVG(avg_duration), 0) AS avg_session_seconds,
+               COUNT(*) AS days_with_brushing
+        FROM (
+          SELECT DATE(timestamp) AS day,
+                 COUNT(*) AS daily_sessions,
+                 AVG(duration_seconds) AS avg_duration
+          FROM silver.toothbrushing
+          WHERE DATE(timestamp) BETWEEN :start AND :end
+          GROUP BY DATE(timestamp)
+        ) daily
+    trend:
+      sql: >
+        SELECT day, daily_sessions, avg_duration,
+          ROUND(AVG(avg_duration) OVER (ORDER BY day ROWS 6 PRECEDING), 0) AS duration_7d,
+          ROUND(AVG(daily_sessions) OVER (ORDER BY day ROWS 6 PRECEDING), 1) AS frequency_7d
+        FROM (
+          SELECT DATE(timestamp) AS day,
+                 COUNT(*) AS daily_sessions,
+                 ROUND(AVG(duration_seconds), 0) AS avg_duration
+          FROM silver.toothbrushing
+          WHERE DATE(timestamp) BETWEEN :start AND :end
+          GROUP BY DATE(timestamp)
+        ) daily
+        ORDER BY day
+    compliance:
+      description: "Days meeting 2x daily brushing at 120s+ per session"
+      sql: >
+        SELECT
+          COUNT(*) FILTER (WHERE daily_sessions >= 2 AND avg_duration >= 120) AS compliant_days,
+          COUNT(*) AS total_days,
+          ROUND(100.0 *
+            COUNT(*) FILTER (WHERE daily_sessions >= 2 AND avg_duration >= 120) /
+            NULLIF(COUNT(*), 0), 1
+          ) AS compliance_pct
+        FROM (
+          SELECT DATE(timestamp) AS day,
+                 COUNT(*) AS daily_sessions,
+                 AVG(duration_seconds) AS avg_duration
+          FROM silver.toothbrushing
+          WHERE DATE(timestamp) BETWEEN :start AND :end
+          GROUP BY DATE(timestamp)
+        ) daily
+    missed_days:
+      description: "Days with no brushing recorded"
+      sql: >
+        SELECT d.day
+        FROM (
+          SELECT generate_series(:start::DATE, :end::DATE, '1 day')::DATE AS day
+        ) d
+        LEFT JOIN (
+          SELECT DISTINCT DATE(timestamp) AS day
+          FROM silver.toothbrushing
+          WHERE DATE(timestamp) BETWEEN :start AND :end
+        ) b ON d.day = b.day
+        WHERE b.day IS NULL
+        ORDER BY d.day
+
+  thresholds:
+    duration:
+      optimal: { min: 120, label: "Good — meets 2-minute recommendation" }
+      short: { min: 60, max: 119, label: "Short — increase brushing time" }
+      very_short: { max: 59, label: "Insufficient — significantly below recommendation" }
+    frequency:
+      optimal: { min: 2, label: "Twice daily — meets dental recommendation" }
+      once: { min: 1, max: 1, label: "Once daily — add second session" }
+      missed: { max: 0, label: "Missed — no brushing recorded" }
+
+  baseline:
+    compute_sql: >
+      SELECT
+        ROUND(AVG(daily_sessions), 1) AS avg_daily_sessions,
+        PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY avg_duration) AS median_duration
+      FROM (
+        SELECT DATE(timestamp) AS day,
+               COUNT(*) AS daily_sessions,
+               AVG(duration_seconds) AS avg_duration
+        FROM silver.toothbrushing
+        WHERE DATE(timestamp) >= CURRENT_DATE - 90
+        GROUP BY DATE(timestamp)
+      ) daily
+
+  related_metrics: []
+
+  examples:
+    - question: "Did I brush my teeth today?"
+      tool: "query_health(metric='toothbrushing', date_range='today')"
+    - question: "How long do I usually brush?"
+      tool: "query_health(metric='toothbrushing', date_range='last_30_days', computation='period_average')"
+    - question: "Am I brushing twice a day consistently?"
+      tool: "query_health(metric='toothbrushing', date_range='last_30_days', computation='compliance')"
+    - question: "How many days did I miss brushing?"
+      tool: "query_health(metric='toothbrushing', date_range='last_30_days', computation='missed_days')"

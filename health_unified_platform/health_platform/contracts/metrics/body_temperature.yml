@@ -1,0 +1,82 @@
+metric:
+  name: body_temperature
+  display_name: "Body Temperature"
+  description: >
+    Body temperature readings from Apple Health in degrees Celsius. Normal range is
+    36.1-37.2C. Temperature is a key vital sign — deviations above 37.5C may indicate
+    fever or infection, while consistently low readings may indicate hypothyroidism.
+    Oura also tracks temperature deviation from personal baseline as a readiness contributor.
+  category: vitals
+  source_table: silver.body_temperature
+  source_column: temperature_degc
+  grain: per_measurement
+  business_key: timestamp
+  unit: "degC"
+
+  computations:
+    daily_value:
+      sql: >
+        SELECT DATE(timestamp) AS day,
+               ROUND(AVG(temperature_degc), 2) AS avg_temp,
+               MIN(temperature_degc) AS min_temp,
+               MAX(temperature_degc) AS max_temp,
+               COUNT(*) AS readings
+        FROM silver.body_temperature
+        WHERE DATE(timestamp) = :date
+        GROUP BY DATE(timestamp)
+    period_average:
+      sql: >
+        SELECT ROUND(AVG(temperature_degc), 2) AS avg_temp,
+               MIN(temperature_degc) AS min_temp,
+               MAX(temperature_degc) AS max_temp,
+               COUNT(*) AS readings
+        FROM silver.body_temperature
+        WHERE DATE(timestamp) BETWEEN :start AND :end
+    trend:
+      sql: >
+        SELECT day, avg_temp,
+          ROUND(AVG(avg_temp) OVER (ORDER BY day ROWS 6 PRECEDING), 2) AS rolling_7d
+        FROM (
+          SELECT DATE(timestamp) AS day,
+                 ROUND(AVG(temperature_degc), 2) AS avg_temp
+          FROM silver.body_temperature
+          WHERE DATE(timestamp) BETWEEN :start AND :end
+          GROUP BY DATE(timestamp)
+        ) daily
+        ORDER BY day
+    elevated_days:
+      description: "Days with average temperature above 37.2C"
+      sql: >
+        SELECT DATE(timestamp) AS day,
+               ROUND(AVG(temperature_degc), 2) AS avg_temp,
+               MAX(temperature_degc) AS peak_temp
+        FROM silver.body_temperature
+        WHERE DATE(timestamp) BETWEEN :start AND :end
+        GROUP BY DATE(timestamp)
+        HAVING AVG(temperature_degc) > 37.2
+        ORDER BY avg_temp DESC
+
+  thresholds:
+    normal: { min: 36.1, max: 37.2, label: "Normal — healthy body temperature" }
+    low_grade_fever: { min: 37.3, max: 38.0, label: "Low-grade fever — monitor symptoms" }
+    fever: { min: 38.1, label: "Fever — possible infection, rest recommended" }
+    hypothermia_risk: { max: 36.0, label: "Below normal — monitor for hypothermia" }
+
+  baseline:
+    compute_sql: >
+      SELECT PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY temperature_degc) AS median_temp
+      FROM silver.body_temperature
+      WHERE DATE(timestamp) >= CURRENT_DATE - 90
+
+  related_metrics:
+    - { metric: readiness_score, relationship: "Temperature deviation is a readiness contributor", lag: 0 }
+    - { metric: resting_heart_rate, relationship: "Fever raises resting heart rate", lag: 0 }
+    - { metric: sleep_score, relationship: "Elevated temperature disrupts sleep quality", lag: 0 }
+
+  examples:
+    - question: "What's my body temperature today?"
+      tool: "query_health(metric='body_temperature', date_range='today')"
+    - question: "Have I had any fever days recently?"
+      tool: "query_health(metric='body_temperature', date_range='last_30_days', computation='elevated_days')"
+    - question: "What's my temperature trend?"
+      tool: "query_health(metric='body_temperature', date_range='last_90_days', computation='trend')"

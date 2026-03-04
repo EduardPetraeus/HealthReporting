@@ -1,0 +1,93 @@
+metric:
+  name: water_intake
+  display_name: "Water Intake"
+  description: >
+    Daily water intake in milliliters tracked via Lifesum. Adequate hydration supports
+    cognitive function, cardiovascular health, temperature regulation, and kidney function.
+    The European Food Safety Authority recommends 2.5L/day for men and 2.0L/day for women
+    from all sources. Individual needs increase with exercise, heat exposure, and altitude.
+    Entries are logged per drink and aggregated to daily totals.
+  category: nutrition
+  source_table: silver.water_intake
+  source_column: water_ml
+  grain: per_entry
+  aggregate_to: daily
+  business_key: timestamp
+  unit: "ml"
+
+  computations:
+    daily_value:
+      sql: >
+        SELECT DATE(timestamp) AS day,
+               SUM(water_ml) AS total_ml,
+               ROUND(SUM(water_ml) / 1000.0, 1) AS total_liters,
+               COUNT(*) AS entries
+        FROM silver.water_intake
+        WHERE DATE(timestamp) = :date
+        GROUP BY DATE(timestamp)
+    period_average:
+      sql: >
+        SELECT ROUND(AVG(daily_ml), 0) AS avg_ml,
+               MIN(daily_ml) AS min_ml,
+               MAX(daily_ml) AS max_ml,
+               COUNT(*) AS days_logged
+        FROM (
+          SELECT DATE(timestamp) AS day, SUM(water_ml) AS daily_ml
+          FROM silver.water_intake
+          WHERE DATE(timestamp) BETWEEN :start AND :end
+          GROUP BY DATE(timestamp)
+        ) daily
+    trend:
+      sql: >
+        SELECT day, daily_ml,
+          ROUND(AVG(daily_ml) OVER (ORDER BY day ROWS 6 PRECEDING), 0) AS rolling_7d
+        FROM (
+          SELECT DATE(timestamp) AS day, SUM(water_ml) AS daily_ml
+          FROM silver.water_intake
+          WHERE DATE(timestamp) BETWEEN :start AND :end
+          GROUP BY DATE(timestamp)
+        ) daily
+        ORDER BY day
+    low_days:
+      description: "Days where water intake was below 1500ml"
+      sql: >
+        SELECT day, daily_ml
+        FROM (
+          SELECT DATE(timestamp) AS day, SUM(water_ml) AS daily_ml
+          FROM silver.water_intake
+          WHERE DATE(timestamp) BETWEEN :start AND :end
+          GROUP BY DATE(timestamp)
+        ) daily
+        WHERE daily_ml < 1500
+        ORDER BY daily_ml ASC
+
+  thresholds:
+    optimal: { min: 2000, label: "Excellent — well hydrated" }
+    good: { min: 1500, max: 1999, label: "Good — adequate hydration" }
+    poor: { max: 1499, label: "Needs attention — increase water intake" }
+
+  baseline:
+    compute_sql: >
+      SELECT PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY daily_ml) AS median_water_ml
+      FROM (
+        SELECT DATE(timestamp) AS day, SUM(water_ml) AS daily_ml
+        FROM silver.water_intake
+        WHERE DATE(timestamp) >= CURRENT_DATE - 90
+        GROUP BY DATE(timestamp)
+      ) daily
+
+  related_metrics:
+    - { metric: calories, relationship: "Water intake often tracked alongside food logging", lag: 0 }
+    - { metric: workout, relationship: "Exercise increases hydration needs", lag: 0 }
+    - { metric: resting_heart_rate, relationship: "Dehydration can elevate resting heart rate", lag: 0 }
+    - { metric: weight, relationship: "Hydration status affects daily weight fluctuations", lag: 0 }
+
+  examples:
+    - question: "How much water did I drink today?"
+      tool: "query_health(metric='water_intake', date_range='today')"
+    - question: "Am I drinking enough water on average?"
+      tool: "query_health(metric='water_intake', date_range='last_30_days', computation='period_average')"
+    - question: "How many days was I dehydrated this month?"
+      tool: "query_health(metric='water_intake', date_range='this_month', computation='low_days')"
+    - question: "Is my water intake improving?"
+      tool: "query_health(metric='water_intake', date_range='last_90_days', computation='trend')"

@@ -145,4 +145,29 @@ Data landscape after deployment:
 - `health_dw.silver`: 11 silver tables (old pipeline — still has data)
 - `health-platform-dev`: new catalog — audit schema live, bronze/silver/gold empty (no autoloader yet)
 
-*Last updated: 2026-02-28*
+---
+
+## AI-Native Data Model Learnings (2026-03-04)
+
+### Parallel subagent dispatch works — but column names diverge
+Dispatched 4 subagents in parallel (SQL DDL, YAML contracts, AI modules, MCP server). All completed successfully, but the AI modules used different column names than the DDL (e.g., `key` vs `profile_key`, `metric_a` vs `source_metric`, `generated_at` vs `created_at`). **Fix**: after parallel dispatch, always diff generated code against DDL schemas. Budget 30-60 min for column name alignment.
+
+### SQL file parsing: semicolons inside quoted strings
+`sql.split(";")` breaks when SQL strings contain semicolons (e.g., `'Highly individual; trend matters more than absolute value'`). Required a character-level state machine parser (`split_sql_statements()`) that tracks `in_string` state. **Lesson**: never use naive semicolon splitting for SQL files with descriptive text.
+
+### Python 3.9 vs 3.12 for modern packages
+The `mcp` package requires Python 3.10+. Project venv is Python 3.9. Created separate `.venv-ai/` with Python 3.12 (`/opt/homebrew/bin/python3.12`) for AI-specific dependencies. **Lesson**: pin Python version in pyproject.toml and upgrade project venv when adding modern dependencies.
+
+### DuckDB HNSW index persistence
+`CREATE INDEX ... USING HNSW` fails on persistent databases with: `HNSW indexes can only be created in in-memory databases`. **Fix**: `SET hnsw_enable_experimental_persistence = true` before creating the index. This is an experimental feature in DuckDB vss extension — monitor for stability.
+
+### Template-based text generation vs LLM
+Chose template-based generation (`text_generator.py`) over LLM API calls for daily summaries. Benefits: deterministic, zero cost, no latency, no API dependency. The generated text is good enough for embedding and semantic search. **Lesson**: for structured data → text, templates are often better than LLMs.
+
+### Vector search quality with general-purpose embeddings
+all-MiniLM-L6-v2 (general-purpose, 384-dim) produces semantically meaningful results for health summaries. "Excellent recovery day" finds days with high sleep + readiness scores. "High stress levels" finds the anomaly day with 20,700 stress minutes. Domain-specific fine-tuning may not be necessary for this use case.
+
+### Semantic Contracts as "Virtual Gold"
+YAML computation recipes effectively replace materialized Gold views at N=1 scale. Adding a new metric requires only a YAML file, not DDL changes. The query_builder reads YAML, substitutes parameters, and executes SQL — same result as a Gold view, but on-demand. **Caveat**: requires well-maintained YAML files; no automatic schema drift detection yet.
+
+*Last updated: 2026-03-04*

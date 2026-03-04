@@ -1,0 +1,97 @@
+metric:
+  name: protein
+  display_name: "Daily Protein Intake"
+  description: >
+    Daily protein intake in grams tracked via Lifesum food logging. Protein is essential
+    for muscle repair, immune function, and satiety. Current sports nutrition guidelines
+    recommend 1.6-2.2g per kg bodyweight for active individuals. Higher intake is especially
+    important during caloric deficit to preserve lean mass. Logged per meal and aggregated
+    to daily totals.
+  category: nutrition
+  source_table: silver.daily_meal
+  source_column: protein
+  grain: per_meal
+  aggregate_to: daily
+  business_key: date
+  unit: "grams"
+
+  computations:
+    daily_value:
+      sql: >
+        SELECT date, SUM(protein) AS total_protein,
+               SUM(calories) AS total_calories,
+               COUNT(*) AS meals_logged,
+               ROUND(SUM(protein) * 4.0 / NULLIF(SUM(calories), 0) * 100, 1) AS protein_cal_pct
+        FROM silver.daily_meal
+        WHERE date = :date
+        GROUP BY date
+    period_average:
+      sql: >
+        SELECT ROUND(AVG(daily_protein), 1) AS avg_protein,
+               MIN(daily_protein) AS min_protein,
+               MAX(daily_protein) AS max_protein,
+               COUNT(*) AS days_logged
+        FROM (
+          SELECT date, SUM(protein) AS daily_protein
+          FROM silver.daily_meal
+          WHERE date BETWEEN :start AND :end
+          GROUP BY date
+        ) daily
+    trend:
+      sql: >
+        SELECT date, daily_protein,
+          ROUND(AVG(daily_protein) OVER (ORDER BY date ROWS 6 PRECEDING), 1) AS rolling_7d
+        FROM (
+          SELECT date, SUM(protein) AS daily_protein
+          FROM silver.daily_meal
+          WHERE date BETWEEN :start AND :end
+          GROUP BY date
+        ) daily
+        ORDER BY date
+    per_kg_bodyweight:
+      description: "Protein intake relative to bodyweight"
+      sql: >
+        SELECT m.date, SUM(m.protein) AS total_protein,
+               w.weight_kg,
+               ROUND(SUM(m.protein) / NULLIF(w.weight_kg, 0), 2) AS g_per_kg
+        FROM silver.daily_meal m
+        LEFT JOIN (
+          SELECT DATE(datetime) AS date, weight_kg,
+                 ROW_NUMBER() OVER (PARTITION BY DATE(datetime) ORDER BY datetime DESC) AS rn
+          FROM silver.weight
+        ) w ON m.date = w.date AND w.rn = 1
+        WHERE m.date BETWEEN :start AND :end
+        GROUP BY m.date, w.weight_kg
+        ORDER BY m.date
+
+  thresholds:
+    optimal: { min: 130, label: "Excellent — supports muscle growth and recovery (1.6g+/kg for 80kg)" }
+    good: { min: 100, max: 129, label: "Good — adequate for moderate activity" }
+    low: { min: 60, max: 99, label: "Low — may not support recovery needs" }
+    very_low: { max: 59, label: "Very low — possible under-logging or insufficient intake" }
+
+  baseline:
+    compute_sql: >
+      SELECT PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY daily_protein) AS median_protein
+      FROM (
+        SELECT date, SUM(protein) AS daily_protein
+        FROM silver.daily_meal
+        WHERE date >= CURRENT_DATE - 90
+        GROUP BY date
+      ) daily
+
+  related_metrics:
+    - { metric: calories, relationship: "Protein contributes to total caloric intake (4 kcal/g)", lag: 0 }
+    - { metric: weight, relationship: "Adequate protein preserves muscle mass during weight loss", lag: 14 }
+    - { metric: workout, relationship: "Post-workout protein intake supports recovery", lag: 0 }
+    - { metric: readiness_score, relationship: "Chronic protein deficit may impair recovery", lag: 1 }
+
+  examples:
+    - question: "How much protein did I eat today?"
+      tool: "query_health(metric='protein', date_range='today')"
+    - question: "Am I hitting my protein target?"
+      tool: "query_health(metric='protein', date_range='last_7_days', computation='per_kg_bodyweight')"
+    - question: "What's my average protein intake this month?"
+      tool: "query_health(metric='protein', date_range='this_month', computation='period_average')"
+    - question: "Is my protein intake trending up?"
+      tool: "query_health(metric='protein', date_range='last_90_days', computation='trend')"

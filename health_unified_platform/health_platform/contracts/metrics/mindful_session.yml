@@ -1,0 +1,105 @@
+metric:
+  name: mindful_session
+  display_name: "Mindfulness Session"
+  description: >
+    Meditation and mindfulness sessions recorded in Apple Health. Each session captures
+    duration in seconds. Regular mindfulness practice is associated with reduced stress,
+    improved HRV, better sleep quality, and enhanced emotional regulation. Consistency
+    of practice (frequency) is more important than individual session length for
+    long-term benefits.
+  category: mindfulness
+  source_table: silver.mindful_session
+  source_column: duration_seconds
+  grain: per_session
+  business_key: timestamp
+  unit: "seconds"
+
+  computations:
+    daily_value:
+      sql: >
+        SELECT DATE(timestamp) AS day,
+               COUNT(*) AS sessions,
+               SUM(duration_seconds) AS total_seconds,
+               ROUND(SUM(duration_seconds) / 60.0, 1) AS total_minutes,
+               ROUND(AVG(duration_seconds) / 60.0, 1) AS avg_session_minutes
+        FROM silver.mindful_session
+        WHERE DATE(timestamp) = :date
+        GROUP BY DATE(timestamp)
+    period_average:
+      sql: >
+        SELECT COUNT(*) AS total_sessions,
+               COUNT(DISTINCT DATE(timestamp)) AS practice_days,
+               ROUND(SUM(duration_seconds) / 3600.0, 1) AS total_hours,
+               ROUND(AVG(duration_seconds) / 60.0, 1) AS avg_session_minutes,
+               COUNT(DISTINCT DATE(timestamp))::NUMERIC /
+                 NULLIF((:end::DATE - :start::DATE + 1), 0) * 100 AS consistency_pct
+        FROM silver.mindful_session
+        WHERE DATE(timestamp) BETWEEN :start AND :end
+    trend:
+      sql: >
+        SELECT week,
+               sessions,
+               total_minutes,
+               practice_days
+        FROM (
+          SELECT DATE_TRUNC('week', timestamp) AS week,
+                 COUNT(*) AS sessions,
+                 ROUND(SUM(duration_seconds) / 60.0, 1) AS total_minutes,
+                 COUNT(DISTINCT DATE(timestamp)) AS practice_days
+          FROM silver.mindful_session
+          WHERE DATE(timestamp) BETWEEN :start AND :end
+          GROUP BY 1
+        ) weekly
+        ORDER BY week
+    streak:
+      description: "Current consecutive days of practice"
+      sql: >
+        WITH daily_practice AS (
+          SELECT DISTINCT DATE(timestamp) AS day
+          FROM silver.mindful_session
+          WHERE DATE(timestamp) <= :date
+        ),
+        with_gaps AS (
+          SELECT day,
+                 day - ROW_NUMBER() OVER (ORDER BY day)::INT * INTERVAL '1 day' AS grp
+          FROM daily_practice
+        )
+        SELECT COUNT(*) AS streak_days,
+               MIN(day) AS streak_start,
+               MAX(day) AS streak_end
+        FROM with_gaps
+        WHERE grp = (SELECT grp FROM with_gaps WHERE day = :date)
+
+  thresholds:
+    frequency:
+      daily: { min: 1, label: "Daily practice — excellent consistency" }
+      regular: { min: 4, max: 6, label: "Regular — 4-6 days per week" }
+      occasional: { min: 1, max: 3, label: "Occasional — consider increasing frequency" }
+    session_length:
+      long: { min: 1200, label: "Deep session (20+ min)" }
+      moderate: { min: 600, max: 1199, label: "Standard session (10-19 min)" }
+      short: { max: 599, label: "Brief session (<10 min)" }
+
+  baseline:
+    compute_sql: >
+      SELECT
+        COUNT(DISTINCT DATE(timestamp)) AS practice_days_90d,
+        PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY duration_seconds / 60.0) AS median_session_minutes
+      FROM silver.mindful_session
+      WHERE DATE(timestamp) >= CURRENT_DATE - 90
+
+  related_metrics:
+    - { metric: daily_stress, relationship: "Regular mindfulness reduces daily stress levels", lag: 0 }
+    - { metric: sleep_score, relationship: "Mindfulness practice improves sleep quality", lag: 0 }
+    - { metric: resting_heart_rate, relationship: "Consistent meditation lowers resting HR over time", lag: 14 }
+    - { metric: readiness_score, relationship: "Stress reduction from mindfulness improves readiness", lag: 1 }
+
+  examples:
+    - question: "Did I meditate today?"
+      tool: "query_health(metric='mindful_session', date_range='today')"
+    - question: "How consistent is my meditation practice?"
+      tool: "query_health(metric='mindful_session', date_range='last_30_days', computation='period_average')"
+    - question: "What's my current meditation streak?"
+      tool: "query_health(metric='mindful_session', date_range='today', computation='streak')"
+    - question: "Am I meditating more or less over time?"
+      tool: "query_health(metric='mindful_session', date_range='last_90_days', computation='trend')"

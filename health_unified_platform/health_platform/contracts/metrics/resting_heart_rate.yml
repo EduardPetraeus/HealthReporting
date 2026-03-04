@@ -1,0 +1,96 @@
+metric:
+  name: resting_heart_rate
+  display_name: "Resting Heart Rate"
+  description: >
+    Heart rate measurements from Apple Health and Oura, stored as individual BPM readings.
+    Resting heart rate (RHR) is derived by taking the minimum BPM during sleep or rest
+    periods. Lower RHR generally indicates better cardiovascular fitness. A sudden increase
+    of 5+ BPM above personal baseline may signal illness, overtraining, or stress. Athletic
+    individuals typically range 40-55 BPM.
+  category: vitals
+  source_table: silver.heart_rate
+  source_column: bpm
+  grain: per_measurement
+  business_key: timestamp
+  unit: "bpm"
+
+  computations:
+    daily_value:
+      description: "Extract daily resting HR as the minimum BPM for the day"
+      sql: >
+        SELECT DATE(timestamp) AS day,
+               MIN(bpm) AS resting_hr,
+               ROUND(AVG(bpm), 1) AS avg_hr,
+               MAX(bpm) AS max_hr,
+               COUNT(*) AS measurements
+        FROM silver.heart_rate
+        WHERE DATE(timestamp) = :date
+        GROUP BY DATE(timestamp)
+    period_average:
+      description: "Average daily resting HR over a period"
+      sql: >
+        SELECT ROUND(AVG(daily_min), 1) AS avg_resting_hr,
+               MIN(daily_min) AS lowest_resting_hr,
+               MAX(daily_min) AS highest_resting_hr,
+               COUNT(*) AS days
+        FROM (
+          SELECT DATE(timestamp) AS day, MIN(bpm) AS daily_min
+          FROM silver.heart_rate
+          WHERE DATE(timestamp) BETWEEN :start AND :end
+          GROUP BY DATE(timestamp)
+        ) daily
+    trend:
+      description: "Daily resting HR with 7-day rolling average"
+      sql: >
+        SELECT day, resting_hr,
+          ROUND(AVG(resting_hr) OVER (ORDER BY day ROWS 6 PRECEDING), 1) AS rolling_7d
+        FROM (
+          SELECT DATE(timestamp) AS day, MIN(bpm) AS resting_hr
+          FROM silver.heart_rate
+          WHERE DATE(timestamp) BETWEEN :start AND :end
+          GROUP BY DATE(timestamp)
+        ) daily
+        ORDER BY day
+    intraday:
+      description: "Hourly HR profile for a single day"
+      sql: >
+        SELECT DATE_TRUNC('hour', timestamp) AS hour,
+               MIN(bpm) AS min_hr,
+               ROUND(AVG(bpm), 1) AS avg_hr,
+               MAX(bpm) AS max_hr,
+               COUNT(*) AS readings
+        FROM silver.heart_rate
+        WHERE DATE(timestamp) = :date
+        GROUP BY 1 ORDER BY 1
+
+  thresholds:
+    athletic: { min: 40, max: 55, label: "Athletic — excellent cardiovascular fitness" }
+    normal: { min: 56, max: 70, label: "Normal — healthy range" }
+    elevated: { min: 71, max: 85, label: "Elevated — monitor for trends" }
+    high: { min: 86, label: "High — consult healthcare provider" }
+
+  baseline:
+    compute_sql: >
+      SELECT PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY daily_min) AS median_resting_hr
+      FROM (
+        SELECT DATE(timestamp) AS day, MIN(bpm) AS daily_min
+        FROM silver.heart_rate
+        WHERE DATE(timestamp) >= CURRENT_DATE - 90
+        GROUP BY DATE(timestamp)
+      ) daily
+
+  related_metrics:
+    - { metric: sleep_score, relationship: "Poor sleep elevates next-day resting HR", lag: 0 }
+    - { metric: readiness_score, relationship: "Elevated RHR is a key contributor to low readiness", lag: 0 }
+    - { metric: daily_stress, relationship: "Chronic stress raises resting heart rate baseline", lag: 0 }
+    - { metric: workout, relationship: "Intense exercise temporarily elevates RHR for 24-48h", lag: 1 }
+
+  examples:
+    - question: "What's my resting heart rate today?"
+      tool: "query_health(metric='resting_heart_rate', date_range='today')"
+    - question: "Is my resting heart rate trending up?"
+      tool: "query_health(metric='resting_heart_rate', date_range='last_90_days', computation='trend')"
+    - question: "What's my average resting HR this week?"
+      tool: "query_health(metric='resting_heart_rate', date_range='last_7_days', computation='period_average')"
+    - question: "Show my heart rate throughout the day"
+      tool: "query_health(metric='resting_heart_rate', date_range='today', computation='intraday')"

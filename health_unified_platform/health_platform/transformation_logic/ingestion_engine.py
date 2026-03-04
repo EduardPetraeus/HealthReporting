@@ -89,6 +89,20 @@ def run_ingestion():
                                 status="error", error_message=str(e))
 
         con.close()
+
+    # Post-ingestion: trigger daily summary generation for today
+    try:
+        from health_platform.ai.text_generator import generate_summary_for_pipeline
+        from datetime import date
+
+        con = duckdb.connect(str(db_file))
+        summary = generate_summary_for_pipeline(con, date.today())
+        if summary:
+            logger.info(f"Daily summary generated ({len(summary)} chars)")
+        con.close()
+    except Exception as e:
+        logger.warning(f"Daily summary generation skipped: {e}")
+
     logger.info("Ingestion complete")
 
 
