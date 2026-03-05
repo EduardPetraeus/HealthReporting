@@ -105,11 +105,11 @@ class TestFormatter:
         """Format dict as markdown key-value."""
         from health_platform.mcp.formatter import format_as_markdown_kv
 
-        data = {"name": "John", "age": 38}
+        data = {"name": "John", "age": 45}
         result = format_as_markdown_kv(data)
 
         assert "name" in result
-        assert "38" in result
+        assert "45" in result
 
     def test_format_error(self):
         """Error formatting includes message."""
@@ -215,7 +215,7 @@ class TestHealthToolsIntegration:
         db.execute("""
             INSERT INTO agent.patient_profile
             (profile_key, profile_value, numeric_value, category, description)
-            VALUES ('age', '38', 38, 'demographics', 'Patient age')
+            VALUES ('age', '45', 45, 'demographics', 'Patient age')
         """)
 
         from health_platform.mcp.health_tools import HealthTools
@@ -223,7 +223,7 @@ class TestHealthToolsIntegration:
         tools = HealthTools(db)
         result = tools.get_profile()
 
-        assert "38" in result
+        assert "45" in result
 
     def test_run_custom_query_readonly(self, seeded_db):
         """Custom query rejects write operations."""

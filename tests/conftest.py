@@ -176,7 +176,7 @@ def seeded_db(memory_db):
     """)
     con.execute("""
         INSERT INTO silver.personal_info (age, weight_kg, height_m, biological_sex, email)
-        VALUES (38, 82.5, 1.83, 'male', 'test@example.com')
+        VALUES (45, 75.0, 1.78, 'male', 'test@example.com')
     """)
 
     yield con
