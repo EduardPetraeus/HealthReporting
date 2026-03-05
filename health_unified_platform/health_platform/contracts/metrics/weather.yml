@@ -1,0 +1,68 @@
+metric:
+  name: weather
+  display_name: "Daily Weather"
+  description: >
+    Daily weather conditions from Open-Meteo for Copenhagen. Includes temperature
+    extremes, precipitation, wind speed, and UV index. Environmental data used to
+    correlate outdoor conditions with sleep quality, activity levels, and mood.
+    Temperature and UV index are key modulators of circadian rhythm and vitamin D synthesis.
+  category: environment
+  source_table: silver.daily_weather
+  source_column: temp_max_c
+  grain: daily
+  business_key: day
+  unit: "various (C, mm, km/h, index)"
+
+  computations:
+    daily_value:
+      sql: >
+        SELECT day, temp_max_c, temp_min_c, precipitation_mm,
+               wind_speed_max_kmh, uv_index_max
+        FROM silver.daily_weather
+        WHERE day BETWEEN :start AND :end
+        ORDER BY day
+    period_average:
+      sql: >
+        SELECT ROUND(AVG(temp_max_c), 1) AS avg_temp_max,
+               ROUND(AVG(temp_min_c), 1) AS avg_temp_min,
+               ROUND(AVG(precipitation_mm), 1) AS avg_precipitation,
+               ROUND(AVG(wind_speed_max_kmh), 1) AS avg_wind_speed,
+               ROUND(AVG(uv_index_max), 1) AS avg_uv_index,
+               COUNT(*) AS days
+        FROM silver.daily_weather
+        WHERE day BETWEEN :start AND :end
+    trend:
+      sql: >
+        SELECT day, temp_max_c,
+          ROUND(AVG(temp_max_c) OVER (ORDER BY day ROWS 6 PRECEDING), 1) AS rolling_7d_temp
+        FROM silver.daily_weather
+        WHERE day BETWEEN :start AND :end
+        ORDER BY day
+
+  thresholds:
+    hot: { min: 30, label: "Hot (heat stress risk)" }
+    warm: { min: 20, max: 29, label: "Warm (comfortable outdoor)" }
+    mild: { min: 10, max: 19, label: "Mild" }
+    cool: { min: 0, max: 9, label: "Cool" }
+    cold: { max: -1, label: "Cold (exposure risk)" }
+
+  baseline:
+    compute_sql: >
+      SELECT ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY temp_max_c), 1) AS median_temp_max
+      FROM silver.daily_weather
+      WHERE day >= CURRENT_DATE - 90
+
+  related_metrics:
+    - { metric: sleep_score, relationship: "Extreme temperatures (hot/cold) impair sleep quality", lag: 0 }
+    - { metric: steps, relationship: "Rain and extreme cold reduce outdoor activity", lag: 0 }
+    - { metric: uv_index_max, relationship: "UV exposure drives vitamin D synthesis and circadian entrainment", lag: 0 }
+
+  examples:
+    - question: "What was the weather like yesterday?"
+      tool: "query_health(metric='weather', date_range='yesterday')"
+    - question: "How cold has it been this week?"
+      tool: "query_health(metric='weather', date_range='this_week', computation='period_average')"
+    - question: "Is the temperature trending up or down?"
+      tool: "query_health(metric='weather', date_range='last_30_days', computation='trend')"
+    - question: "Did it rain a lot this month?"
+      tool: "query_health(metric='weather', date_range='this_month', computation='daily_value')"

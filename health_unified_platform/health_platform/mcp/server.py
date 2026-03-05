@@ -33,10 +33,10 @@ def get_db_path() -> str:
     return str(Path.home() / "health_dw" / f"health_dw_{env}.db")
 
 
-def get_tools() -> HealthTools:
+def get_tools(read_only: bool = True) -> HealthTools:
     """Get or create HealthTools instance."""
     db_path = get_db_path()
-    con = duckdb.connect(db_path, read_only=True)
+    con = duckdb.connect(db_path, read_only=read_only)
     return HealthTools(con)
 
 
@@ -127,7 +127,7 @@ def record_insight(title: str, content: str, insight_type: str = "pattern", conf
         confidence: Confidence score 0-1 (default 0.7)
         tags: Comma-separated tags
     """
-    tools = get_tools()
+    tools = get_tools(read_only=False)
     try:
         tag_list = [t.strip() for t in tags.split(",") if t.strip()] if tags else []
         return tools.record_insight(title, content, insight_type, confidence, tag_list)

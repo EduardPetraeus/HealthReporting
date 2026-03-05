@@ -1,0 +1,186 @@
+"""
+OAuth 2.0 Authorization Code flow for the Strava API.
+Handles first-time browser auth, token storage and automatic refresh.
+
+Strava API reference: https://developers.strava.com/
+"""
+
+from __future__ import annotations
+
+import json
+import subprocess
+import time
+import webbrowser
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from pathlib import Path
+from urllib.parse import parse_qs, urlencode, urlparse
+
+import requests
+
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from health_platform.utils.logging_config import get_logger
+
+logger = get_logger("strava.auth")
+
+CONFIG_DIR = Path.home() / ".config" / "health_reporting"
+TOKEN_FILE = CONFIG_DIR / "strava_tokens.json"
+
+AUTHORIZE_URL = "https://www.strava.com/oauth/authorize"
+TOKEN_URL = "https://www.strava.com/oauth/token"
+CALLBACK_PORT = 8082
+OAUTH_SCOPES = "read,activity:read_all"
+
+
+def _load_credentials() -> tuple[str, str, str]:
+    """Load client_id and client_secret from 1Password CLI."""
+    try:
+        client_id = subprocess.run(
+            ["op", "read", "op://Health/Strava API/client_id"],
+            capture_output=True, text=True, check=True,
+        ).stdout.strip()
+        client_secret = subprocess.run(
+            ["op", "read", "op://Health/Strava API/client_secret"],
+            capture_output=True, text=True, check=True,
+        ).stdout.strip()
+    except (subprocess.CalledProcessError, FileNotFoundError) as exc:
+        raise ValueError(
+            "Failed to load Strava credentials from 1Password CLI. "
+            "Ensure `op` is installed and signed in."
+        ) from exc
+
+    redirect_uri = f"http://localhost:{CALLBACK_PORT}/callback"
+    if not client_id or not client_secret:
+        raise ValueError("Missing Strava client_id or client_secret in 1Password.")
+    return client_id, client_secret, redirect_uri
+
+
+def _save_tokens(tokens: dict) -> None:
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    TOKEN_FILE.write_text(json.dumps(tokens, indent=2))
+
+
+def _load_tokens() -> dict | None:
+    if TOKEN_FILE.exists():
+        return json.loads(TOKEN_FILE.read_text())
+    return None
+
+
+def _is_expired(tokens: dict) -> bool:
+    """Returns True if the access token expires within 60 seconds."""
+    return time.time() >= tokens.get("expires_at", 0) - 60
+
+
+def _refresh_tokens(tokens: dict, client_id: str, client_secret: str) -> dict:
+    """Refresh the access token using the refresh token."""
+    logger.info("Refreshing Strava access token...")
+    response = requests.post(
+        TOKEN_URL,
+        data={
+            "grant_type": "refresh_token",
+            "refresh_token": tokens["refresh_token"],
+            "client_id": client_id,
+            "client_secret": client_secret,
+        },
+    )
+    response.raise_for_status()
+    new_tokens = response.json()
+    new_tokens["expires_at"] = new_tokens.get("expires_at", time.time() + 21600)
+    _save_tokens(new_tokens)
+    logger.info("Token refreshed successfully.")
+    return new_tokens
+
+
+class _CallbackHandler(BaseHTTPRequestHandler):
+    """Minimal HTTP handler that captures the OAuth authorization code."""
+
+    auth_code: str | None = None
+
+    def do_GET(self) -> None:
+        params = parse_qs(urlparse(self.path).query)
+        if "code" in params:
+            _CallbackHandler.auth_code = params["code"][0]
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(b"Authorization successful. You can close this tab.")
+        else:
+            self.send_response(400)
+            self.end_headers()
+            self.wfile.write(b"Missing authorization code.")
+
+    def log_message(self, format: str, *args) -> None:  # noqa: A002
+        pass  # suppress request logs
+
+
+def _run_auth_flow(client_id: str, client_secret: str, redirect_uri: str) -> dict:
+    """Opens the browser for OAuth login and exchanges the code for tokens."""
+    auth_url = (
+        f"{AUTHORIZE_URL}?"
+        + urlencode({
+            "client_id": client_id,
+            "redirect_uri": redirect_uri,
+            "response_type": "code",
+            "scope": OAUTH_SCOPES,
+            "approval_prompt": "auto",
+        })
+    )
+    logger.info("Opening browser for Strava authorization...")
+    webbrowser.open(auth_url)
+
+    logger.info("Waiting for OAuth callback on port %d...", CALLBACK_PORT)
+    server = HTTPServer(("localhost", CALLBACK_PORT), _CallbackHandler)
+    server.handle_request()
+
+    code = _CallbackHandler.auth_code
+    if not code:
+        raise RuntimeError("No authorization code received in callback.")
+
+    response = requests.post(
+        TOKEN_URL,
+        data={
+            "grant_type": "authorization_code",
+            "code": code,
+            "client_id": client_id,
+            "client_secret": client_secret,
+        },
+    )
+    response.raise_for_status()
+    tokens = response.json()
+    tokens["expires_at"] = tokens.get("expires_at", time.time() + 21600)
+    _save_tokens(tokens)
+    logger.info("Authorization successful. Tokens saved to %s", TOKEN_FILE)
+    return tokens
+
+
+def get_access_token() -> str:
+    """
+    Returns a valid Strava access token.
+    Runs the browser OAuth flow on first use.
+    Auto-refreshes when the token is near expiry.
+    """
+    client_id, client_secret, redirect_uri = _load_credentials()
+    tokens = _load_tokens()
+
+    if tokens is None:
+        tokens = _run_auth_flow(client_id, client_secret, redirect_uri)
+    elif _is_expired(tokens):
+        tokens = _refresh_tokens(tokens, client_id, client_secret)
+
+    return tokens["access_token"]
+
+
+def build_authorize_url() -> str:
+    """Build the OAuth authorization URL for testing or manual flows."""
+    client_id, _, redirect_uri = _load_credentials()
+    return (
+        f"{AUTHORIZE_URL}?"
+        + urlencode({
+            "client_id": client_id,
+            "redirect_uri": redirect_uri,
+            "response_type": "code",
+            "scope": OAUTH_SCOPES,
+            "approval_prompt": "auto",
+        })
+    )

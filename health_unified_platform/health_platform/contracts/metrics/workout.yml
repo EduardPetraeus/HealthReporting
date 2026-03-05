@@ -9,7 +9,7 @@ metric:
     combination of day and workout identifier.
   category: activity
   source_table: silver.workout
-  source_columns: [activity, duration_seconds, calories, distance_meters, avg_hr]
+  source_columns: [activity, duration_seconds, calories, distance_meters, intensity]
   grain: per_workout
   business_key: "day + start_datetime"
   unit: "multiple (duration in seconds, calories in kcal, distance in meters)"
@@ -19,10 +19,10 @@ metric:
       sql: >
         SELECT day, activity, duration_seconds,
                ROUND(duration_seconds / 60.0, 1) AS duration_minutes,
-               calories, distance_meters, avg_hr
+               calories, distance_meters, intensity
         FROM silver.workout
-        WHERE day = :date
-        ORDER BY start_datetime
+        WHERE day BETWEEN :start AND :end
+        ORDER BY day, start_datetime
     period_summary:
       sql: >
         SELECT COUNT(*) AS total_workouts,
@@ -52,7 +52,7 @@ metric:
                COUNT(*) AS sessions,
                ROUND(SUM(duration_seconds) / 3600.0, 1) AS total_hours,
                SUM(calories) AS total_calories,
-               ROUND(AVG(avg_hr), 0) AS avg_heart_rate
+               STRING_AGG(DISTINCT intensity, ', ') AS intensities
         FROM silver.workout
         WHERE day BETWEEN :start AND :end
         GROUP BY activity

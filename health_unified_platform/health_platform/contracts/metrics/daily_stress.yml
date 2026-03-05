@@ -23,7 +23,8 @@ metric:
                ROUND(stress_high / 3600.0, 1) AS stress_hours,
                ROUND(recovery_high / 3600.0, 1) AS recovery_hours
         FROM silver.daily_stress
-        WHERE day = :date
+        WHERE day BETWEEN :start AND :end
+        ORDER BY day
     period_average:
       sql: >
         SELECT ROUND(AVG(stress_high / 3600.0), 1) AS avg_stress_hours,

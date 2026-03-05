@@ -15,7 +15,7 @@ metric:
 
   computations:
     daily_value:
-      sql: "SELECT day, readiness_score FROM silver.daily_readiness WHERE day = :date"
+      sql: "SELECT day, readiness_score FROM silver.daily_readiness WHERE day BETWEEN :start AND :end ORDER BY day"
     period_average:
       sql: >
         SELECT ROUND(AVG(readiness_score), 1) AS avg_readiness,
