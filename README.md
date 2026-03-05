@@ -37,6 +37,7 @@ See `docs/databricks_framework.md` for the cloud pipeline reference and `docs/ar
 | Withings | Planned | weight, body composition, blood pressure |
 | Strava | Planned | workouts, GPS activities |
 | GetTested | Planned | lab results, blood tests |
+| DNA Complete (WGS) | Planned | genetic variants (WGS), SNP profile, pharmacogenomics, risk categories |
 
 ## Silver Tables (21)
 
@@ -52,6 +53,20 @@ See `docs/databricks_framework.md` for the cloud pipeline reference and `docs/ar
 | `agent.knowledge_base` | Archival memory — accumulated insights, vector-searchable |
 | `contracts/metrics/` | 18 YAML semantic contracts + index + business rules |
 | `mcp/server.py` | MCP server with 8 tools (query_health, search_memory, get_profile, etc.) |
+
+## Cross-Analysis: Genetics x Health Data
+
+DNA Complete whole genome sequencing (WGS) provides a static genetic context layer for all dynamic health metrics. Unlike time-series data from wearables, genetic data is sequenced once and valid for life — it acts as a permanent lens through which all other health signals are interpreted.
+
+The cross-analysis strategy maps specific gene variants to existing silver tables:
+- **Sleep** — CLOCK, PER2, PER3 variants contextualize sleep_score, timing, and latency
+- **Cardiovascular** — APOE, MTHFR, ACE variants inform heart_rate, blood_pressure, and readiness interpretation
+- **Metabolism** — FTO, MC4R, TCF7L2 variants add context to weight, calorie, and activity data
+- **Stress response** — COMT, BDNF variants correlate with stress_level, HRV, and readiness
+- **Athletic performance** — ACTN3, ACE, PPARGC1A variants inform workout effectiveness and activity_score
+- **Pharmacogenomics** — CYP1A2, CYP2D6, CYP2C19 variants affect supplement metabolism and caffeine timing
+
+This transforms HealthReporting from a reactive monitoring platform into a genetically-informed health intelligence system.
 
 ## Quick Start
 
