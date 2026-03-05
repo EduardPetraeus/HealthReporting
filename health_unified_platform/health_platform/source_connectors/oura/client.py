@@ -1,21 +1,84 @@
 """
 Oura API V2 client.
 Wraps each endpoint in a typed method with automatic pagination.
+Implements BaseConnector for a consistent connector interface.
 """
 
 from __future__ import annotations
 
+import sys
 from datetime import date
+from pathlib import Path
 
 import requests
 
+# Ensure the source_connectors package is importable
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from source_connectors.base import BaseConnector
+
 BASE_URL = "https://api.ouraring.com"
 
+# Mapping from endpoint name to client method name
+ENDPOINT_METHODS: dict[str, str] = {
+    "daily_sleep": "fetch_daily_sleep",
+    "daily_activity": "fetch_daily_activity",
+    "daily_readiness": "fetch_daily_readiness",
+    "heartrate": "fetch_heartrate",
+    "workout": "fetch_workout",
+    "daily_spo2": "fetch_daily_spo2",
+    "daily_stress": "fetch_daily_stress",
+}
 
-class OuraClient:
+
+class OuraClient(BaseConnector):
+    """Oura Ring API V2 connector.
+
+    Implements BaseConnector with Oura-specific authentication and
+    paginated data fetching across all available endpoints.
+    """
+
     def __init__(self, access_token: str) -> None:
+        self._access_token = access_token
         self.session = requests.Session()
         self.session.headers.update({"Authorization": f"Bearer {access_token}"})
+
+    # ------------------------------------------------------------------
+    # BaseConnector interface
+    # ------------------------------------------------------------------
+
+    @property
+    def source_name(self) -> str:
+        return "oura"
+
+    def authenticate(self) -> None:
+        """No-op: OuraClient receives a pre-authenticated token at init.
+
+        For the full OAuth flow, see auth.py / get_access_token().
+        """
+
+    def fetch(self, endpoint: str, start_date: str, end_date: str) -> list[dict]:
+        """Fetch records from the named Oura endpoint.
+
+        Args:
+            endpoint: One of the keys in ENDPOINT_METHODS (e.g. 'daily_sleep').
+            start_date: ISO 8601 date string (YYYY-MM-DD).
+            end_date: ISO 8601 date string (YYYY-MM-DD).
+
+        Returns:
+            List of record dicts from the Oura API.
+        """
+        method_name = ENDPOINT_METHODS.get(endpoint)
+        if not method_name:
+            raise ValueError(
+                f"Unknown endpoint '{endpoint}'. "
+                f"Available: {list(ENDPOINT_METHODS.keys())}"
+            )
+        method = getattr(self, method_name)
+        return method(date.fromisoformat(start_date), date.fromisoformat(end_date))
+
+    def get_endpoints(self) -> list[str]:
+        return list(ENDPOINT_METHODS.keys())
 
     # ------------------------------------------------------------------
     # Internal helpers

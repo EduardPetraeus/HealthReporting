@@ -168,23 +168,23 @@ class SchemaPruner:
             schema = "main"
             table = table_name
 
-        # Query information_schema for column details
+        # Query duckdb_columns() for column details including COMMENT ON descriptions
         sql = """
             SELECT
                 column_name,
                 data_type,
                 COALESCE(comment, '') AS description
-            FROM information_schema.columns
-            WHERE table_schema = ?
+            FROM duckdb_columns()
+            WHERE schema_name = ?
               AND table_name = ?
-            ORDER BY ordinal_position
+            ORDER BY column_index
         """
         try:
             result = self.con.execute(sql, [schema, table])
             rows = result.fetchall()
         except Exception as exc:
             logger.debug(
-                "Could not query information_schema for %s: %s", table_name, exc
+                "Could not query duckdb_columns for %s: %s", table_name, exc
             )
             # Fallback: try PRAGMA table_info
             return self._get_columns_via_pragma(table_name)

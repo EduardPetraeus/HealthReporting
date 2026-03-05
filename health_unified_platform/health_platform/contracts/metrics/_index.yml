@@ -49,6 +49,11 @@ metrics:
     source_tables: [silver.mindful_session]
     max_columns: 8
 
+  environment:
+    metrics: [temp_max_c, temp_min_c, precipitation_mm, wind_speed_max_kmh, uv_index_max]
+    source_tables: [silver.daily_weather]
+    max_columns: 8
+
 query_routing:
   sleep_questions:
     tables: [silver.daily_sleep]

@@ -16,13 +16,14 @@ metric:
   computations:
     daily_value:
       sql: >
-        SELECT day, spo2_avg_pct, spo2_min_pct
+        SELECT day, spo2_avg_pct, breathing_disturbance_index
         FROM silver.daily_spo2
-        WHERE day = :date
+        WHERE day BETWEEN :start AND :end
+        ORDER BY day
     period_average:
       sql: >
         SELECT ROUND(AVG(spo2_avg_pct), 1) AS avg_spo2,
-               MIN(spo2_min_pct) AS lowest_spo2,
+               MIN(breathing_disturbance_index) AS lowest_spo2,
                MAX(spo2_avg_pct) AS highest_avg_spo2,
                COUNT(*) AS days
         FROM silver.daily_spo2
@@ -37,11 +38,11 @@ metric:
     low_nights:
       description: "Nights where SpO2 dropped below 95%"
       sql: >
-        SELECT day, spo2_avg_pct, spo2_min_pct
+        SELECT day, spo2_avg_pct, breathing_disturbance_index
         FROM silver.daily_spo2
         WHERE day BETWEEN :start AND :end
-          AND spo2_min_pct < 95
-        ORDER BY spo2_min_pct ASC
+          AND breathing_disturbance_index < 95
+        ORDER BY breathing_disturbance_index ASC
 
   thresholds:
     normal: { min: 95, label: "Normal — healthy oxygen saturation" }

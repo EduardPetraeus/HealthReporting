@@ -15,7 +15,7 @@ metric:
 
   computations:
     daily_value:
-      sql: "SELECT day, steps FROM silver.daily_activity WHERE day = :date"
+      sql: "SELECT day, steps FROM silver.daily_activity WHERE day BETWEEN :start AND :end ORDER BY day"
     period_average:
       sql: >
         SELECT ROUND(AVG(steps), 0) AS avg_steps,

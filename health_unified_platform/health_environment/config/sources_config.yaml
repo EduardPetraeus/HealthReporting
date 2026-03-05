@@ -182,3 +182,47 @@ sources:
     source_type: "parquet"
     target_schema: "bronze"
     target_table: "stg_oura_personal_info"
+
+  # Withings endpoints (OAuth2 API, fetched via source_connectors/withings/run_withings.py)
+  - name: "withings_weight"
+    # Weight and body composition (fat%, muscle%, bone%, hydration%)
+    relative_path: "withings/raw/weight/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_withings_weight"
+
+  - name: "withings_blood_pressure"
+    # Blood pressure readings (systolic, diastolic, pulse)
+    relative_path: "withings/raw/blood_pressure/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_withings_blood_pressure"
+
+  - name: "withings_temperature"
+    # Body temperature measurements
+    relative_path: "withings/raw/temperature/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_withings_temperature"
+
+  # Strava endpoints (OAuth2 API, fetched via source_connectors/strava/run_strava.py)
+  - name: "strava_activities"
+    # Activities: running, cycling, swimming, etc. with GPS, HR, power data
+    relative_path: "strava/raw/activities/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_strava_activities"
+
+  - name: "strava_athlete_stats"
+    # Aggregated athlete statistics (totals, recent, YTD)
+    relative_path: "strava/raw/athlete_stats/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_strava_athlete_stats"
+
+  # Open-Meteo weather data (free API, no auth required)
+  - name: "weather_open_meteo"
+    relative_path: "weather/raw/open_meteo/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_weather_open_meteo"

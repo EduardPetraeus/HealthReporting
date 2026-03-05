@@ -20,10 +20,24 @@ from health_platform.utils.logging_config import get_logger
 
 logger = get_logger("oura.writer")
 
-DATA_LAKE_ROOT = Path(
-    os.environ.get("OURA_DATA_LAKE_ROOT")
-    or str(Path.home() / "data_lake" / "oura" / "raw")
-)
+def _resolve_data_lake_root() -> Path:
+    """Resolve data lake root from env var or environment_config.yaml."""
+    if env_val := os.environ.get("OURA_DATA_LAKE_ROOT"):
+        return Path(env_val)
+    # Read from environment_config.yaml (canonical source)
+    config_path = Path(__file__).resolve().parents[2] / "../../health_environment/config/environment_config.yaml"
+    try:
+        import yaml
+        with open(config_path) as f:
+            cfg = yaml.safe_load(f)
+        return Path(cfg["paths"]["data_lake_root"]) / "oura" / "raw"
+    except Exception:
+        fallback = Path.home() / "health_data_lake" / "oura" / "raw"
+        logger.warning("No OURA_DATA_LAKE_ROOT env var or environment_config.yaml found. Using fallback: %s", fallback)
+        return fallback
+
+
+DATA_LAKE_ROOT = _resolve_data_lake_root()
 
 
 def _partition_path(endpoint: str, partition_date: date) -> Path:

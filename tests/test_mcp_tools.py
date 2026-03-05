@@ -74,12 +74,13 @@ class TestQueryBuilder:
         sql = qb.build_query(
             "sleep_score",
             "daily_value",
-            {"date": "2026-03-01"},
+            {"start": "2026-03-01", "end": "2026-03-01"},
         )
 
         assert sql is not None
         assert "2026-03-01" in sql
         assert "SELECT" in sql.upper()
+        assert "BETWEEN" in sql.upper()
 
 
 class TestFormatter:
