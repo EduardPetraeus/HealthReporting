@@ -15,7 +15,7 @@ CHAT_HTML = r"""<!DOCTYPE html>
 <html lang="da">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Health Assistant</title>
@@ -110,6 +110,7 @@ header .status { font-size:12px; color:var(--muted); margin-left:auto; }
 }
 .msg.bot tbody tr:hover { background: rgba(88,166,255,0.04); }
 .msg.bot tbody tr:last-child td { border-bottom: none; }
+.msg.bot .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
 /* Score badges */
 .score-good { color: var(--green); font-weight: 600; }
@@ -122,7 +123,8 @@ header .status { font-size:12px; color:var(--muted); margin-left:auto; }
   -webkit-overflow-scrolling: touch; flex-shrink: 0;
 }
 .quick-btns button {
-  padding: 7px 14px; border-radius: 18px; border: 1px solid var(--border);
+  padding: 11px 14px; min-height: 44px; border-radius: 18px;
+  border: 1px solid var(--border);
   background: var(--surface); color: var(--text); font-size: 13px;
   white-space: nowrap; cursor: pointer; flex-shrink: 0;
   transition: all 0.15s;
@@ -131,7 +133,8 @@ header .status { font-size:12px; color:var(--muted); margin-left:auto; }
 
 /* Input area */
 #input-area {
-  padding: 10px 12px; border-top: 1px solid var(--border);
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom)) 12px;
+  border-top: 1px solid var(--border);
   background: var(--surface); display: flex; gap: 8px; flex-shrink: 0;
 }
 #input-area input {
@@ -150,7 +153,11 @@ header .status { font-size:12px; color:var(--muted); margin-left:auto; }
 #input-area button svg { fill: #fff; width: 20px; height: 20px; }
 
 /* Typing indicator */
-.typing { display:flex; gap:4px; padding:10px 16px; align-self:flex-start; }
+.typing {
+  display:flex; gap:4px; padding:10px 16px; align-self:flex-start;
+  background: var(--bot-bg); border: 1px solid var(--border);
+  border-radius: 4px 18px 18px 18px;
+}
 .typing span {
   width:7px; height:7px; border-radius:50%; background:var(--muted);
   animation: blink 1.4s infinite both;
@@ -186,7 +193,7 @@ header .status { font-size:12px; color:var(--muted); margin-left:auto; }
 <div id="login">
   <h2>Health Assistant</h2>
   <p>Connect to your health data on Mac Mini via Tailscale.</p>
-  <input id="token-input" type="password" placeholder="API token" autocomplete="off">
+  <input id="token-input" type="password" placeholder="API token" autocomplete="off" enterkeyhint="go" spellcheck="false">
   <button onclick="doLogin()">Connect</button>
   <div class="error-msg" id="login-error"></div>
 </div>
@@ -277,6 +284,8 @@ function md(text) {
 
   // Paragraphs: double newline
   html = html.replace(/\n\n+/g, '</p><p>');
+  // Single newlines → <br> (but not after block elements)
+  html = html.replace(/([^>])\n([^<])/g, '$1<br>$2');
   html = '<p>' + html + '</p>';
 
   // Clean up empty paragraphs and whitespace around block elements
@@ -339,7 +348,7 @@ function buildTable(lines) {
     t += '</tr>';
   }
   t += '</tbody></table>';
-  return t;
+  return '<div class="table-wrap">' + t + '</div>';
 }
 
 function colorizeScore(val, header) {
@@ -380,7 +389,7 @@ function addMsg(text, cls) {
     d.textContent = text;
   }
   chatEl.appendChild(d);
-  chatEl.scrollTop = chatEl.scrollHeight;
+  requestAnimationFrame(() => { chatEl.scrollTop = chatEl.scrollHeight; });
 }
 
 function showTyping() {
@@ -388,7 +397,7 @@ function showTyping() {
   d.className = 'typing'; d.id = 'typing';
   d.innerHTML = '<span></span><span></span><span></span>';
   chatEl.appendChild(d);
-  chatEl.scrollTop = chatEl.scrollHeight;
+  requestAnimationFrame(() => { chatEl.scrollTop = chatEl.scrollHeight; });
 }
 function hideTyping() {
   const t = document.getElementById('typing');
@@ -430,6 +439,14 @@ async function ask(question) {
 
 function send() { ask(inputEl.value); }
 inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+
+/* --- iOS keyboard resize handler --- */
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', () => {
+    document.body.style.height = window.visualViewport.height + 'px';
+    requestAnimationFrame(() => { chatEl.scrollTop = chatEl.scrollHeight; });
+  });
+}
 
 /* --- Server health check --- */
 fetch(API + '/health').then(r => r.json()).then(d => {
