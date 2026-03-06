@@ -245,7 +245,7 @@ def _route_question(tools: HealthTools, question_lower: str, original: str) -> s
     Simple keyword-based routing. For full AI understanding, use Claude + MCP.
     """
     # Sleep questions
-    if any(kw in question_lower for kw in ["sleep", "sov", "slept"]):
+    if any(kw in question_lower for kw in ["sleep", "sov", "søvn", "slept"]):
         if "trend" in question_lower or "getting" in question_lower:
             return tools.query_health("sleep_score", "last_30_days", "trend")
         if "average" in question_lower or "gennemsnit" in question_lower:
