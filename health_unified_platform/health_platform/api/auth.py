@@ -1,10 +1,10 @@
 """Bearer token authentication for the Health API.
 
-Loads the API token from macOS Keychain via `security` CLI.
+Loads the API token from macOS Keychain (claude.keychain-db) via `security` CLI.
 Falls back to HEALTH_API_TOKEN environment variable.
 
 Setup:
-    security add-generic-password -a health-api -s health-api-token -w "<your-token>"
+    security add-generic-password -a claude -s HEALTH_API_TOKEN -w "<your-token>" ~/Library/Keychains/claude.keychain-db
 """
 
 from __future__ import annotations
@@ -26,17 +26,19 @@ _cached_token: str | None = None
 
 
 def _load_token_from_keychain() -> str | None:
-    """Load API token from macOS Keychain."""
+    """Load API token from claude.keychain-db (macOS Keychain)."""
+    keychain_path = os.path.expanduser("~/Library/Keychains/claude.keychain-db")
     try:
         result = subprocess.run(
             [
                 "security",
                 "find-generic-password",
                 "-a",
-                "health-api",
+                "claude",
                 "-s",
-                "health-api-token",
+                "HEALTH_API_TOKEN",
                 "-w",
+                keychain_path,
             ],
             capture_output=True,
             text=True,
@@ -45,7 +47,7 @@ def _load_token_from_keychain() -> str | None:
         if result.returncode == 0:
             token = result.stdout.strip()
             if token:
-                logger.info("API token loaded from macOS Keychain")
+                logger.info("API token loaded from claude keychain")
                 return token
     except Exception as exc:
         logger.debug("Keychain lookup failed: %s", exc)
@@ -56,7 +58,7 @@ def get_api_token() -> str:
     """Resolve the API bearer token from Keychain or environment.
 
     Priority:
-    1. macOS Keychain (health-api-token)
+    1. claude.keychain-db (HEALTH_API_TOKEN)
     2. HEALTH_API_TOKEN environment variable
     3. Auto-generate and warn (dev only)
     """

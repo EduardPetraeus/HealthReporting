@@ -24,6 +24,10 @@ from health_platform.api.server import app
 def _set_test_token(monkeypatch):
     """Set a known API token for all tests."""
     monkeypatch.setenv("HEALTH_API_TOKEN", "test-token-12345")
+    # Bypass keychain so env var is used
+    monkeypatch.setattr(
+        "health_platform.api.auth._load_token_from_keychain", lambda: None
+    )
     # Clear cached token
     import health_platform.api.auth as auth_module
 
