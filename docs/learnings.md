@@ -170,4 +170,24 @@ all-MiniLM-L6-v2 (general-purpose, 384-dim) produces semantically meaningful res
 ### Semantic Contracts as "Virtual Gold"
 YAML computation recipes effectively replace materialized Gold views at N=1 scale. Adding a new metric requires only a YAML file, not DDL changes. The query_builder reads YAML, substitutes parameters, and executes SQL — same result as a Gold view, but on-demand. **Caveat**: requires well-maintained YAML files; no automatic schema drift detection yet.
 
-*Last updated: 2026-03-04*
+### localStorage + `unsafe-inline` CSP — accepted risk (2026-03-06)
+
+The chat UI stores the API token in `localStorage` and uses `unsafe-inline` for both script and style CSP directives. This is an accepted trade-off for this deployment:
+
+**Why it's acceptable:**
+- App binds to `127.0.0.1`, accessible only via Tailscale VPN (no public internet)
+- No user-generated content rendered as raw HTML — all output is escaped via `escapeHtml()`
+- Single-user deployment, no multi-tenant attack surface
+- `X-Frame-Options: DENY` and `X-Content-Type-Options: nosniff` headers set
+
+**If the app ever goes public, revisit:**
+- Switch token storage from `localStorage` to `HttpOnly` cookie (requires server-side session)
+- Replace `unsafe-inline` with nonce-based CSP (`script-src 'nonce-<random>'`)
+- Add `Strict-Transport-Security` header
+- Consider CSRF tokens for state-changing endpoints
+
+### Keychain-first secrets management (2026-03-06)
+
+All secrets are stored in `~/Library/Keychains/claude.keychain-db` and read via the shared `get_secret()` utility. Environment variables serve as fallback for CI/testing only. The `.env` file pattern has been fully removed from Oura auth in favour of keychain reads.
+
+*Last updated: 2026-03-06*
