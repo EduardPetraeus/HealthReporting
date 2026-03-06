@@ -60,6 +60,8 @@ variables:
 
 # ---------------------------------------------------------------------------
 # Targets — both use the same workspace, separated by Unity Catalog
+# NOTE: workspace host is a public URL (requires PAT for access).
+# To avoid hardcoding, set profile: DEFAULT and use ~/.databrickscfg instead.
 # ---------------------------------------------------------------------------
 targets:
   dev:
