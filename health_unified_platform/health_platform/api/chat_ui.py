@@ -555,9 +555,12 @@ async function ask(question) {
 function addRetryMsg(text, retryQuestion) {
   const d = document.createElement('div');
   d.className = 'msg bot error';
-  d.innerHTML = '<div class="bot-label">Health Assistant</div><p>' + escapeHtml(text) +
-    '</p><button class="retry-btn" onclick="ask(\'' + escapeHtml(retryQuestion).replace(/'/g, "\\'") +
-    '\')">Prøv igen</button>';
+  d.innerHTML = '<div class="bot-label">Health Assistant</div><p>' + escapeHtml(text) + '</p>';
+  const btn = document.createElement('button');
+  btn.className = 'retry-btn';
+  btn.textContent = 'Prøv igen';
+  btn.addEventListener('click', () => ask(retryQuestion));
+  d.appendChild(btn);
   chatEl.appendChild(d);
   requestAnimationFrame(() => { chatEl.scrollTop = chatEl.scrollHeight; });
 }

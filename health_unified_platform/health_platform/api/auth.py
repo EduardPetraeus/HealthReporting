@@ -9,6 +9,7 @@ Setup:
 
 from __future__ import annotations
 
+import os
 import secrets
 
 from fastapi import Depends, HTTPException, status
@@ -30,7 +31,7 @@ def get_api_token() -> str:
     Priority:
     1. claude.keychain-db (HEALTH_API_TOKEN)
     2. HEALTH_API_TOKEN environment variable
-    3. Auto-generate and warn (dev only)
+    3. Auto-generate and warn (dev only — never in production)
     """
     global _cached_token
     if _cached_token is not None:
@@ -41,11 +42,19 @@ def get_api_token() -> str:
         _cached_token = token
         return token
 
-    # Dev fallback: auto-generate a token and log it
+    # Only allow ephemeral tokens in dev
+    env = os.environ.get("HEALTH_ENV", "dev")
+    if env != "dev":
+        raise RuntimeError(
+            "HEALTH_API_TOKEN not configured. "
+            "Store it: security add-generic-password -a claude "
+            "-s HEALTH_API_TOKEN -w '<token>' ~/Library/Keychains/claude.keychain-db"
+        )
+
     token = secrets.token_urlsafe(32)
     logger.warning(
-        "No API token configured. Generated ephemeral token for this session. "
-        "Set up Keychain or HEALTH_API_TOKEN for production use."
+        "DEV MODE: No API token configured. Generated ephemeral token: %s",
+        token,
     )
     _cached_token = token
     return token

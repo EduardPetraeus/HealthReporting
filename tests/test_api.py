@@ -6,6 +6,7 @@ Uses FastAPI TestClient with in-memory DuckDB to test all endpoints.
 from __future__ import annotations
 
 import os
+import subprocess
 import sys
 from pathlib import Path
 from unittest.mock import patch
@@ -20,16 +21,25 @@ from fastapi.testclient import TestClient
 from health_platform.api.server import app
 
 
+def _fake_keychain_run(*args, **kwargs):
+    """Mock subprocess.run that simulates errSecItemNotFound (code 44)."""
+    return subprocess.CompletedProcess(
+        args=args[0] if args else [],
+        returncode=44,
+        stdout="",
+        stderr="The specified item could not be found in the keychain.",
+    )
+
+
 @pytest.fixture(autouse=True)
 def _set_test_token(monkeypatch):
     """Set a known API token for all tests."""
     monkeypatch.setenv("HEALTH_API_TOKEN", "test-token-12345")
+    monkeypatch.setenv("HEALTH_ENV", "dev")
     # Bypass keychain — let get_secret fall back to env var
     monkeypatch.setattr(
         "health_platform.utils.keychain.subprocess.run",
-        lambda *a, **kw: type(
-            "R", (), {"returncode": 44, "stdout": "", "stderr": ""}
-        )(),
+        _fake_keychain_run,
     )
     # Clear cached token
     import health_platform.api.auth as auth_module

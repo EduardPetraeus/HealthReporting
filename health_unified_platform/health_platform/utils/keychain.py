@@ -56,8 +56,27 @@ def get_secret(key_name: str, *, fallback_env: bool = True) -> str | None:
             if value:
                 logger.debug("Loaded %s from keychain", key_name)
                 return value
+        else:
+            logger.debug(
+                "Keychain lookup for %s returned code %d: %s",
+                key_name,
+                result.returncode,
+                result.stderr.strip(),
+            )
+    except subprocess.TimeoutExpired:
+        logger.warning(
+            "Keychain lookup for %s timed out (5s) — keychain may be locked",
+            key_name,
+        )
+    except OSError as exc:
+        logger.warning("Keychain lookup for %s failed (OS error): %s", key_name, exc)
     except Exception as exc:
-        logger.debug("Keychain lookup for %s failed: %s", key_name, exc)
+        logger.warning(
+            "Unexpected error during keychain lookup for %s: %s (%s)",
+            key_name,
+            exc,
+            type(exc).__name__,
+        )
 
     # Fallback to environment variable
     if fallback_env:
