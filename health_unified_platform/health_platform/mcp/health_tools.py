@@ -607,12 +607,16 @@ class HealthTools:
                 table = f"silver.{table}"
             return (table, column)
 
-        # Lookup from contract
+        # Lookup from contract — validate even YAML-sourced identifiers
         try:
             contract = self.query_builder.load_contract(metric_ref)
             metric_def = contract.get("metric", contract)
             table = metric_def.get("source_table", f"silver.{metric_ref}")
             column = metric_def.get("source_column", metric_ref)
+            # Validate table parts (schema.table)
+            for part in table.split("."):
+                self._validate_identifier(part)
+            self._validate_identifier(column)
             return (table, column)
         except FileNotFoundError:
             return (f"silver.{metric_ref}", metric_ref)
