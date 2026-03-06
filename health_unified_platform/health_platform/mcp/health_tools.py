@@ -619,7 +619,8 @@ class HealthTools:
             self._validate_identifier(column)
             return (table, column)
         except FileNotFoundError:
-            return (f"silver.{metric_ref}", metric_ref)
+            table = self._validate_identifier(metric_ref)
+            return (f"silver.{table}", self._validate_identifier(metric_ref))
 
     @staticmethod
     def _interpret_correlation(abs_r: float) -> str:
