@@ -4,6 +4,60 @@
 
 ---
 
+## 2026-03-06 — Session 009: Iterations 1-3 — MCP Live + Daily Sync + Remote Access
+
+**Phase:** Roadmap Iterations 1-3 (autonomous execution)
+**Branch:** `feature/iteration-1-mcp-goes-live`
+**Goal:** Wire MCP into Claude Code, automate daily Oura sync, build FastAPI for remote access
+
+### What was done
+
+**Iteration 1 — MCP Goes Live**
+- Fixed `health_tools.py`: `id` → `insight_id`, VARCHAR → VARCHAR[] tags, added `is_active` filter
+- Fixed `embedding_engine.py`: matching `insight_id` references in backfill
+- Fixed `test_mcp_integration.py`: knowledge_base fixture aligned with real DB schema
+- Created `tests/test_mcp_smoke.py` — 55+ tests covering all 8 MCP tools + 10 standard health questions
+
+**Iteration 2 — Automated Daily Refresh**
+- Created `scripts/daily_sync.sh` — 4-step pipeline (Oura fetch → Bronze → Silver → Summary + Embedding)
+- Created `scripts/launchd/com.health.daily-sync.plist` — daily at 06:00
+- ntfy.sh push notifications on success/failure
+
+**Iteration 3 — Remote Access**
+- Created `health_platform/api/server.py` — FastAPI with 5 endpoints (/health, /v1/chat, /v1/query, /v1/profile, /v1/alerts)
+- Created `health_platform/api/auth.py` — Bearer token from macOS Keychain + env var fallback
+- Created `scripts/launchd/com.health.api-server.plist` — always-on with KeepAlive
+- Created `tests/test_api.py` — 14 tests for all endpoints
+
+**Security hardening**
+- SQL injection prevention: `_SAFE_IDENTIFIER` regex validator in `_parse_metric_ref`
+- Expanded `run_custom_query` forbidden keywords (ATTACH, DETACH, COPY, CALL, PRAGMA)
+- Removed unused imports (yaml, format_as_yaml, columns variable)
+- Code review + security review via subagents
+
+### Stats
+- 5 commits, 11 files changed, 1744 lines added
+- 222 tests passing (all green)
+- 0 security issues found
+
+### Architecture changes
+- New: FastAPI REST layer (`api/server.py`, `api/auth.py`) — keyword-based chat routing
+- New: launchd automation (daily sync + always-on API server)
+- No breaking changes to existing MCP server or data model
+
+### Manual steps required (not done by Claude)
+- Install Tailscale on Mac Mini + iPhone + laptop
+- Load launchd plists: `launchctl load ~/Library/LaunchAgents/com.health.daily-sync.plist`
+- Set API token in Keychain: `security add-generic-password -s health-api -a token -w <your-token>`
+
+### Carried over
+- Iteration 4: Data Quality Shield (dbt tests, data quality suite)
+- Iteration 5-10: remaining roadmap items
+- Tailscale installation (manual)
+- ANTHROPIC_API_KEY → GitHub Secrets
+
+---
+
 ## 2026-03-04 — Session 008: AI-Native Data Model — Full Implementation
 
 **Phase:** Phase 3b — AI-Native Data Model
