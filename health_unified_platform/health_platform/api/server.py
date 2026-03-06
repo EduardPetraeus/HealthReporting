@@ -72,7 +72,9 @@ def _get_tools(read_only: bool = True) -> HealthTools:
 
 
 class ChatRequest(BaseModel):
-    question: str = Field(..., description="Natural language health question")
+    question: str = Field(
+        ..., description="Natural language health question", max_length=2000
+    )
     format: str = Field("markdown", description="Output format: markdown or plain")
 
 

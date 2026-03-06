@@ -190,12 +190,13 @@ def generate_response(tools: HealthTools, question: str) -> str:
     # Gather data context
     context = _gather_context(tools, question)
 
-    # Build the user message with context
+    # Sanitize question: strip patterns that could manipulate the prompt
+    safe_question = question.replace("---", "").strip()
+
+    # Build the user message with context — clear separation between data and question
     user_message = (
-        f"Here is the user's current health data:\n\n"
-        f"{context}\n\n"
-        f"---\n\n"
-        f"User's question: {question}"
+        f"<health_data>\n{context}\n</health_data>\n\n"
+        f"<user_question>\n{safe_question}\n</user_question>"
     )
 
     try:
@@ -228,6 +229,5 @@ def generate_response(tools: HealthTools, question: str) -> str:
         return (
             "## Temporary Error\n\n"
             "Could not reach the AI assistant. "
-            "Your health data is still accessible via the quick action buttons.\n\n"
-            f"*Technical: {exc_type}*"
+            "Your health data is still accessible via the quick action buttons."
         )
