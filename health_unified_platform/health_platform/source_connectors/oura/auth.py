@@ -42,8 +42,8 @@ def _load_credentials() -> tuple[str, str, str]:
         security add-generic-password -a claude -s OURA_CLIENT_ID -w "<id>" ~/Library/Keychains/claude.keychain-db
         security add-generic-password -a claude -s OURA_CLIENT_SECRET -w "<secret>" ~/Library/Keychains/claude.keychain-db
     """
-    client_id = get_secret("OURA_CLIENT_ID")
-    client_secret = get_secret("OURA_CLIENT_SECRET")
+    client_id = get_secret("OURA_CLIENT_ID", fallback_env=False)
+    client_secret = get_secret("OURA_CLIENT_SECRET", fallback_env=False)
     redirect_uri = (
         os.environ.get("OURA_REDIRECT_URI")
         or f"http://localhost:{CALLBACK_PORT}/callback"
