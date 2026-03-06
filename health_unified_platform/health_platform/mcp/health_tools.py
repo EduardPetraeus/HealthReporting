@@ -491,6 +491,11 @@ class HealthTools:
             "REPLACE",
             "GRANT",
             "REVOKE",
+            "ATTACH",
+            "DETACH",
+            "COPY",
+            "CALL",
+            "PRAGMA",
         ]
         sql_upper = sql.upper().strip()
         for keyword in forbidden_keywords:
@@ -567,15 +572,24 @@ class HealthTools:
         )
         return (today - timedelta(days=7), today)
 
+    _SAFE_IDENTIFIER = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
+
+    def _validate_identifier(self, name: str) -> str:
+        """Validate that a string is a safe SQL identifier (prevents injection)."""
+        if not self._SAFE_IDENTIFIER.match(name):
+            raise ValueError(f"Invalid SQL identifier: {name!r}")
+        return name
+
     def _parse_metric_ref(self, metric_ref: str) -> tuple[str, str]:
         """Parse a metric reference like 'daily_sleep.sleep_score' into (table, column).
 
         If no dot, tries to look up the metric contract for source_table and source_column.
+        Validates all identifiers to prevent SQL injection.
         """
         if "." in metric_ref:
             parts = metric_ref.split(".", 1)
-            table = parts[0]
-            column = parts[1]
+            table = self._validate_identifier(parts[0])
+            column = self._validate_identifier(parts[1])
             # Ensure table has schema prefix
             if not table.startswith("silver.") and not table.startswith("agent."):
                 table = f"silver.{table}"
