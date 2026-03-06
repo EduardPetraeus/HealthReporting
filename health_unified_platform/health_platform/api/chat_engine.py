@@ -7,10 +7,8 @@ contextual response with insights — like a personal health advisor.
 
 from __future__ import annotations
 
-import os
-import subprocess
-
 from health_platform.mcp.health_tools import HealthTools
+from health_platform.utils.keychain import get_secret
 from health_platform.utils.logging_config import get_logger
 
 logger = get_logger("api.chat_engine")
@@ -40,31 +38,9 @@ Formatting guidelines:
 
 def _get_api_key() -> str:
     """Load Anthropic API key from claude keychain."""
-    try:
-        result = subprocess.run(
-            [
-                "security",
-                "find-generic-password",
-                "-a",
-                "claude",
-                "-s",
-                "ANTHROPIC_API_KEY",
-                "-w",
-                os.path.expanduser("~/Library/Keychains/claude.keychain-db"),
-            ],
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
-        if result.returncode == 0 and result.stdout.strip():
-            return result.stdout.strip()
-    except Exception as exc:
-        logger.debug("Keychain lookup for ANTHROPIC_API_KEY failed: %s", exc)
-
-    key = os.environ.get("ANTHROPIC_API_KEY", "")
+    key = get_secret("ANTHROPIC_API_KEY")
     if key:
         return key
-
     raise RuntimeError("ANTHROPIC_API_KEY not found in keychain or environment")
 
 

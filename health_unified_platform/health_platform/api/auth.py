@@ -9,13 +9,12 @@ Setup:
 
 from __future__ import annotations
 
-import os
 import secrets
-import subprocess
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
+from health_platform.utils.keychain import get_secret
 from health_platform.utils.logging_config import get_logger
 
 logger = get_logger("api.auth")
@@ -23,35 +22,6 @@ logger = get_logger("api.auth")
 _bearer_scheme = HTTPBearer()
 
 _cached_token: str | None = None
-
-
-def _load_token_from_keychain() -> str | None:
-    """Load API token from claude.keychain-db (macOS Keychain)."""
-    keychain_path = os.path.expanduser("~/Library/Keychains/claude.keychain-db")
-    try:
-        result = subprocess.run(
-            [
-                "security",
-                "find-generic-password",
-                "-a",
-                "claude",
-                "-s",
-                "HEALTH_API_TOKEN",
-                "-w",
-                keychain_path,
-            ],
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
-        if result.returncode == 0:
-            token = result.stdout.strip()
-            if token:
-                logger.info("API token loaded from claude keychain")
-                return token
-    except Exception as exc:
-        logger.debug("Keychain lookup failed: %s", exc)
-    return None
 
 
 def get_api_token() -> str:
@@ -66,14 +36,8 @@ def get_api_token() -> str:
     if _cached_token is not None:
         return _cached_token
 
-    token = _load_token_from_keychain()
+    token = get_secret("HEALTH_API_TOKEN")
     if token:
-        _cached_token = token
-        return token
-
-    token = os.environ.get("HEALTH_API_TOKEN")
-    if token:
-        logger.info("API token loaded from HEALTH_API_TOKEN env var")
         _cached_token = token
         return token
 
