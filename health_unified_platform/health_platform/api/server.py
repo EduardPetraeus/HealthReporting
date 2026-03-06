@@ -68,6 +68,7 @@ def _get_tools(read_only: bool = True) -> HealthTools:
 
 class ChatRequest(BaseModel):
     question: str = Field(..., description="Natural language health question")
+    format: str = Field("markdown", description="Output format: markdown or plain")
 
 
 class ChatResponse(BaseModel):
@@ -119,6 +120,9 @@ async def chat(
         answer = _route_question(tools, question, request.question)
     finally:
         tools.close()
+
+    if request.format == "plain":
+        answer = _markdown_table_to_plain(answer)
 
     return ChatResponse(
         answer=answer,
@@ -203,6 +207,28 @@ async def alerts(
         alerts=alert_list,
         timestamp=datetime.now().isoformat(),
     )
+
+
+# --- Formatting helpers ---
+
+
+def _markdown_table_to_plain(text: str) -> str:
+    """Convert markdown table output to plain text for mobile display."""
+    lines = text.strip().split("\n")
+    result = []
+    for line in lines:
+        # Skip separator lines (|---|---|)
+        if line.strip().startswith("|") and set(line.replace("|", "").strip()) <= {
+            "-",
+            " ",
+        }:
+            continue
+        if "|" in line:
+            cells = [c.strip() for c in line.split("|") if c.strip()]
+            result.append("  ".join(cells))
+        else:
+            result.append(line)
+    return "\n".join(result)
 
 
 # --- Question routing ---

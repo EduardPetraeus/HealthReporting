@@ -67,3 +67,6 @@ claude_code_productivity.md
 # Machine-specific launchd plists (use .plist.template instead)
 scripts/launchd/*.plist
 !scripts/launchd/*.plist.template
+
+# Machine-specific setup guides (contain IP addresses)
+scripts/iphone-shortcut-setup.md
