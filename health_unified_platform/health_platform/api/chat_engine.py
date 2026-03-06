@@ -89,13 +89,16 @@ def _gather_context(tools: HealthTools, question: str) -> str:
         if profile and "No profile" not in profile:
             context_parts.append("## Patient Profile\n" + profile)
     except Exception:
-        pass
+        logger.debug("Failed to load patient profile", exc_info=True)
 
     # Gather data based on question keywords
     data_queries = []
 
+    matched = False
+
     # Sleep
     if any(kw in q for kw in ["sleep", "sov", "søvn", "slept", "insomnia"]):
+        matched = True
         data_queries.extend(
             [
                 ("sleep_score", "last_7_days", "daily_value"),
@@ -105,7 +108,8 @@ def _gather_context(tools: HealthTools, question: str) -> str:
         )
 
     # Readiness
-    elif any(kw in q for kw in ["readiness", "ready", "klar", "energy", "energi"]):
+    if any(kw in q for kw in ["readiness", "ready", "klar", "energy", "energi"]):
+        matched = True
         data_queries.extend(
             [
                 ("readiness_score", "last_7_days", "daily_value"),
@@ -114,7 +118,8 @@ def _gather_context(tools: HealthTools, question: str) -> str:
         )
 
     # Steps / Activity
-    elif any(kw in q for kw in ["step", "skridt", "walk", "activity", "aktiv"]):
+    if any(kw in q for kw in ["step", "skridt", "walk", "activity", "aktiv"]):
+        matched = True
         data_queries.extend(
             [
                 ("steps", "last_7_days", "daily_value"),
@@ -124,19 +129,22 @@ def _gather_context(tools: HealthTools, question: str) -> str:
         )
 
     # Workout
-    elif any(kw in q for kw in ["workout", "exercise", "træning", "run", "løb"]):
+    if any(kw in q for kw in ["workout", "exercise", "træning", "run", "løb"]):
+        matched = True
         data_queries.append(("workout", "last_30_days", "daily_value"))
 
     # Stress
-    elif any(kw in q for kw in ["stress", "recover", "afslapning"]):
+    if any(kw in q for kw in ["stress", "recover", "afslapning"]):
+        matched = True
         data_queries.append(("daily_stress", "last_7_days", "daily_value"))
 
     # Weight
-    elif any(kw in q for kw in ["weight", "vægt", "body", "krop"]):
+    if any(kw in q for kw in ["weight", "vægt", "body", "krop"]):
+        matched = True
         data_queries.append(("weight", "last_30_days", "daily_value"))
 
     # Broad / overview / trend questions — give everything
-    else:
+    if not matched:
         data_queries.extend(
             [
                 ("sleep_score", "last_7_days", "daily_value"),
@@ -155,7 +163,7 @@ def _gather_context(tools: HealthTools, question: str) -> str:
                 label = f"{metric} ({date_range}, {computation})"
                 context_parts.append(f"## {label}\n{result}")
         except Exception:
-            pass
+            logger.debug("Failed to query %s", metric, exc_info=True)
 
     # Try to get recent daily summaries for richer context
     try:
@@ -163,7 +171,7 @@ def _gather_context(tools: HealthTools, question: str) -> str:
         if summaries and "No results" not in summaries:
             context_parts.append("## Recent Daily Summaries\n" + summaries)
     except Exception:
-        pass
+        logger.debug("Failed to search memory", exc_info=True)
 
     return (
         "\n\n---\n\n".join(context_parts)
@@ -207,17 +215,19 @@ def generate_response(tools: HealthTools, question: str) -> str:
             "Run: `pip install anthropic`"
         )
     except Exception as exc:
-        if "authentication" in str(exc).lower() or "api_key" in str(exc).lower():
+        exc_type = type(exc).__name__
+        # Detect auth errors by exception type name (avoids importing anthropic)
+        if exc_type in ("AuthenticationError", "PermissionDeniedError"):
             logger.error("Invalid ANTHROPIC_API_KEY")
             return (
                 "## Configuration Error\n\n"
                 "The AI assistant is not configured correctly. "
                 "Please check the ANTHROPIC_API_KEY in your keychain."
             )
-        logger.error("Claude API call failed: %s", exc)
+        logger.exception("Claude API call failed")
         return (
             "## Temporary Error\n\n"
             "Could not reach the AI assistant. "
             "Your health data is still accessible via the quick action buttons.\n\n"
-            f"*Technical: {type(exc).__name__}*"
+            f"*Technical: {exc_type}*"
         )
