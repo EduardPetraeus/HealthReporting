@@ -83,3 +83,6 @@ build/
 # Test coverage
 .coverage
 htmlcov/
+
+# Generated documentation
+docs/*.html
