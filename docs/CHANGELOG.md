@@ -4,57 +4,60 @@
 
 ---
 
-## 2026-03-06 — Session 009: Iterations 1-3 — MCP Live + Daily Sync + Remote Access
+## 2026-03-06 — Session 010: Claude API Chat + Multi-AI Review
 
-**Phase:** Roadmap Iterations 1-3 (autonomous execution)
+**Phase:** Roadmap Iteration 3 completion (AI-powered chat)
 **Branch:** `feature/iteration-1-mcp-goes-live`
-**Goal:** Wire MCP into Claude Code, automate daily Oura sync, build FastAPI for remote access
+**Goal:** Replace keyword-based chat with Claude API intelligence, run multi-AI review pipeline
 
 ### What was done
 
-**Iteration 1 — MCP Goes Live**
-- Fixed `health_tools.py`: `id` → `insight_id`, VARCHAR → VARCHAR[] tags, added `is_active` filter
-- Fixed `embedding_engine.py`: matching `insight_id` references in backfill
-- Fixed `test_mcp_integration.py`: knowledge_base fixture aligned with real DB schema
-- Created `tests/test_mcp_smoke.py` — 55+ tests covering all 8 MCP tools + 10 standard health questions
+**Claude API Integration — "Læge i lommen"**
+- Created `chat_engine.py` — Claude Sonnet 4 integration with context gathering + system prompt
+- Server.py delegates to `generate_response()` instead of keyword routing
+- Context-aware: gathers relevant health data per question, includes patient profile
+- Multi-topic support: `if` instead of `elif` allows asking about sleep AND steps
+- Responds in user's language (Danish/English) with markdown tables, insights, baselines
+- Lazy import of `anthropic` — tests run in Python 3.9 without SDK
+- API key from claude.keychain-db with env var fallback
 
-**Iteration 2 — Automated Daily Refresh**
-- Created `scripts/daily_sync.sh` — 4-step pipeline (Oura fetch → Bronze → Silver → Summary + Embedding)
-- Created `scripts/launchd/com.health.daily-sync.plist` — daily at 06:00
-- ntfy.sh push notifications on success/failure
+**Mobile UI Improvements (from UI review)**
+- iOS keyboard: `interactive-widget=resizes-content` + visualViewport handler
+- Safe area insets for iPhone home indicator
+- Quick action buttons: min 44px touch targets
+- Removed `user-scalable=no` (accessibility)
+- Single newline → `<br>` in markdown renderer
+- Table overflow: scrollable wrapper for narrow screens
+- Typing indicator styled as bot bubble
+- Auto-scroll: requestAnimationFrame for reliability
+- Login input: enterkeyhint=go, spellcheck=false
 
-**Iteration 3 — Remote Access**
-- Created `health_platform/api/server.py` — FastAPI with 5 endpoints (/health, /v1/chat, /v1/query, /v1/profile, /v1/alerts)
-- Created `health_platform/api/auth.py` — Bearer token from macOS Keychain + env var fallback
-- Created `scripts/launchd/com.health.api-server.plist` — always-on with KeepAlive
-- Created `tests/test_api.py` — 14 tests for all endpoints
+**Security fixes (from security + Gemini review)**
+- YAML-sourced identifiers now validated via `_validate_identifier`
+- Silent `except: pass` → `logger.debug(exc_info=True)` in chat_engine
+- Exception type name matching instead of string matching for auth errors
+- `logger.exception` for API failures (includes stack trace)
 
-**Security hardening**
-- SQL injection prevention: `_SAFE_IDENTIFIER` regex validator in `_parse_metric_ref`
-- Expanded `run_custom_query` forbidden keywords (ATTACH, DETACH, COPY, CALL, PRAGMA)
-- Removed unused imports (yaml, format_as_yaml, columns variable)
-- Code review + security review via subagents
+### Multi-AI Review Pipeline
+- **Gemini review (gemini-2.5-flash):** 8 findings addressed — silent error suppression, elif→if, auth error detection, dead code analysis
+- **Security review (Claude subagent):** YAML SQL injection path identified and fixed
+- **UI review (Claude subagent):** 3 HIGH, 4 MEDIUM, 4 LOW findings — all HIGH and MEDIUM fixed
 
 ### Stats
-- 5 commits, 11 files changed, 1744 lines added
+- 4 commits, 4 files changed
 - 222 tests passing (all green)
-- 0 security issues found
+- 3 AI reviews completed (Gemini + 2 Claude subagents)
+- 0 security issues remaining
 
 ### Architecture changes
-- New: FastAPI REST layer (`api/server.py`, `api/auth.py`) — keyword-based chat routing
-- New: launchd automation (daily sync + always-on API server)
-- No breaking changes to existing MCP server or data model
-
-### Manual steps required (not done by Claude)
-- Install Tailscale on Mac Mini + iPhone + laptop
-- Load launchd plists: `launchctl load ~/Library/LaunchAgents/com.health.daily-sync.plist`
-- Set API token in Keychain: `security add-generic-password -s health-api -a token -w <your-token>`
+- New: `chat_engine.py` — AI-powered response generation (Claude API)
+- Modified: server.py routes to chat_engine instead of keyword routing
+- `_route_question` retained as test fallback only
 
 ### Carried over
-- Iteration 4: Data Quality Shield (dbt tests, data quality suite)
-- Iteration 5-10: remaining roadmap items
-- Tailscale installation (manual)
-- ANTHROPIC_API_KEY → GitHub Secrets
+- Iteration 4: Data Quality Shield (dbt tests)
+- Merge to main: pending Claus approval + iPhone live test
+- Clean up docs/architecture-diagram*.html and app/ directory
 
 ---
 
