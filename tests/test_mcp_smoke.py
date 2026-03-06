@@ -212,7 +212,7 @@ def smoke_db():
         """
         CREATE TABLE silver.personal_info (
             age INTEGER, weight_kg DOUBLE, height_m DOUBLE,
-            biological_sex VARCHAR, email VARCHAR,
+            biological_sex VARCHAR,
             business_key_hash VARCHAR, row_hash VARCHAR,
             load_datetime TIMESTAMP, update_datetime TIMESTAMP
         )
@@ -220,8 +220,8 @@ def smoke_db():
     )
     con.execute(
         """
-        INSERT INTO silver.personal_info (age, weight_kg, height_m, biological_sex, email)
-        VALUES (45, 75.0, 1.78, 'male', 'test@example.com')
+        INSERT INTO silver.personal_info (age, weight_kg, height_m, biological_sex)
+        VALUES (45, 75.0, 1.78, 'male')
     """
     )
 

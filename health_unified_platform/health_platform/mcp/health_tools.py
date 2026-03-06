@@ -265,6 +265,7 @@ class HealthTools:
 
         Supports dotted notation: 'table.column' (e.g., 'daily_sleep.sleep_score').
         """
+        max_lag = min(max_lag, 30)
         table_a, col_a = self._parse_metric_ref(metric_a)
         table_b, col_b = self._parse_metric_ref(metric_b)
 
@@ -450,7 +451,7 @@ class HealthTools:
                 """,
                 [insight_id, title, content, insight_type, confidence, tags_list],
             )
-            logger.info("Recorded insight: %s (id=%s)", title, insight_id)
+            logger.info("Recorded insight id=%s type=%s", insight_id, insight_type)
             tags_display = ", ".join(tags_list) if tags_list else "(none)"
             return (
                 f"Insight recorded successfully.\n\n"
@@ -507,7 +508,7 @@ class HealthTools:
                     "Only read-only (SELECT) queries are allowed."
                 )
 
-        logger.info("Custom query executed. Reason: %s", explanation)
+        logger.info("Custom query executed (reason length=%d)", len(explanation))
 
         try:
             result = self.con.execute(sql)
