@@ -116,13 +116,14 @@ async def chat(
 ):
     """Ask a natural language health question.
 
-    The AI interprets the question and routes to the appropriate tool.
-    Simple keyword matching — for full AI chat, use Claude Code + MCP.
+    Uses Claude AI to interpret the question and generate insights
+    from the user's real health data.
     """
-    question = request.question.lower()
+    from health_platform.api.chat_engine import generate_response  # noqa: E402
+
     tools = _get_tools()
     try:
-        answer = _route_question(tools, question, request.question)
+        answer = generate_response(tools, request.question)
     finally:
         tools.close()
 

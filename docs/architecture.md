@@ -1,6 +1,6 @@
 # ARCHITECTURE.md — HealthReporting
 
-> Last updated: 2026-03-04
+> Last updated: 2026-03-06
 > For technical implementation details (silver pattern, merge scripts, hive partitioning), see `docs/architecture.md`.
 
 ---
@@ -93,13 +93,18 @@ graph TD
         DBX_LIVE[Live data flow to cloud<br/>Autoloader not yet running live data]
     end
 
+    subgraph "Built (Session 009)"
+        API[FastAPI REST server<br/>5 endpoints, Bearer auth<br/>Tailscale VPN ready]
+        DSYNC[Daily sync automation<br/>launchd at 06:00<br/>ntfy.sh notifications]
+        SMOKE[222 tests<br/>55 MCP smoke tests<br/>14 API tests]
+    end
+
     subgraph "Not Built"
         WITH_C[Withings connector]
         STRA[Strava connector]
         GETT[GetTested connector]
         G_FULL[Gold: full reporting entities<br/>cross-source joins, composite score]
         VIZ[Visualization layer]
-        TDD[Test framework — pytest TDD]
     end
 
     AH_C --> IE --> B_AH
@@ -255,6 +260,11 @@ HealthReporting/
 │   ├── learnings.md                       # architectural decisions and lessons
 │   ├── paths.md                           # key file paths
 │   └── runbook.md                         # how to run the platform locally
+├── scripts/
+│   ├── daily_sync.sh                      # 4-step Oura → Bronze → Silver → Summary pipeline
+│   └── launchd/
+│       ├── com.health.daily-sync.plist    # Daily at 06:00
+│       └── com.health.api-server.plist    # Always-on FastAPI
 ├── .claude/
 │   ├── commands/                          # 10 slash commands
 │   └── agents/                            # 12 custom agents
@@ -282,6 +292,9 @@ HealthReporting/
         │       ├── _index.yml              # master index + query routing
         │       ├── _business_rules.yml     # composite score + alerts
         │       └── 18 metric YAMLs         # per-metric definitions
+        ├── api/                             # REST API (NEW — Session 009)
+        │   ├── server.py                   # FastAPI, 5 endpoints
+        │   └── auth.py                     # Bearer token (Keychain + env)
         ├── mcp/                            # MCP Server (NEW)
         │   ├── server.py                   # FastMCP server, 8 tools
         │   ├── health_tools.py             # tool implementations
@@ -329,5 +342,7 @@ HealthReporting/
 | Embeddings | sentence-transformers (all-MiniLM-L6-v2) | — |
 | Vector Search | DuckDB VSS (HNSW, cosine) | — |
 | CI/CD | — | GitHub Actions (deploy.yml) |
+| API | FastAPI (Tailscale VPN) | — |
+| Automation | launchd (daily sync + API server) | Databricks Workflows |
 | Reporting | MCP tools → Claude Code | Databricks AI/BI (planned) |
 | Audit | AuditLogger to DuckDB | AuditLogger to Delta |

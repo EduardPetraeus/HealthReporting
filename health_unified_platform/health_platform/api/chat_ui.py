@@ -200,20 +200,19 @@ header .status { font-size:12px; color:var(--muted); margin-left:auto; }
 <div id="chat">
   <div class="msg bot">
     <div class="bot-icon">Health Assistant</div>
-    Ask me about your health data — sleep, steps, readiness, weight, stress, or workouts.
-    <br><br>You can type in Danish or English.
+    Hej! Jeg er din personlige sundhedsassistent. Spørg mig om hvad som helst — søvn, skridt, energi, stress, træning eller vægt.
+    <br><br>Jeg forstår dansk og engelsk.
   </div>
 </div>
 
 <div class="quick-btns">
-  <button onclick="ask('how did I sleep?')">Sleep</button>
-  <button onclick="ask('readiness')">Readiness</button>
-  <button onclick="ask('steps')">Steps</button>
-  <button onclick="ask('weight')">Weight</button>
-  <button onclick="ask('stress')">Stress</button>
-  <button onclick="ask('workout')">Workouts</button>
-  <button onclick="ask('profil')">Profile</button>
-  <button onclick="ask('sleep trend')">Trend</button>
+  <button onclick="ask('Hvordan har jeg sovet den seneste uge?')">Søvn</button>
+  <button onclick="ask('Hvad er min readiness og energi?')">Energi</button>
+  <button onclick="ask('Hvor mange skridt har jeg gået?')">Skridt</button>
+  <button onclick="ask('Giv mig et overblik over min sundhed')">Overblik</button>
+  <button onclick="ask('Hvordan er min stress og recovery?')">Stress</button>
+  <button onclick="ask('Vis mine træninger')">Træning</button>
+  <button onclick="ask('Hvad vejer jeg og hvordan er trenden?')">Vægt</button>
 </div>
 
 <div id="input-area">
