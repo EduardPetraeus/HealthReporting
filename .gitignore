@@ -48,6 +48,7 @@ logs/
 .claude/claude_mcp_config.json
 .claude/skills/
 .claude/settings.local.json
+.claude/settings.json
 .ai-dev-kit/
 
 # Claude agent instructions (local-only)
@@ -63,3 +64,25 @@ backlog/
 claude_code_productivity.json
 claude_code_productivity.md
 .venv-ai/
+
+# Machine-specific launchd plists (use .plist.template instead)
+scripts/launchd/*.plist
+!scripts/launchd/*.plist.template
+
+# Machine-specific setup guides (contain IP addresses)
+scripts/iphone-shortcut-setup.md
+
+# IDE
+.idea/
+
+# Python build artifacts
+*.egg-info/
+dist/
+build/
+
+# Test coverage
+.coverage
+htmlcov/
+
+# Generated documentation
+docs/*.html

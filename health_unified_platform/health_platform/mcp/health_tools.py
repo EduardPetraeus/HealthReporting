@@ -4,6 +4,7 @@ Each method corresponds to an MCP tool registered in server.py.
 Delegates to QueryBuilder for YAML-based queries, Formatter for output,
 and SchemaPruner for schema context.
 """
+
 from __future__ import annotations
 
 import re
@@ -13,12 +14,10 @@ from pathlib import Path
 from typing import Optional
 
 import duckdb
-import yaml
 
 from health_platform.mcp.formatter import (
     format_as_markdown_kv,
     format_as_markdown_table,
-    format_as_yaml,
     format_empty,
     format_error,
     format_result,
@@ -103,7 +102,9 @@ class HealthTools:
             rows = result.fetchall()
         except Exception as exc:
             logger.error("Query failed for %s/%s: %s", metric, computation, exc)
-            return format_error(f"Query execution failed: {exc}")
+            return format_error(
+                "Query execution failed. Check server logs for details."
+            )
 
         if not rows:
             return format_empty(metric, date_range)
@@ -147,7 +148,7 @@ class HealthTools:
 
         # Build LIKE conditions — match any keyword
         like_conditions = " OR ".join(
-            [f"LOWER(summary_text) LIKE '%' || ? || '%'" for _ in keywords]
+            ["LOWER(summary_text) LIKE '%' || ? || '%'" for _ in keywords]
         )
         sql = f"""
             SELECT day, summary_text
@@ -175,7 +176,7 @@ class HealthTools:
 
         like_conditions = " OR ".join(
             [
-                f"LOWER(title) LIKE '%' || ? || '%' OR LOWER(content) LIKE '%' || ? || '%'"
+                "LOWER(title) LIKE '%' || ? || '%' OR LOWER(content) LIKE '%' || ? || '%'"
                 for _ in keywords
             ]
         )
@@ -185,9 +186,9 @@ class HealthTools:
             params.extend([kw, kw])
 
         sql = f"""
-            SELECT id, title, insight_type, confidence, created_at
+            SELECT insight_id, title, insight_type, confidence, created_at
             FROM agent.knowledge_base
-            WHERE {like_conditions}
+            WHERE is_active = true AND ({like_conditions})
             ORDER BY created_at DESC
             LIMIT ?
         """
@@ -228,11 +229,12 @@ class HealthTools:
                 """
                 result = self.con.execute(sql)
 
-            columns = [desc[0] for desc in result.description]
             rows = result.fetchall()
         except Exception as exc:
             logger.error("Failed to load profile: %s", exc)
-            return format_error(f"Failed to load profile: {exc}")
+            return format_error(
+                "Failed to load profile. Check server logs for details."
+            )
 
         if not rows:
             cat_str = ", ".join(categories) if categories else "all"
@@ -267,6 +269,7 @@ class HealthTools:
 
         Supports dotted notation: 'table.column' (e.g., 'daily_sleep.sleep_score').
         """
+        max_lag = min(max_lag, 30)
         table_a, col_a = self._parse_metric_ref(metric_a)
         table_b, col_b = self._parse_metric_ref(metric_b)
 
@@ -392,9 +395,7 @@ class HealthTools:
                     range_str = f"<= {max_val}"
                 threshold_rows.append([level, range_str, label])
             parts.append(
-                format_as_markdown_table(
-                    threshold_rows, ["Level", "Range", "Label"]
-                )
+                format_as_markdown_table(threshold_rows, ["Level", "Range", "Label"])
             )
 
         # Related metrics
@@ -412,7 +413,9 @@ class HealthTools:
         if examples:
             parts.append("\n## Example Queries\n")
             for ex in examples:
-                parts.append(f"- *\"{ex.get('question', '')}\"* -> `{ex.get('tool', '')}`")
+                parts.append(
+                    f'- *"{ex.get("question", "")}"* -> `{ex.get("tool", "")}`'
+                )
 
         return "\n".join(parts)
 
@@ -440,30 +443,33 @@ class HealthTools:
             return format_error("Confidence must be between 0.0 and 1.0.")
 
         insight_id = str(uuid.uuid4())
-        tags_str = ",".join(tags) if tags else ""
+        tags_list = tags if tags else []
 
         try:
             self._ensure_knowledge_base_table()
             self.con.execute(
                 """
                 INSERT INTO agent.knowledge_base
-                    (id, title, content, insight_type, confidence, tags, created_at)
+                    (insight_id, title, content, insight_type, confidence, tags, created_at)
                 VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
                 """,
-                [insight_id, title, content, insight_type, confidence, tags_str],
+                [insight_id, title, content, insight_type, confidence, tags_list],
             )
-            logger.info("Recorded insight: %s (id=%s)", title, insight_id)
+            logger.info("Recorded insight id=%s type=%s", insight_id, insight_type)
+            tags_display = ", ".join(tags_list) if tags_list else "(none)"
             return (
                 f"Insight recorded successfully.\n\n"
                 f"- **ID:** {insight_id}\n"
                 f"- **Title:** {title}\n"
                 f"- **Type:** {insight_type}\n"
                 f"- **Confidence:** {confidence}\n"
-                f"- **Tags:** {tags_str or '(none)'}"
+                f"- **Tags:** {tags_display}"
             )
         except Exception as exc:
             logger.error("Failed to record insight: %s", exc)
-            return format_error(f"Failed to record insight: {exc}")
+            return format_error(
+                "Failed to record insight. Check server logs for details."
+            )
 
     # ------------------------------------------------------------------
     # Tool 7: get_schema_context
@@ -492,6 +498,14 @@ class HealthTools:
             "REPLACE",
             "GRANT",
             "REVOKE",
+            "ATTACH",
+            "DETACH",
+            "COPY",
+            "CALL",
+            "PRAGMA",
+            "EXPORT",
+            "LOAD",
+            "INSTALL",
         ]
         sql_upper = sql.upper().strip()
         for keyword in forbidden_keywords:
@@ -503,7 +517,7 @@ class HealthTools:
                     "Only read-only (SELECT) queries are allowed."
                 )
 
-        logger.info("Custom query executed. Reason: %s", explanation)
+        logger.info("Custom query executed (reason length=%d)", len(explanation))
 
         try:
             result = self.con.execute(sql)
@@ -511,7 +525,9 @@ class HealthTools:
             rows = result.fetchall()
         except Exception as exc:
             logger.error("Custom query failed: %s", exc)
-            return format_error(f"Query execution failed: {exc}")
+            return format_error(
+                "Query execution failed. Check server logs for details."
+            )
 
         if not rows:
             return "Query returned no results."
@@ -568,26 +584,39 @@ class HealthTools:
         )
         return (today - timedelta(days=7), today)
 
+    _SAFE_IDENTIFIER = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
+
+    def _validate_identifier(self, name: str) -> str:
+        """Validate that a string is a safe SQL identifier (prevents injection)."""
+        if not self._SAFE_IDENTIFIER.match(name):
+            raise ValueError(f"Invalid SQL identifier: {name!r}")
+        return name
+
     def _parse_metric_ref(self, metric_ref: str) -> tuple[str, str]:
         """Parse a metric reference like 'daily_sleep.sleep_score' into (table, column).
 
         If no dot, tries to look up the metric contract for source_table and source_column.
+        Validates all identifiers to prevent SQL injection.
         """
         if "." in metric_ref:
             parts = metric_ref.split(".", 1)
-            table = parts[0]
-            column = parts[1]
+            table = self._validate_identifier(parts[0])
+            column = self._validate_identifier(parts[1])
             # Ensure table has schema prefix
             if not table.startswith("silver.") and not table.startswith("agent."):
                 table = f"silver.{table}"
             return (table, column)
 
-        # Lookup from contract
+        # Lookup from contract — validate even YAML-sourced identifiers
         try:
             contract = self.query_builder.load_contract(metric_ref)
             metric_def = contract.get("metric", contract)
             table = metric_def.get("source_table", f"silver.{metric_ref}")
             column = metric_def.get("source_column", metric_ref)
+            # Validate table parts (schema.table)
+            for part in table.split("."):
+                self._validate_identifier(part)
+            self._validate_identifier(column)
             return (table, column)
         except FileNotFoundError:
             return (f"silver.{metric_ref}", metric_ref)
@@ -607,15 +636,20 @@ class HealthTools:
     def _ensure_knowledge_base_table(self) -> None:
         """Create agent.knowledge_base if it does not exist."""
         self.con.execute("CREATE SCHEMA IF NOT EXISTS agent")
-        self.con.execute("""
+        self.con.execute(
+            """
             CREATE TABLE IF NOT EXISTS agent.knowledge_base (
-                id VARCHAR PRIMARY KEY,
-                title VARCHAR NOT NULL,
-                content TEXT NOT NULL,
+                insight_id VARCHAR PRIMARY KEY,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 insight_type VARCHAR NOT NULL,
-                confidence FLOAT NOT NULL,
-                tags VARCHAR DEFAULT '',
-                embedding FLOAT[],
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                title VARCHAR NOT NULL,
+                content VARCHAR NOT NULL,
+                evidence_query VARCHAR,
+                confidence DOUBLE NOT NULL,
+                tags VARCHAR[],
+                embedding FLOAT[384],
+                is_active BOOLEAN DEFAULT true,
+                superseded_by VARCHAR
             )
-        """)
+        """
+        )

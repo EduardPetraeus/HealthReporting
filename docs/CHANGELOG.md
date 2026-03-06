@@ -4,6 +4,116 @@
 
 ---
 
+## 2026-03-06 — Session 011: Keychain Migration, Cleanup, Security Hardening
+
+**Phase:** Post-review cleanup + secrets consolidation
+**Branch:** `feature/iteration-1-mcp-goes-live`
+**Goal:** Commit session 010 leftovers, migrate Oura auth from .env to Keychain, consolidate duplicated keychain patterns
+
+### What was done
+
+**Post-review commits**
+- Committed `server.py` (Literal import, type constraint) and `chat_ui.py` (localStorage, isBusy lock, retry button, CSP headers) from session 010 review
+
+**Cleanup**
+- Added `docs/*.html` to `.gitignore` for generated diagram files
+- Rewrote `run_chat.sh` from Streamlit launcher to FastAPI/uvicorn launcher
+- Removed `.claude/settings.json` from git tracking (already in .gitignore)
+
+**Shared keychain utility (NEW)**
+- Created `utils/keychain.py` with `get_secret(key_name, fallback_env=True)` — single function for all macOS Keychain reads
+- 7 test cases in `test_keychain_util.py` (all mocked, no real keychain access)
+
+**Oura auth migration**
+- Removed `python-dotenv` dependency from Oura `auth.py`
+- `OURA_CLIENT_ID` and `OURA_CLIENT_SECRET` now read from `claude.keychain-db`
+- Error messages include keychain setup instructions
+
+**Keychain consolidation**
+- `api/auth.py`: replaced 25-line `_load_token_from_keychain()` with `get_secret("HEALTH_API_TOKEN")`
+- `api/chat_engine.py`: replaced 25-line `_get_api_key()` with `get_secret("ANTHROPIC_API_KEY")`
+- `test_api.py`: updated fixture to mock `subprocess.run` instead of removed function
+
+**Security documentation**
+- `docs/learnings.md`: documented localStorage + `unsafe-inline` CSP risk acceptance for VPN-only deployment
+- `docs/learnings.md`: documented keychain-first secrets management pattern
+- `scripts/security-hardening.sh`: verification script for keychain timeout, FileVault, DNS, firewall (read-only)
+
+### Stats
+- 8 commits, 11 files changed (3 new, 8 modified)
+- 229 tests passing (up from 222 — 7 new keychain tests)
+- Net code reduction: ~57 lines removed (duplicated subprocess patterns)
+
+### Architecture changes
+- New: `utils/keychain.py` — shared secrets access layer
+- Modified: all keychain reads now go through single utility
+- Removed: `.env` file dependency from Oura connector
+
+### Carried over
+- Delete legacy `app/` directory (Streamlit UI — already deleted locally, not committed)
+- Iteration 4: Data Quality Shield (dbt tests)
+- Merge to main: pending Claus approval + iPhone live test
+- Remaining modified files: `docs/SETUP_DATABRICKS_MCP.md`, `scripts/daily_sync.sh`
+
+---
+
+## 2026-03-06 — Session 010: Claude API Chat + Multi-AI Review
+
+**Phase:** Roadmap Iteration 3 completion (AI-powered chat)
+**Branch:** `feature/iteration-1-mcp-goes-live`
+**Goal:** Replace keyword-based chat with Claude API intelligence, run multi-AI review pipeline
+
+### What was done
+
+**Claude API Integration — "Læge i lommen"**
+- Created `chat_engine.py` — Claude Sonnet 4 integration with context gathering + system prompt
+- Server.py delegates to `generate_response()` instead of keyword routing
+- Context-aware: gathers relevant health data per question, includes patient profile
+- Multi-topic support: `if` instead of `elif` allows asking about sleep AND steps
+- Responds in user's language (Danish/English) with markdown tables, insights, baselines
+- Lazy import of `anthropic` — tests run in Python 3.9 without SDK
+- API key from claude.keychain-db with env var fallback
+
+**Mobile UI Improvements (from UI review)**
+- iOS keyboard: `interactive-widget=resizes-content` + visualViewport handler
+- Safe area insets for iPhone home indicator
+- Quick action buttons: min 44px touch targets
+- Removed `user-scalable=no` (accessibility)
+- Single newline → `<br>` in markdown renderer
+- Table overflow: scrollable wrapper for narrow screens
+- Typing indicator styled as bot bubble
+- Auto-scroll: requestAnimationFrame for reliability
+- Login input: enterkeyhint=go, spellcheck=false
+
+**Security fixes (from security + Gemini review)**
+- YAML-sourced identifiers now validated via `_validate_identifier`
+- Silent `except: pass` → `logger.debug(exc_info=True)` in chat_engine
+- Exception type name matching instead of string matching for auth errors
+- `logger.exception` for API failures (includes stack trace)
+
+### Multi-AI Review Pipeline
+- **Gemini review (gemini-2.5-flash):** 8 findings addressed — silent error suppression, elif→if, auth error detection, dead code analysis
+- **Security review (Claude subagent):** YAML SQL injection path identified and fixed
+- **UI review (Claude subagent):** 3 HIGH, 4 MEDIUM, 4 LOW findings — all HIGH and MEDIUM fixed
+
+### Stats
+- 4 commits, 4 files changed
+- 222 tests passing (all green)
+- 3 AI reviews completed (Gemini + 2 Claude subagents)
+- 0 security issues remaining
+
+### Architecture changes
+- New: `chat_engine.py` — AI-powered response generation (Claude API)
+- Modified: server.py routes to chat_engine instead of keyword routing
+- `_route_question` retained as test fallback only
+
+### Carried over
+- Iteration 4: Data Quality Shield (dbt tests)
+- Merge to main: pending Claus approval + iPhone live test
+- Clean up docs/architecture-diagram*.html and app/ directory
+
+---
+
 ## 2026-03-04 — Session 008: AI-Native Data Model — Full Implementation
 
 **Phase:** Phase 3b — AI-Native Data Model

@@ -1,7 +1,7 @@
 # PROJECT_PLAN.md — HealthReporting
 
-> Last updated: 2026-03-04 (Session 008)
-> Current phase: **Phase 3b — AI-Native Data Model (COMPLETE) + Phase 5 (Databricks, parallel) + Phase 7 (AI Governance, active)**
+> Last updated: 2026-03-06 (Session 011)
+> Current phase: **Phase 3b — AI-Native Data Model (COMPLETE) + Phase 5 (Databricks, parallel) + Phase 7 (AI Governance, active) + Roadmap Iterations 1-3 (COMPLETE)**
 
 ---
 
@@ -122,10 +122,10 @@
 | M5: .mcp.json updated (local, gitignored) | ✅ done | Health MCP server config |
 | M5: ADR-005 | ✅ done | `docs/adr/ADR-005-ai-native-data-model.md` |
 | M5: 55/55 pytest tests green | ✅ done | All phases validated |
-| Wire MCP server into Claude Code | ⬜ not started | Start server, test live queries |
+| Wire MCP server into Claude Code | ✅ done | .mcp.json configured, 8 tools verified, 55 smoke tests |
 | Deprecate local Gold views | ⬜ not started | Keep Databricks Gold |
 
-**Exit criteria:** AI agent queries health data via MCP tools with >80% accuracy. All memory tiers populated. ✅ ACHIEVED (pending MCP live wire-up).
+**Exit criteria:** AI agent queries health data via MCP tools with >80% accuracy. All memory tiers populated. ✅ ACHIEVED.
 
 ---
 
@@ -171,7 +171,7 @@
 | Auto-deploy to dev on push | ✅ done | Feature branches → dev |
 | Auto-deploy to prd on merge | ✅ done | Main → prd |
 | Automated tests | ⬜ not started | pytest TDD framework |
-| Oura daily job (cron) | ⬜ not started | Automated bronze → silver pipeline |
+| Oura daily job (cron) | ✅ done | `scripts/daily_sync.sh` + `com.health.daily-sync.plist` — runs daily at 06:00 |
 | Code-reviewer agent as PR gate | ⬜ not started | AI governance experiment |
 
 ---

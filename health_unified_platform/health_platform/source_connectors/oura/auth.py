@@ -15,16 +15,15 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlencode, urlparse
 
 import requests
-from dotenv import load_dotenv
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
+from health_platform.utils.keychain import get_secret
 from health_platform.utils.logging_config import get_logger
 
 logger = get_logger("oura.auth")
 
 CONFIG_DIR = Path.home() / ".config" / "health_reporting"
-ENV_FILE = CONFIG_DIR / ".env"
 TOKEN_FILE = CONFIG_DIR / "oura_tokens.json"
 
 AUTHORIZE_URL = "https://cloud.ouraring.com/oauth/authorize"
@@ -37,12 +36,27 @@ OAUTH_SCOPES = (
 
 
 def _load_credentials() -> tuple[str, str, str]:
-    load_dotenv(ENV_FILE)
-    client_id = os.getenv("OURA_CLIENT_ID")
-    client_secret = os.getenv("OURA_CLIENT_SECRET")
-    redirect_uri = os.getenv("OURA_REDIRECT_URI", f"http://localhost:{CALLBACK_PORT}/callback")
+    """Load OAuth credentials from macOS Keychain (claude.keychain-db).
+
+    Setup:
+        security add-generic-password -a claude -s OURA_CLIENT_ID -w "<id>" ~/Library/Keychains/claude.keychain-db
+        security add-generic-password -a claude -s OURA_CLIENT_SECRET -w "<secret>" ~/Library/Keychains/claude.keychain-db
+    """
+    client_id = get_secret("OURA_CLIENT_ID", fallback_env=False)
+    client_secret = get_secret("OURA_CLIENT_SECRET", fallback_env=False)
+    redirect_uri = (
+        os.environ.get("OURA_REDIRECT_URI")
+        or f"http://localhost:{CALLBACK_PORT}/callback"
+    )
     if not client_id or not client_secret:
-        raise ValueError(f"Missing OURA_CLIENT_ID or OURA_CLIENT_SECRET in {ENV_FILE}")
+        raise ValueError(
+            "Missing OURA_CLIENT_ID or OURA_CLIENT_SECRET. "
+            "Store them in macOS Keychain:\n"
+            "  security add-generic-password -a claude -s OURA_CLIENT_ID "
+            "-w '<id>' ~/Library/Keychains/claude.keychain-db\n"
+            "  security add-generic-password -a claude -s OURA_CLIENT_SECRET "
+            "-w '<secret>' ~/Library/Keychains/claude.keychain-db"
+        )
     return client_id, client_secret, redirect_uri
 
 
@@ -104,14 +118,13 @@ class _CallbackHandler(BaseHTTPRequestHandler):
 
 def _run_auth_flow(client_id: str, client_secret: str, redirect_uri: str) -> dict:
     """Opens the browser for OAuth login and exchanges the code for tokens."""
-    auth_url = (
-        f"{AUTHORIZE_URL}?"
-        + urlencode({
+    auth_url = f"{AUTHORIZE_URL}?" + urlencode(
+        {
             "client_id": client_id,
             "redirect_uri": redirect_uri,
             "response_type": "code",
             "scope": OAUTH_SCOPES,
-        })
+        }
     )
     logger.info("Opening browser for Oura authorization...")
     webbrowser.open(auth_url)

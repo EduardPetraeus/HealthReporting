@@ -3,6 +3,7 @@
 Tests all tools with synthetic data to verify end-to-end functionality
 without requiring the real health database.
 """
+
 from __future__ import annotations
 
 import sys
@@ -26,80 +27,101 @@ def mcp_db():
     con.execute("CREATE SCHEMA IF NOT EXISTS agent")
 
     # Silver tables
-    con.execute("""
+    con.execute(
+        """
         CREATE TABLE silver.daily_sleep (
             sk_date INTEGER, day DATE, sleep_score INTEGER,
             business_key_hash VARCHAR, row_hash VARCHAR,
             load_datetime TIMESTAMP, update_datetime TIMESTAMP
         )
-    """)
-    con.execute("""
+    """
+    )
+    con.execute(
+        """
         INSERT INTO silver.daily_sleep (day, sleep_score) VALUES
         ('2026-02-01', 82), ('2026-02-02', 75), ('2026-02-03', 91),
         ('2026-02-04', 68), ('2026-02-05', 85), ('2026-02-06', 79),
         ('2026-02-07', 88)
-    """)
+    """
+    )
 
-    con.execute("""
+    con.execute(
+        """
         CREATE TABLE silver.daily_readiness (
             sk_date INTEGER, day DATE, readiness_score INTEGER,
             business_key_hash VARCHAR, row_hash VARCHAR,
             load_datetime TIMESTAMP, update_datetime TIMESTAMP
         )
-    """)
-    con.execute("""
+    """
+    )
+    con.execute(
+        """
         INSERT INTO silver.daily_readiness (day, readiness_score) VALUES
         ('2026-02-01', 79), ('2026-02-02', 72), ('2026-02-03', 88),
         ('2026-02-04', 65), ('2026-02-05', 81), ('2026-02-06', 77),
         ('2026-02-07', 85)
-    """)
+    """
+    )
 
-    con.execute("""
+    con.execute(
+        """
         CREATE TABLE silver.daily_activity (
             sk_date INTEGER, day DATE, activity_score INTEGER, steps INTEGER,
             active_calories INTEGER, total_calories INTEGER,
             business_key_hash VARCHAR, row_hash VARCHAR,
             load_datetime TIMESTAMP, update_datetime TIMESTAMP
         )
-    """)
-    con.execute("""
+    """
+    )
+    con.execute(
+        """
         INSERT INTO silver.daily_activity (day, activity_score, steps) VALUES
         ('2026-02-01', 91, 12450), ('2026-02-02', 68, 5200),
         ('2026-02-03', 85, 9800), ('2026-02-04', 72, 7100),
         ('2026-02-05', 88, 11200), ('2026-02-06', 65, 4800),
         ('2026-02-07', 82, 8500)
-    """)
+    """
+    )
 
-    con.execute("""
+    con.execute(
+        """
         CREATE TABLE silver.daily_spo2 (
             sk_date INTEGER, day DATE, spo2_avg_pct DOUBLE,
             breathing_disturbance_index DOUBLE,
             business_key_hash VARCHAR, row_hash VARCHAR,
             load_datetime TIMESTAMP, update_datetime TIMESTAMP
         )
-    """)
-    con.execute("""
+    """
+    )
+    con.execute(
+        """
         INSERT INTO silver.daily_spo2 (day, spo2_avg_pct, breathing_disturbance_index) VALUES
         ('2026-02-01', 97.5, 0.8), ('2026-02-02', 96.2, 1.2),
         ('2026-02-03', 98.1, 0.5)
-    """)
+    """
+    )
 
-    con.execute("""
+    con.execute(
+        """
         CREATE TABLE silver.daily_stress (
             sk_date INTEGER, day DATE, day_summary VARCHAR,
             stress_high INTEGER, recovery_high INTEGER,
             business_key_hash VARCHAR, row_hash VARCHAR,
             load_datetime TIMESTAMP, update_datetime TIMESTAMP
         )
-    """)
-    con.execute("""
+    """
+    )
+    con.execute(
+        """
         INSERT INTO silver.daily_stress (day, day_summary, stress_high, recovery_high) VALUES
         ('2026-02-01', 'restored', 120, 480),
         ('2026-02-02', 'stressed', 360, 240),
         ('2026-02-03', 'normal', 200, 400)
-    """)
+    """
+    )
 
-    con.execute("""
+    con.execute(
+        """
         CREATE TABLE silver.workout (
             sk_date INTEGER, day DATE, workout_id VARCHAR, activity VARCHAR,
             intensity VARCHAR, calories INTEGER, distance_meters INTEGER,
@@ -108,51 +130,71 @@ def mcp_db():
             business_key_hash VARCHAR, row_hash VARCHAR,
             load_datetime TIMESTAMP, update_datetime TIMESTAMP
         )
-    """)
-    con.execute("""
+    """
+    )
+    con.execute(
+        """
         INSERT INTO silver.workout (day, activity, intensity, calories, distance_meters,
             start_datetime, duration_seconds) VALUES
         ('2026-02-01', 'running', 'high', 450, 5000, '2026-02-01 07:00:00', 1800),
         ('2026-02-03', 'cycling', 'medium', 300, 15000, '2026-02-03 17:00:00', 3600),
         ('2026-02-05', 'running', 'high', 500, 6000, '2026-02-05 07:00:00', 2100)
-    """)
+    """
+    )
 
     # Agent tables
-    con.execute("""
+    con.execute(
+        """
         CREATE TABLE agent.patient_profile (
             category VARCHAR, profile_key VARCHAR, profile_value VARCHAR,
             last_updated_at TIMESTAMP
         )
-    """)
-    con.execute("""
+    """
+    )
+    con.execute(
+        """
         INSERT INTO agent.patient_profile (category, profile_key, profile_value) VALUES
         ('demographics', 'age', '40'),
         ('demographics', 'biological_sex', 'male'),
         ('demographics', 'height_m', '1.9'),
         ('baselines', 'sleep_score_baseline', '86'),
         ('baselines', 'resting_hr_baseline', '49 bpm')
-    """)
+    """
+    )
 
-    con.execute("""
+    con.execute(
+        """
         CREATE TABLE agent.daily_summaries (
             day DATE, summary_text TEXT, embedding FLOAT[]
         )
-    """)
-    con.execute("""
+    """
+    )
+    con.execute(
+        """
         INSERT INTO agent.daily_summaries (day, summary_text) VALUES
         ('2026-02-01', 'Good sleep quality with score 82. Active day with 12450 steps and a morning run.'),
         ('2026-02-02', 'Poor sleep at 75. Low activity day with only 5200 steps. Stress levels elevated.'),
         ('2026-02-03', 'Excellent sleep score 91. Moderate activity with evening cycling session.')
-    """)
+    """
+    )
 
-    con.execute("""
+    con.execute(
+        """
         CREATE TABLE agent.knowledge_base (
-            id VARCHAR PRIMARY KEY, title VARCHAR NOT NULL, content TEXT NOT NULL,
-            insight_type VARCHAR NOT NULL, confidence FLOAT NOT NULL,
-            tags VARCHAR DEFAULT '', embedding FLOAT[],
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            insight_id VARCHAR PRIMARY KEY,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            insight_type VARCHAR NOT NULL,
+            title VARCHAR NOT NULL,
+            content VARCHAR NOT NULL,
+            evidence_query VARCHAR,
+            confidence DOUBLE NOT NULL,
+            tags VARCHAR[],
+            embedding FLOAT[384],
+            is_active BOOLEAN DEFAULT true,
+            superseded_by VARCHAR
         )
-    """)
+    """
+    )
 
     yield con
     con.close()
@@ -178,7 +220,9 @@ class TestQueryHealth:
         assert "91" in result
 
     def test_period_average(self, tools):
-        result = tools.query_health("sleep_score", "2026-02-01:2026-02-07", "period_average")
+        result = tools.query_health(
+            "sleep_score", "2026-02-01:2026-02-07", "period_average"
+        )
         assert "avg_sleep_score" in result
 
     def test_trend(self, tools):
@@ -186,7 +230,9 @@ class TestQueryHealth:
         assert "rolling_7d" in result
 
     def test_distribution(self, tools):
-        result = tools.query_health("sleep_score", "2026-02-01:2026-02-07", "distribution")
+        result = tools.query_health(
+            "sleep_score", "2026-02-01:2026-02-07", "distribution"
+        )
         assert "excellent" in result or "good" in result or "fair" in result
 
     def test_steps(self, tools):
@@ -215,7 +261,9 @@ class TestQueryHealth:
         assert "cycling" in result
 
     def test_workout_period_summary(self, tools):
-        result = tools.query_health("workout", "2026-02-01:2026-02-07", "period_summary")
+        result = tools.query_health(
+            "workout", "2026-02-01:2026-02-07", "period_summary"
+        )
         assert "3" in result  # 3 workouts
 
     def test_invalid_metric(self, tools):
@@ -290,9 +338,7 @@ class TestDiscoverCorrelations:
         assert "Strongest correlation" in result
 
     def test_invalid_metrics(self, tools):
-        result = tools.discover_correlations(
-            "nonexistent.col", "also_nonexistent.col"
-        )
+        result = tools.discover_correlations("nonexistent.col", "also_nonexistent.col")
         assert "Error" in result or "Could not compute" in result
 
 
@@ -322,7 +368,9 @@ class TestRecordInsight:
     """Tool 6: record_insight — write to knowledge base."""
 
     def test_record_pattern(self, tools):
-        result = tools.record_insight("Test pattern", "Content here", "pattern", 0.8, ["test"])
+        result = tools.record_insight(
+            "Test pattern", "Content here", "pattern", 0.8, ["test"]
+        )
         assert "recorded successfully" in result
 
     def test_record_anomaly(self, tools):
@@ -363,8 +411,7 @@ class TestRunCustomQuery:
 
     def test_valid_select(self, tools):
         result = tools.run_custom_query(
-            "SELECT COUNT(*) AS n FROM silver.daily_sleep",
-            "Testing count"
+            "SELECT COUNT(*) AS n FROM silver.daily_sleep", "Testing count"
         )
         assert "7" in result
 
@@ -380,13 +427,13 @@ class TestRunCustomQuery:
     def test_blocks_insert(self, tools):
         result = tools.run_custom_query(
             "INSERT INTO silver.daily_sleep VALUES (1, '2026-01-01', 80, null, null, null, null)",
-            "Bad"
+            "Bad",
         )
         assert "Error" in result
 
     def test_empty_result(self, tools):
         result = tools.run_custom_query(
             "SELECT * FROM silver.daily_sleep WHERE sleep_score > 999",
-            "No results expected"
+            "No results expected",
         )
         assert "no results" in result.lower()

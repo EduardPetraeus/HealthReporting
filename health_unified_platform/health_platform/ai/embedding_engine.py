@@ -10,6 +10,7 @@ gracefully if it is not installed.
 
 from __future__ import annotations
 
+import re
 import sys
 from pathlib import Path
 
@@ -32,6 +33,7 @@ except ImportError:
 # ---------------------------------------------------------------------------
 # VSS extension helper
 # ---------------------------------------------------------------------------
+
 
 def ensure_vss_extension(con) -> bool:
     """Install and load the DuckDB VSS (vector similarity search) extension.
@@ -59,6 +61,7 @@ def ensure_vss_extension(con) -> bool:
 # ---------------------------------------------------------------------------
 # Embedding engine
 # ---------------------------------------------------------------------------
+
 
 class EmbeddingEngine:
     """Compute and manage vector embeddings for health data text.
@@ -135,13 +138,15 @@ class EmbeddingEngine:
             Number of rows updated.
         """
         try:
-            rows = con.execute("""
+            rows = con.execute(
+                """
                 SELECT day, summary_text
                 FROM agent.daily_summaries
                 WHERE embedding IS NULL
                   AND summary_text IS NOT NULL
                 ORDER BY day
-            """).fetchall()
+            """
+            ).fetchall()
         except Exception as exc:
             logger.error("Failed to query daily_summaries for backfill: %s", exc)
             return 0
@@ -158,11 +163,14 @@ class EmbeddingEngine:
         count = 0
         for (day, _), embedding in zip(rows, embeddings):
             try:
-                con.execute("""
+                con.execute(
+                    """
                     UPDATE agent.daily_summaries
                     SET embedding = ?
                     WHERE day = ?
-                """, [embedding, day])
+                """,
+                    [embedding, day],
+                )
                 count += 1
             except Exception as exc:
                 logger.error("Failed to update embedding for %s: %s", day, exc)
@@ -184,13 +192,15 @@ class EmbeddingEngine:
             Number of rows updated.
         """
         try:
-            rows = con.execute("""
-                SELECT id, content
+            rows = con.execute(
+                """
+                SELECT insight_id, content
                 FROM agent.knowledge_base
                 WHERE embedding IS NULL
                   AND content IS NOT NULL
-                ORDER BY id
-            """).fetchall()
+                ORDER BY insight_id
+            """
+            ).fetchall()
         except Exception as exc:
             logger.error("Failed to query knowledge_base for backfill: %s", exc)
             return 0
@@ -207,21 +217,23 @@ class EmbeddingEngine:
         count = 0
         for (entry_id, _), embedding in zip(rows, embeddings):
             try:
-                con.execute("""
+                con.execute(
+                    """
                     UPDATE agent.knowledge_base
                     SET embedding = ?
-                    WHERE id = ?
-                """, [embedding, entry_id])
+                    WHERE insight_id = ?
+                """,
+                    [embedding, entry_id],
+                )
                 count += 1
             except Exception as exc:
                 logger.error(
                     "Failed to update embedding for knowledge_base id %s: %s",
-                    entry_id, exc,
+                    entry_id,
+                    exc,
                 )
 
-        logger.info(
-            "Backfilled %d / %d knowledge base embeddings", count, len(rows)
-        )
+        logger.info("Backfilled %d / %d knowledge base embeddings", count, len(rows))
         return count
 
     def search_similar(
@@ -253,6 +265,11 @@ class EmbeddingEngine:
             List of dicts with keys from the table plus ``similarity_score``.
         """
         query_embedding = self.embed_text(query)
+
+        # Validate table name to prevent SQL injection
+        _safe_id = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_.]*$")
+        if not _safe_id.match(table):
+            raise ValueError(f"Invalid table name: {table!r}")
 
         # Use manual cosine similarity via DuckDB list functions
         # cosine_sim = dot(a, b) / (norm(a) * norm(b))

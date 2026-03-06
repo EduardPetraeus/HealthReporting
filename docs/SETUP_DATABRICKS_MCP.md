@@ -31,7 +31,7 @@ Auth is handled via the `DEFAULT` profile:
 
 ```ini
 [DEFAULT]
-host  = https://dbc-23749322-8818.cloud.databricks.com
+host  = https://dbc-XXXXXXXX-XXXX.cloud.databricks.com
 token = <PAT — stored locally, never in repo>
 ```
 
