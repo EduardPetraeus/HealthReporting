@@ -609,8 +609,9 @@ class TestStandardHealthQuestions:
 
     def test_q4_step_count_this_week(self, tools):
         """Q4: How many steps this week?"""
-        result = tools.query_health("steps", "2026-02-24:2026-02-28")
-        assert "steps" in result or "day" in result
+        result = tools.query_health("steps", "2026-02-20:2026-02-26")
+        assert "Error" not in result
+        assert "12450" in result
 
     def test_q5_sleep_trend(self, tools):
         """Q5: Is my sleep getting better or worse?"""
