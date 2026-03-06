@@ -4,6 +4,7 @@ Each method corresponds to an MCP tool registered in server.py.
 Delegates to QueryBuilder for YAML-based queries, Formatter for output,
 and SchemaPruner for schema context.
 """
+
 from __future__ import annotations
 
 import re
@@ -13,12 +14,10 @@ from pathlib import Path
 from typing import Optional
 
 import duckdb
-import yaml
 
 from health_platform.mcp.formatter import (
     format_as_markdown_kv,
     format_as_markdown_table,
-    format_as_yaml,
     format_empty,
     format_error,
     format_result,
@@ -147,7 +146,7 @@ class HealthTools:
 
         # Build LIKE conditions — match any keyword
         like_conditions = " OR ".join(
-            [f"LOWER(summary_text) LIKE '%' || ? || '%'" for _ in keywords]
+            ["LOWER(summary_text) LIKE '%' || ? || '%'" for _ in keywords]
         )
         sql = f"""
             SELECT day, summary_text
@@ -175,7 +174,7 @@ class HealthTools:
 
         like_conditions = " OR ".join(
             [
-                f"LOWER(title) LIKE '%' || ? || '%' OR LOWER(content) LIKE '%' || ? || '%'"
+                "LOWER(title) LIKE '%' || ? || '%' OR LOWER(content) LIKE '%' || ? || '%'"
                 for _ in keywords
             ]
         )
@@ -185,9 +184,9 @@ class HealthTools:
             params.extend([kw, kw])
 
         sql = f"""
-            SELECT id, title, insight_type, confidence, created_at
+            SELECT insight_id, title, insight_type, confidence, created_at
             FROM agent.knowledge_base
-            WHERE {like_conditions}
+            WHERE is_active = true AND ({like_conditions})
             ORDER BY created_at DESC
             LIMIT ?
         """
@@ -228,7 +227,6 @@ class HealthTools:
                 """
                 result = self.con.execute(sql)
 
-            columns = [desc[0] for desc in result.description]
             rows = result.fetchall()
         except Exception as exc:
             logger.error("Failed to load profile: %s", exc)
@@ -392,9 +390,7 @@ class HealthTools:
                     range_str = f"<= {max_val}"
                 threshold_rows.append([level, range_str, label])
             parts.append(
-                format_as_markdown_table(
-                    threshold_rows, ["Level", "Range", "Label"]
-                )
+                format_as_markdown_table(threshold_rows, ["Level", "Range", "Label"])
             )
 
         # Related metrics
@@ -412,7 +408,9 @@ class HealthTools:
         if examples:
             parts.append("\n## Example Queries\n")
             for ex in examples:
-                parts.append(f"- *\"{ex.get('question', '')}\"* -> `{ex.get('tool', '')}`")
+                parts.append(
+                    f'- *"{ex.get("question", "")}"* -> `{ex.get("tool", "")}`'
+                )
 
         return "\n".join(parts)
 
@@ -440,26 +438,27 @@ class HealthTools:
             return format_error("Confidence must be between 0.0 and 1.0.")
 
         insight_id = str(uuid.uuid4())
-        tags_str = ",".join(tags) if tags else ""
+        tags_list = tags if tags else []
 
         try:
             self._ensure_knowledge_base_table()
             self.con.execute(
                 """
                 INSERT INTO agent.knowledge_base
-                    (id, title, content, insight_type, confidence, tags, created_at)
+                    (insight_id, title, content, insight_type, confidence, tags, created_at)
                 VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
                 """,
-                [insight_id, title, content, insight_type, confidence, tags_str],
+                [insight_id, title, content, insight_type, confidence, tags_list],
             )
             logger.info("Recorded insight: %s (id=%s)", title, insight_id)
+            tags_display = ", ".join(tags_list) if tags_list else "(none)"
             return (
                 f"Insight recorded successfully.\n\n"
                 f"- **ID:** {insight_id}\n"
                 f"- **Title:** {title}\n"
                 f"- **Type:** {insight_type}\n"
                 f"- **Confidence:** {confidence}\n"
-                f"- **Tags:** {tags_str or '(none)'}"
+                f"- **Tags:** {tags_display}"
             )
         except Exception as exc:
             logger.error("Failed to record insight: %s", exc)
@@ -607,15 +606,20 @@ class HealthTools:
     def _ensure_knowledge_base_table(self) -> None:
         """Create agent.knowledge_base if it does not exist."""
         self.con.execute("CREATE SCHEMA IF NOT EXISTS agent")
-        self.con.execute("""
+        self.con.execute(
+            """
             CREATE TABLE IF NOT EXISTS agent.knowledge_base (
-                id VARCHAR PRIMARY KEY,
-                title VARCHAR NOT NULL,
-                content TEXT NOT NULL,
+                insight_id VARCHAR PRIMARY KEY,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 insight_type VARCHAR NOT NULL,
-                confidence FLOAT NOT NULL,
-                tags VARCHAR DEFAULT '',
-                embedding FLOAT[],
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                title VARCHAR NOT NULL,
+                content VARCHAR NOT NULL,
+                evidence_query VARCHAR,
+                confidence DOUBLE NOT NULL,
+                tags VARCHAR[],
+                embedding FLOAT[384],
+                is_active BOOLEAN DEFAULT true,
+                superseded_by VARCHAR
             )
-        """)
+        """
+        )
