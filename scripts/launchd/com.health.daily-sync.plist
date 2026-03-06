@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.health.daily-sync</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/clauseduardpetraeus/Github repos/HealthReporting/scripts/daily_sync.sh</string>
+    </array>
+
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>6</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HEALTH_ENV</key>
+        <string>dev</string>
+        <key>HEALTH_DB_PATH</key>
+        <string>/Users/Shared/data_lake/database/health_dw_dev.db</string>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin</string>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/Users/Shared/data_lake/logs/daily_sync/launchd-stdout.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/Shared/data_lake/logs/daily_sync/launchd-stderr.log</string>
+
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>Nice</key>
+    <integer>10</integer>
+</dict>
+</plist>
