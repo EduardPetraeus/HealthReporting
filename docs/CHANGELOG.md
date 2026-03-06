@@ -4,6 +4,59 @@
 
 ---
 
+## 2026-03-06 — Session 011: Keychain Migration, Cleanup, Security Hardening
+
+**Phase:** Post-review cleanup + secrets consolidation
+**Branch:** `feature/iteration-1-mcp-goes-live`
+**Goal:** Commit session 010 leftovers, migrate Oura auth from .env to Keychain, consolidate duplicated keychain patterns
+
+### What was done
+
+**Post-review commits**
+- Committed `server.py` (Literal import, type constraint) and `chat_ui.py` (localStorage, isBusy lock, retry button, CSP headers) from session 010 review
+
+**Cleanup**
+- Added `docs/*.html` to `.gitignore` for generated diagram files
+- Rewrote `run_chat.sh` from Streamlit launcher to FastAPI/uvicorn launcher
+- Removed `.claude/settings.json` from git tracking (already in .gitignore)
+
+**Shared keychain utility (NEW)**
+- Created `utils/keychain.py` with `get_secret(key_name, fallback_env=True)` — single function for all macOS Keychain reads
+- 7 test cases in `test_keychain_util.py` (all mocked, no real keychain access)
+
+**Oura auth migration**
+- Removed `python-dotenv` dependency from Oura `auth.py`
+- `OURA_CLIENT_ID` and `OURA_CLIENT_SECRET` now read from `claude.keychain-db`
+- Error messages include keychain setup instructions
+
+**Keychain consolidation**
+- `api/auth.py`: replaced 25-line `_load_token_from_keychain()` with `get_secret("HEALTH_API_TOKEN")`
+- `api/chat_engine.py`: replaced 25-line `_get_api_key()` with `get_secret("ANTHROPIC_API_KEY")`
+- `test_api.py`: updated fixture to mock `subprocess.run` instead of removed function
+
+**Security documentation**
+- `docs/learnings.md`: documented localStorage + `unsafe-inline` CSP risk acceptance for VPN-only deployment
+- `docs/learnings.md`: documented keychain-first secrets management pattern
+- `scripts/security-hardening.sh`: verification script for keychain timeout, FileVault, DNS, firewall (read-only)
+
+### Stats
+- 8 commits, 11 files changed (3 new, 8 modified)
+- 229 tests passing (up from 222 — 7 new keychain tests)
+- Net code reduction: ~57 lines removed (duplicated subprocess patterns)
+
+### Architecture changes
+- New: `utils/keychain.py` — shared secrets access layer
+- Modified: all keychain reads now go through single utility
+- Removed: `.env` file dependency from Oura connector
+
+### Carried over
+- Delete legacy `app/` directory (Streamlit UI — already deleted locally, not committed)
+- Iteration 4: Data Quality Shield (dbt tests)
+- Merge to main: pending Claus approval + iPhone live test
+- Remaining modified files: `docs/SETUP_DATABRICKS_MCP.md`, `scripts/daily_sync.sh`
+
+---
+
 ## 2026-03-06 — Session 010: Claude API Chat + Multi-AI Review
 
 **Phase:** Roadmap Iteration 3 completion (AI-powered chat)
