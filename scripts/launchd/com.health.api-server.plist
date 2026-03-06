@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.health.api-server</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/clauseduardpetraeus/HealthReporting/.venv-ai/bin/uvicorn</string>
+        <string>health_platform.api.server:app</string>
+        <string>--host</string>
+        <string>0.0.0.0</string>
+        <string>--port</string>
+        <string>8000</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/clauseduardpetraeus/HealthReporting/health_unified_platform</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HEALTH_ENV</key>
+        <string>dev</string>
+        <key>HEALTH_DB_PATH</key>
+        <string>/Users/Shared/data_lake/database/health_dw_dev.db</string>
+        <key>PYTHONPATH</key>
+        <string>/Users/clauseduardpetraeus/HealthReporting/health_unified_platform</string>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin</string>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/Shared/data_lake/logs/api-server/stdout.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/Shared/data_lake/logs/api-server/stderr.log</string>
+
+    <key>ThrottleInterval</key>
+    <integer>10</integer>
+</dict>
+</plist>
