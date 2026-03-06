@@ -16,6 +16,7 @@ import os
 from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
+from typing import Literal
 
 import duckdb
 from fastapi import Depends, FastAPI, Query
@@ -75,7 +76,9 @@ class ChatRequest(BaseModel):
     question: str = Field(
         ..., description="Natural language health question", max_length=2000
     )
-    format: str = Field("markdown", description="Output format: markdown or plain")
+    format: Literal["markdown", "plain"] = Field(
+        "markdown", description="Output format: markdown or plain"
+    )
 
 
 class ChatResponse(BaseModel):

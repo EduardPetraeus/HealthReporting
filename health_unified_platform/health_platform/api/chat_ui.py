@@ -286,6 +286,15 @@ header .status {
   font-weight: 500;
 }
 
+/* ===== Retry button in error messages ===== */
+.retry-btn {
+  margin-top: 8px; padding: 8px 20px; border-radius: 16px;
+  border: none; background: var(--fill-tertiary);
+  color: var(--system-blue); font-size: 15px; font-weight: 500;
+  cursor: pointer; transition: all 0.15s;
+}
+.retry-btn:active { background: var(--system-blue); color: #fff; transform: scale(0.96); }
+
 /* ===== Horizontal rule as subtle gradient ===== */
 .msg.bot .divider {
   height: 0.5px; margin: 12px 0;
@@ -337,7 +346,8 @@ header .status {
 
 <script>
 const API = window.location.origin;
-let token = sessionStorage.getItem('health_token') || '';
+let token = localStorage.getItem('health_token') || sessionStorage.getItem('health_token') || '';
+let isBusy = false;  // Prevent parallel requests
 
 /* --- Login --- */
 function doLogin() {
@@ -358,7 +368,7 @@ function doLogin() {
     btn.textContent = 'Forbind';
     btn.disabled = false;
     if (r && r.ok) {
-      sessionStorage.setItem('health_token', token);
+      localStorage.setItem('health_token', token);
       document.getElementById('login').classList.add('hidden');
     } else {
       document.getElementById('login-error').textContent = 'Ugyldigt token';
@@ -504,7 +514,9 @@ function hideTyping() {
 }
 
 async function ask(question) {
-  if (!question.trim()) return;
+  if (!question.trim() || isBusy) return;
+  isBusy = true;
+  const lastQ = question;
   addMsg(question, 'user');
   inputEl.value = '';
   // Remove welcome chips after first use
@@ -526,16 +538,28 @@ async function ask(question) {
       const data = await r.json();
       addMsg(data.answer, 'bot');
     } else if (r.status === 401) {
-      sessionStorage.removeItem('health_token');
+      localStorage.removeItem('health_token');
       document.getElementById('login').classList.remove('hidden');
       addMsg('Session udløbet. Log ind igen.', 'bot error');
     } else {
-      addMsg('Serverfejl (' + r.status + '). Prøv igen.', 'bot error');
+      addRetryMsg('Serverfejl. Prøv igen.', lastQ);
     }
   } catch(e) {
     hideTyping();
-    addMsg('Kan ikke nå serveren. Er din Mac Mini online?', 'bot error');
+    addRetryMsg('Kan ikke nå serveren. Tjek din forbindelse.', lastQ);
+  } finally {
+    isBusy = false;
   }
+}
+
+function addRetryMsg(text, retryQuestion) {
+  const d = document.createElement('div');
+  d.className = 'msg bot error';
+  d.innerHTML = '<div class="bot-label">Health Assistant</div><p>' + escapeHtml(text) +
+    '</p><button class="retry-btn" onclick="ask(\'' + escapeHtml(retryQuestion).replace(/'/g, "\\'") +
+    '\')">Prøv igen</button>';
+  chatEl.appendChild(d);
+  requestAnimationFrame(() => { chatEl.scrollTop = chatEl.scrollHeight; });
 }
 
 function send() { ask(inputEl.value); }
@@ -585,4 +609,16 @@ fetch(API + '/health').then(r => r.json()).then(d => {
 @router.get("/", response_class=HTMLResponse)
 async def chat_ui(request: Request):
     """Serve the mobile chat interface."""
-    return HTMLResponse(content=CHAT_HTML)
+    return HTMLResponse(
+        content=CHAT_HTML,
+        headers={
+            "Content-Security-Policy": (
+                "default-src 'self'; "
+                "script-src 'unsafe-inline'; "
+                "style-src 'unsafe-inline'; "
+                "img-src 'self' data:;"
+            ),
+            "X-Content-Type-Options": "nosniff",
+            "X-Frame-Options": "DENY",
+        },
+    )
