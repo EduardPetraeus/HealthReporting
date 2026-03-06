@@ -63,3 +63,7 @@ backlog/
 claude_code_productivity.json
 claude_code_productivity.md
 .venv-ai/
+
+# Machine-specific launchd plists (use .plist.template instead)
+scripts/launchd/*.plist
+!scripts/launchd/*.plist.template

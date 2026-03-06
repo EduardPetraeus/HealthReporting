@@ -8,7 +8,7 @@
     <key>ProgramArguments</key>
     <array>
         <string>/bin/bash</string>
-        <string>/Users/clauseduardpetraeus/Github repos/HealthReporting/scripts/daily_sync.sh</string>
+        <string>${REPO_ROOT}/scripts/daily_sync.sh</string>
     </array>
 
     <key>StartCalendarInterval</key>

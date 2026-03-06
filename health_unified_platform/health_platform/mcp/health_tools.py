@@ -102,7 +102,9 @@ class HealthTools:
             rows = result.fetchall()
         except Exception as exc:
             logger.error("Query failed for %s/%s: %s", metric, computation, exc)
-            return format_error(f"Query execution failed: {exc}")
+            return format_error(
+                "Query execution failed. Check server logs for details."
+            )
 
         if not rows:
             return format_empty(metric, date_range)
@@ -230,7 +232,9 @@ class HealthTools:
             rows = result.fetchall()
         except Exception as exc:
             logger.error("Failed to load profile: %s", exc)
-            return format_error(f"Failed to load profile: {exc}")
+            return format_error(
+                "Failed to load profile. Check server logs for details."
+            )
 
         if not rows:
             cat_str = ", ".join(categories) if categories else "all"
@@ -463,7 +467,9 @@ class HealthTools:
             )
         except Exception as exc:
             logger.error("Failed to record insight: %s", exc)
-            return format_error(f"Failed to record insight: {exc}")
+            return format_error(
+                "Failed to record insight. Check server logs for details."
+            )
 
     # ------------------------------------------------------------------
     # Tool 7: get_schema_context
@@ -497,6 +503,9 @@ class HealthTools:
             "COPY",
             "CALL",
             "PRAGMA",
+            "EXPORT",
+            "LOAD",
+            "INSTALL",
         ]
         sql_upper = sql.upper().strip()
         for keyword in forbidden_keywords:
@@ -516,7 +525,9 @@ class HealthTools:
             rows = result.fetchall()
         except Exception as exc:
             logger.error("Custom query failed: %s", exc)
-            return format_error(f"Query execution failed: {exc}")
+            return format_error(
+                "Query execution failed. Check server logs for details."
+            )
 
         if not rows:
             return "Query returned no results."

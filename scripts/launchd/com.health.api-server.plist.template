@@ -7,7 +7,7 @@
 
     <key>ProgramArguments</key>
     <array>
-        <string>/Users/clauseduardpetraeus/HealthReporting/.venv-ai/bin/uvicorn</string>
+        <string>${REPO_ROOT}/.venv-ai/bin/uvicorn</string>
         <string>health_platform.api.server:app</string>
         <string>--host</string>
         <string>0.0.0.0</string>
@@ -16,7 +16,7 @@
     </array>
 
     <key>WorkingDirectory</key>
-    <string>/Users/clauseduardpetraeus/HealthReporting/health_unified_platform</string>
+    <string>${REPO_ROOT}/health_unified_platform</string>
 
     <key>EnvironmentVariables</key>
     <dict>
@@ -25,7 +25,7 @@
         <key>HEALTH_DB_PATH</key>
         <string>/Users/Shared/data_lake/database/health_dw_dev.db</string>
         <key>PYTHONPATH</key>
-        <string>/Users/clauseduardpetraeus/HealthReporting/health_unified_platform</string>
+        <string>${REPO_ROOT}/health_unified_platform</string>
         <key>PATH</key>
         <string>/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin</string>
     </dict>

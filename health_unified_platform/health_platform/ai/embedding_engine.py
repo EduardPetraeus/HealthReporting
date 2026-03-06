@@ -10,6 +10,7 @@ gracefully if it is not installed.
 
 from __future__ import annotations
 
+import re
 import sys
 from pathlib import Path
 
@@ -264,6 +265,11 @@ class EmbeddingEngine:
             List of dicts with keys from the table plus ``similarity_score``.
         """
         query_embedding = self.embed_text(query)
+
+        # Validate table name to prevent SQL injection
+        _safe_id = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_.]*$")
+        if not _safe_id.match(table):
+            raise ValueError(f"Invalid table name: {table!r}")
 
         # Use manual cosine similarity via DuckDB list functions
         # cosine_sim = dot(a, b) / (norm(a) * norm(b))
