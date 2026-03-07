@@ -1,7 +1,7 @@
 # PROJECT_PLAN.md — HealthReporting
 
-> Last updated: 2026-03-06 (Session 011)
-> Current phase: **Phase 3b — AI-Native Data Model (COMPLETE) + Phase 5 (Databricks, parallel) + Phase 7 (AI Governance, active) + Roadmap Iterations 1-3 (COMPLETE)**
+> Last updated: 2026-03-07 (Audit cleanup)
+> Current phase: **Phase 3b — AI-Native Data Model (COMPLETE) + Phase 5 (Databricks, parallel) + Phase 7 (AI Governance, active) + Roadmap Iterations A1 ✅, C1/A5 ✅ — next: A2 Data Quality Shield**
 
 ---
 
@@ -68,7 +68,7 @@
 | Apple Health silver transforms | ✅ done | 9 entities: heart_rate, step_count, toothbrushing, body_temperature, respiratory_rate, water_intake, daily_energy_by_source, daily_walking_gait, mindful_session |
 | Oura silver transforms | ✅ done | 9 entities: daily_sleep, daily_activity, daily_readiness, heart_rate (shared), workout, daily_spo2, daily_stress, personal_info |
 | Lifesum silver transforms | ✅ done | daily_meal |
-| Withings silver transforms | 🔵 partial | blood_pressure + weight merge scripts exist |
+| Withings silver transforms | ✅ done | blood_pressure + weight merge scripts merged |
 | DuckDB local silver runner | ✅ done | run_merge.py — 21 merge scripts working locally |
 | Silver validation tests | ⬜ not started | TDD framework — pytest + conftest.py |
 | dbt schema tests on all 17 entities | ⬜ not started | not-null, unique, accepted-values |
@@ -212,3 +212,20 @@
 | ai-ledelse.md bidirectional sync process | 🔵 in progress | 3 delta-file syncs completed; formal sync protocol defined in AI_GOVERNANCE.md Layer 7 |
 
 **Exit criteria:** `/prioritize` produces a ranked Top 3 that reflects P0 strategic items from TODO.md — not just technical backlog from PROJECT_PLAN.md.
+
+---
+
+## MVP Iteration Roadmap
+
+Per `MASTER_PLAN.md`: `A1 → C1/A5 → A2 → B1 → A3 → B3 → B2 → C2`
+
+| Iteration | Name | Status | Notes |
+|-----------|------|--------|-------|
+| A1 | MCP Goes Live | ✅ done | MCP server wired into Claude Code, 8 tools, 55 smoke tests |
+| C1/A5 | Daily Sync + API + Withings | ✅ done | 6-step sync pipeline, FastAPI server, Withings connectors merged |
+| **A2** | Data Quality Shield | ⬜ next | Automated quality checks — nulls, duplicates, stale data, schema drift |
+| B1 | LLM-Powered Chat Engine | ⬜ planned | Replace keyword routing with Claude tool-use (function calling) |
+| A3 | Smart Alerts | ⬜ planned | Proactive anomaly detection + ntfy.sh notifications |
+| B3 | Conversation Memory | ⬜ planned | Multi-turn chat context management |
+| B2 | Streaming Responses | ⬜ planned | SSE streaming in FastAPI |
+| C2 | Apple Health Auto-Import | ⬜ planned | Automated Apple Health XML ingestion |

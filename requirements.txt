@@ -61,6 +61,9 @@ filelock>=3.20.3
 mcp>=1.0.0
 sentence-transformers>=2.2.0
 pytest>=7.0.0
+# API server dependencies
+fastapi>=0.100.0
+uvicorn>=0.22.0
 # Chat GUI dependencies
 streamlit>=1.24.0
 plotly>=5.15.0

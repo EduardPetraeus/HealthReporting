@@ -22,18 +22,15 @@ from __future__ import annotations
 
 import builtins
 import os
-import time
 import uuid
 import warnings
 from datetime import datetime, timezone
 from typing import Any, Optional
 
 from health_platform.utils.logging_config import get_logger
+from health_platform.utils.paths import get_db_path
 
 logger = get_logger("audit_logger")
-
-_DUCKDB_DB_PATH_ENV = "HEALTH_DB_PATH"
-_DUCKDB_DEFAULT_DB = "/Users/Shared/data_lake/database/health_dw_{env}.db"
 
 # Unity Catalog table references (Databricks)
 _UC_JOB_RUNS_TABLE = "{catalog}.audit.job_runs"
@@ -50,10 +47,7 @@ def _get_catalog() -> str:
 
 
 def _get_duckdb_path() -> str:
-    if path := os.environ.get(_DUCKDB_DB_PATH_ENV):
-        return path
-    env = os.environ.get("HEALTH_ENV", "dev")
-    return _DUCKDB_DEFAULT_DB.format(env=env)
+    return str(get_db_path())
 
 
 def _now() -> datetime:
@@ -114,7 +108,9 @@ class AuditLogger:
             else:
                 self._start_duckdb()
         except Exception as exc:
-            warnings.warn(f"[AuditLogger] start() failed (non-fatal): {exc}", stacklevel=2)
+            warnings.warn(
+                f"[AuditLogger] start() failed (non-fatal): {exc}", stacklevel=2
+            )
 
     def log_table(
         self,
@@ -138,18 +134,34 @@ class AuditLogger:
         try:
             if self._databricks:
                 self._log_table_databricks(
-                    run_id, table_name, layer, operation,
-                    rows_before, rows_after, rows_changed,
-                    start_time, status, error_message,
+                    run_id,
+                    table_name,
+                    layer,
+                    operation,
+                    rows_before,
+                    rows_after,
+                    rows_changed,
+                    start_time,
+                    status,
+                    error_message,
                 )
             else:
                 self._log_table_duckdb(
-                    run_id, table_name, layer, operation,
-                    rows_before, rows_after, rows_changed,
-                    start_time, status, error_message,
+                    run_id,
+                    table_name,
+                    layer,
+                    operation,
+                    rows_before,
+                    rows_after,
+                    rows_changed,
+                    start_time,
+                    status,
+                    error_message,
                 )
         except Exception as exc:
-            warnings.warn(f"[AuditLogger] log_table() failed (non-fatal): {exc}", stacklevel=2)
+            warnings.warn(
+                f"[AuditLogger] log_table() failed (non-fatal): {exc}", stacklevel=2
+            )
 
         return run_id
 
@@ -173,18 +185,30 @@ class AuditLogger:
         try:
             if self._databricks:
                 self._finish_databricks(
-                    status, error_message, rows_processed,
-                    rows_inserted, rows_updated, rows_deleted,
-                    end_time, duration,
+                    status,
+                    error_message,
+                    rows_processed,
+                    rows_inserted,
+                    rows_updated,
+                    rows_deleted,
+                    end_time,
+                    duration,
                 )
             else:
                 self._finish_duckdb(
-                    status, error_message, rows_processed,
-                    rows_inserted, rows_updated, rows_deleted,
-                    end_time, duration,
+                    status,
+                    error_message,
+                    rows_processed,
+                    rows_inserted,
+                    rows_updated,
+                    rows_deleted,
+                    end_time,
+                    duration,
                 )
         except Exception as exc:
-            warnings.warn(f"[AuditLogger] finish() failed (non-fatal): {exc}", stacklevel=2)
+            warnings.warn(
+                f"[AuditLogger] finish() failed (non-fatal): {exc}", stacklevel=2
+            )
         finally:
             if self._con:
                 try:
@@ -200,6 +224,7 @@ class AuditLogger:
     def _get_con(self):
         if self._con is None:
             import duckdb
+
             self._con = duckdb.connect(_get_duckdb_path())
         return self._con
 
@@ -211,13 +236,28 @@ class AuditLogger:
                 job_id, job_name, job_type, source_system, env, start_time, status
             ) VALUES (?, ?, ?, ?, ?, ?, 'running')
             """,
-            [self.job_id, self.job_name, self.job_type, self.source_system, self.env, self.start_time],
+            [
+                self.job_id,
+                self.job_name,
+                self.job_type,
+                self.source_system,
+                self.env,
+                self.start_time,
+            ],
         )
 
     def _log_table_duckdb(
-        self, run_id, table_name, layer, operation,
-        rows_before, rows_after, rows_changed,
-        start_time, status, error_message,
+        self,
+        run_id,
+        table_name,
+        layer,
+        operation,
+        rows_before,
+        rows_after,
+        rows_changed,
+        start_time,
+        status,
+        error_message,
     ) -> None:
         con = self._get_con()
         end_time = _now()
@@ -230,16 +270,31 @@ class AuditLogger:
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             [
-                run_id, self.job_id, table_name, layer, operation,
-                rows_before, rows_after, rows_changed,
-                start_time, end_time, status, error_message,
+                run_id,
+                self.job_id,
+                table_name,
+                layer,
+                operation,
+                rows_before,
+                rows_after,
+                rows_changed,
+                start_time,
+                end_time,
+                status,
+                error_message,
             ],
         )
 
     def _finish_duckdb(
-        self, status, error_message, rows_processed,
-        rows_inserted, rows_updated, rows_deleted,
-        end_time, duration,
+        self,
+        status,
+        error_message,
+        rows_processed,
+        rows_inserted,
+        rows_updated,
+        rows_deleted,
+        end_time,
+        duration,
     ) -> None:
         con = self._get_con()
         con.execute(
@@ -251,9 +306,14 @@ class AuditLogger:
             WHERE job_id = ?
             """,
             [
-                end_time, duration, status,
-                error_message, rows_processed,
-                rows_inserted, rows_updated, rows_deleted,
+                end_time,
+                duration,
+                status,
+                error_message,
+                rows_processed,
+                rows_inserted,
+                rows_updated,
+                rows_deleted,
                 self.job_id,
             ],
         )
@@ -280,9 +340,17 @@ class AuditLogger:
         self._spark().sql(sql)
 
     def _log_table_databricks(
-        self, run_id, table_name, layer, operation,
-        rows_before, rows_after, rows_changed,
-        start_time, status, error_message,
+        self,
+        run_id,
+        table_name,
+        layer,
+        operation,
+        rows_before,
+        rows_after,
+        rows_changed,
+        start_time,
+        status,
+        error_message,
     ) -> None:
         catalog = _get_catalog()
         table_runs_table = _UC_TABLE_RUNS_TABLE.format(catalog=catalog)
@@ -309,9 +377,15 @@ class AuditLogger:
         self._spark().sql(sql)
 
     def _finish_databricks(
-        self, status, error_message, rows_processed,
-        rows_inserted, rows_updated, rows_deleted,
-        end_time, duration,
+        self,
+        status,
+        error_message,
+        rows_processed,
+        rows_inserted,
+        rows_updated,
+        rows_deleted,
+        end_time,
+        duration,
     ) -> None:
         catalog = _get_catalog()
         job_runs_table = _UC_JOB_RUNS_TABLE.format(catalog=catalog)
