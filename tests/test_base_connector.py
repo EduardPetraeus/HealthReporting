@@ -9,27 +9,9 @@ import pytest
 
 # Ensure imports resolve correctly
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "health_unified_platform"))
-sys.path.insert(
-    0,
-    str(
-        Path(__file__).resolve().parents[1]
-        / "health_unified_platform"
-        / "health_platform"
-    ),
-)
-sys.path.insert(
-    0,
-    str(
-        Path(__file__).resolve().parents[1]
-        / "health_unified_platform"
-        / "health_platform"
-        / "source_connectors"
-        / "oura"
-    ),
-)
 
-from source_connectors.base import BaseConnector
-from source_connectors.oura.client import OuraClient
+from health_platform.source_connectors.base import BaseConnector
+from health_platform.source_connectors.oura.client import OuraClient
 
 
 class TestBaseConnectorABC:

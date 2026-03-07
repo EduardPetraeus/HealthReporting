@@ -15,7 +15,7 @@ import requests
 # Ensure the source_connectors package is importable
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from source_connectors.base import BaseConnector
+from health_platform.source_connectors.base import BaseConnector
 
 BASE_URL = "https://api.ouraring.com"
 
@@ -116,13 +116,19 @@ class OuraClient(BaseConnector):
     # ------------------------------------------------------------------
 
     def fetch_daily_sleep(self, start: date, end: date) -> list[dict]:
-        return self._get_collection("/v2/usercollection/daily_sleep", self._date_params(start, end))
+        return self._get_collection(
+            "/v2/usercollection/daily_sleep", self._date_params(start, end)
+        )
 
     def fetch_daily_activity(self, start: date, end: date) -> list[dict]:
-        return self._get_collection("/v2/usercollection/daily_activity", self._date_params(start, end))
+        return self._get_collection(
+            "/v2/usercollection/daily_activity", self._date_params(start, end)
+        )
 
     def fetch_daily_readiness(self, start: date, end: date) -> list[dict]:
-        return self._get_collection("/v2/usercollection/daily_readiness", self._date_params(start, end))
+        return self._get_collection(
+            "/v2/usercollection/daily_readiness", self._date_params(start, end)
+        )
 
     def fetch_heartrate(self, start: date, end: date) -> list[dict]:
         """
@@ -146,13 +152,19 @@ class OuraClient(BaseConnector):
         return records
 
     def fetch_workout(self, start: date, end: date) -> list[dict]:
-        return self._get_collection("/v2/usercollection/workout", self._date_params(start, end))
+        return self._get_collection(
+            "/v2/usercollection/workout", self._date_params(start, end)
+        )
 
     def fetch_daily_spo2(self, start: date, end: date) -> list[dict]:
-        return self._get_collection("/v2/usercollection/daily_spo2", self._date_params(start, end))
+        return self._get_collection(
+            "/v2/usercollection/daily_spo2", self._date_params(start, end)
+        )
 
     def fetch_daily_stress(self, start: date, end: date) -> list[dict]:
-        return self._get_collection("/v2/usercollection/daily_stress", self._date_params(start, end))
+        return self._get_collection(
+            "/v2/usercollection/daily_stress", self._date_params(start, end)
+        )
 
     def fetch_personal_info(self) -> dict:
         """Personal info is a single object, not a paginated collection."""

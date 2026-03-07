@@ -1,4 +1,5 @@
 """Tests for YAML semantic contracts validation."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -117,11 +118,7 @@ class TestMetricContracts:
         """List all metric YAML files (excluding _ prefixed)."""
         if not CONTRACTS_DIR.exists():
             return []
-        return [
-            f
-            for f in CONTRACTS_DIR.glob("*.yml")
-            if not f.name.startswith("_")
-        ]
+        return [f for f in CONTRACTS_DIR.glob("*.yml") if not f.name.startswith("_")]
 
     def test_metric_files_exist(self):
         """At least 10 metric contract files exist."""
@@ -187,7 +184,13 @@ class TestMetricContracts:
 
             metric = data.get("metric", data)
             comps = metric.get("computations", {})
-            assert "daily_value" in comps, f"{f.name} missing daily_value computation"
+            grain = metric.get("grain", "daily")
+            if grain == "daily":
+                assert (
+                    "daily_value" in comps
+                ), f"{f.name} missing daily_value computation"
+            else:
+                assert len(comps) >= 1, f"{f.name} has no computations"
 
     def test_contracts_have_examples(self):
         """Each metric has usage examples."""
