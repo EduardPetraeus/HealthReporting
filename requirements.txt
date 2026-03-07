@@ -56,6 +56,7 @@ tzdata==2025.3
 urllib3==2.6.3
 zipp==3.23.0
 black==24.10.0
+filelock>=3.20.3
 # AI-native data model dependencies
 mcp>=1.0.0
 sentence-transformers>=2.2.0
