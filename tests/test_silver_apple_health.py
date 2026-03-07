@@ -10,20 +10,24 @@ Validates all 15 new silver tables created in A3:
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
 import pytest
 import duckdb
 
-DB_PATH = "/Users/Shared/data_lake/database/health_dw_dev.db"
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "health_unified_platform"))
+from health_platform.utils.paths import get_db_path  # noqa: E402
 
-# Simple event tables: (table_name, value_column, value_type)
+# Simple event tables: (table_name, value_column)
 SIMPLE_EVENT_TABLES = [
-    ("hrv", "hrv_ms", "DOUBLE"),
-    ("hr_recovery", "recovery_bpm", "DOUBLE"),
-    ("six_min_walk", "distance_m", "DOUBLE"),
-    ("flights_climbed", "flights", "DOUBLE"),
-    ("running_speed", "speed_m_per_s", "DOUBLE"),
-    ("physical_effort", "effort_kj_per_hr_kg", "DOUBLE"),
-    ("exercise_time", "exercise_minutes", "DOUBLE"),
+    ("hrv", "hrv_ms"),
+    ("hr_recovery", "recovery_bpm"),
+    ("six_min_walk", "distance_m"),
+    ("flights_climbed", "flights"),
+    ("running_speed", "speed_m_per_s"),
+    ("physical_effort", "effort_kj_per_hr_kg"),
+    ("exercise_time", "exercise_minutes"),
 ]
 
 # Event tables with duration
@@ -69,7 +73,7 @@ ALL_TABLES = [
 @pytest.fixture(scope="module")
 def db():
     """Read-only connection to the dev DuckDB database."""
-    con = duckdb.connect(DB_PATH, read_only=True)
+    con = duckdb.connect(str(get_db_path()), read_only=True)
     yield con
     con.close()
 
@@ -136,8 +140,8 @@ class TestSourceNamePopulated:
 class TestSimpleEventColumns:
     """Verify value columns exist and have correct types in simple event tables."""
 
-    @pytest.mark.parametrize("table,col,expected_type", SIMPLE_EVENT_TABLES)
-    def test_value_column_not_null(self, db, table, col, expected_type):
+    @pytest.mark.parametrize("table,col", SIMPLE_EVENT_TABLES)
+    def test_value_column_not_null(self, db, table, col):
         null_count = db.execute(
             f"SELECT COUNT(*) FROM silver.{table} WHERE {col} IS NULL"
         ).fetchone()[0]
