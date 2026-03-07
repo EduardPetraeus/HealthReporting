@@ -1,0 +1,91 @@
+metric:
+  name: lab_biomarkers
+  display_name: "Lab Biomarkers"
+  description: >
+    Periodic lab test results including blood panels and microbiome analysis.
+    Covers 65+ blood biomarkers (BodyPanel Large) and 30+ microbiome markers
+    (Gut Microbiome XL). Supports longitudinal tracking across retests.
+  category: lab_results
+  source_table: silver.lab_results
+  source_column: value_numeric
+  grain: per_test
+  business_key: "test_id + marker_name"
+  unit: "varies by marker"
+
+  computations:
+    specific_marker:
+      sql: >
+        SELECT test_date, marker_name, value_numeric, value_text, unit,
+               reference_min, reference_max, status
+        FROM silver.lab_results
+        WHERE marker_name = :marker_name
+        ORDER BY test_date DESC
+
+    out_of_range:
+      sql: >
+        SELECT test_date, test_type, marker_name, marker_category,
+               value_numeric, unit, reference_min, reference_max, status
+        FROM silver.lab_results
+        WHERE status != 'normal'
+        ORDER BY test_date DESC, marker_category, marker_name
+
+    test_summary:
+      sql: >
+        SELECT test_date, test_type, test_name,
+               COUNT(*) AS total_markers,
+               SUM(CASE WHEN status = 'normal' THEN 1 ELSE 0 END) AS normal_count,
+               SUM(CASE WHEN status != 'normal' THEN 1 ELSE 0 END) AS abnormal_count
+        FROM silver.lab_results
+        GROUP BY test_date, test_type, test_name
+        ORDER BY test_date DESC
+
+    category_summary:
+      sql: >
+        SELECT marker_category, COUNT(*) AS markers,
+               SUM(CASE WHEN status != 'normal' THEN 1 ELSE 0 END) AS abnormal
+        FROM silver.lab_results
+        WHERE test_date = :date
+        GROUP BY marker_category
+        ORDER BY abnormal DESC, marker_category
+
+    longitudinal:
+      sql: >
+        SELECT test_date, value_numeric, unit, status
+        FROM silver.lab_results
+        WHERE marker_name = :marker_name
+        ORDER BY test_date
+
+  thresholds:
+    pancreatic_elastase:
+      optimal: { min: 200, label: "Normal" }
+      low: { min: 100, max: 199, label: "Moderate insufficiency" }
+      critical: { max: 99, label: "Severe insufficiency" }
+    secretory_iga:
+      optimal: { min: 510, max: 2040, label: "Normal" }
+      low: { max: 509, label: "Weakened mucosal immunity" }
+    epa:
+      optimal: { min: 2, label: "Normal" }
+      low: { max: 1.99, label: "Low — supplement recommended" }
+    vitamin_d3_25oh:
+      optimal: { min: 40, max: 60, label: "Optimal" }
+      sufficient: { min: 30, max: 39, label: "Sufficient" }
+      insufficient: { min: 20, max: 29, label: "Insufficiency" }
+      deficient: { max: 19, label: "Deficiency" }
+    calprotectin:
+      normal: { max: 50, label: "No inflammation" }
+      elevated: { min: 51, label: "Possible inflammation" }
+
+  related_metrics:
+    - { metric: weight, relationship: "Malabsorption affects body composition", lag: 0 }
+    - { metric: sleep_score, relationship: "Vitamin D and gut health influence sleep quality", lag: 0 }
+    - { metric: readiness_score, relationship: "Nutrient status affects recovery capacity", lag: 0 }
+
+  examples:
+    - question: "What are my abnormal lab results?"
+      tool: "query_health(metric='lab_biomarkers', computation='out_of_range')"
+    - question: "What is my elastase level?"
+      tool: "query_health(metric='lab_biomarkers', computation='specific_marker', marker_name='pancreatic_elastase')"
+    - question: "How many markers were tested?"
+      tool: "query_health(metric='lab_biomarkers', computation='test_summary')"
+    - question: "Has my EPA improved since last test?"
+      tool: "query_health(metric='lab_biomarkers', computation='longitudinal', marker_name='epa')"

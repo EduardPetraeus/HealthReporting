@@ -54,6 +54,21 @@ metrics:
     source_tables: [silver.daily_weather]
     max_columns: 8
 
+  lab_results:
+    metrics: [pancreatic_elastase, secretory_iga, epa, vitamin_d3, choline, calprotectin, zonulin, fat_residue, sugar_residue]
+    source_tables: [silver.lab_results]
+    max_columns: 15
+
+  genetics:
+    metrics: [alpha1_antitrypsin, actn3, deep_sleep_predisposition, caffeine_metabolism, ancestry]
+    source_tables: [agent.genetic_profile]
+    max_columns: 10
+
+  supplements:
+    metrics: [active_supplements, supplement_protocol, intervention_tracking]
+    source_tables: [silver.supplement_log]
+    max_columns: 12
+
 query_routing:
   sleep_questions:
     tables: [silver.daily_sleep]
@@ -79,6 +94,21 @@ query_routing:
     tables: [agent.daily_summaries]
     max_columns: 12
     description: "Multi-domain queries spanning sleep, activity, and vitals"
+
+  lab_questions:
+    tables: [silver.lab_results]
+    max_columns: 15
+    description: "Questions about lab tests, biomarkers, blood panels, microbiome results"
+
+  genetics_questions:
+    tables: [agent.genetic_profile]
+    max_columns: 10
+    description: "Questions about genetic predispositions, carrier status, ancestry, DNA"
+
+  supplement_questions:
+    tables: [silver.supplement_log]
+    max_columns: 12
+    description: "Questions about supplements, interventions, protocol, what am I taking"
 
   nutrition_questions:
     tables: [silver.daily_meal, silver.water_intake]
