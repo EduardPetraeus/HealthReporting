@@ -103,6 +103,27 @@ jobs:
             exit 1
           fi
 
+  dependency-audit:
+    name: Dependency Vulnerability Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]" 2>/dev/null || pip install -e "." 2>/dev/null || true
+
+      - name: Run pip-audit
+        run: |
+          pip install pip-audit
+          pip-audit --desc
+
   lint:
     name: Python Lint
     runs-on: ubuntu-latest
