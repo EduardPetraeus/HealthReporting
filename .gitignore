@@ -1,5 +1,6 @@
 # Legacy on-premise DW (not actively developed)
 legacy_on_premise_dw/
+archive/legacy_on_premise_dw/
 
 # Python
 .venv/
