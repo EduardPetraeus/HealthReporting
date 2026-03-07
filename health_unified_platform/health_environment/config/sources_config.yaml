@@ -226,3 +226,18 @@ sources:
     source_type: "parquet"
     target_schema: "bronze"
     target_table: "stg_weather_open_meteo"
+
+  # Manual data sources (YAML files imported via import_manual_data.py)
+  - name: "manual_lab_results"
+    # Lab test results (blood panels, microbiome) — YAML files imported via import_manual_data.py
+    relative_path: "manual/lab_results/**/*.yaml"
+    source_type: "yaml"
+    target_schema: "silver"
+    target_table: "lab_results"
+
+  - name: "manual_supplements"
+    # Supplement protocol — YAML file imported via import_manual_data.py
+    relative_path: "manual/supplement_protocol.yaml"
+    source_type: "yaml"
+    target_schema: "silver"
+    target_table: "supplement_log"

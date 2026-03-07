@@ -1,0 +1,78 @@
+metric:
+  name: genetics
+  display_name: "Genetic Profile"
+  description: >
+    Static genetic findings from 23andMe genotyping. Includes health predispositions,
+    carrier status, wellness traits, and ancestry. Loaded once, referenced permanently
+    in AI reasoning to contextualize daily health metrics.
+  category: genetics
+  source_table: agent.genetic_profile
+  source_column: result_summary
+  grain: static
+  business_key: "category + report_name"
+  unit: null
+
+  computations:
+    all_findings:
+      sql: >
+        SELECT category, report_name, result_summary, variant_detected,
+               gene, snp_id, genotype, clinical_relevance,
+               platform_relevance, related_metrics
+        FROM agent.genetic_profile
+        ORDER BY
+          CASE clinical_relevance
+            WHEN 'high' THEN 1
+            WHEN 'medium' THEN 2
+            WHEN 'low' THEN 3
+            ELSE 4
+          END,
+          category, report_name
+
+    high_relevance:
+      sql: >
+        SELECT category, report_name, result_summary, gene, snp_id,
+               genotype, platform_relevance, related_metrics
+        FROM agent.genetic_profile
+        WHERE clinical_relevance IN ('high', 'medium')
+        ORDER BY clinical_relevance, category
+
+    by_category:
+      sql: >
+        SELECT report_name, result_summary, variant_detected,
+               gene, clinical_relevance, platform_relevance
+        FROM agent.genetic_profile
+        WHERE category = :category
+        ORDER BY clinical_relevance
+
+    for_metric:
+      sql: >
+        SELECT category, report_name, result_summary, gene,
+               clinical_relevance, platform_relevance
+        FROM agent.genetic_profile
+        WHERE related_metrics LIKE '%' || replace(replace(:metric, '%', ''), '_', '') || '%'
+        ORDER BY clinical_relevance
+
+    variants_detected:
+      sql: >
+        SELECT category, report_name, result_summary, gene, snp_id, genotype
+        FROM agent.genetic_profile
+        WHERE variant_detected = true
+        ORDER BY clinical_relevance
+
+  related_metrics:
+    - { metric: sleep_score, relationship: "Deep sleep genetic predisposition affects sleep scores", lag: 0 }
+    - { metric: deep_sleep, relationship: "Genetically less likely to be deep sleeper", lag: 0 }
+    - { metric: workout, relationship: "ACTN3 genotype influences optimal training type", lag: 0 }
+    - { metric: weight, relationship: "Genetic weight predisposition (BMI 27.1 predicted)", lag: 0 }
+
+  examples:
+    - question: "What are my genetic risk factors?"
+      tool: "query_health(metric='genetics', computation='high_relevance')"
+    - question: "What does my DNA say about sleep?"
+      tool: "query_health(metric='genetics', computation='for_metric', metric='sleep_score')"
+    - question: "Am I a carrier for anything?"
+      tool: "query_health(metric='genetics', computation='by_category', category='carrier_status')"
+    - question: "Which genetic variants were detected?"
+      tool: "query_health(metric='genetics', computation='variants_detected')"
+    - question: "What's my ancestry breakdown?"
+      tool: "query_health(metric='genetics', computation='by_category', category='ancestry')"

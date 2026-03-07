@@ -87,6 +87,26 @@ CREATE TABLE IF NOT EXISTS agent.knowledge_base (
 );
 
 -- =============================================================================
+-- GENETIC PROFILE: static genetic findings from genotyping platforms
+-- One row per genetic report/finding. Loaded once, referenced permanently
+-- by the agent to contextualize daily health metrics.
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS agent.genetic_profile (
+    category            VARCHAR NOT NULL,
+    report_name         VARCHAR NOT NULL,
+    result_summary      VARCHAR NOT NULL,
+    variant_detected    BOOLEAN,
+    gene                VARCHAR,
+    snp_id              VARCHAR,
+    genotype            VARCHAR,
+    clinical_relevance  VARCHAR NOT NULL,
+    platform_relevance  VARCHAR,
+    related_metrics     VARCHAR,
+    load_datetime       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (category, report_name)
+);
+
+-- =============================================================================
 -- CROSS-LAYER: metric relationships (silver schema)
 -- Quantified statistical relationships between health metrics.
 -- Lives in silver because it bridges raw data and agent reasoning.

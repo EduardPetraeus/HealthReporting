@@ -1,0 +1,71 @@
+metric:
+  name: supplements
+  display_name: "Supplement Protocol"
+  description: >
+    Active supplement and intervention tracking. Records what is being taken,
+    doses, timing, target conditions, and status (active/planned/stopped/awaiting_rx).
+    Enables correlation analysis between interventions and biomarker changes at retest.
+  category: supplements
+  source_table: silver.supplement_log
+  source_column: supplement_name
+  grain: per_supplement
+  business_key: supplement_name
+  unit: "varies"
+
+  computations:
+    active_protocol:
+      sql: >
+        SELECT supplement_name, dose, unit, frequency, timing, product,
+               start_date, status, target
+        FROM silver.supplement_log
+        WHERE status = 'active'
+        ORDER BY start_date
+
+    full_protocol:
+      sql: >
+        SELECT supplement_name, dose, unit, frequency, timing, product,
+               start_date, end_date, status, target, notes
+        FROM silver.supplement_log
+        ORDER BY
+          CASE status
+            WHEN 'active' THEN 1
+            WHEN 'planned' THEN 2
+            WHEN 'awaiting_rx' THEN 3
+            WHEN 'stopped' THEN 4
+          END,
+          supplement_name
+
+    by_status:
+      sql: >
+        SELECT status, COUNT(*) AS count,
+               LIST(supplement_name) AS supplements
+        FROM silver.supplement_log
+        GROUP BY status
+
+    targeting:
+      sql: >
+        SELECT supplement_name, dose, unit, frequency, status, target
+        FROM silver.supplement_log
+        WHERE target LIKE '%' || replace(replace(:condition, '%', ''), '_', '') || '%'
+        ORDER BY status
+
+  thresholds:
+    protocol_completeness:
+      full: { label: "All supplements active" }
+      partial: { label: "Some planned/awaiting" }
+      minimal: { label: "Few active, many pending" }
+
+  related_metrics:
+    - { metric: lab_biomarkers, relationship: "Supplements target specific out-of-range biomarkers", lag: 0 }
+    - { metric: sleep_score, relationship: "D3, magnesium, and omega-3 may improve sleep quality", lag: 7 }
+    - { metric: readiness_score, relationship: "Nutritional supplementation supports recovery", lag: 7 }
+
+  examples:
+    - question: "What supplements am I taking?"
+      tool: "query_health(metric='supplements', computation='active_protocol')"
+    - question: "What's my full supplement plan?"
+      tool: "query_health(metric='supplements', computation='full_protocol')"
+    - question: "Which supplements target my elastase problem?"
+      tool: "query_health(metric='supplements', computation='targeting', condition='elastase')"
+    - question: "How many supplements are still pending?"
+      tool: "query_health(metric='supplements', computation='by_status')"
