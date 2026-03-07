@@ -1,7 +1,13 @@
 #!/bin/bash
 # daily_sync.sh — Automated daily health data refresh
 #
-# Pipeline: Oura fetch → Bronze ingestion → Silver merge → Daily summary → Embedding
+# Pipeline:
+#   Step 1: Fetch data from all API sources (Oura, Withings, Strava, Weather)
+#   Step 2: Bronze ingestion (parquet → DuckDB bronze tables)
+#   Step 3: Silver merge (ALL sources — bronze → silver deduplicated tables)
+#   Step 4: Daily summary + embedding generation
+#   Step 5: Correlation computation (metric relationships)
+#   Step 6: Patient profile refresh (baselines + demographics)
 #
 # Usage:
 #   ./scripts/daily_sync.sh              (manual run)
@@ -26,6 +32,22 @@ NTFY_TOPIC="${NTFY_TOPIC:-}"
 
 export HEALTH_ENV
 export PYTHONPATH="${PLATFORM_ROOT}"
+
+# Validate PLATFORM_ROOT resolves to the actual platform package
+if [[ ! -f "${PLATFORM_ROOT}/health_platform/__init__.py" ]]; then
+    echo "ERROR: PLATFORM_ROOT does not point to a valid health_platform package: ${PLATFORM_ROOT}" >&2
+    exit 1
+fi
+
+# Resolve data lake root and DB path via paths.py (cross-platform)
+HEALTH_DB_PATH=$("${VENV_PYTHON}" -c "from health_platform.utils.paths import get_db_path; print(get_db_path())")
+export HEALTH_DB_PATH
+
+# Validate NTFY_TOPIC (only allow safe chars for URL)
+if [[ -n "${NTFY_TOPIC}" && ! "${NTFY_TOPIC}" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+    echo "WARNING: NTFY_TOPIC contains invalid characters — notifications disabled" >&2
+    NTFY_TOPIC=""
+fi
 
 mkdir -p "${LOG_DIR}"
 
@@ -58,30 +80,82 @@ on_error() {
 }
 trap 'on_error ${LINENO}' ERR
 
-# --- Main pipeline ---
-log "=== Daily Health Sync Starting [env: ${HEALTH_ENV}] ==="
-
-# Step 1: Oura data fetch
-log "Step 1/4: Fetching Oura data..."
-cd "${PLATFORM_ROOT}/health_platform/source_connectors/oura"
-"${VENV_PYTHON}" run_oura.py >> "${LOG_FILE}" 2>&1
-log "Step 1/4: Oura fetch complete"
-
-# Step 2: Bronze ingestion (read parquet → DuckDB bronze tables)
-log "Step 2/4: Running bronze ingestion..."
-cd "${PLATFORM_ROOT}"
-"${VENV_PYTHON}" -m health_platform.transformation_logic.ingestion_engine >> "${LOG_FILE}" 2>&1
-log "Step 2/4: Bronze ingestion complete"
-
-# Step 3: Silver merge (bronze → silver deduplicated tables)
-log "Step 3/4: Running silver merges..."
-MERGE_DIR="${PLATFORM_ROOT}/health_platform/transformation_logic/dbt/merge"
-cd "${MERGE_DIR}"
-
+# --- Counters ---
+FETCH_OK=0
+FETCH_WARN=0
 MERGE_COUNT=0
 MERGE_ERRORS=0
 
-for sql_file in silver/merge_oura_*.sql; do
+# --- Main pipeline ---
+log "=== Daily Health Sync Starting [env: ${HEALTH_ENV}] ==="
+
+# =========================================================================
+# Step 1/6: Fetch data from all API sources
+# =========================================================================
+log "Step 1/6: Fetching data from API sources..."
+
+# 1a: Oura (required — primary wearable)
+log "  1a: Oura..."
+cd "${PLATFORM_ROOT}/health_platform/source_connectors/oura"
+if "${VENV_PYTHON}" run_oura.py >> "${LOG_FILE}" 2>&1; then
+    FETCH_OK=$((FETCH_OK + 1))
+    log "  1a: Oura fetch complete"
+else
+    FETCH_WARN=$((FETCH_WARN + 1))
+    log "  1a: WARNING — Oura fetch failed (continuing)"
+fi
+
+# 1b: Withings (weight + blood pressure)
+log "  1b: Withings..."
+cd "${PLATFORM_ROOT}/health_platform/source_connectors/withings"
+if "${VENV_PYTHON}" run_withings.py >> "${LOG_FILE}" 2>&1; then
+    FETCH_OK=$((FETCH_OK + 1))
+    log "  1b: Withings fetch complete"
+else
+    FETCH_WARN=$((FETCH_WARN + 1))
+    log "  1b: WARNING — Withings fetch failed (continuing)"
+fi
+
+# 1c: Strava (activities)
+log "  1c: Strava..."
+cd "${PLATFORM_ROOT}/health_platform/source_connectors/strava"
+if "${VENV_PYTHON}" run_strava.py >> "${LOG_FILE}" 2>&1; then
+    FETCH_OK=$((FETCH_OK + 1))
+    log "  1c: Strava fetch complete"
+else
+    FETCH_WARN=$((FETCH_WARN + 1))
+    log "  1c: WARNING — Strava fetch failed (continuing)"
+fi
+
+# 1d: Weather (Open-Meteo — no auth required)
+log "  1d: Weather..."
+cd "${PLATFORM_ROOT}/health_platform/source_connectors/weather"
+if "${VENV_PYTHON}" run_weather.py >> "${LOG_FILE}" 2>&1; then
+    FETCH_OK=$((FETCH_OK + 1))
+    log "  1d: Weather fetch complete"
+else
+    FETCH_WARN=$((FETCH_WARN + 1))
+    log "  1d: WARNING — Weather fetch failed (continuing)"
+fi
+
+log "Step 1/6: Fetch complete (${FETCH_OK} ok, ${FETCH_WARN} warnings)"
+
+# =========================================================================
+# Step 2/6: Bronze ingestion (read parquet → DuckDB bronze tables)
+# =========================================================================
+log "Step 2/6: Running bronze ingestion..."
+cd "${PLATFORM_ROOT}"
+"${VENV_PYTHON}" -m health_platform.transformation_logic.ingestion_engine >> "${LOG_FILE}" 2>&1
+log "Step 2/6: Bronze ingestion complete"
+
+# =========================================================================
+# Step 3/6: Silver merge (ALL sources — bronze → silver deduplicated)
+# =========================================================================
+log "Step 3/6: Running silver merges..."
+MERGE_DIR="${PLATFORM_ROOT}/health_platform/transformation_logic/dbt/merge"
+cd "${MERGE_DIR}"
+
+for sql_file in silver/merge_*.sql; do
     if [[ -f "${sql_file}" ]]; then
         log "  Merging: ${sql_file}"
         if "${VENV_PYTHON}" run_merge.py "${sql_file}" >> "${LOG_FILE}" 2>&1; then
@@ -93,11 +167,13 @@ for sql_file in silver/merge_oura_*.sql; do
     fi
 done
 
-log "Step 3/4: Silver merge complete (${MERGE_COUNT} succeeded, ${MERGE_ERRORS} failed)"
+log "Step 3/6: Silver merge complete (${MERGE_COUNT} succeeded, ${MERGE_ERRORS} failed)"
 
-# Step 4: Generate daily summary + embedding for yesterday
+# =========================================================================
+# Step 4/6: Generate daily summary + embedding for yesterday
+# =========================================================================
 # (yesterday because today's data may still be incomplete)
-log "Step 4/4: Generating daily summary..."
+log "Step 4/6: Generating daily summary..."
 cd "${PLATFORM_ROOT}"
 "${VENV_AI_PYTHON}" -c "
 import duckdb
@@ -105,7 +181,7 @@ import os
 from datetime import date, timedelta
 from health_platform.ai.text_generator import generate_summary_for_pipeline
 
-db_path = os.environ.get('HEALTH_DB_PATH', '/Users/Shared/data_lake/database/health_dw_dev.db')
+db_path = os.environ['HEALTH_DB_PATH']
 yesterday = date.today() - timedelta(days=1)
 
 con = duckdb.connect(db_path)
@@ -119,16 +195,16 @@ finally:
     con.close()
 " >> "${LOG_FILE}" 2>&1 || log "  WARNING: Summary generation failed (non-critical)"
 
-log "Step 4/4: Daily summary complete"
+log "Step 4/6: Daily summary complete"
 
 # --- Generate embedding for the new summary ---
-log "Bonus: Generating embedding for yesterday's summary..."
+log "  Generating embedding for yesterday's summary..."
 "${VENV_AI_PYTHON}" -c "
 import duckdb
 import os
 from health_platform.ai.embedding_engine import EmbeddingEngine
 
-db_path = os.environ.get('HEALTH_DB_PATH', '/Users/Shared/data_lake/database/health_dw_dev.db')
+db_path = os.environ['HEALTH_DB_PATH']
 
 con = duckdb.connect(db_path)
 try:
@@ -139,6 +215,54 @@ finally:
     con.close()
 " >> "${LOG_FILE}" 2>&1 || log "  WARNING: Embedding generation failed (non-critical)"
 
-# --- Done ---
+# =========================================================================
+# Step 5/6: Correlation computation
+# =========================================================================
+log "Step 5/6: Computing metric correlations..."
+cd "${PLATFORM_ROOT}"
+"${VENV_AI_PYTHON}" -c "
+import duckdb
+import os
+from health_platform.ai.correlation_engine import compute_all_correlations
+
+db_path = os.environ['HEALTH_DB_PATH']
+
+con = duckdb.connect(db_path)
+try:
+    count = compute_all_correlations(con)
+    print(f'Computed {count} correlations')
+finally:
+    con.close()
+" >> "${LOG_FILE}" 2>&1 || log "  WARNING: Correlation computation failed (non-critical)"
+
+log "Step 5/6: Correlations complete"
+
+# =========================================================================
+# Step 6/6: Patient profile refresh (baselines + demographics)
+# =========================================================================
+log "Step 6/6: Refreshing patient profile..."
+cd "${PLATFORM_ROOT}"
+"${VENV_AI_PYTHON}" -c "
+import duckdb
+import os
+from health_platform.ai.baseline_computer import compute_all_baselines, compute_demographics
+
+db_path = os.environ['HEALTH_DB_PATH']
+
+con = duckdb.connect(db_path)
+try:
+    baselines = compute_all_baselines(con)
+    demographics = compute_demographics(con)
+    print(f'Profile refresh: {baselines} baselines, {demographics} demographics')
+finally:
+    con.close()
+" >> "${LOG_FILE}" 2>&1 || log "  WARNING: Profile refresh failed (non-critical)"
+
+log "Step 6/6: Patient profile refresh complete"
+
+# =========================================================================
+# Done
+# =========================================================================
 log "=== Daily Health Sync Complete ==="
-notify "Health Sync OK" "Daily sync completed. ${MERGE_COUNT} merges, ${MERGE_ERRORS} errors." "low"
+log "Summary: ${FETCH_OK} sources fetched, ${FETCH_WARN} fetch warnings, ${MERGE_COUNT} merges ok, ${MERGE_ERRORS} merge errors"
+notify "Health Sync OK" "Daily sync: ${FETCH_OK} fetched, ${MERGE_COUNT} merges, ${MERGE_ERRORS} errors." "low"
