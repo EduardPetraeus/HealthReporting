@@ -134,6 +134,146 @@ sources:
     target_schema: "bronze"
     target_table: "stg_apple_health_active_energy_burned"
 
+  - name: "apple_health_hrv"
+    # Heart rate variability (SDNN) measured during sleep or rest
+    relative_path: "apple_health_data/Vitality/heartratevariabilitysdnn/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_hrv"
+
+  - name: "apple_health_hr_recovery"
+    # Heart rate recovery one minute after exercise
+    relative_path: "apple_health_data/Vitality/heartraterecoveryoneminute/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_hr_recovery"
+
+  - name: "apple_health_resting_heart_rate"
+    # Daily resting heart rate estimate
+    relative_path: "apple_health_data/Other/restingheartrate/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_resting_heart_rate"
+
+  - name: "apple_health_six_min_walk"
+    # Six-minute walk test distance estimate
+    relative_path: "apple_health_data/Other/sixminutewalktestdistance/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_six_min_walk"
+
+  - name: "apple_health_exercise_time"
+    # Apple exercise time per session
+    relative_path: "apple_health_data/Activity/appleexercisetime/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_exercise_time"
+
+  - name: "apple_health_stand_time"
+    # Minutes spent standing per session
+    relative_path: "apple_health_data/Activity/applestandtime/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_stand_time"
+
+  - name: "apple_health_stand_hour"
+    # Hours with at least one standing minute
+    relative_path: "apple_health_data/Other/applestandhour/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_stand_hour"
+
+  - name: "apple_health_distance_walking_running"
+    # Distance covered walking or running
+    relative_path: "apple_health_data/Activity/distancewalkingrunning/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_distance_walking_running"
+
+  - name: "apple_health_distance_cycling"
+    # Distance covered cycling
+    relative_path: "apple_health_data/Activity/distancecycling/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_distance_cycling"
+
+  - name: "apple_health_flights_climbed"
+    # Flights of stairs climbed
+    relative_path: "apple_health_data/Activity/flightsclimbed/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_flights_climbed"
+
+  - name: "apple_health_running_speed"
+    # Running speed in meters per second
+    relative_path: "apple_health_data/Activity/runningspeed/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_running_speed"
+
+  - name: "apple_health_hand_washing"
+    # Hand washing event duration
+    relative_path: "apple_health_data/Hygiene/handwashingevent/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_hand_washing"
+
+  - name: "apple_health_env_audio_exposure"
+    # Environmental sound level exposure in dB
+    relative_path: "apple_health_data/Environment/environmentalaudioexposure/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_env_audio_exposure"
+
+  - name: "apple_health_headphone_audio_exposure"
+    # Headphone audio level exposure in dB
+    relative_path: "apple_health_data/Environment/headphoneaudioexposure/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_headphone_audio_exposure"
+
+  - name: "apple_health_body_fat_percentage"
+    # Body fat percentage measurement
+    relative_path: "apple_health_data/BodyMetrics/bodyfatpercentage/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_body_fat_percentage"
+
+  - name: "apple_health_lean_body_mass"
+    # Lean body mass in kg
+    relative_path: "apple_health_data/BodyMetrics/leanbodymass/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_lean_body_mass"
+
+  - name: "apple_health_bmi"
+    # Body mass index
+    relative_path: "apple_health_data/BodyMetrics/bodymassindex/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_bmi"
+
+  - name: "apple_health_body_mass"
+    # Body weight in kg
+    relative_path: "apple_health_data/BodyMetrics/bodymass/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_body_mass"
+
+  - name: "apple_health_bp_systolic"
+    # Systolic blood pressure in mmHg
+    relative_path: "apple_health_data/Vitality/bloodpressuresystolic/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_bp_systolic"
+
+  - name: "apple_health_bp_diastolic"
+    # Diastolic blood pressure in mmHg
+    relative_path: "apple_health_data/Vitality/bloodpressurediastolic/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_apple_health_bp_diastolic"
+
   # Oura Ring endpoints (V2 API, fetched via source_connectors/oura/run_oura.py)
   - name: "oura_daily_sleep"
     relative_path: "oura/raw/daily_sleep/**/*.parquet"
