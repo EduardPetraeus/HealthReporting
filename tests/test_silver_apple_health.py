@@ -19,7 +19,7 @@ import duckdb
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "health_unified_platform"))
 from health_platform.utils.paths import get_db_path  # noqa: E402
 
-# Simple event tables: (table_name, value_column)
+# Tables with a non-null value column to validate: (table_name, value_column)
 SIMPLE_EVENT_TABLES = [
     ("hrv", "hrv_ms"),
     ("hr_recovery", "recovery_bpm"),
@@ -28,20 +28,7 @@ SIMPLE_EVENT_TABLES = [
     ("running_speed", "speed_m_per_s"),
     ("physical_effort", "effort_kj_per_hr_kg"),
     ("exercise_time", "exercise_minutes"),
-]
-
-# Event tables with duration
-DURATION_EVENT_TABLES = [
-    ("hand_washing", "duration_seconds", "DOUBLE"),
-]
-
-# Daily grain tables: (table_name,)
-DAILY_TABLES = [
-    "vo2_max",
-    "resting_heart_rate",
-    "stand_time",
-    "audio_exposure",
-    "body_measurement",
+    ("hand_washing", "duration_seconds"),
 ]
 
 # Multi-source tables with distance_type or exposure_type
