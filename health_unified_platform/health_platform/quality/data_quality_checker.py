@@ -19,7 +19,7 @@ from health_platform.utils.logging_config import get_logger
 
 logger = get_logger("data_quality_checker")
 
-_SAFE_IDENTIFIER = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
+_SAFE_IDENTIFIER = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*\Z")
 
 
 def _validate_id(name: str) -> str:

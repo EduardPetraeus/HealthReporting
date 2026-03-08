@@ -584,7 +584,7 @@ class HealthTools:
         )
         return (today - timedelta(days=7), today)
 
-    _SAFE_IDENTIFIER = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
+    _SAFE_IDENTIFIER = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*\Z")
 
     def _validate_identifier(self, name: str) -> str:
         """Validate that a string is a safe SQL identifier (prevents injection)."""
