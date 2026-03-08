@@ -1,0 +1,272 @@
+# quality_rules.yaml — Data quality rules for all silver tables.
+#
+# Check types:
+#   not_null:    list of columns that must not contain NULL
+#   unique:      list of columns that must be unique
+#   freshness:   { column: <date_col>, max_hours: <int> }
+#   row_count:   { min_rows: <int> }
+#   value_range: { <column>: { min: <num>, max: <num> } }
+#
+# Tables are keyed by silver table name (without schema prefix).
+
+tables:
+
+  # =====================================================================
+  # Oura — Daily aggregates
+  # =====================================================================
+
+  daily_sleep:
+    not_null: [business_key_hash, sk_date, day, sleep_score]
+    unique: [business_key_hash]
+    freshness: { column: day, max_hours: 49 }
+    row_count: { min_rows: 1 }
+    value_range:
+      sleep_score: { min: 0, max: 100 }
+
+  daily_readiness:
+    not_null: [business_key_hash, sk_date, day, readiness_score]
+    unique: [business_key_hash]
+    freshness: { column: day, max_hours: 49 }
+    row_count: { min_rows: 1 }
+    value_range:
+      readiness_score: { min: 0, max: 100 }
+
+  daily_activity:
+    not_null: [business_key_hash, sk_date, day]
+    unique: [business_key_hash]
+    freshness: { column: day, max_hours: 49 }
+    row_count: { min_rows: 1 }
+    value_range:
+      activity_score: { min: 0, max: 100 }
+      steps: { min: 0, max: 100000 }
+
+  daily_stress:
+    not_null: [business_key_hash, sk_date, day]
+    unique: [business_key_hash]
+    freshness: { column: day, max_hours: 49 }
+    row_count: { min_rows: 1 }
+
+  daily_spo2:
+    not_null: [business_key_hash, sk_date, day]
+    unique: [business_key_hash]
+    freshness: { column: day, max_hours: 49 }
+    row_count: { min_rows: 1 }
+    value_range:
+      spo2_avg_pct: { min: 50, max: 100 }
+
+  workout:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  blood_oxygen:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  personal_info:
+    not_null: [business_key_hash]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  # =====================================================================
+  # Oura + Apple Health — Event-level (shared tables)
+  # =====================================================================
+
+  heart_rate:
+    not_null: [business_key_hash, sk_date, bpm]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+    value_range:
+      bpm: { min: 20, max: 250 }
+
+  # =====================================================================
+  # Apple Health — Daily aggregates
+  # =====================================================================
+
+  daily_energy_by_source:
+    not_null: [business_key_hash, sk_date, day]
+    unique: [business_key_hash]
+    freshness: { column: day, max_hours: 49 }
+    row_count: { min_rows: 1 }
+
+  daily_walking_gait:
+    not_null: [business_key_hash, sk_date, day]
+    unique: [business_key_hash]
+    freshness: { column: day, max_hours: 49 }
+    row_count: { min_rows: 1 }
+
+  # =====================================================================
+  # Apple Health — Event-level
+  # =====================================================================
+
+  step_count:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  distance:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  exercise_time:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  flights_climbed:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  stand_time:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  mindful_session:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  toothbrushing:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  hand_washing:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  audio_exposure:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  body_temperature:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  body_measurement:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  respiratory_rate:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  resting_heart_rate:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+    value_range:
+      bpm: { min: 20, max: 120 }
+
+  hrv:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  hr_recovery:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  vo2_max:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+    value_range:
+      vo2_max: { min: 10, max: 90 }
+
+  six_min_walk:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  running_speed:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  physical_effort:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  # =====================================================================
+  # Apple Health — Blood pressure
+  # =====================================================================
+
+  blood_pressure_v2:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+    value_range:
+      systolic: { min: 50, max: 300 }
+      diastolic: { min: 30, max: 200 }
+
+  # =====================================================================
+  # Withings
+  # =====================================================================
+
+  weight:
+    not_null: [business_key_hash, sk_date, weight_kg]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+    value_range:
+      weight_kg: { min: 30, max: 200 }
+
+  blood_pressure:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+    value_range:
+      systolic: { min: 50, max: 300 }
+      diastolic: { min: 30, max: 200 }
+
+  # =====================================================================
+  # Lifesum
+  # =====================================================================
+
+  daily_meal:
+    not_null: [business_key_hash, sk_date, day]
+    unique: [business_key_hash]
+    freshness: { column: day, max_hours: 49 }
+    row_count: { min_rows: 1 }
+
+  # =====================================================================
+  # Nutrition (Apple Health water tracking)
+  # =====================================================================
+
+  water_intake:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  # =====================================================================
+  # Strava
+  # =====================================================================
+
+  strava_activity:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  # =====================================================================
+  # Weather
+  # =====================================================================
+
+  daily_weather:
+    not_null: [business_key_hash, sk_date, day]
+    unique: [business_key_hash]
+    freshness: { column: day, max_hours: 49 }
+    row_count: { min_rows: 1 }
+    value_range:
+      temperature_max: { min: -50, max: 60 }
+      temperature_min: { min: -60, max: 50 }

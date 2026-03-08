@@ -1,11 +1,12 @@
 """MCP server for health data access.
 
-Exposes 8 tools for AI agents to interact with health data through
+Exposes 9 tools for AI agents to interact with health data through
 semantic contracts instead of raw SQL.
 
 Usage:
     python -m health_platform.mcp.server
 """
+
 from __future__ import annotations
 
 import os
@@ -24,6 +25,7 @@ from health_platform.utils.logging_config import get_logger
 logger = get_logger("mcp_server")
 
 mcp = FastMCP("health")
+
 
 def get_db_path() -> str:
     """Resolve DuckDB database path from environment."""
@@ -80,7 +82,11 @@ def get_profile(categories: str = "") -> str:
     """
     tools = get_tools()
     try:
-        cat_list = [c.strip() for c in categories.split(",") if c.strip()] if categories else None
+        cat_list = (
+            [c.strip() for c in categories.split(",") if c.strip()]
+            if categories
+            else None
+        )
         return tools.get_profile(cat_list)
     finally:
         tools.close()
@@ -117,7 +123,13 @@ def get_metric_definition(metric_name: str) -> str:
 
 
 @mcp.tool()
-def record_insight(title: str, content: str, insight_type: str = "pattern", confidence: float = 0.7, tags: str = "") -> str:
+def record_insight(
+    title: str,
+    content: str,
+    insight_type: str = "pattern",
+    confidence: float = 0.7,
+    tags: str = "",
+) -> str:
     """Record an insight to the knowledge base.
 
     Args:
@@ -160,6 +172,24 @@ def run_custom_query(sql: str, explanation: str) -> str:
     tools = get_tools()
     try:
         return tools.run_custom_query(sql, explanation)
+    finally:
+        tools.close()
+
+
+@mcp.tool()
+def check_data_quality(table: str = "", check_type: str = "") -> str:
+    """Run data quality checks on silver tables.
+
+    Args:
+        table: Single table to check (e.g., 'daily_sleep'). Empty = all tables.
+        check_type: Single check type to run: 'not_null', 'unique', 'freshness', 'row_count', 'value_range'. Empty = all types.
+    """
+    tools = get_tools()
+    try:
+        return tools.check_data_quality(
+            table=table or None,
+            check_type=check_type or None,
+        )
     finally:
         tools.close()
 

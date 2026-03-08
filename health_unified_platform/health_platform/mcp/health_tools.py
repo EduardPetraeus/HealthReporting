@@ -33,7 +33,7 @@ _CONTRACTS_DIR = Path(__file__).resolve().parents[1] / "contracts" / "metrics"
 
 
 class HealthTools:
-    """Implements all 8 MCP tool operations against a DuckDB connection."""
+    """Implements all 9 MCP tool operations against a DuckDB connection."""
 
     def __init__(self, con: duckdb.DuckDBPyConnection) -> None:
         self.con = con
@@ -633,6 +633,61 @@ class HealthTools:
             return "weak"
         else:
             return "negligible"
+
+    # ------------------------------------------------------------------
+    # Tool 9: check_data_quality
+    # ------------------------------------------------------------------
+
+    def check_data_quality(
+        self, table: Optional[str] = None, check_type: Optional[str] = None
+    ) -> str:
+        """Run data quality checks and return a formatted report."""
+        from health_platform.quality.data_quality_checker import DataQualityChecker
+        from health_platform.quality.models import QualityReport
+        from health_platform.quality.reporters import format_for_mcp
+
+        if table and not self._SAFE_IDENTIFIER.match(table):
+            return format_error(f"Invalid table name: {table!r}")
+        if check_type:
+            valid_types = {
+                "not_null",
+                "unique",
+                "freshness",
+                "row_count",
+                "value_range",
+            }
+            if check_type not in valid_types:
+                return format_error(
+                    f"Unknown check type '{check_type}'. "
+                    f"Valid: {', '.join(sorted(valid_types))}"
+                )
+
+        try:
+            checker = DataQualityChecker(self.con)
+        except Exception as exc:
+            logger.error("Failed to initialize DQ checker: %s", exc)
+            return format_error(f"Failed to load quality rules: {exc}")
+
+        try:
+            if table:
+                results = checker.run_table_checks(table)
+                report = QualityReport(results=results)
+                report.finish()
+            elif check_type:
+                results = checker.run_check_type(check_type)
+                report = QualityReport(results=results)
+                report.finish()
+            else:
+                report = checker.run_all_checks()
+        except Exception as exc:
+            logger.error("DQ check failed: %s", exc)
+            return format_error(f"Quality check failed: {exc}")
+
+        return format_for_mcp(report)
+
+    # ------------------------------------------------------------------
+    # Private helpers
+    # ------------------------------------------------------------------
 
     def _ensure_knowledge_base_table(self) -> None:
         """Create agent.knowledge_base if it does not exist."""

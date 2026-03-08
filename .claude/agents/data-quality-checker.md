@@ -1,47 +1,49 @@
 ---
 name: data-quality-checker
-description: Run data quality checks on bronze or silver tables. Use when asked to check data quality, validate data, audit freshness, or flag anomalies.
+description: Run data quality checks on silver tables. Use when asked to check data quality, validate data, audit freshness, or flag anomalies.
 ---
 
 # Data Quality Checker
 
-Run DQ checks on the health data platform.
+Run DQ checks on the health data platform using the quality module.
 
-## Freshness checks
-For each silver table, verify:
-```sql
-SELECT
-  '<table>'                          AS table_name,
-  MAX(_ingested_at)                  AS last_ingested,
-  DATEDIFF('hour', MAX(_ingested_at), current_timestamp()) AS hours_stale
-FROM silver.<table>
+## Quick run (all checks)
+```bash
+cd ~/Github\ repos/HealthReporting
+PYTHONPATH=health_unified_platform .venv/bin/python scripts/run_quality_checks.py
 ```
-Flag tables where `hours_stale > 25` (missed daily ingestion).
 
-## Row count checks
-- Bronze vs silver row count ratio — flag if silver has < 90% of bronze rows
-- Flag if any table has 0 rows
-
-## Null rate checks
-For key columns (date, source_system, primary metric), report:
-```sql
-SELECT
-  COUNT(*) FILTER (WHERE <col> IS NULL) * 100.0 / COUNT(*) AS null_pct
-FROM silver.<table>
+## Single table
+```bash
+PYTHONPATH=health_unified_platform .venv/bin/python scripts/run_quality_checks.py --table daily_sleep
 ```
-Flag if null_pct > 5% on any key column.
 
-## Anomaly detection (simple)
-- Flag rows where a metric is > 3 standard deviations from the mean
-- Report as: `[ANOMALY] table: silver.<x>, column: <y>, value: <z>, z-score: <n>`
+## Single check type
+```bash
+PYTHONPATH=health_unified_platform .venv/bin/python scripts/run_quality_checks.py --type freshness
+```
 
-## Output format
-```
-FRESHNESS:  ✓ oura_sleep (2h ago) | ✗ apple_health_steps (STALE: 30h)
-ROW COUNTS: ✓ oura_sleep 1,204 rows | ✗ apple_health_steps 0 rows
-NULLS:      ✓ all key columns < 5% null
-ANOMALIES:  [ANOMALY] oura_sleep.hrv_rmssd = 142 (z=3.4)
-```
+## MCP tool
+Call `check_data_quality` tool from Claude Desktop (Tool 9 in server.py).
+
+## Configuration
+Rules defined in `health_environment/config/quality_rules.yaml`.
+Engine: `health_platform/quality/data_quality_checker.py`.
+
+## Check types
+- **not_null** — key columns must not contain NULL values
+- **unique** — business_key_hash must be unique per table
+- **freshness** — date column must be within max_hours threshold
+- **row_count** — table must have minimum number of rows
+- **value_range** — metric values must be within defined bounds
+
+## Adding rules for new tables
+1. Add table entry in `quality_rules.yaml`
+2. Run `pytest tests/test_quality_rules_yaml.py` to validate syntax
+3. Run `scripts/run_quality_checks.py --table <name>` to verify
 
 ## Scale-up note
-Enterprise upgrade: replace with DLT `@dlt.expect` expectations for row-level quarantine and Databricks DQ monitoring dashboard.
+Enterprise upgrade path:
+- **Databricks DLT**: Migrate to `@dlt.expect` expectations for row-level quarantine
+- **Great Expectations**: Convert YAML rules to GX expectation suites (same structure)
+- Current YAML rules are the abstraction layer — framework behind them can change

@@ -5,9 +5,10 @@
 #   Step 1: Fetch data from all API sources (Oura, Withings, Strava, Weather)
 #   Step 2: Bronze ingestion (parquet → DuckDB bronze tables)
 #   Step 3: Silver merge (ALL sources — bronze → silver deduplicated tables)
-#   Step 4: Daily summary + embedding generation
-#   Step 5: Correlation computation (metric relationships)
-#   Step 6: Patient profile refresh (baselines + demographics)
+#   Step 4: Data quality checks (YAML-driven, warnings only)
+#   Step 5: Daily summary + embedding generation
+#   Step 6: Correlation computation (metric relationships)
+#   Step 7: Patient profile refresh (baselines + demographics)
 #
 # Usage:
 #   ./scripts/daily_sync.sh              (manual run)
@@ -90,9 +91,9 @@ MERGE_ERRORS=0
 log "=== Daily Health Sync Starting [env: ${HEALTH_ENV}] ==="
 
 # =========================================================================
-# Step 1/6: Fetch data from all API sources
+# Step 1/7: Fetch data from all API sources
 # =========================================================================
-log "Step 1/6: Fetching data from API sources..."
+log "Step 1/7: Fetching data from API sources..."
 
 # 1a: Oura (required — primary wearable)
 log "  1a: Oura..."
@@ -138,20 +139,20 @@ else
     log "  1d: WARNING — Weather fetch failed (continuing)"
 fi
 
-log "Step 1/6: Fetch complete (${FETCH_OK} ok, ${FETCH_WARN} warnings)"
+log "Step 1/7: Fetch complete (${FETCH_OK} ok, ${FETCH_WARN} warnings)"
 
 # =========================================================================
-# Step 2/6: Bronze ingestion (read parquet → DuckDB bronze tables)
+# Step 2/7: Bronze ingestion (read parquet → DuckDB bronze tables)
 # =========================================================================
-log "Step 2/6: Running bronze ingestion..."
+log "Step 2/7: Running bronze ingestion..."
 cd "${PLATFORM_ROOT}"
 "${VENV_PYTHON}" -m health_platform.transformation_logic.ingestion_engine >> "${LOG_FILE}" 2>&1
-log "Step 2/6: Bronze ingestion complete"
+log "Step 2/7: Bronze ingestion complete"
 
 # =========================================================================
-# Step 3/6: Silver merge (ALL sources — bronze → silver deduplicated)
+# Step 3/7: Silver merge (ALL sources — bronze → silver deduplicated)
 # =========================================================================
-log "Step 3/6: Running silver merges..."
+log "Step 3/7: Running silver merges..."
 MERGE_DIR="${PLATFORM_ROOT}/health_platform/transformation_logic/dbt/merge"
 cd "${MERGE_DIR}"
 
@@ -167,13 +168,26 @@ for sql_file in silver/merge_*.sql; do
     fi
 done
 
-log "Step 3/6: Silver merge complete (${MERGE_COUNT} succeeded, ${MERGE_ERRORS} failed)"
+log "Step 3/7: Silver merge complete (${MERGE_COUNT} succeeded, ${MERGE_ERRORS} failed)"
 
 # =========================================================================
-# Step 4/6: Generate daily summary + embedding for yesterday
+# Step 4/7: Data quality checks (warnings only — never stops pipeline)
+# =========================================================================
+log "Step 4/7: Running data quality checks..."
+DQ_EXIT=0
+DQ_OUTPUT=$("${VENV_PYTHON}" "${REPO_ROOT}/scripts/run_quality_checks.py" 2>&1) || DQ_EXIT=$?
+log "${DQ_OUTPUT}"
+if [[ ${DQ_EXIT} -ne 0 ]]; then
+    log "  WARNING: Data quality issues detected"
+    notify "Health DQ Warning" "${DQ_OUTPUT}" "high"
+fi
+log "Step 4/7: Data quality checks complete"
+
+# =========================================================================
+# Step 5/7: Generate daily summary + embedding for yesterday
 # =========================================================================
 # (yesterday because today's data may still be incomplete)
-log "Step 4/6: Generating daily summary..."
+log "Step 5/7: Generating daily summary..."
 cd "${PLATFORM_ROOT}"
 "${VENV_AI_PYTHON}" -c "
 import duckdb
@@ -195,7 +209,7 @@ finally:
     con.close()
 " >> "${LOG_FILE}" 2>&1 || log "  WARNING: Summary generation failed (non-critical)"
 
-log "Step 4/6: Daily summary complete"
+log "Step 5/7: Daily summary complete"
 
 # --- Generate embedding for the new summary ---
 log "  Generating embedding for yesterday's summary..."
@@ -216,9 +230,9 @@ finally:
 " >> "${LOG_FILE}" 2>&1 || log "  WARNING: Embedding generation failed (non-critical)"
 
 # =========================================================================
-# Step 5/6: Correlation computation
+# Step 6/7: Correlation computation
 # =========================================================================
-log "Step 5/6: Computing metric correlations..."
+log "Step 6/7: Computing metric correlations..."
 cd "${PLATFORM_ROOT}"
 "${VENV_AI_PYTHON}" -c "
 import duckdb
@@ -235,12 +249,12 @@ finally:
     con.close()
 " >> "${LOG_FILE}" 2>&1 || log "  WARNING: Correlation computation failed (non-critical)"
 
-log "Step 5/6: Correlations complete"
+log "Step 6/7: Correlations complete"
 
 # =========================================================================
-# Step 6/6: Patient profile refresh (baselines + demographics)
+# Step 7/7: Patient profile refresh (baselines + demographics)
 # =========================================================================
-log "Step 6/6: Refreshing patient profile..."
+log "Step 7/7: Refreshing patient profile..."
 cd "${PLATFORM_ROOT}"
 "${VENV_AI_PYTHON}" -c "
 import duckdb
@@ -258,7 +272,7 @@ finally:
     con.close()
 " >> "${LOG_FILE}" 2>&1 || log "  WARNING: Profile refresh failed (non-critical)"
 
-log "Step 6/6: Patient profile refresh complete"
+log "Step 7/7: Patient profile refresh complete"
 
 # =========================================================================
 # Done
