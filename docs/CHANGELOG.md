@@ -16,6 +16,7 @@
 - Genetics parser: ancestry composition, neanderthal ancestry, wellness traits extraction from 23andMe PDFs/CSV/JSON (PR #183)
 
 ### Fixed
+- **CLIN-01: Supplement protocol** — corrected seed dates (D3 winter period Oct-Mar, others Feb 2026), fixed 3 mismatched health graph edge node IDs, added 5 new intervention edges (Creon, eggs, magnesia, probiotics)
 - **Governance:** validate_lab_data.py hardcoded path replaced with paths utility (PR #183)
 - **Strava pipeline (E2E):** Fixed 5 bugs blocking Strava data from reaching silver layer (INT-06, DB-26)
   - `run_strava.py` imported state/writer from oura instead of strava — data landed in wrong path, state mixed

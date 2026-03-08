@@ -61,9 +61,7 @@ def ensure_tables(con: duckdb.DuckDBPyConnection) -> None:
             sql = schema_file.read_text()
             for stmt in sql.split(";"):
                 lines = [
-                    line
-                    for line in stmt.strip().splitlines()
-                    if not line.strip().startswith("--")
+                    line for line in stmt.strip().splitlines() if not line.strip().startswith("--")
                 ]
                 cleaned = "\n".join(lines).strip()
                 if cleaned:
@@ -405,9 +403,7 @@ def _merge_via_staging(
 ) -> None:
     """Generic staging-table MERGE for small static tables."""
     if target_table not in _ALLOWED_MERGE_TARGETS:
-        raise ValueError(
-            f"Merge target '{target_table}' is not in the allowed table list"
-        )
+        raise ValueError(f"Merge target '{target_table}' is not in the allowed table list")
     staging = f"{target_table}__staging"
     con.execute(f"DROP TABLE IF EXISTS {staging}")
     con.execute(f"CREATE TABLE {staging} AS SELECT * FROM {target_table} WHERE false")
@@ -441,9 +437,7 @@ def _merge_via_staging(
     con.execute(f"DROP TABLE IF EXISTS {staging}")
 
 
-def import_patient_demographics(
-    con: duckdb.DuckDBPyConnection, audit: AuditLogger
-) -> int:
+def import_patient_demographics(con: duckdb.DuckDBPyConnection, audit: AuditLogger) -> int:
     """Import patient demographics YAML into 5 silver tables."""
     if not DEMOGRAPHICS_FILE.exists():
         logger.warning(f"Demographics file not found: {DEMOGRAPHICS_FILE}")
@@ -530,9 +524,7 @@ def import_patient_demographics(
     for item in data.get("vaccinations", []):
         vaccine = item["vaccine"]
         bk = md5_hash(vaccine)
-        rh = md5_hash(
-            item.get("coverage", ""), str(item.get("year", "")), item.get("notes", "")
-        )
+        rh = md5_hash(item.get("coverage", ""), str(item.get("year", "")), item.get("notes", ""))
         vax_rows.append(
             (
                 vaccine,
@@ -666,10 +658,7 @@ def update_patient_profile(con: duckdb.DuckDBPyConnection) -> None:
         ).fetchall()
 
         for report_name, result_summary, platform_relevance in genetic_rows:
-            key = (
-                "genetic_"
-                + report_name.lower().replace(" ", "_").replace("-", "_")[:40]
-            )
+            key = "genetic_" + report_name.lower().replace(" ", "_").replace("-", "_")[:40]
             description = platform_relevance or report_name
             _upsert_profile(
                 con,
@@ -981,9 +970,7 @@ def update_health_graph(con: duckdb.DuckDBPyConnection) -> None:
             desc = f"Supplement targeting {target}." if target else "Active supplement."
             if dose_str:
                 desc = f"{dose_str}. {desc}"
-            nodes.append(
-                (node_id, "supplement", name, desc, "supplement_log", "supplement_name")
-            )
+            nodes.append((node_id, "supplement", name, desc, "supplement_log", "supplement_name"))
     except Exception as exc:
         logger.warning("Could not read supplements for health graph: %s", exc)
 
@@ -998,9 +985,7 @@ def update_health_graph(con: duckdb.DuckDBPyConnection) -> None:
             desc = notes or f"Family history: {relation} with {condition}"
             if fh_status:
                 desc += f" ({fh_status})"
-            nodes.append(
-                (node_id, "family_history", label, desc, "family_history", "relation")
-            )
+            nodes.append((node_id, "family_history", label, desc, "family_history", "relation"))
     except Exception as exc:
         logger.warning("Could not read family history for health graph: %s", exc)
 
@@ -1076,9 +1061,9 @@ def update_health_graph(con: duckdb.DuckDBPyConnection) -> None:
             "mechanistic",
             "Pancreatic amylase co-secreted with elastase. Low elastase indicates reduced enzyme output.",
         ),
-        # Supplement → target edges
+        # Supplement → target edges (node IDs match dynamic generation from supplement names)
         (
-            "intervention:omega3_supplement",
+            "intervention:pikasol_premium_omega_3",
             "biomarker:epa",
             "improves",
             0.75,
@@ -1086,7 +1071,7 @@ def update_health_graph(con: duckdb.DuckDBPyConnection) -> None:
             "EPA-rich fish oil directly increases EPA levels. Expected normalization in 8-12 weeks.",
         ),
         (
-            "intervention:vitamin_d3_supplement",
+            "intervention:vitamin_d3",
             "biomarker:vitamin_d3_level",
             "improves",
             0.70,
@@ -1094,7 +1079,7 @@ def update_health_graph(con: duckdb.DuckDBPyConnection) -> None:
             "D3 supplementation raises serum 25-OH D3. Absorption limited by fat malabsorption.",
         ),
         (
-            "intervention:digestive_enzymes",
+            "intervention:super_enzymes",
             "biomarker:pancreatic_elastase",
             "improves",
             0.60,
@@ -1102,7 +1087,7 @@ def update_health_graph(con: duckdb.DuckDBPyConnection) -> None:
             "Exogenous enzymes compensate for endogenous insufficiency. Restores digestive function.",
         ),
         (
-            "intervention:digestive_enzymes",
+            "intervention:super_enzymes",
             "condition:fat_malabsorption",
             "improves",
             0.80,
@@ -1116,6 +1101,46 @@ def update_health_graph(con: duckdb.DuckDBPyConnection) -> None:
             0.55,
             "clinical_trial",
             "L-glutamine supports enterocyte metabolism and may improve mucosal immune function.",
+        ),
+        (
+            "intervention:creon",
+            "biomarker:pancreatic_elastase",
+            "improves",
+            0.85,
+            "clinical_trial",
+            "Prescription pancreatic enzyme replacement. Gold standard for exocrine insufficiency.",
+        ),
+        (
+            "intervention:creon",
+            "condition:fat_malabsorption",
+            "improves",
+            0.90,
+            "clinical_trial",
+            "Creon restores lipase activity, directly addressing fat malabsorption from low elastase.",
+        ),
+        (
+            "intervention:eggs_(choline_source)",
+            "biomarker:choline_level",
+            "improves",
+            0.65,
+            "dietary",
+            "Eggs are a primary dietary choline source. 2 eggs provide ~300mg choline.",
+        ),
+        (
+            "intervention:magnesia",
+            "condition:gut_motility",
+            "improves",
+            0.60,
+            "clinical",
+            "Magnesium oxide acts as osmotic laxative, supporting gut motility.",
+        ),
+        (
+            "intervention:targeted_probiotics",
+            "condition:dysbiosis",
+            "improves",
+            0.70,
+            "clinical_trial",
+            "Targeted probiotic strains restore depleted beneficial bacteria populations.",
         ),
         # Genetic context edges
         (
@@ -1168,7 +1193,7 @@ def update_health_graph(con: duckdb.DuckDBPyConnection) -> None:
             "sIgA is the first-line mucosal immune defense. Low sIgA increases inflammation vulnerability.",
         ),
         (
-            "intervention:omega3_supplement",
+            "intervention:pikasol_premium_omega_3",
             "condition:inflammation",
             "improves",
             0.70,
