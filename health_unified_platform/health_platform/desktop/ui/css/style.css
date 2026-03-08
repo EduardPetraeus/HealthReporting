@@ -621,3 +621,16 @@ body {
   font-size: 13px;
   color: var(--system-blue);
 }
+
+/* ===== Chat Extras ===== */
+.clear-btn {
+  background: transparent;
+  border: none;
+  color: var(--label-tertiary);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+}
+.clear-btn:hover { color: var(--system-red, #ff453a); }
+
+.stream-content { line-height: 1.6; }

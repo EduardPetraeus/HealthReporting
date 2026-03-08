@@ -21,8 +21,8 @@ function navigate(page) {
 
     currentPage = page;
 
-    // Load page data on first visit
     if (page === 'dashboard') loadDashboard();
+    if (page === 'chat') loadChatHistory();
 }
 
 // --- Dashboard ---
@@ -61,7 +61,6 @@ async function loadDashboard() {
 function renderDashboard(data, container) {
     let html = '';
 
-    // Health Score card
     const hs = data.health_score || {};
     const scoreVal = hs.score != null ? Math.round(hs.score) : '--';
     const status = hs.status || 'unknown';
@@ -84,7 +83,6 @@ function renderDashboard(data, container) {
         </div>
     </div>`;
 
-    // KPI cards
     const kpis = data.kpis || {};
     html += '<div class="kpi-grid">';
     html += renderKpiCard(kpis.sleep_score, 'sleep', 'Sleep Score');
@@ -93,14 +91,12 @@ function renderDashboard(data, container) {
     html += renderKpiCard(kpis.resting_hr, 'hr', 'Resting HR');
     html += '</div>';
 
-    // Trend chart
     html += `
     <div class="trend-card">
         <h3>30-Day Trend — Sleep &amp; Readiness</h3>
         <div class="trend-chart"><canvas id="trend-canvas"></canvas></div>
     </div>`;
 
-    // Alerts
     const alerts = data.alerts || [];
     if (alerts.length > 0) {
         html += '<div class="alerts-section"><h3>Alerts</h3>';
@@ -114,7 +110,6 @@ function renderDashboard(data, container) {
         html += '</div>';
     }
 
-    // Quick actions
     html += `
     <div class="quick-actions">
         <button class="quick-action" onclick="quickChat('Hvordan har jeg sovet den seneste uge?')">Sleep Analysis</button>
@@ -125,7 +120,6 @@ function renderDashboard(data, container) {
 
     container.innerHTML = html;
 
-    // Render sparklines after DOM is ready
     requestAnimationFrame(() => {
         renderSparklines(data.sparklines || {});
         renderTrend(data.trends || {});
@@ -151,7 +145,6 @@ function renderKpiCard(kpi, id, fallbackLabel) {
 }
 
 function renderSparklines(sparklines) {
-    // Destroy old charts
     Object.values(sparklineCharts).forEach(c => c && c.destroy());
     sparklineCharts = {};
 
@@ -172,15 +165,10 @@ function renderSparklines(sparklines) {
 }
 
 function renderTrend(trends) {
-    if (trendChart) {
-        trendChart.destroy();
-        trendChart = null;
-    }
-
+    if (trendChart) { trendChart.destroy(); trendChart = null; }
     const days = trends.days || [];
     const sleep = trends.sleep || [];
     const readiness = trends.readiness || [];
-
     if (days.length > 0) {
         trendChart = createTrendChart('trend-canvas', days, sleep, readiness);
     }
@@ -192,14 +180,15 @@ function quickChat(question) {
     navigate('chat');
     setTimeout(() => {
         const input = document.getElementById('chat-input');
-        if (input) {
-            input.value = question;
-            sendChat();
-        }
+        if (input) { input.value = question; sendChat(); }
     }, 100);
 }
 
 // --- Chat ---
+
+let streamingEl = null;
+let streamBuffer = '';
+let chatHistoryLoaded = false;
 
 async function sendChat() {
     const input = document.getElementById('chat-input');
@@ -214,18 +203,67 @@ async function sendChat() {
     showTyping(chatEl);
 
     try {
-        const result = await window.pywebview.api.query_metric(
-            'sleep_score', 'daily_value', 'last_7_days'
-        );
-        hideTyping();
-        // For now, show the raw query result
-        // Chat engine integration comes in Session 2
-        addChatMsg(chatEl, 'Chat integration comes in Session 2. Here is raw data:\n\n' + (result.result || result.error || 'No data'), 'bot');
+        await window.pywebview.api.chat(question);
     } catch (err) {
         hideTyping();
-        addChatMsg(chatEl, 'Error: ' + String(err), 'bot error');
+        if (!streamingEl) {
+            addChatMsg(chatEl, 'Error: ' + String(err), 'bot error');
+        }
     } finally {
         isBusy = false;
+    }
+}
+
+function appendStreamChunk(text) {
+    const chatEl = document.getElementById('chat-messages');
+    if (!streamingEl) {
+        hideTyping();
+        streamingEl = document.createElement('div');
+        streamingEl.className = 'msg bot';
+        streamingEl.innerHTML = '<div class="bot-label">Health Assistant</div><div class="stream-content"></div>';
+        chatEl.appendChild(streamingEl);
+        streamBuffer = '';
+    }
+    streamBuffer += text;
+    const contentEl = streamingEl.querySelector('.stream-content');
+    if (contentEl) contentEl.innerHTML = md(streamBuffer);
+    requestAnimationFrame(() => chatEl.scrollTop = chatEl.scrollHeight);
+}
+
+function finishStream() {
+    if (streamingEl) {
+        const contentEl = streamingEl.querySelector('.stream-content');
+        if (contentEl) contentEl.innerHTML = md(streamBuffer);
+    }
+    streamingEl = null;
+    streamBuffer = '';
+}
+
+async function loadChatHistory() {
+    if (chatHistoryLoaded) return;
+    chatHistoryLoaded = true;
+    try {
+        const history = await window.pywebview.api.get_chat_history();
+        if (!history || history.length === 0) return;
+        const chatEl = document.getElementById('chat-messages');
+        for (const msg of history) {
+            addChatMsg(chatEl, msg.content, msg.role === 'user' ? 'user' : 'bot');
+        }
+    } catch (err) {
+        console.error('Failed to load chat history:', err);
+    }
+}
+
+async function clearChatHistory() {
+    try {
+        await window.pywebview.api.clear_chat_history();
+        const chatEl = document.getElementById('chat-messages');
+        while (chatEl.children.length > 1) {
+            chatEl.removeChild(chatEl.lastChild);
+        }
+        chatHistoryLoaded = false;
+    } catch (err) {
+        console.error('Failed to clear history:', err);
     }
 }
 
@@ -290,12 +328,11 @@ async function populateMetricDropdown() {
     }
 }
 
-// --- Markdown renderer (from chat_ui.py) ---
+// --- Markdown renderer ---
 
 function md(text) {
     if (!text) return '';
     let html = escapeHtml(text);
-
     html = html.replace(/^(-{3,}|\*{3,})$/gm, '<div class="divider"></div>');
     html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
     html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
@@ -380,7 +417,6 @@ window.addEventListener('pywebviewready', () => {
     loadDashboard();
     populateMetricDropdown();
 
-    // Update status bar
     window.pywebview.api.get_status().then(status => {
         const el = document.getElementById('db-status');
         if (el) {

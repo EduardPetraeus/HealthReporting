@@ -8,7 +8,10 @@ Returns JSON-serializable dicts/lists for JavaScript consumption.
 
 from __future__ import annotations
 
-from datetime import date, timedelta
+import json
+import threading
+import uuid
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any, Optional
 
@@ -25,7 +28,7 @@ _CONTRACTS_DIR = Path(__file__).resolve().parents[1] / "contracts" / "metrics"
 
 def _sanitize(value: Any) -> Any:
     """Convert DuckDB types to JSON-serializable Python types."""
-    import decimal  # noqa: F811 — imported here to survive ruff auto-removal
+    import decimal
 
     if isinstance(value, decimal.Decimal):
         return float(value)
@@ -42,16 +45,19 @@ class DesktopAPI:
     """API exposed to the pywebview JavaScript bridge.
 
     All public methods return JSON-serializable values.
-    The DuckDB connection uses read_only=True to allow parallel
-    access with the daily sync process.
+    The DuckDB connection uses read_only=True for queries.
+    A separate write connection (with threading lock) persists chat history.
     """
 
     def __init__(self, db_path: str) -> None:
         self._db_path = db_path
         self._window = None
         self._con: Optional[duckdb.DuckDBPyConnection] = None
+        self._write_con: Optional[duckdb.DuckDBPyConnection] = None
+        self._write_lock = threading.Lock()
         self._tools: Optional[HealthTools] = None
         self._query_builder = QueryBuilder(_CONTRACTS_DIR)
+        self._session_id = str(uuid.uuid4())[:8]
 
     def set_window(self, window) -> None:
         self._window = window
@@ -64,11 +70,168 @@ class DesktopAPI:
             self._con = duckdb.connect(self._db_path, read_only=True)
         return self._con
 
+    def _get_write_connection(self) -> duckdb.DuckDBPyConnection:
+        """Get or create a writable DuckDB connection for chat history."""
+        if self._write_con is None:
+            self._write_con = duckdb.connect(self._db_path)
+            self._ensure_chat_history_table()
+        return self._write_con
+
+    def _ensure_chat_history_table(self) -> None:
+        """Create agent.chat_history table if it does not exist."""
+        con = self._write_con
+        if con is None:
+            return
+        con.execute("CREATE SCHEMA IF NOT EXISTS agent")
+        con.execute(
+            """
+            CREATE TABLE IF NOT EXISTS agent.chat_history (
+                id VARCHAR PRIMARY KEY,
+                session_id VARCHAR,
+                role VARCHAR NOT NULL,
+                content TEXT NOT NULL,
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        )
+
     def _get_tools(self) -> HealthTools:
         """Get or create a HealthTools instance."""
         if self._tools is None:
             self._tools = HealthTools(self._get_connection())
         return self._tools
+
+    # ------------------------------------------------------------------
+    # Chat
+    # ------------------------------------------------------------------
+
+    def chat(self, question: str) -> str:
+        """Send a health question to Claude and stream the response.
+
+        Gathers health data context, builds multi-turn message history,
+        streams from Claude API, and pushes chunks to the frontend via
+        evaluate_js(). Persists both user question and AI response.
+        """
+        import anthropic
+
+        from health_platform.api.chat_engine import SYSTEM_PROMPT, _gather_context
+        from health_platform.utils.keychain import get_secret
+
+        self._save_chat_message("user", question)
+
+        api_key = get_secret("ANTHROPIC_API_KEY")
+        if not api_key:
+            error_msg = "ANTHROPIC_API_KEY not found in keychain."
+            self._save_chat_message("assistant", error_msg)
+            return error_msg
+
+        try:
+            tools = self._get_tools()
+            context = _gather_context(tools, question)
+        except Exception as exc:
+            logger.debug("Failed to gather context: %s", exc)
+            context = "No health data available."
+
+        safe_question = question.replace("---", "").strip()
+        user_message = (
+            f"<health_data>\n{context}\n</health_data>\n\n"
+            f"<user_question>\n{safe_question}\n</user_question>"
+        )
+
+        messages = self._build_message_history(user_message)
+
+        client = anthropic.Anthropic(api_key=api_key)
+        full_response = ""
+
+        try:
+            with client.messages.stream(
+                model="claude-sonnet-4-20250514",
+                max_tokens=1024,
+                system=SYSTEM_PROMPT,
+                messages=messages,
+            ) as stream:
+                for text in stream.text_stream:
+                    full_response += text
+                    if self._window:
+                        escaped = json.dumps(text)
+                        self._window.evaluate_js(f"appendStreamChunk({escaped})")
+        except Exception as exc:
+            logger.error("Claude API error: %s", exc)
+            if not full_response:
+                full_response = f"Error: {exc}"
+
+        if self._window:
+            self._window.evaluate_js("finishStream()")
+
+        self._save_chat_message("assistant", full_response)
+        return full_response
+
+    def _build_message_history(self, current_user_message: str) -> list[dict]:
+        """Build message list with recent chat history for multi-turn context."""
+        messages = []
+        try:
+            con = self._get_connection()
+            rows = con.execute(
+                """
+                SELECT role, content FROM agent.chat_history
+                ORDER BY timestamp DESC
+                LIMIT 20
+                """
+            ).fetchall()
+            # Reverse to chronological order, skip the last user message (it's current)
+            for role, content in reversed(rows[1:] if rows else []):
+                messages.append({"role": role, "content": content})
+        except Exception:
+            pass
+
+        messages.append({"role": "user", "content": current_user_message})
+        return messages
+
+    def get_chat_history(self) -> list[dict]:
+        """Return all chat messages for the current session display."""
+        try:
+            con = self._get_connection()
+            rows = con.execute(
+                """
+                SELECT role, content, timestamp
+                FROM agent.chat_history
+                ORDER BY timestamp ASC
+                """
+            ).fetchall()
+            return [
+                {"role": r[0], "content": r[1], "timestamp": str(r[2])} for r in rows
+            ]
+        except Exception:
+            return []
+
+    def clear_chat_history(self) -> dict:
+        """Delete all chat history."""
+        try:
+            with self._write_lock:
+                con = self._get_write_connection()
+                con.execute("DELETE FROM agent.chat_history")
+            return {"status": "ok"}
+        except Exception as exc:
+            logger.debug("Failed to clear chat history: %s", exc)
+            return {"status": "error", "message": str(exc)}
+
+    def _save_chat_message(self, role: str, content: str) -> None:
+        """Persist a chat message to DuckDB."""
+        try:
+            with self._write_lock:
+                con = self._get_write_connection()
+                con.execute(
+                    "INSERT INTO agent.chat_history (id, session_id, role, content, timestamp) VALUES (?, ?, ?, ?, ?)",
+                    [
+                        str(uuid.uuid4()),
+                        self._session_id,
+                        role,
+                        content,
+                        datetime.now().isoformat(),
+                    ],
+                )
+        except Exception as exc:
+            logger.debug("Failed to save chat message: %s", exc)
 
     # ------------------------------------------------------------------
     # Dashboard

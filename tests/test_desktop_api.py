@@ -1,6 +1,6 @@
 """Tests for the DesktopAPI class.
 
-Uses an in-memory DuckDB database with synthetic data.
+Uses a temporary DuckDB database with synthetic data.
 """
 
 from __future__ import annotations
@@ -134,6 +134,19 @@ def dev_db(tmp_path):
     """
     )
 
+    # Chat history table
+    con.execute(
+        """
+        CREATE TABLE agent.chat_history (
+            id VARCHAR PRIMARY KEY,
+            session_id VARCHAR,
+            role VARCHAR NOT NULL,
+            content TEXT NOT NULL,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """
+    )
+
     con.close()
     return db_path
 
@@ -142,6 +155,38 @@ def dev_db(tmp_path):
 def api(dev_db):
     """Create a DesktopAPI instance with test database."""
     return DesktopAPI(dev_db)
+
+
+# ===================================================================
+# Helpers for chat tests
+# ===================================================================
+
+
+def _close_all(api):
+    """Close all DuckDB connections to allow fresh connections."""
+    if api._con:
+        api._con.close()
+        api._con = None
+    if api._write_con:
+        api._write_con.close()
+        api._write_con = None
+
+
+def _read_rows(
+    db_path, sql="SELECT role, content FROM agent.chat_history ORDER BY timestamp"
+):
+    """Read rows from a fresh read-only connection."""
+    import duckdb
+
+    con = duckdb.connect(db_path, read_only=True)
+    rows = con.execute(sql).fetchall()
+    con.close()
+    return rows
+
+
+# ===================================================================
+# Session 1: Dashboard & System Tests
+# ===================================================================
 
 
 class TestSanitize:
@@ -210,7 +255,7 @@ class TestDashboardData:
         assert "steps" in kpis
         assert "resting_hr" in kpis
 
-        for key, kpi in kpis.items():
+        for _key, kpi in kpis.items():
             assert "label" in kpi
             assert "value" in kpi
             assert "day" in kpi
@@ -230,7 +275,7 @@ class TestDashboardData:
         assert "steps" in sparklines
         assert "resting_hr" in sparklines
 
-        for key, series in sparklines.items():
+        for _key, series in sparklines.items():
             assert isinstance(series, list)
             for point in series:
                 assert "day" in point
@@ -247,7 +292,6 @@ class TestDashboardData:
     def test_alerts_low_scores(self, api):
         alerts = api.get_dashboard_data()["alerts"]
         assert isinstance(alerts, list)
-        # We have sleep_score=58 and readiness=55, so alerts should fire
         alert_metrics = [a["metric"] for a in alerts]
         assert "sleep_score" in alert_metrics
         assert "readiness_score" in alert_metrics
@@ -261,8 +305,8 @@ class TestDashboardData:
 
 class TestNoDatabase:
     def test_missing_db(self, tmp_path):
-        api = DesktopAPI(str(tmp_path / "nonexistent.db"))
-        data = api.get_dashboard_data()
+        missing_api = DesktopAPI(str(tmp_path / "nonexistent.db"))
+        data = missing_api.get_dashboard_data()
         assert data["error"] == "no_database"
 
 
@@ -289,7 +333,203 @@ class TestGetStatus:
         assert status["db_size_mb"] > 0
 
     def test_status_without_db(self, tmp_path):
-        api = DesktopAPI(str(tmp_path / "nonexistent.db"))
-        status = api.get_status()
+        missing_api = DesktopAPI(str(tmp_path / "nonexistent.db"))
+        status = missing_api.get_status()
         assert status["db_exists"] is False
         assert status["db_size_mb"] == 0
+
+
+# ===================================================================
+# Session 2: Chat Integration Tests
+# ===================================================================
+
+
+class TestChatHistoryTable:
+    def test_ensure_chat_history_table(self, api):
+        """_ensure_chat_history_table creates the table if needed."""
+        import duckdb
+
+        _close_all(api)
+        con = duckdb.connect(api._db_path)
+        con.execute("DROP TABLE IF EXISTS agent.chat_history")
+        con.close()
+
+        api._get_write_connection()
+        _close_all(api)
+
+        rows = _read_rows(api._db_path, "SELECT COUNT(*) FROM agent.chat_history")
+        assert rows[0][0] == 0
+
+
+class TestSaveChatMessage:
+    def test_save_user_message(self, api):
+        """_save_chat_message persists a user message."""
+        api._save_chat_message("user", "How did I sleep?")
+        session_id = api._session_id
+        _close_all(api)
+
+        rows = _read_rows(
+            api._db_path,
+            "SELECT role, content, session_id FROM agent.chat_history",
+        )
+        assert len(rows) == 1
+        assert rows[0][0] == "user"
+        assert rows[0][1] == "How did I sleep?"
+        assert rows[0][2] == session_id
+
+    def test_save_assistant_message(self, api):
+        """_save_chat_message persists an assistant message."""
+        api._save_chat_message("assistant", "Your sleep score was 88.")
+        _close_all(api)
+
+        rows = _read_rows(api._db_path)
+        assert len(rows) == 1
+        assert rows[0][0] == "assistant"
+        assert rows[0][1] == "Your sleep score was 88."
+
+    def test_save_multiple_messages(self, api):
+        """Multiple messages get unique IDs and correct ordering."""
+        api._save_chat_message("user", "Q1")
+        api._save_chat_message("assistant", "A1")
+        api._save_chat_message("user", "Q2")
+        _close_all(api)
+
+        rows = _read_rows(
+            api._db_path,
+            "SELECT id, role, content FROM agent.chat_history ORDER BY timestamp",
+        )
+        assert len(rows) == 3
+        ids = [r[0] for r in rows]
+        assert len(set(ids)) == 3
+        assert rows[0][1] == "user"
+        assert rows[1][1] == "assistant"
+        assert rows[2][1] == "user"
+
+
+class TestGetChatHistory:
+    def test_empty_history(self, api):
+        """get_chat_history returns empty list when no messages."""
+        history = api.get_chat_history()
+        assert history == []
+
+    def test_returns_persisted_messages(self, api):
+        """get_chat_history returns messages saved with _save_chat_message."""
+        api._save_chat_message("user", "Hello")
+        api._save_chat_message("assistant", "Hi there")
+        _close_all(api)
+
+        history = api.get_chat_history()
+        assert len(history) == 2
+        assert history[0]["role"] == "user"
+        assert history[0]["content"] == "Hello"
+        assert history[1]["role"] == "assistant"
+        assert history[1]["content"] == "Hi there"
+        assert "timestamp" in history[0]
+
+    def test_history_ordered_by_timestamp(self, api):
+        """Messages are returned in chronological order."""
+        api._save_chat_message("user", "First")
+        api._save_chat_message("assistant", "Second")
+        api._save_chat_message("user", "Third")
+        _close_all(api)
+
+        history = api.get_chat_history()
+        contents = [m["content"] for m in history]
+        assert contents == ["First", "Second", "Third"]
+
+
+class TestClearChatHistory:
+    def test_clear_removes_all_messages(self, api):
+        """clear_chat_history deletes all messages."""
+        api._save_chat_message("user", "Test 1")
+        api._save_chat_message("assistant", "Answer 1")
+
+        result = api.clear_chat_history()
+        assert result["status"] == "ok"
+        _close_all(api)
+
+        history = api.get_chat_history()
+        assert history == []
+
+    def test_clear_empty_history(self, api):
+        """Clearing an already empty history succeeds."""
+        result = api.clear_chat_history()
+        assert result["status"] == "ok"
+
+
+class TestBuildMessageHistory:
+    def test_with_no_prior_history(self, api):
+        """With no history, returns just the current message."""
+        messages = api._build_message_history("Current question")
+        assert len(messages) == 1
+        assert messages[0]["role"] == "user"
+        assert messages[0]["content"] == "Current question"
+
+    def test_with_prior_messages(self, api):
+        """Includes prior messages for multi-turn context."""
+        api._save_chat_message("user", "Q1")
+        api._save_chat_message("assistant", "A1")
+        api._save_chat_message("user", "Q2")
+        _close_all(api)
+
+        messages = api._build_message_history("Current question")
+        assert len(messages) >= 2
+        assert messages[-1]["role"] == "user"
+        assert messages[-1]["content"] == "Current question"
+
+    def test_current_message_is_last(self, api):
+        """The current user message is always the last in the list."""
+        api._save_chat_message("user", "Old question")
+        api._save_chat_message("assistant", "Old answer")
+        _close_all(api)
+
+        messages = api._build_message_history("New question here")
+        assert messages[-1]["content"] == "New question here"
+        assert messages[-1]["role"] == "user"
+
+
+class TestChatWithMockedAPI:
+    def test_chat_without_api_key(self, api, monkeypatch):
+        """chat() returns error when API key is missing."""
+        monkeypatch.setattr("health_platform.utils.keychain.get_secret", lambda _: None)
+        result = api.chat("How did I sleep?")
+        assert "ANTHROPIC_API_KEY" in result
+
+    def test_chat_saves_user_message(self, api, monkeypatch):
+        """chat() persists the user question even if API call fails."""
+        monkeypatch.setattr("health_platform.utils.keychain.get_secret", lambda _: None)
+        api.chat("My test question")
+        _close_all(api)
+
+        rows = _read_rows(
+            api._db_path,
+            "SELECT role, content FROM agent.chat_history WHERE role = 'user'",
+        )
+        assert len(rows) == 1
+        assert rows[0][1] == "My test question"
+
+    def test_chat_saves_error_response(self, api, monkeypatch):
+        """chat() persists the error message as assistant response."""
+        monkeypatch.setattr("health_platform.utils.keychain.get_secret", lambda _: None)
+        api.chat("Test question")
+        _close_all(api)
+
+        rows = _read_rows(
+            api._db_path,
+            "SELECT role, content FROM agent.chat_history WHERE role = 'assistant'",
+        )
+        assert len(rows) == 1
+        assert "ANTHROPIC_API_KEY" in rows[0][1]
+
+
+class TestSessionId:
+    def test_session_id_is_set(self, api):
+        """Each API instance gets a unique session ID."""
+        assert api._session_id is not None
+        assert len(api._session_id) == 8
+
+    def test_different_instances_different_ids(self, dev_db):
+        """Two API instances get different session IDs."""
+        api1 = DesktopAPI(dev_db)
+        api2 = DesktopAPI(dev_db)
+        assert api1._session_id != api2._session_id

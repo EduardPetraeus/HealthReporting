@@ -42,6 +42,7 @@ def seed_dev_database() -> None:
     _create_daily_stress(con, days)
     _create_weight(con, days)
     _create_patient_profile(con)
+    _create_chat_history_table(con)
 
     con.close()
     print(f"Dev database seeded: {len(days)} days of synthetic data")
@@ -267,6 +268,21 @@ def _create_patient_profile(con: duckdb.DuckDBPyConnection) -> None:
             "INSERT INTO agent.patient_profile (category, profile_key, profile_value) VALUES (?, ?, ?)",
             [cat, key, val],
         )
+
+
+def _create_chat_history_table(con: duckdb.DuckDBPyConnection) -> None:
+    con.execute("DROP TABLE IF EXISTS agent.chat_history")
+    con.execute(
+        """
+        CREATE TABLE agent.chat_history (
+            id VARCHAR PRIMARY KEY,
+            session_id VARCHAR,
+            role VARCHAR NOT NULL,
+            content TEXT NOT NULL,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
 
 
 if __name__ == "__main__":
