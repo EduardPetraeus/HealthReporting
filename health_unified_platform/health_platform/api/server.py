@@ -12,6 +12,7 @@ Architecture:
 
 from __future__ import annotations
 
+import json
 import os
 from contextlib import asynccontextmanager
 from datetime import datetime
@@ -20,6 +21,7 @@ from typing import Literal
 
 import duckdb
 from fastapi import Depends, FastAPI, Query
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from health_platform.api.auth import verify_token
@@ -91,6 +93,9 @@ class ChatRequest(BaseModel):
     format: Literal["markdown", "plain"] = Field(
         "markdown", description="Output format: markdown or plain"
     )
+    session_id: str | None = Field(
+        None, description="Session ID for multi-turn conversations"
+    )
 
 
 class ChatResponse(BaseModel):
@@ -140,7 +145,7 @@ async def chat(
 
     tools = _get_tools()
     try:
-        answer = generate_response(tools, request.question)
+        answer = generate_response(tools, request.question, request.session_id)
     finally:
         tools.close()
 
@@ -151,6 +156,33 @@ async def chat(
         answer=answer,
         timestamp=datetime.now().isoformat(),
     )
+
+
+@app.post("/v1/chat/stream", tags=["ai"])
+async def chat_stream(
+    request: ChatRequest,
+    _token: str = Depends(verify_token),
+):
+    """Stream a chat response using Server-Sent Events.
+
+    Uses Claude tool-use to gather health data, then streams the
+    synthesized response as SSE text chunks.
+    """
+    from health_platform.api.chat_engine import generate_response_stream  # noqa: E402
+
+    tools = _get_tools()
+
+    async def event_generator():
+        try:
+            for chunk in generate_response_stream(
+                tools, request.question, request.session_id
+            ):
+                yield f"data: {json.dumps({'text': chunk})}\n\n"
+            yield f"data: {json.dumps({'done': True})}\n\n"
+        finally:
+            tools.close()
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 
 @app.get("/v1/query", response_model=QueryResponse, tags=["data"])

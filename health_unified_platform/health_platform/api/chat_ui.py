@@ -348,6 +348,7 @@ header .status {
 const API = window.location.origin;
 let token = localStorage.getItem('health_token') || sessionStorage.getItem('health_token') || '';
 let isBusy = false;  // Prevent parallel requests
+let sessionId = crypto.randomUUID();  // New session per page load
 
 /* --- Login --- */
 function doLogin() {
@@ -513,6 +514,20 @@ function hideTyping() {
   if (t) t.remove();
 }
 
+function createBotMessage() {
+  const d = document.createElement('div');
+  d.className = 'msg bot';
+  d.innerHTML = '<div class="bot-label">Health Assistant</div>';
+  chatEl.appendChild(d);
+  requestAnimationFrame(() => { chatEl.scrollTop = chatEl.scrollHeight; });
+  return d;
+}
+
+function updateBotMessage(el, text) {
+  el.innerHTML = '<div class="bot-label">Health Assistant</div>' + md(text);
+  requestAnimationFrame(() => { chatEl.scrollTop = chatEl.scrollHeight; });
+}
+
 async function ask(question) {
   if (!question.trim() || isBusy) return;
   isBusy = true;
@@ -525,28 +540,80 @@ async function ask(question) {
   showTyping();
 
   try {
-    const r = await fetch(API + '/v1/chat', {
+    // Try streaming first
+    const response = await fetch(API + '/v1/chat/stream', {
       method: 'POST',
       headers: {
         'Authorization': 'Bearer ' + token,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({question: question, format: 'markdown'})
+      body: JSON.stringify({question: question, format: 'markdown', session_id: sessionId})
     });
-    hideTyping();
-    if (r.ok) {
-      const data = await r.json();
-      addMsg(data.answer, 'bot');
-    } else if (r.status === 401) {
+
+    if (response.status === 401) {
+      hideTyping();
       localStorage.removeItem('health_token');
       document.getElementById('login').classList.remove('hidden');
       addMsg('Session udløbet. Log ind igen.', 'bot error');
-    } else {
+      return;
+    }
+
+    if (!response.ok) {
+      hideTyping();
       addRetryMsg('Serverfejl. Prøv igen.', lastQ);
+      return;
+    }
+
+    hideTyping();
+    const msgDiv = createBotMessage();
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText = '';
+
+    while (true) {
+      const {done, value} = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, {stream: true});
+      for (const line of chunk.split('\n')) {
+        if (line.startsWith('data: ')) {
+          try {
+            const data = JSON.parse(line.slice(6));
+            if (data.text) {
+              fullText += data.text;
+              updateBotMessage(msgDiv, fullText);
+            }
+          } catch(parseErr) {
+            // Ignore incomplete JSON chunks
+          }
+        }
+      }
+    }
+
+    // If no text was streamed, show fallback message
+    if (!fullText) {
+      updateBotMessage(msgDiv, 'Intet svar modtaget.');
     }
   } catch(e) {
     hideTyping();
-    addRetryMsg('Kan ikke nå serveren. Tjek din forbindelse.', lastQ);
+    // Fallback to non-streaming endpoint
+    try {
+      const r = await fetch(API + '/v1/chat', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + token,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({question: lastQ, format: 'markdown', session_id: sessionId})
+      });
+      if (r.ok) {
+        const data = await r.json();
+        addMsg(data.answer, 'bot');
+      } else {
+        addRetryMsg('Kan ikke nå serveren. Tjek din forbindelse.', lastQ);
+      }
+    } catch(fallbackErr) {
+      addRetryMsg('Kan ikke nå serveren. Tjek din forbindelse.', lastQ);
+    }
   } finally {
     isBusy = false;
   }

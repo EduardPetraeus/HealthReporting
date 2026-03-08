@@ -1,11 +1,14 @@
-"""AI-powered chat engine using Claude API.
+"""AI-powered chat engine using Claude tool-use and SSE streaming.
 
-Takes a natural language health question, gathers relevant data from
-the health database, and uses Claude to generate an intelligent,
-contextual response with insights — like a personal health advisor.
+Replaces the keyword-routing approach with Claude's native function calling.
+The LLM decides which health tools to invoke, executes them in a loop,
+and synthesizes a final response from real data.
 """
 
 from __future__ import annotations
+
+import json
+import uuid
 
 from health_platform.mcp.health_tools import HealthTools
 from health_platform.utils.keychain import get_secret
@@ -15,7 +18,11 @@ logger = get_logger("api.chat_engine")
 
 _client = None  # anthropic.Anthropic, lazily initialized
 
+MAX_TOOL_CALLS = 5
+
 SYSTEM_PROMPT = """You are a personal health assistant with access to the user's real health data from wearable devices (Oura Ring) and other sources.
+
+You have access to health data tools. Use them to fetch the user's actual data before answering. Always query data first, then synthesize insights. Call multiple tools if needed to build a complete picture.
 
 Your role:
 - Interpret the user's question and analyze their health data
@@ -36,6 +43,111 @@ Formatting guidelines:
 - Add a brief summary at the top before detailed data
 """
 
+HEALTH_TOOLS = [
+    {
+        "name": "query_health",
+        "description": "Query a health metric using semantic contracts. Use for questions about sleep, readiness, activity, steps, weight, stress, spo2.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "metric": {
+                    "type": "string",
+                    "description": (
+                        "Metric name: sleep_score, readiness_score, steps, "
+                        "activity_score, weight, daily_stress, blood_oxygen, "
+                        "body_temperature, respiratory_rate, water_intake, "
+                        "resting_heart_rate, workout, calories"
+                    ),
+                },
+                "date_range": {
+                    "type": "string",
+                    "description": (
+                        "Date range: today, yesterday, last_7_days, last_30_days, "
+                        "last_90_days, or YYYY-MM-DD:YYYY-MM-DD"
+                    ),
+                },
+                "computation": {
+                    "type": "string",
+                    "enum": ["daily_value", "period_average", "trend", "anomaly"],
+                    "description": "Computation type",
+                },
+            },
+            "required": ["metric", "date_range"],
+        },
+    },
+    {
+        "name": "get_profile",
+        "description": "Load patient profile with demographics, baselines, and personal info.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "categories": {
+                    "type": "string",
+                    "description": "Comma-separated categories: baselines, demographics. Empty for all.",
+                }
+            },
+        },
+    },
+    {
+        "name": "discover_correlations",
+        "description": "Find correlations between two health metrics with lag analysis.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "metric_a": {
+                    "type": "string",
+                    "description": "First metric in table.column format",
+                },
+                "metric_b": {
+                    "type": "string",
+                    "description": "Second metric in table.column format",
+                },
+                "max_lag": {
+                    "type": "integer",
+                    "description": "Max lag days to test (default 3)",
+                },
+            },
+            "required": ["metric_a", "metric_b"],
+        },
+    },
+    {
+        "name": "search_memory",
+        "description": "Search agent memory and daily summaries for past insights and patterns.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "Natural language search query",
+                },
+                "top_k": {
+                    "type": "integer",
+                    "description": "Number of results (default 5)",
+                },
+            },
+            "required": ["query"],
+        },
+    },
+    {
+        "name": "search_evidence",
+        "description": "Search PubMed for peer-reviewed evidence supporting health claims.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "PubMed search query",
+                },
+                "max_results": {
+                    "type": "integer",
+                    "description": "Number of results (default 5, max 20)",
+                },
+            },
+            "required": ["query"],
+        },
+    },
+]
+
 
 def _get_api_key() -> str:
     """Load Anthropic API key from claude keychain."""
@@ -55,191 +167,168 @@ def _get_client():
     return _client
 
 
-_EVIDENCE_KEYWORDS: dict[str, str] = {
-    "sleep": "sleep quality health outcomes",
-    "søvn": "sleep quality health outcomes",
-    "sov": "sleep quality health outcomes",
-    "hrv": "heart rate variability health",
-    "heart rate": "heart rate variability health",
-    "puls": "heart rate variability health",
-    "stress": "stress biomarkers cortisol health",
-    "readiness": "recovery readiness biomarkers",
-    "recovery": "recovery readiness biomarkers",
-    "steps": "physical activity step count health benefits",
-    "skridt": "physical activity step count health benefits",
-    "exercise": "exercise health outcomes meta-analysis",
-    "træning": "exercise health outcomes meta-analysis",
-    "weight": "body weight management health",
-    "vægt": "body weight management health",
-    "magnesium": "magnesium supplementation health",
-    "vitamin": "vitamin supplementation health outcomes",
-    "caffeine": "caffeine health effects",
-    "kaffe": "caffeine health effects",
-    "alcohol": "alcohol health effects",
-    "alkohol": "alcohol health effects",
-    "melatonin": "melatonin sleep supplementation",
-}
+# ------------------------------------------------------------------
+# Chat history persistence (DuckDB agent.chat_history)
+# ------------------------------------------------------------------
 
 
-def _build_evidence_query(question_lower: str) -> str | None:
-    """Map question keywords to PubMed search queries. Returns None if no match."""
-    matched_queries: list[str] = []
-    seen: set[str] = set()
-    for keyword, query in _EVIDENCE_KEYWORDS.items():
-        if keyword in question_lower and query not in seen:
-            matched_queries.append(query)
-            seen.add(query)
-        if len(matched_queries) >= 2:
-            break
-    if not matched_queries:
-        return None
-    return " OR ".join(matched_queries)
-
-
-def _gather_context(tools: HealthTools, question: str) -> str:
-    """Gather relevant health data context for the AI based on the question."""
-    q = question.lower()
-    context_parts = []
-
-    # Always include patient profile (core memory)
-    try:
-        profile = tools.get_profile()
-        if profile and "No profile" not in profile:
-            context_parts.append("## Patient Profile\n" + profile)
-    except Exception:
-        logger.debug("Failed to load patient profile", exc_info=True)
-
-    # Gather data based on question keywords
-    data_queries = []
-
-    matched = False
-
-    # Sleep
-    if any(kw in q for kw in ["sleep", "sov", "søvn", "slept", "insomnia"]):
-        matched = True
-        data_queries.extend(
-            [
-                ("sleep_score", "last_7_days", "daily_value"),
-                ("sleep_score", "last_30_days", "period_average"),
-                ("sleep_score", "last_30_days", "trend"),
-            ]
+def _ensure_chat_history_table(con) -> None:
+    """Create agent.chat_history if it doesn't exist."""
+    con.execute("CREATE SCHEMA IF NOT EXISTS agent")
+    con.execute(
+        """
+        CREATE TABLE IF NOT EXISTS agent.chat_history (
+            id VARCHAR PRIMARY KEY,
+            session_id VARCHAR NOT NULL,
+            role VARCHAR NOT NULL,
+            content TEXT NOT NULL,
+            tool_name VARCHAR,
+            tool_input TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
-
-    # Readiness
-    if any(kw in q for kw in ["readiness", "ready", "klar", "energy", "energi"]):
-        matched = True
-        data_queries.extend(
-            [
-                ("readiness_score", "last_7_days", "daily_value"),
-                ("readiness_score", "last_30_days", "period_average"),
-            ]
-        )
-
-    # Steps / Activity
-    if any(kw in q for kw in ["step", "skridt", "walk", "activity", "aktiv"]):
-        matched = True
-        data_queries.extend(
-            [
-                ("steps", "last_7_days", "daily_value"),
-                ("steps", "last_30_days", "period_average"),
-                ("activity_score", "last_7_days", "daily_value"),
-            ]
-        )
-
-    # Workout
-    if any(kw in q for kw in ["workout", "exercise", "træning", "run", "løb"]):
-        matched = True
-        data_queries.append(("workout", "last_30_days", "daily_value"))
-
-    # Stress
-    if any(kw in q for kw in ["stress", "recover", "afslapning"]):
-        matched = True
-        data_queries.append(("daily_stress", "last_7_days", "daily_value"))
-
-    # Weight
-    if any(kw in q for kw in ["weight", "vægt", "body", "krop"]):
-        matched = True
-        data_queries.append(("weight", "last_30_days", "daily_value"))
-
-    # Broad / overview / trend questions — give everything
-    if not matched:
-        data_queries.extend(
-            [
-                ("sleep_score", "last_7_days", "daily_value"),
-                ("readiness_score", "last_7_days", "daily_value"),
-                ("steps", "last_7_days", "daily_value"),
-                ("sleep_score", "last_30_days", "period_average"),
-                ("readiness_score", "last_30_days", "period_average"),
-            ]
-        )
-
-    # Execute queries
-    for metric, date_range, computation in data_queries:
-        try:
-            result = tools.query_health(metric, date_range, computation)
-            if result and "Error" not in result:
-                label = f"{metric} ({date_range}, {computation})"
-                context_parts.append(f"## {label}\n{result}")
-        except Exception:
-            logger.debug("Failed to query %s", metric, exc_info=True)
-
-    # Gather PubMed evidence if relevant keywords detected
-    evidence_query = _build_evidence_query(q)
-    if evidence_query:
-        try:
-            from health_platform.knowledge.evidence_store import EvidenceStore
-
-            store = EvidenceStore(tools.con)
-            articles = store.search(evidence_query, max_results=3)
-            evidence_block = store.format_for_context(articles)
-            if evidence_block:
-                context_parts.append(evidence_block)
-        except Exception:
-            logger.debug("Failed to gather evidence", exc_info=True)
-
-    # Try to get recent daily summaries for richer context
-    try:
-        summaries = tools.search_memory(question)
-        if summaries and "No results" not in summaries:
-            context_parts.append("## Recent Daily Summaries\n" + summaries)
-    except Exception:
-        logger.debug("Failed to search memory", exc_info=True)
-
-    return (
-        "\n\n---\n\n".join(context_parts)
-        if context_parts
-        else "No health data available."
+        """
     )
+    # Create index if not exists — DuckDB supports this syntax
+    try:
+        con.execute(
+            """
+            CREATE INDEX IF NOT EXISTS idx_chat_history_session
+            ON agent.chat_history(session_id, created_at)
+            """
+        )
+    except Exception:
+        # Index may already exist or DuckDB version may not support IF NOT EXISTS
+        pass
 
 
-def generate_response(tools: HealthTools, question: str) -> str:
-    """Generate an AI-powered response to a health question.
+def _load_chat_history(con, session_id: str, limit: int = 20) -> list[dict]:
+    """Load recent messages for a session."""
+    try:
+        _ensure_chat_history_table(con)
+        result = con.execute(
+            """
+            SELECT role, content, tool_name, tool_input
+            FROM agent.chat_history
+            WHERE session_id = ?
+            ORDER BY created_at ASC
+            LIMIT ?
+            """,
+            [session_id, limit],
+        )
+        rows = result.fetchall()
+    except Exception:
+        logger.debug("Failed to load chat history", exc_info=True)
+        return []
 
-    1. Gathers relevant health data from the database
-    2. Sends context + question to Claude
-    3. Returns a rich markdown response with insights
+    messages = []
+    for role, content, tool_name, tool_input in rows:
+        if role in ("user", "assistant"):
+            messages.append({"role": role, "content": content})
+        # tool_use and tool_result are reconstructed by the caller if needed
+    return messages
+
+
+def _save_message(
+    con,
+    session_id: str,
+    role: str,
+    content: str,
+    tool_name: str | None = None,
+    tool_input: str | None = None,
+) -> None:
+    """Save a message to chat history."""
+    try:
+        _ensure_chat_history_table(con)
+        msg_id = str(uuid.uuid4())
+        con.execute(
+            """
+            INSERT INTO agent.chat_history (id, session_id, role, content, tool_name, tool_input)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            [msg_id, session_id, role, content, tool_name, tool_input],
+        )
+    except Exception:
+        logger.debug("Failed to save chat message", exc_info=True)
+
+
+# ------------------------------------------------------------------
+# Tool execution dispatcher
+# ------------------------------------------------------------------
+
+
+def _execute_tool(tools: HealthTools, tool_name: str, tool_input: dict) -> str:
+    """Execute a health tool and return the result string."""
+    try:
+        if tool_name == "query_health":
+            return tools.query_health(
+                tool_input["metric"],
+                tool_input["date_range"],
+                tool_input.get("computation", "daily_value"),
+            )
+        elif tool_name == "get_profile":
+            categories_str = tool_input.get("categories", "")
+            cat_list = (
+                [c.strip() for c in categories_str.split(",") if c.strip()]
+                if categories_str
+                else None
+            )
+            return tools.get_profile(cat_list)
+        elif tool_name == "discover_correlations":
+            return tools.discover_correlations(
+                tool_input["metric_a"],
+                tool_input["metric_b"],
+                tool_input.get("max_lag", 3),
+            )
+        elif tool_name == "search_memory":
+            return tools.search_memory(
+                tool_input["query"],
+                tool_input.get("top_k", 5),
+            )
+        elif tool_name == "search_evidence":
+            return tools.search_evidence(
+                tool_input["query"],
+                tool_input.get("max_results", 5),
+            )
+        else:
+            return f"Error: Unknown tool '{tool_name}'"
+    except Exception as exc:
+        logger.error("Tool execution failed: %s(%s) — %s", tool_name, tool_input, exc)
+        return f"Error executing {tool_name}: query failed. Check tool parameters and try again."
+
+
+# ------------------------------------------------------------------
+# Main response generation (tool-use loop)
+# ------------------------------------------------------------------
+
+
+def generate_response(
+    tools: HealthTools, question: str, session_id: str | None = None
+) -> str:
+    """Generate response using Claude tool-use with multi-turn support.
+
+    1. Load chat history from agent.chat_history if session_id provided
+    2. Build messages list with history
+    3. Call Claude with tools
+    4. If Claude requests tool_use: execute tool, append result, call again
+    5. Loop until Claude returns text (max MAX_TOOL_CALLS tool calls)
+    6. Save conversation to chat_history
+    7. Return final text
     """
-    # Gather data context
-    context = _gather_context(tools, question)
+    # Build messages with optional history
+    messages: list[dict] = []
+    if session_id:
+        try:
+            history = _load_chat_history(tools.con, session_id)
+            messages.extend(history)
+        except Exception:
+            logger.debug("Could not load chat history", exc_info=True)
 
-    # Sanitize question: strip patterns that could manipulate the prompt
+    # Sanitize question
     safe_question = question.replace("---", "").strip()
-
-    # Build the user message with context — clear separation between data and question
-    user_message = (
-        f"<health_data>\n{context}\n</health_data>\n\n"
-        f"<user_question>\n{safe_question}\n</user_question>"
-    )
+    messages.append({"role": "user", "content": safe_question})
 
     try:
         client = _get_client()
-        response = client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=1024,
-            system=SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": user_message}],
-        )
-        return response.content[0].text
     except ImportError:
         logger.error("anthropic package not installed")
         return (
@@ -248,18 +337,261 @@ def generate_response(tools: HealthTools, question: str) -> str:
             "Run: `pip install anthropic`"
         )
     except Exception as exc:
-        exc_type = type(exc).__name__
-        # Detect auth errors by exception type name (avoids importing anthropic)
-        if exc_type in ("AuthenticationError", "PermissionDeniedError"):
-            logger.error("Invalid ANTHROPIC_API_KEY")
-            return (
-                "## Configuration Error\n\n"
-                "The AI assistant is not configured correctly. "
-                "Please check the ANTHROPIC_API_KEY in your keychain."
+        logger.exception("Failed to initialize Claude client")
+        return _format_error_response(exc)
+
+    # Tool-use loop
+    tool_call_count = 0
+    try:
+        while tool_call_count < MAX_TOOL_CALLS:
+            response = client.messages.create(
+                model="claude-sonnet-4-20250514",
+                max_tokens=1024,
+                system=SYSTEM_PROMPT,
+                tools=HEALTH_TOOLS,
+                messages=messages,
             )
-        logger.exception("Claude API call failed")
-        return (
-            "## Temporary Error\n\n"
-            "Could not reach the AI assistant. "
-            "Your health data is still accessible via the quick action buttons."
+
+            # Check if response contains tool_use blocks
+            tool_use_blocks = [
+                block for block in response.content if block.type == "tool_use"
+            ]
+
+            if not tool_use_blocks:
+                # No tool calls — extract text response
+                text_parts = [
+                    block.text for block in response.content if block.type == "text"
+                ]
+                final_text = "\n".join(text_parts) if text_parts else ""
+
+                # Save to history
+                if session_id:
+                    _save_message(tools.con, session_id, "user", safe_question)
+                    _save_message(tools.con, session_id, "assistant", final_text)
+
+                return final_text
+
+            # Process tool calls
+            # Add the assistant message with tool_use blocks to messages
+            assistant_content = []
+            for block in response.content:
+                if block.type == "text":
+                    assistant_content.append({"type": "text", "text": block.text})
+                elif block.type == "tool_use":
+                    assistant_content.append(
+                        {
+                            "type": "tool_use",
+                            "id": block.id,
+                            "name": block.name,
+                            "input": block.input,
+                        }
+                    )
+            messages.append({"role": "assistant", "content": assistant_content})
+
+            # Execute each tool and build tool_result content
+            tool_results = []
+            for block in tool_use_blocks:
+                result = _execute_tool(tools, block.name, block.input)
+                tool_results.append(
+                    {
+                        "type": "tool_result",
+                        "tool_use_id": block.id,
+                        "content": result,
+                    }
+                )
+                tool_call_count += 1
+
+                # Save tool interactions to history
+                if session_id:
+                    _save_message(
+                        tools.con,
+                        session_id,
+                        "tool_use",
+                        result,
+                        tool_name=block.name,
+                        tool_input=json.dumps(block.input),
+                    )
+
+            messages.append({"role": "user", "content": tool_results})
+
+        # Hit max tool calls — force a text response
+        messages.append(
+            {
+                "role": "user",
+                "content": (
+                    "Please provide your final answer now based on the data "
+                    "you have gathered so far."
+                ),
+            }
         )
+        response = client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=1024,
+            system=SYSTEM_PROMPT,
+            messages=messages,
+        )
+        text_parts = [block.text for block in response.content if block.type == "text"]
+        final_text = "\n".join(text_parts) if text_parts else ""
+
+        if session_id:
+            _save_message(tools.con, session_id, "user", safe_question)
+            _save_message(tools.con, session_id, "assistant", final_text)
+
+        return final_text
+
+    except Exception as exc:
+        return _format_error_response(exc)
+
+
+# ------------------------------------------------------------------
+# SSE Streaming response generation
+# ------------------------------------------------------------------
+
+
+def generate_response_stream(
+    tools: HealthTools, question: str, session_id: str | None = None
+):
+    """Generator that yields text chunks for SSE streaming.
+
+    Same tool-use loop as generate_response but uses stream=True for the
+    final text response. Tool calls are executed silently; only the final
+    synthesized answer is streamed to the client.
+    """
+    # Build messages with optional history
+    messages: list[dict] = []
+    if session_id:
+        try:
+            history = _load_chat_history(tools.con, session_id)
+            messages.extend(history)
+        except Exception:
+            logger.debug("Could not load chat history", exc_info=True)
+
+    safe_question = question.replace("---", "").strip()
+    messages.append({"role": "user", "content": safe_question})
+
+    try:
+        client = _get_client()
+    except ImportError:
+        yield (
+            "## Setup Required\n\n"
+            "The `anthropic` Python package is not installed. "
+            "Run: `pip install anthropic`"
+        )
+        return
+    except Exception as exc:
+        yield _format_error_response(exc)
+        return
+
+    # Tool-use loop (non-streaming) — resolve all tool calls first
+    tool_call_count = 0
+    try:
+        while tool_call_count < MAX_TOOL_CALLS:
+            response = client.messages.create(
+                model="claude-sonnet-4-20250514",
+                max_tokens=1024,
+                system=SYSTEM_PROMPT,
+                tools=HEALTH_TOOLS,
+                messages=messages,
+            )
+
+            tool_use_blocks = [
+                block for block in response.content if block.type == "tool_use"
+            ]
+
+            if not tool_use_blocks:
+                # No more tool calls — now stream the final response
+                break
+
+            # Process tool calls (same as generate_response)
+            assistant_content = []
+            for block in response.content:
+                if block.type == "text":
+                    assistant_content.append({"type": "text", "text": block.text})
+                elif block.type == "tool_use":
+                    assistant_content.append(
+                        {
+                            "type": "tool_use",
+                            "id": block.id,
+                            "name": block.name,
+                            "input": block.input,
+                        }
+                    )
+            messages.append({"role": "assistant", "content": assistant_content})
+
+            tool_results = []
+            for block in tool_use_blocks:
+                result = _execute_tool(tools, block.name, block.input)
+                tool_results.append(
+                    {
+                        "type": "tool_result",
+                        "tool_use_id": block.id,
+                        "content": result,
+                    }
+                )
+                tool_call_count += 1
+
+                if session_id:
+                    _save_message(
+                        tools.con,
+                        session_id,
+                        "tool_use",
+                        result,
+                        tool_name=block.name,
+                        tool_input=json.dumps(block.input),
+                    )
+
+            messages.append({"role": "user", "content": tool_results})
+        else:
+            # Hit max tool calls — add prompt for final answer
+            messages.append(
+                {
+                    "role": "user",
+                    "content": (
+                        "Please provide your final answer now based on the data "
+                        "you have gathered so far."
+                    ),
+                }
+            )
+
+        # Stream the final response
+        full_text = ""
+        with client.messages.stream(
+            model="claude-sonnet-4-20250514",
+            max_tokens=1024,
+            system=SYSTEM_PROMPT,
+            messages=messages,
+        ) as stream:
+            for text in stream.text_stream:
+                full_text += text
+                yield text
+
+        # Save to history after streaming completes
+        if session_id:
+            _save_message(tools.con, session_id, "user", safe_question)
+            _save_message(tools.con, session_id, "assistant", full_text)
+
+    except Exception as exc:
+        yield _format_error_response(exc)
+
+
+# ------------------------------------------------------------------
+# Helpers
+# ------------------------------------------------------------------
+
+
+def _format_error_response(exc: Exception) -> str:
+    """Format an error into a user-friendly markdown response."""
+    exc_type = type(exc).__name__
+    if exc_type in ("AuthenticationError", "PermissionDeniedError"):
+        logger.error("Invalid ANTHROPIC_API_KEY")
+        return (
+            "## Configuration Error\n\n"
+            "The AI assistant is not configured correctly. "
+            "Please check the ANTHROPIC_API_KEY in your keychain."
+        )
+    logger.exception("Claude API call failed")
+    return (
+        "## Temporary Error\n\n"
+        "Could not reach the AI assistant. "
+        "Your health data is still accessible via the quick action buttons."
+    )
