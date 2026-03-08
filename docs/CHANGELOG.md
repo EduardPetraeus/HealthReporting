@@ -6,7 +6,23 @@
 
 ## [Unreleased] — 2026-03-08
 
-### Added
+### Added (Session 6: Data Lake Consolidation)
+- **Strava keychain auth:** Switched from 1Password CLI to macOS Keychain (get_secret)
+- **Strava dedicated writer/state:** No longer shares Oura's writer — own writer.py and state.py
+- **Data lake consolidation:** All writers (Oura, Strava, Weather) use get_data_lake_root()
+- **Oura directory merge:** oura_csv/ → oura/csv_raw/, Oura/csv/ → oura/csv_export/
+- **Integration tests:** 36 tests — path resolution, parquet quality, config alignment, Hive partitioning
+- **Bronze ingestion verified:** 66 tables loaded in 10 seconds (all API sources end-to-end)
+
+### Changed (Session 6)
+- sources_config.yaml: 7 Oura CSV entries updated from oura_csv/raw/ to oura/csv_raw/
+- convert_oura_csv.sh: paths updated to match consolidated structure
+- oura/writer.py: removed custom path resolution, uses shared get_data_lake_root()
+- weather/run_weather.py: removed custom path resolution, uses shared get_data_lake_root()
+
+---
+
+### Added (Session 2-5)
 - **A8:** Lifesum CSV expansion — bodymeasures, exercise, weighins, bodyfat merge scripts + sources_config entries
 - **A9:** Workout unification — Strava to silver.workout merge, Lifesum exercise to workout, source_system column, cross-source duplicate detection
 - **B1:** LLM chat engine rewrite — Claude tool-use (function calling), SSE streaming endpoint, multi-turn chat history

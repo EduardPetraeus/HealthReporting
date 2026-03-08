@@ -1,7 +1,7 @@
 # PROJECT_PLAN.md — HealthReporting
 
-> Last updated: 2026-03-08 (Session 5 — Withings operational)
-> Current phase: **Phase 3b ✅ + Phase 5 (Databricks) + Phase 7 (Governance). Iterations done: A1-A9 ✅, B1-B4 ✅, C1 (2/3), C2 ✅, D2 (2/5), D4 ✅, DS1-DS4 ✅, E0 ✅, F1-F2 ✅. Withings operational (9 endpoints, full load). Next: C1 Session 3 / D1 Mobile / D2 Desktop**
+> Last updated: 2026-03-08 (Session 6 — Data lake consolidation + Strava keychain)
+> Current phase: **Phase 3b ✅ + Phase 5 (Databricks) + Phase 7 (Governance). Iterations done: A1-A9 ✅, B1-B4 ✅, C1 (2/3), C2 ✅, D2 (2/5), D4 ✅, DS1-DS4 ✅, E0 ✅, F1-F2 ✅. All 5 API sources operational (Oura, Strava, Withings, Weather, Apple Health). Next: Full QA review → C1 Session 3 / D1 Mobile / D2 Desktop**
 
 ---
 
@@ -48,7 +48,7 @@
 | Oura connector | ✅ done | OAuth 2.0, incremental, 8 endpoints |
 | Lifesum connector | ✅ done | csv_to_parquet.py |
 | Withings connector | ✅ done | OAuth 2.0 keychain auth, 9 endpoints, full load 2020→now (1,947 records) |
-| Strava connector | ⬜ not started | API-based — planned |
+| Strava connector | ✅ done | OAuth 2.0 keychain auth, dedicated writer/state, 428 parquet files |
 | GetTested connector | ⬜ not started | Manual/export — planned |
 | sources_config.yaml — full schema | ✅ done | 27 sources defined (19 Apple Health + 8 Oura + 1 Lifesum) |
 | Ingestion engine — all active sources | ✅ done | Works for Apple Health, Oura, Lifesum |
