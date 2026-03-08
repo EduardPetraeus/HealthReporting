@@ -1,6 +1,6 @@
 """MCP server for health data access.
 
-Exposes 9 tools for AI agents to interact with health data through
+Exposes 10 tools for AI agents to interact with health data through
 semantic contracts instead of raw SQL.
 
 Usage:
@@ -189,6 +189,26 @@ def check_data_quality(table: str = "", check_type: str = "") -> str:
         return tools.check_data_quality(
             table=table or None,
             check_type=check_type or None,
+        )
+    finally:
+        tools.close()
+
+
+@mcp.tool()
+def search_evidence(query: str, max_results: int = 5, min_year: str = "") -> str:
+    """Search PubMed for evidence supporting health claims.
+
+    Returns peer-reviewed articles sorted by evidence quality (GRADE hierarchy).
+
+    Args:
+        query: Search query (e.g., 'HRV sleep quality', 'magnesium supplementation sleep')
+        max_results: Number of articles to return (default 5, max 20)
+        min_year: Minimum publication year filter (e.g., '2020')
+    """
+    tools = get_tools(read_only=False)
+    try:
+        return tools.search_evidence(
+            query, max_results=min(int(max_results), 20), min_year=min_year
         )
     finally:
         tools.close()
