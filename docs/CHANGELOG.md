@@ -6,6 +6,14 @@
 
 ## [Unreleased] — 2026-03-08
 
+### Added (Session 7: sundhed.dk Connector)
+- **sundhed.dk web scraper:** Playwright-based connector with MitID 2FA, 5 clinical data sections (lab results, medications, vaccinations, e-journal, appointments)
+- **Parsers:** 5 pure HTML→dict parsers for AngularJS ui-grid, sdk-table, ngx-datatable
+- **Browser auth:** AngularJS login state detection + signal file fallback for non-interactive terminals
+- **Security:** All fixtures rewritten with synthetic data (year 2030, fictional hospitals/medications), _debug_html/ gitignored
+- **Tests:** 52 unit tests with synthetic HTML fixtures
+- **Config:** 5 new sources_config.yaml entries (min sundhed/raw/ paths)
+
 ### Added (Session 6: Data Lake Consolidation)
 - **Strava keychain auth:** Switched from 1Password CLI to macOS Keychain (get_secret)
 - **Strava dedicated writer/state:** No longer shares Oura's writer — own writer.py and state.py
