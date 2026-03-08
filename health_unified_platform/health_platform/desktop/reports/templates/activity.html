@@ -1,0 +1,45 @@
+<div class="section">
+    <div class="section-title">Activity</div>
+
+    {% if activity and activity.daily %}
+    <div class="card-grid mb-12">
+        <div class="card">
+            <div class="card-label">Avg Activity Score</div>
+            <div class="card-value">{{ activity.avg_score|default('--', true) }}</div>
+        </div>
+        <div class="card">
+            <div class="card-label">Avg Daily Steps</div>
+            <div class="card-value">{{ "{:,}".format(activity.avg_steps) if activity.avg_steps else '--' }}</div>
+        </div>
+        <div class="card">
+            <div class="card-label">Total Steps</div>
+            <div class="card-value">{{ "{:,}".format(activity.total_steps) }}</div>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Score</th>
+                <th>Steps</th>
+                <th>Active Cal</th>
+                <th>Total Cal</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for day in activity.daily %}
+            <tr>
+                <td>{{ day.day }}</td>
+                <td>{{ day.score|default('--', true) }}</td>
+                <td>{{ "{:,}".format(day.steps) if day.steps else '--' }}</td>
+                <td>{{ day.active_calories|default('--', true) }}</td>
+                <td>{{ day.total_calories|default('--', true) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="no-data">No activity data available for this period.</p>
+    {% endif %}
+</div>

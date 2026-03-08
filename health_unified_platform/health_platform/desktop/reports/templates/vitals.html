@@ -1,0 +1,53 @@
+<div class="section">
+    <div class="section-title">Vitals</div>
+
+    {% if vitals and vitals.heart_rate_daily %}
+    <h3 style="font-size: 12px; font-weight: 600; margin-bottom: 8px; color: #3a3a3c;">Heart Rate</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Resting HR</th>
+                <th>Avg HR</th>
+                <th>Max HR</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in vitals.heart_rate_daily %}
+            <tr>
+                <td>{{ entry.day }}</td>
+                <td>{{ entry.resting_hr|default('--', true) }} bpm</td>
+                <td>{{ entry.avg_hr|default('--', true) }} bpm</td>
+                <td>{{ entry.max_hr|default('--', true) }} bpm</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="no-data">No heart rate data available for this period.</p>
+    {% endif %}
+
+    {% if vitals and vitals.weight_entries %}
+    <h3 style="font-size: 12px; font-weight: 600; margin: 12px 0 8px; color: #3a3a3c;">Weight</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Weight</th>
+                <th>Fat Mass</th>
+                <th>Muscle Mass</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in vitals.weight_entries %}
+            <tr>
+                <td>{{ entry.date }}</td>
+                <td>{{ entry.weight_kg|default('--', true) }} kg</td>
+                <td>{{ entry.fat_mass_kg|default('--', true) }} kg</td>
+                <td>{{ entry.muscle_mass_kg|default('--', true) }} kg</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>

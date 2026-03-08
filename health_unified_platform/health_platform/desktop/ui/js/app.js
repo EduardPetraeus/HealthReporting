@@ -1,5 +1,5 @@
 /**
- * HealthReporting Desktop — Navigation and state management.
+ * HealthReporting Desktop — Navigation, state management, and API bridge.
  * Communicates with Python DesktopAPI via window.pywebview.api.
  */
 
@@ -7,6 +7,23 @@ let currentPage = 'dashboard';
 let isBusy = false;
 let sparklineCharts = {};
 let trendChart = null;
+
+// --- Toast Notifications ---
+
+function showToast(message, type = 'info', duration = 4000) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'toast toast-' + type;
+    toast.textContent = message;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('toast-out');
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
+}
 
 // --- Navigation ---
 
@@ -23,6 +40,8 @@ function navigate(page) {
 
     if (page === 'dashboard') loadDashboard();
     if (page === 'chat') loadChatHistory();
+    if (page === 'reports') initReportsPage();
+    if (page === 'explorer') initExplorerPage();
 }
 
 // --- Dashboard ---
@@ -55,6 +74,7 @@ async function loadDashboard() {
                 <h2>Connection Error</h2>
                 <p>${escapeHtml(String(err))}</p>
             </div>`;
+        showToast('Failed to load dashboard: ' + String(err), 'error');
     }
 }
 
@@ -209,6 +229,7 @@ async function sendChat() {
         if (!streamingEl) {
             addChatMsg(chatEl, 'Error: ' + String(err), 'bot error');
         }
+        showToast('Chat error: ' + String(err), 'error');
     } finally {
         isBusy = false;
     }
@@ -262,8 +283,10 @@ async function clearChatHistory() {
             chatEl.removeChild(chatEl.lastChild);
         }
         chatHistoryLoaded = false;
+        showToast('Chat history cleared', 'success');
     } catch (err) {
         console.error('Failed to clear history:', err);
+        showToast('Failed to clear history', 'error');
     }
 }
 
@@ -293,7 +316,109 @@ function hideTyping() {
     if (t) t.remove();
 }
 
+// --- Reports ---
+
+let reportsInitialized = false;
+
+function initReportsPage() {
+    if (reportsInitialized) return;
+    reportsInitialized = true;
+
+    // Set default dates: last 30 days
+    const today = new Date();
+    const start = new Date(today);
+    start.setDate(start.getDate() - 30);
+
+    const startInput = document.getElementById('report-start');
+    const endInput = document.getElementById('report-end');
+    if (startInput) startInput.value = formatDate(start);
+    if (endInput) endInput.value = formatDate(today);
+}
+
+function getSelectedSections() {
+    const checkboxes = document.querySelectorAll('.report-section:checked');
+    return Array.from(checkboxes).map(cb => cb.value);
+}
+
+async function generateReport() {
+    const startDate = document.getElementById('report-start').value;
+    const endDate = document.getElementById('report-end').value;
+    const sections = getSelectedSections();
+
+    if (!startDate || !endDate) {
+        showToast('Please select start and end dates', 'error');
+        return;
+    }
+
+    if (sections.length === 0) {
+        showToast('Please select at least one section', 'error');
+        return;
+    }
+
+    const btn = document.getElementById('btn-generate');
+    const textEl = document.getElementById('generate-text');
+    const spinnerEl = document.getElementById('generate-spinner');
+    const preview = document.getElementById('report-preview');
+
+    btn.disabled = true;
+    textEl.textContent = 'Generating...';
+    spinnerEl.style.display = 'inline-block';
+    preview.innerHTML = '<div class="loading">Generating report</div>';
+
+    try {
+        const result = await window.pywebview.api.generate_report(startDate, endDate, sections);
+
+        if (result.error) {
+            preview.innerHTML = `<div class="preview-placeholder"><p>Error: ${escapeHtml(result.error)}</p></div>`;
+            showToast('Report generation failed: ' + result.error, 'error');
+            return;
+        }
+
+        // Display PDF in iframe using base64 data
+        preview.innerHTML = `<iframe src="data:application/pdf;base64,${result.pdf_base64}" title="Report Preview"></iframe>`;
+        document.getElementById('btn-download').style.display = 'inline-block';
+        showToast('Report generated successfully', 'success');
+    } catch (err) {
+        preview.innerHTML = `<div class="preview-placeholder"><p>Error: ${escapeHtml(String(err))}</p></div>`;
+        showToast('Report generation failed', 'error');
+    } finally {
+        btn.disabled = false;
+        textEl.textContent = 'Generate Report';
+        spinnerEl.style.display = 'none';
+    }
+}
+
+async function downloadReport() {
+    const startDate = document.getElementById('report-start').value;
+    const endDate = document.getElementById('report-end').value;
+    const sections = getSelectedSections();
+
+    if (!startDate || !endDate) {
+        showToast('Please select dates first', 'error');
+        return;
+    }
+
+    try {
+        const result = await window.pywebview.api.download_report(startDate, endDate, sections);
+        if (result.error) {
+            showToast('Download failed: ' + result.error, 'error');
+        } else {
+            showToast('Report saved to: ' + result.path, 'success', 6000);
+        }
+    } catch (err) {
+        showToast('Download failed: ' + String(err), 'error');
+    }
+}
+
 // --- Data Explorer ---
+
+let explorerInitialized = false;
+
+function initExplorerPage() {
+    if (explorerInitialized) return;
+    explorerInitialized = true;
+    populateMetricDropdown();
+}
 
 async function runExplorer() {
     const metric = document.getElementById('explorer-metric').value;
@@ -301,13 +426,31 @@ async function runExplorer() {
     const dateRange = document.getElementById('explorer-range').value;
     const resultEl = document.getElementById('explorer-result');
 
-    resultEl.textContent = 'Loading...';
+    const btn = document.getElementById('btn-query');
+    const textEl = document.getElementById('query-text');
+    const spinnerEl = document.getElementById('query-spinner');
+
+    btn.disabled = true;
+    textEl.textContent = 'Querying...';
+    spinnerEl.style.display = 'inline-block';
+    resultEl.innerHTML = '<div class="loading">Querying data</div>';
 
     try {
         const data = await window.pywebview.api.query_metric(metric, computation, dateRange);
-        resultEl.textContent = data.result || data.error || 'No data';
+
+        if (data.error) {
+            resultEl.textContent = 'Error: ' + data.error;
+            showToast('Query failed: ' + data.error, 'error');
+        } else {
+            resultEl.textContent = data.result || 'No data returned';
+        }
     } catch (err) {
         resultEl.textContent = 'Error: ' + String(err);
+        showToast('Query failed', 'error');
+    } finally {
+        btn.disabled = false;
+        textEl.textContent = 'Query';
+        spinnerEl.style.display = 'none';
     }
 }
 
@@ -411,11 +554,19 @@ function escapeHtml(t) {
     return d.innerHTML;
 }
 
+// --- Helpers ---
+
+function formatDate(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+}
+
 // --- Init ---
 
 window.addEventListener('pywebviewready', () => {
     loadDashboard();
-    populateMetricDropdown();
 
     window.pywebview.api.get_status().then(status => {
         const el = document.getElementById('db-status');

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Health Report — {{ start_date }} to {{ end_date }}{% endblock %}
+{% block content %}
+
+<div class="report-header">
+    <h1>Health Report</h1>
+    <div class="subtitle">HealthReporting Personal Health Platform</div>
+    <div class="date-range">{{ start_date }} — {{ end_date }}</div>
+</div>
+
+{% if "summary" in sections %}
+{% include "summary.html" %}
+{% endif %}
+
+{% if "vitals" in sections %}
+{% include "vitals.html" %}
+{% endif %}
+
+{% if "sleep" in sections %}
+{% include "sleep.html" %}
+{% endif %}
+
+{% if "activity" in sections %}
+{% include "activity.html" %}
+{% endif %}
+
+{% if "nutrition" in sections %}
+{% include "nutrition.html" %}
+{% endif %}
+
+{% if "trends" in sections %}
+{% include "trends.html" %}
+{% endif %}
+
+{% if "alerts" in sections %}
+{% include "alerts.html" %}
+{% endif %}
+
+<div class="report-footer">
+    Generated on {{ generated_at }} by HealthReporting
+</div>
+
+{% endblock %}

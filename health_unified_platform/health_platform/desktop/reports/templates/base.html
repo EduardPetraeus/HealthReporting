@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{% block title %}Health Report{% endblock %}</title>
+<style>
+/* ===== Base Styles ===== */
+@page {
+    size: A4;
+    margin: 20mm 15mm 25mm 15mm;
+    @bottom-center {
+        content: "Page " counter(page) " of " counter(pages);
+        font-size: 9px;
+        color: #8e8e93;
+        font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+    }
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'SF Pro Text', sans-serif;
+    color: #1c1c1e;
+    font-size: 11px;
+    line-height: 1.5;
+    background: #ffffff;
+}
+
+/* ===== Header ===== */
+.report-header {
+    text-align: center;
+    padding-bottom: 16px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #007aff;
+}
+
+.report-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1c1c1e;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+}
+
+.report-header .subtitle {
+    font-size: 12px;
+    color: #8e8e93;
+}
+
+.report-header .date-range {
+    font-size: 14px;
+    color: #3a3a3c;
+    margin-top: 6px;
+    font-weight: 500;
+}
+
+/* ===== Section ===== */
+.section {
+    margin-bottom: 20px;
+    page-break-inside: avoid;
+}
+
+.section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1c1c1e;
+    padding-bottom: 6px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #e5e5ea;
+    letter-spacing: -0.3px;
+}
+
+/* ===== Cards ===== */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.card {
+    background: #f2f2f7;
+    border-radius: 10px;
+    padding: 14px 16px;
+}
+
+.card-label {
+    font-size: 10px;
+    color: #8e8e93;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.card-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1c1c1e;
+    letter-spacing: -0.5px;
+}
+
+.card-unit {
+    font-size: 12px;
+    font-weight: 400;
+    color: #8e8e93;
+}
+
+/* Score colors */
+.score-excellent { color: #34c759; }
+.score-good { color: #007aff; }
+.score-fair { color: #ff9500; }
+.score-poor { color: #ff3b30; }
+
+/* ===== Tables ===== */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+    margin-bottom: 12px;
+}
+
+thead th {
+    text-align: left;
+    padding: 8px 10px;
+    font-weight: 600;
+    color: #8e8e93;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #e5e5ea;
+    background: #f9f9f9;
+}
+
+tbody td {
+    padding: 7px 10px;
+    border-bottom: 0.5px solid #f2f2f7;
+    font-variant-numeric: tabular-nums;
+}
+
+tbody tr:last-child td { border-bottom: none; }
+
+/* ===== Alerts ===== */
+.alert {
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.alert-warning {
+    background: #fff9e6;
+    border-left: 3px solid #ff9500;
+    color: #8a6d00;
+}
+
+.alert-icon { font-size: 14px; flex-shrink: 0; }
+
+/* ===== Footer ===== */
+.report-footer {
+    margin-top: 24px;
+    padding-top: 12px;
+    border-top: 1px solid #e5e5ea;
+    text-align: center;
+    font-size: 9px;
+    color: #c7c7cc;
+}
+
+/* ===== Utility ===== */
+.text-muted { color: #8e8e93; }
+.text-center { text-align: center; }
+.mb-8 { margin-bottom: 8px; }
+.mb-12 { margin-bottom: 12px; }
+.no-data {
+    color: #c7c7cc;
+    font-style: italic;
+    padding: 12px 0;
+}
+</style>
+</head>
+<body>
+{% block content %}{% endblock %}
+</body>
+</html>

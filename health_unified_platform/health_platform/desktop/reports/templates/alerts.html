@@ -1,0 +1,14 @@
+<div class="section">
+    <div class="section-title">Alerts</div>
+
+    {% if alerts %}
+    {% for alert in alerts %}
+    <div class="alert alert-{{ alert.type }}">
+        <span class="alert-icon">&#x26A0;</span>
+        <span><strong>{{ alert.metric }}:</strong> {{ alert.message }}</span>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p style="color: #34c759; font-size: 12px; padding: 12px 0;">No alerts for this period. All metrics within normal ranges.</p>
+    {% endif %}
+</div>
