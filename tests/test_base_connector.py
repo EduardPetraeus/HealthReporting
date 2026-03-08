@@ -66,6 +66,16 @@ class TestOuraClientImplementsBaseConnector:
             "workout",
             "daily_spo2",
             "daily_stress",
+            "daily_cardiovascular_age",
+            "daily_resilience",
+            "sleep_time",
+            "enhanced_tag",
+            "vo2_max",
+            "session",
+            "tag",
+            "rest_mode_period",
+            "ring_configuration",
+            "sleep",
         ]
         assert endpoints == expected
 
