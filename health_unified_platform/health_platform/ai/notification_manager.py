@@ -6,6 +6,7 @@ based on anomaly severity.
 
 from __future__ import annotations
 
+import re
 import urllib.request
 
 from health_platform.ai.anomaly_detector import AnomalyReport
@@ -31,7 +32,15 @@ class NotificationManager:
 
         Args:
             topic: ntfy.sh topic name. If None, notifications are logged but not sent.
+
+        Raises:
+            ValueError: If topic contains invalid characters or exceeds 64 chars.
         """
+        if topic is not None and not re.fullmatch(r"[a-zA-Z0-9_-]{1,64}", topic):
+            raise ValueError(
+                f"Invalid ntfy.sh topic: {topic!r}. "
+                "Must be 1-64 characters of [a-zA-Z0-9_-]."
+            )
         self.topic = topic
         self.base_url = "https://ntfy.sh"
 
