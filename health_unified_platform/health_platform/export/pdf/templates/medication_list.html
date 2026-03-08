@@ -1,0 +1,29 @@
+{# Medication / supplement list section partial #}
+<div class="section">
+    <h2 class="section-title">Medications &amp; Supplements</h2>
+
+    {% if medications %}
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Dosage</th>
+                <th>Frequency</th>
+                <th>Last Recorded</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for med in medications %}
+            <tr>
+                <td>{{ med.name | default(med.supplement_name, true) }}</td>
+                <td>{{ med.dosage | default("-", true) }}</td>
+                <td>{{ med.frequency | default("daily", true) }}</td>
+                <td>{{ med.last_date | default("-", true) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="no-data">No medication or supplement records found for the selected period.</p>
+    {% endif %}
+</div>

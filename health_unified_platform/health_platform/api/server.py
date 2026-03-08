@@ -68,6 +68,11 @@ from health_platform.api.routes.mobile import router as mobile_router  # noqa: E
 
 app.include_router(mobile_router)
 
+# Mount clinician export endpoints (FHIR, PDF)
+from health_platform.export.routes import router as export_router  # noqa: E402
+
+app.include_router(export_router)
+
 
 def _get_tools(read_only: bool = True) -> HealthTools:
     """Create a fresh HealthTools instance."""

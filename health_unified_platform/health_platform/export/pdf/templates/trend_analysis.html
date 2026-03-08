@@ -1,0 +1,41 @@
+{# Trend analysis section partial #}
+<div class="section">
+    <h2 class="section-title">Trend Analysis ({{ start_date }} to {{ end_date }})</h2>
+
+    {% if trends %}
+    <table>
+        <thead>
+            <tr>
+                <th>Metric</th>
+                <th>Period Average</th>
+                <th>Min</th>
+                <th>Max</th>
+                <th>Trend</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for trend in trends %}
+            <tr>
+                <td>{{ trend.metric | replace("_", " ") | title }}</td>
+                <td>{{ "%.1f" | format(trend.avg) if trend.avg is not none else "-" }}</td>
+                <td>{{ "%.1f" | format(trend.min) if trend.min is not none else "-" }}</td>
+                <td>{{ "%.1f" | format(trend.max) if trend.max is not none else "-" }}</td>
+                <td>
+                    {% if trend.direction == "up" %}
+                        <span class="trend-up">Improving</span>
+                    {% elif trend.direction == "down" %}
+                        <span class="trend-down">Declining</span>
+                    {% else %}
+                        <span class="trend-stable">Stable</span>
+                    {% endif %}
+                </td>
+                <td>{{ trend.note | default("", true) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="no-data">Insufficient data for trend analysis in the selected period.</p>
+    {% endif %}
+</div>

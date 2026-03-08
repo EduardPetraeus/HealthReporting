@@ -1,0 +1,45 @@
+{# Lab results section partial #}
+<div class="section">
+    <h2 class="section-title">Laboratory Results</h2>
+
+    {% if lab_results %}
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Test</th>
+                <th>Result</th>
+                <th>Unit</th>
+                <th>Reference Range</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for lab in lab_results %}
+            <tr>
+                <td>{{ lab.day | default(lab.date, true) }}</td>
+                <td>{{ lab.test_name | default("Unknown", true) }}</td>
+                <td>{{ lab.value }}</td>
+                <td>{{ lab.unit | default("", true) }}</td>
+                <td>
+                    {% if lab.reference_range_low is defined and lab.reference_range_high is defined %}
+                        {{ lab.reference_range_low }} - {{ lab.reference_range_high }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if lab.flag is defined %}
+                        <span class="flag-{{ lab.flag }}">{{ lab.flag | upper }}</span>
+                    {% else %}
+                        <span class="flag-normal">Normal</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="no-data">No laboratory results available for the selected period.</p>
+    {% endif %}
+</div>
