@@ -2,6 +2,7 @@
 
 > Last updated: 2026-03-06
 > For technical implementation details (silver pattern, merge scripts, hive partitioning), see `docs/architecture.md`.
+> For C4 architecture diagrams (Context → Container → Component) and solution architecture narrative, see [`c4-architecture.md`](./c4-architecture.md).
 
 ---
 
