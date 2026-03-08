@@ -16,10 +16,22 @@ from pathlib import Path
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+import re
+
 import duckdb
 from health_platform.mcp.health_tools import HealthTools
 from health_platform.utils.logging_config import get_logger
 from mcp.server.fastmcp import FastMCP
+
+_SAFE_ID = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*\Z")
+
+
+def _validate_id(name: str) -> str:
+    """Validate a SQL identifier to prevent injection."""
+    if not _SAFE_ID.fullmatch(name):
+        raise ValueError(f"Invalid SQL identifier: {name!r}")
+    return name
+
 
 logger = get_logger("mcp_server")
 
@@ -259,7 +271,11 @@ def forecast_metric(
     if len(parts) != 2:
         return "Error: metric must be in table.column format (e.g., 'daily_sleep.sleep_score')"
 
-    table, column = f"silver.{parts[0]}", parts[1]
+    try:
+        table = f"silver.{_validate_id(parts[0])}"
+        column = _validate_id(parts[1])
+    except ValueError as exc:
+        return f"**Error:** {exc}"
     forecast_days = min(max(int(forecast_days), 1), 14)
 
     tools = get_tools()
