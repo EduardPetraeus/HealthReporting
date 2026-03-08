@@ -141,7 +141,7 @@ class FhirMapper:
         }
 
         # Name
-        name_parts: dict[str, str] = {}
+        name_parts: dict[str, Any] = {}
         if "first_name" in demographics:
             name_parts["given"] = [demographics["first_name"]]
         if "last_name" in demographics:
