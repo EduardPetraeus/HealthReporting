@@ -61,6 +61,11 @@ from health_platform.api.chat_ui import router as chat_ui_router  # noqa: E402
 
 app.include_router(chat_ui_router)
 
+# Mount mobile endpoints (bulk sync, thresholds)
+from health_platform.api.routes.mobile import router as mobile_router  # noqa: E402
+
+app.include_router(mobile_router)
+
 
 def _get_tools(read_only: bool = True) -> HealthTools:
     """Create a fresh HealthTools instance."""

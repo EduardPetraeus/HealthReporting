@@ -370,3 +370,108 @@ class TestAlertsEndpoint:
         data = response.json()
         assert "alerts" in data
         assert isinstance(data["alerts"], list)
+
+
+class TestMobileSyncEndpoint:
+    """Tests for GET /v1/mobile/sync — bulk data sync for mobile app."""
+
+    def test_sync_returns_all_sections(self, client):
+        response = client.get("/v1/mobile/sync", headers=AUTH_HEADERS)
+        assert response.status_code == 200
+        data = response.json()
+        assert "metrics" in data
+        assert "profile" in data
+        assert "alerts" in data
+        assert "daily_summaries" in data
+        assert "sync_timestamp" in data
+
+    def test_sync_contains_sleep_data(self, client):
+        response = client.get("/v1/mobile/sync", headers=AUTH_HEADERS)
+        data = response.json()
+        assert "sleep_score" in data["metrics"]
+        sleep_rows = data["metrics"]["sleep_score"]
+        assert len(sleep_rows) == 7
+        assert sleep_rows[0]["sleep_score"] == 82
+
+    def test_sync_contains_steps_data(self, client):
+        response = client.get("/v1/mobile/sync", headers=AUTH_HEADERS)
+        data = response.json()
+        assert "steps" in data["metrics"]
+        step_rows = data["metrics"]["steps"]
+        assert len(step_rows) == 3
+        assert step_rows[0]["steps"] == 12450
+
+    def test_sync_contains_profile(self, client):
+        response = client.get("/v1/mobile/sync", headers=AUTH_HEADERS)
+        data = response.json()
+        profile = data["profile"]
+        assert "demographics" in profile
+        assert profile["demographics"]["biological_sex"] == "male"
+
+    def test_sync_contains_daily_summaries(self, client):
+        response = client.get("/v1/mobile/sync", headers=AUTH_HEADERS)
+        data = response.json()
+        summaries = data["daily_summaries"]
+        assert len(summaries) >= 1
+        assert "Good sleep" in summaries[0]["summary_text"]
+
+    def test_sync_since_parameter_filters(self, client):
+        response = client.get(
+            "/v1/mobile/sync",
+            params={"since": "2026-02-25T00:00:00"},
+            headers=AUTH_HEADERS,
+        )
+        data = response.json()
+        sleep_rows = data["metrics"]["sleep_score"]
+        # Only 2026-02-25 and 2026-02-26 should remain
+        assert len(sleep_rows) == 2
+
+    def test_sync_requires_auth(self, client):
+        response = client.get("/v1/mobile/sync")
+        assert response.status_code in (401, 403)
+
+    def test_sync_invalid_since_uses_default(self, client):
+        response = client.get(
+            "/v1/mobile/sync",
+            params={"since": "not-a-date"},
+            headers=AUTH_HEADERS,
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert "metrics" in data
+
+
+class TestMobileThresholdsEndpoint:
+    """Tests for GET /v1/mobile/thresholds — metric threshold definitions."""
+
+    def test_thresholds_returns_data(self, client):
+        response = client.get("/v1/mobile/thresholds", headers=AUTH_HEADERS)
+        assert response.status_code == 200
+        data = response.json()
+        assert "thresholds" in data
+        assert "metric_count" in data
+        assert "timestamp" in data
+
+    def test_thresholds_contains_sleep_score(self, client):
+        response = client.get("/v1/mobile/thresholds", headers=AUTH_HEADERS)
+        data = response.json()
+        thresholds = data["thresholds"]
+        assert "sleep_score" in thresholds
+        assert "optimal" in thresholds["sleep_score"]
+        assert thresholds["sleep_score"]["optimal"]["min"] == 85
+
+    def test_thresholds_contains_steps(self, client):
+        response = client.get("/v1/mobile/thresholds", headers=AUTH_HEADERS)
+        data = response.json()
+        thresholds = data["thresholds"]
+        assert "steps" in thresholds
+        assert thresholds["steps"]["optimal"]["min"] == 10000
+
+    def test_thresholds_has_multiple_metrics(self, client):
+        response = client.get("/v1/mobile/thresholds", headers=AUTH_HEADERS)
+        data = response.json()
+        assert data["metric_count"] >= 10
+
+    def test_thresholds_requires_auth(self, client):
+        response = client.get("/v1/mobile/thresholds")
+        assert response.status_code in (401, 403)
