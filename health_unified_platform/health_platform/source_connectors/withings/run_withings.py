@@ -35,9 +35,12 @@ END_DATE = date.today()
 
 # (endpoint_name, client_method, date_field_in_response)
 ENDPOINTS: list[tuple[str, str, str]] = [
-    ("weight",          "fetch_weight",          "datetime"),
-    ("blood_pressure",  "fetch_blood_pressure",  "datetime"),
-    ("temperature",     "fetch_temperature",     "datetime"),
+    ("weight", "fetch_weight", "datetime"),
+    ("blood_pressure", "fetch_blood_pressure", "datetime"),
+    ("temperature", "fetch_temperature", "datetime"),
+    ("sleep_summary", "fetch_sleep_summary", "date"),
+    ("sleep_raw", "fetch_sleep_raw", "startdate"),
+    ("heart_list", "fetch_heart_list", "timestamp"),
 ]
 
 
@@ -50,7 +53,6 @@ def main() -> None:
         state = load_state()
 
         for endpoint_name, method_name, date_field in ENDPOINTS:
-
             start_date = get_start_date(endpoint_name, state)
 
             if start_date > END_DATE:
