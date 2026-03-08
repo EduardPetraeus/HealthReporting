@@ -293,7 +293,7 @@ def _execute_tool(tools: HealthTools, tool_name: str, tool_input: dict) -> str:
             return f"Error: Unknown tool '{tool_name}'"
     except Exception as exc:
         logger.error("Tool execution failed: %s(%s) — %s", tool_name, tool_input, exc)
-        return f"Error executing {tool_name}: {exc}"
+        return f"Error executing {tool_name}: query failed. Check tool parameters and try again."
 
 
 # ------------------------------------------------------------------
@@ -343,7 +343,7 @@ def generate_response(
     # Tool-use loop
     tool_call_count = 0
     try:
-        while tool_call_count <= MAX_TOOL_CALLS:
+        while tool_call_count < MAX_TOOL_CALLS:
             response = client.messages.create(
                 model="claude-sonnet-4-20250514",
                 max_tokens=1024,
@@ -485,7 +485,7 @@ def generate_response_stream(
     # Tool-use loop (non-streaming) — resolve all tool calls first
     tool_call_count = 0
     try:
-        while tool_call_count <= MAX_TOOL_CALLS:
+        while tool_call_count < MAX_TOOL_CALLS:
             response = client.messages.create(
                 model="claude-sonnet-4-20250514",
                 max_tokens=1024,
