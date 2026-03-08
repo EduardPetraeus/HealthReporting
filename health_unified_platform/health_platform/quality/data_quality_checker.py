@@ -148,6 +148,7 @@ class DataQualityChecker:
             "freshness": self._check_freshness,
             "row_count": self._check_row_count,
             "value_range": self._check_value_range,
+            "schema_drift": self._check_schema_drift,
         }
         handler = handlers.get(check_type)
         if not handler:
@@ -322,6 +323,52 @@ class DataQualityChecker:
                 )
             )
         return results
+
+    def _check_schema_drift(self, table_name: str, config: dict) -> list[CheckResult]:
+        """Check that all expected columns exist in the actual table.
+
+        Config format: { expected_columns: [col1, col2, ...] }
+        The check passes if every expected column is present in the table.
+        """
+        expected = config.get("expected_columns", [])
+        tbl = _validate_id(table_name)
+
+        # Query actual column names from the table
+        sql = (
+            f"SELECT column_name FROM information_schema.columns "
+            f"WHERE table_schema = 'silver' AND table_name = '{tbl}'"
+        )
+        try:
+            rows = self.con.execute(sql).fetchall()
+            actual_columns = {row[0] for row in rows}
+        except Exception as exc:
+            return [
+                CheckResult(
+                    table_name=table_name,
+                    check_type="schema_drift",
+                    column=None,
+                    passed=False,
+                    message=f"Could not read schema: {exc}",
+                )
+            ]
+
+        missing = sorted(set(expected) - actual_columns)
+        passed = len(missing) == 0
+        return [
+            CheckResult(
+                table_name=table_name,
+                check_type="schema_drift",
+                column=None,
+                passed=passed,
+                message=(
+                    f"All {len(expected)} expected columns present"
+                    if passed
+                    else f"Missing columns: {', '.join(missing)}"
+                ),
+                value=float(len(missing)),
+                threshold=0.0,
+            )
+        ]
 
     # ------------------------------------------------------------------
     # Helpers

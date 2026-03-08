@@ -12,7 +12,14 @@ from health_platform.utils.logging_config import get_logger
 
 logger = get_logger("rule_loader")
 
-_VALID_CHECK_TYPES = {"not_null", "unique", "freshness", "row_count", "value_range"}
+_VALID_CHECK_TYPES = {
+    "not_null",
+    "unique",
+    "freshness",
+    "row_count",
+    "value_range",
+    "schema_drift",
+}
 _SAFE_IDENTIFIER = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*\Z")
 
 _DEFAULT_RULES_PATH = (
@@ -103,8 +110,7 @@ def _validate_check_schema(table_name: str, check_type: str, check_value: Any) -
             )
         if "column" not in check_value or "max_hours" not in check_value:
             raise ValueError(
-                f"Table '{table_name}'.freshness requires "
-                f"'column' and 'max_hours' keys"
+                f"Table '{table_name}'.freshness requires 'column' and 'max_hours' keys"
             )
         if not isinstance(check_value["max_hours"], (int, float)):
             raise ValueError(
@@ -113,8 +119,7 @@ def _validate_check_schema(table_name: str, check_type: str, check_value: Any) -
             )
         if not _SAFE_IDENTIFIER.match(check_value["column"]):
             raise ValueError(
-                f"Invalid column '{check_value['column']}' "
-                f"in {table_name}.freshness"
+                f"Invalid column '{check_value['column']}' in {table_name}.freshness"
             )
 
     elif check_type == "row_count":
@@ -147,6 +152,26 @@ def _validate_check_schema(table_name: str, check_type: str, check_value: Any) -
                         f"Table '{table_name}'.value_range.{col}.{key} "
                         f"must be numeric, got {type(bounds[key]).__name__}"
                     )
+
+    elif check_type == "schema_drift":
+        if not isinstance(check_value, dict):
+            raise ValueError(
+                f"Table '{table_name}'.schema_drift must be a dict "
+                f"with 'expected_columns' key"
+            )
+        if "expected_columns" not in check_value:
+            raise ValueError(
+                f"Table '{table_name}'.schema_drift requires 'expected_columns' key"
+            )
+        cols = check_value["expected_columns"]
+        if not isinstance(cols, list) or not all(isinstance(c, str) for c in cols):
+            raise ValueError(
+                f"Table '{table_name}'.schema_drift.expected_columns "
+                f"must be a list of column names"
+            )
+        for col in cols:
+            if not _SAFE_IDENTIFIER.match(col):
+                raise ValueError(f"Invalid column '{col}' in {table_name}.schema_drift")
 
 
 def list_tables(rules_path: Path | None = None) -> list[str]:

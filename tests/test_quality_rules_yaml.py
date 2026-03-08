@@ -29,13 +29,19 @@ MERGE_DIR = (
 
 
 def _get_silver_table_names_from_merges() -> set[str]:
-    """Extract silver table names from merge SQL file headers."""
+    """Extract silver table names from merge SQL file headers.
+
+    Strips trailing annotations like '(shared table)' to get the bare
+    table name that matches the YAML key.
+    """
     tables = set()
     for sql_file in MERGE_DIR.glob("merge_*.sql"):
         with open(sql_file, "r", encoding="utf-8") as f:
             for line in f:
                 if "-> silver." in line:
-                    table_name = line.split("-> silver.")[1].strip()
+                    raw = line.split("-> silver.")[1].strip()
+                    # Remove trailing annotations like "(shared table)"
+                    table_name = raw.split("(")[0].strip().split()[0].strip()
                     tables.add(table_name)
                     break
     return tables
@@ -135,4 +141,40 @@ class TestSchemaValidation:
     def test_rejects_trailing_newline_in_table_name(self, tmp_path):
         path = self._write_rules(tmp_path, {"daily_sleep\n": {"not_null": ["col"]}})
         with pytest.raises(ValueError, match="Invalid table name"):
+            load_rules(path)
+
+    def test_accepts_valid_schema_drift(self, tmp_path):
+        path = self._write_rules(
+            tmp_path,
+            {
+                "good_table": {
+                    "schema_drift": {
+                        "expected_columns": ["business_key_hash", "sk_date"],
+                    },
+                },
+            },
+        )
+        tables = load_rules(path)
+        assert "good_table" in tables
+
+    def test_rejects_schema_drift_without_expected_columns(self, tmp_path):
+        path = self._write_rules(
+            tmp_path,
+            {"good_table": {"schema_drift": {"wrong_key": ["col"]}}},
+        )
+        with pytest.raises(ValueError, match="expected_columns"):
+            load_rules(path)
+
+    def test_rejects_schema_drift_invalid_column(self, tmp_path):
+        path = self._write_rules(
+            tmp_path,
+            {
+                "good_table": {
+                    "schema_drift": {
+                        "expected_columns": ["valid_col", "bad col;"],
+                    },
+                },
+            },
+        )
+        with pytest.raises(ValueError, match="Invalid column"):
             load_rules(path)
