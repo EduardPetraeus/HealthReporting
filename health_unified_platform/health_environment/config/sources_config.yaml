@@ -528,3 +528,28 @@ sources:
     source_type: "parquet"
     target_schema: "bronze"
     target_table: "stg_withings_heart_list"
+
+  # Lifesum CSV expansion (A8)
+  - name: "lifesum_bodymeasures"
+    relative_path: "lifesum/parquet/bodymeasures/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_lifesum_bodymeasures"
+
+  - name: "lifesum_exercise"
+    relative_path: "lifesum/parquet/exercise/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_lifesum_exercise"
+
+  - name: "lifesum_weighins"
+    relative_path: "lifesum/parquet/weighins/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_lifesum_weighins"
+
+  - name: "lifesum_bodyfat"
+    relative_path: "lifesum/parquet/bodyfat/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_lifesum_bodyfat"

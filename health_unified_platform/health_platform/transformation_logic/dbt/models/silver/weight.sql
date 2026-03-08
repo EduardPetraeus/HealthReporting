@@ -15,6 +15,7 @@ select
     null::double     as bone_mass_kg,
     null::double     as muscle_mass_kg,
     null::double     as hydration_kg,
+    null::varchar    as source_system,
     null::varchar    as business_key_hash,
     null::varchar    as row_hash,
     null::timestamp  as load_datetime,

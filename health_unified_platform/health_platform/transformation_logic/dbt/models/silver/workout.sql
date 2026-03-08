@@ -19,6 +19,7 @@ select
     null::double     as duration_seconds,
     null::varchar    as label,
     null::varchar    as source,
+    null::varchar    as source_system,
     null::varchar    as business_key_hash,
     null::varchar    as row_hash,
     null::timestamp  as load_datetime,

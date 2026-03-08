@@ -27,7 +27,8 @@ SELECT
         - epoch_ms(start_datetime::TIMESTAMP) / 1000.0 AS duration_seconds,
     label::VARCHAR                                     AS label,
     source,
-    md5(coalesce(id, ''))                              AS business_key_hash,
+    'oura'                                             AS source_system,
+    md5(coalesce(id, '') || '||oura')                  AS business_key_hash,
     md5(
         coalesce(id, '')                                   || '||' ||
         coalesce(activity, '')                             || '||' ||
@@ -55,16 +56,17 @@ WHEN MATCHED AND target.row_hash <> src.row_hash THEN UPDATE SET
     duration_seconds = src.duration_seconds,
     label            = src.label,
     source           = src.source,
+    source_system    = src.source_system,
     row_hash         = src.row_hash,
     update_datetime  = current_timestamp
 
 WHEN NOT MATCHED THEN INSERT (
     sk_date, day, workout_id, activity, intensity, calories, distance_meters,
-    start_datetime, end_datetime, duration_seconds, label, source,
+    start_datetime, end_datetime, duration_seconds, label, source, source_system,
     business_key_hash, row_hash, load_datetime, update_datetime
 ) VALUES (
     src.sk_date, src.day, src.workout_id, src.activity, src.intensity, src.calories, src.distance_meters,
-    src.start_datetime, src.end_datetime, src.duration_seconds, src.label, src.source,
+    src.start_datetime, src.end_datetime, src.duration_seconds, src.label, src.source, src.source_system,
     src.business_key_hash, src.row_hash, current_timestamp, current_timestamp
 );
 
