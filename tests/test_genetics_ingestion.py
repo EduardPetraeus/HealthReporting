@@ -79,7 +79,7 @@ class TestGeneticsPdfParser:
     # -- Result summary extraction --
 
     def test_extract_result_summary_no_variant(self):
-        text = "Claus Eduard, you do not have the e4 variant we tested."
+        text = "Test User, you do not have the e4 variant we tested."
         result = GeneticsPdfParser._extract_result_summary(text)
         assert "do not have" in result.lower()
 
@@ -89,7 +89,7 @@ class TestGeneticsPdfParser:
         assert "0" in result
 
     def test_extract_result_summary_muscle(self):
-        text = "Claus Eduard, your genetic muscle composition is common in elite power athletes"
+        text = "Test User, your genetic muscle composition is common in elite power athletes"
         result = GeneticsPdfParser._extract_result_summary(text)
         assert "muscle" in result.lower() or "power" in result.lower()
 
@@ -148,8 +148,8 @@ class TestGeneticsPdfParser:
     # -- Haplogroup extraction --
 
     def test_extract_haplogroup_maternal(self):
-        text = "your maternal haplogroup is V."
-        assert GeneticsPdfParser._extract_haplogroup(text) == "V"
+        text = "your maternal haplogroup is X2."
+        assert GeneticsPdfParser._extract_haplogroup(text) == "X2"
 
     def test_extract_haplogroup_paternal(self):
         text = "your paternal haplogroup is R1b."
@@ -158,9 +158,7 @@ class TestGeneticsPdfParser:
     # -- Report name extraction --
 
     def test_extract_report_name_strips_prefix(self):
-        path = Path(
-            "Claus Eduard Petræus Late-Onset Alzheimer's Disease Report - 23andMe.pdf"
-        )
+        path = Path("Test User Late-Onset Alzheimer's Disease Report - 23andMe.pdf")
         result = GeneticsPdfParser._extract_report_name(path)
         assert result == "Late-Onset Alzheimer's Disease"
 
@@ -175,9 +173,9 @@ class TestGeneticsPdfParser:
     def test_parse_pdf_health_report(self, mock_pdfplumber):
         mock_page = MagicMock()
         mock_page.extract_text.return_value = (
-            "Claus Eduard Petræus\n"
+            "Test User\n"
             "Late-Onset Alzheimer's Disease\n"
-            "Claus Eduard, you do not have the e4 variant we tested.\n"
+            "Test User, you do not have the e4 variant we tested.\n"
             "0 variants detected in the APOE gene\n"
             "Marker Tested Gene Marker ID (SNP) Your Genotype\n"
             "e4 APOE rs429358 T T C\n"
@@ -188,9 +186,7 @@ class TestGeneticsPdfParser:
         mock_pdf.__exit__ = MagicMock(return_value=False)
         mock_pdfplumber.open.return_value = mock_pdf
 
-        path = Path(
-            "Claus Eduard Petræus Late-Onset Alzheimer's Disease Report - 23andMe.pdf"
-        )
+        path = Path("Test User Late-Onset Alzheimer's Disease Report - 23andMe.pdf")
         results = self.parser.parse_pdf(path)
 
         assert len(results) == 1
@@ -205,9 +201,9 @@ class TestGeneticsPdfParser:
     def test_parse_pdf_haplogroup(self, mock_pdfplumber):
         mock_page = MagicMock()
         mock_page.extract_text.return_value = (
-            "Claus Eduard Petræus\n"
+            "Test User\n"
             "Maternal Haplogroup\n"
-            "Claus Eduard, your maternal haplogroup is V.\n"
+            "Test User, your maternal haplogroup is X2.\n"
             "Migrations of Your Maternal Line\n"
         )
         mock_pdf = MagicMock()
@@ -216,13 +212,13 @@ class TestGeneticsPdfParser:
         mock_pdf.__exit__ = MagicMock(return_value=False)
         mock_pdfplumber.open.return_value = mock_pdf
 
-        path = Path("Claus Eduard Petræus Maternal Haplogroup Report - 23andMe.pdf")
+        path = Path("Test User Maternal Haplogroup Report - 23andMe.pdf")
         results = self.parser.parse_pdf(path)
 
         assert len(results) == 1
         r = results[0]
         assert r["category"] == "haplogroup"
-        assert r["genotype"] == "V"
+        assert r["genotype"] == "X2"
         assert r["gene"] == "mtDNA"
         assert r["variant_detected"] is False
 
@@ -342,8 +338,8 @@ class TestFamilyTreeParser:
                 "parent_ids": [],
                 "partner_ids": [],
                 "sex": None,
-                "first_name": "Claus",
-                "last_name": "Petraeus",
+                "first_name": "Test",
+                "last_name": "User",
                 "relationship_id": "you",
                 "up": 0,
                 "down": 0,
@@ -376,7 +372,7 @@ class TestFamilyTreeParser:
         assert len(rows) == 2
 
         user = next(r for r in rows if r["relationship_to_user"] == "you")
-        assert user["first_name"] == "Claus"
+        assert user["first_name"] == "Test"
         assert user["generation"] == 0
         assert user["num_shared_segments"] == 2
         assert user["has_dna_match"] is True
@@ -619,7 +615,7 @@ class TestQueryGeneticsTool:
         self.con.execute(
             """
             INSERT INTO silver.family_tree VALUES
-            ('u1', 'Claus', 'Petraeus', 'you', 0, 'both',
+            ('u1', 'Test', 'User', 'you', 0, 'both',
              2, true, NULL, 'test.json', 'f1', 'fr1', CURRENT_TIMESTAMP, NULL),
             ('f1', NULL, NULL, 'father', -1, 'unknown',
              1, true, NULL, 'test.json', 'f2', 'fr2', CURRENT_TIMESTAMP, NULL)

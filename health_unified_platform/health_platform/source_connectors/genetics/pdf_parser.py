@@ -107,7 +107,7 @@ class GeneticsPdfParser:
                         pages_text.append(text)
                 full_text = "\n".join(pages_text)
         except Exception as exc:
-            logger.error("Failed to open PDF %s: %s", path, exc)
+            logger.error("Failed to open PDF %s: %s", path.name, exc)
             return []
 
         if not full_text.strip():
@@ -192,8 +192,15 @@ class GeneticsPdfParser:
     def _extract_report_name(path: Path) -> str:
         """Extract clean report name from filename."""
         name = path.stem
-        # Remove "Claus Eduard Petræus " prefix and " - 23andMe" suffix
-        name = re.sub(r"^Claus Eduard Petr[æa]us\s+", "", name)
+        # Remove owner name prefix (any 2-4 word name) and " - 23andMe" suffix
+        name = re.sub(
+            r"^[A-Za-z\u00C0-\u017E]+"
+            r"(?:\s+[A-Za-z\u00C0-\u017E]+){1,3}\s+(?="
+            r"(?:Late|Early|Alpha|Hereditary|Type|Muscle|BRCA|"
+            r"Celiac|MUTYH|Factor|Maternal|Paternal|Age))",
+            "",
+            name,
+        )
         name = re.sub(r"\s*-?\s*23andMe$", "", name)
         name = re.sub(r"\s+Report$", "", name)
         return name.strip()
@@ -201,9 +208,9 @@ class GeneticsPdfParser:
     @staticmethod
     def _extract_condition(text: str, report_name: str) -> str:
         """Extract the condition name from the report text."""
-        # Try to find the main heading after "23andMe" header
+        # Try to find the main heading after the owner name line
         match = re.search(
-            r"(?:Claus Eduard.*?\n)(.+?)(?:\n[A-Z]|\nis characterized|\nis a)",
+            r"(?:[A-Z][a-z]+\s[A-Z].*?\n)(.+?)(?:\n[A-Z]|\nis characterized|\nis a)",
             text,
         )
         if match:
@@ -215,9 +222,9 @@ class GeneticsPdfParser:
     @staticmethod
     def _extract_result_summary(text: str) -> str:
         """Extract the main result statement."""
-        # Pattern: "Claus Eduard, you/your ..." — capture from "you" onward
+        # Pattern: "<Name>, you/your ..." — capture from "you" onward
         match = re.search(
-            r"Claus Eduard,?\s+(you(?:r)?\s+.+?)(?:\.|Your risk|Studies|$)",
+            r"[A-Z][a-z]+,?\s+(you(?:r)?\s+.+?)(?:\.|Your risk|Studies|$)",
             text,
             re.IGNORECASE,
         )

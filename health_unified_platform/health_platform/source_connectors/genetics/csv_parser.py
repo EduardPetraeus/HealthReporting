@@ -103,6 +103,10 @@ def parse_family_tree_json(path: Path) -> list[dict]:
         relationship_to_user, generation, side, num_shared_segments,
         has_dna_match, profile_url
     """
+    max_size = 50 * 1024 * 1024  # 50 MB
+    if path.stat().st_size > max_size:
+        raise ValueError(f"Family tree JSON exceeds {max_size} bytes: {path.name}")
+
     with open(path, encoding="utf-8") as f:
         data = json.load(f)
 

@@ -966,7 +966,8 @@ class HealthTools:
             params.append(category)
         if report_name:
             conditions.append("LOWER(report_name) LIKE '%' || LOWER(?) || '%'")
-            params.append(report_name)
+            # Strip LIKE wildcards to prevent unintended pattern matching
+            params.append(report_name.replace("%", "").replace("_", ""))
 
         where_clause = " AND ".join(conditions) if conditions else "1=1"
         sql = f"""
