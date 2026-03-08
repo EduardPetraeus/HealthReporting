@@ -1,0 +1,114 @@
+# =============================================================================
+# weekly_pipeline.yml — DAB job definition for weekly aggregation pipeline
+#
+# Schedule: Every Sunday at 08:00 UTC
+# Purpose: Rebuild gold dimension tables that depend on accumulated data,
+#          run data quality checks, and generate weekly health summaries.
+# =============================================================================
+
+resources:
+  jobs:
+    weekly_health_pipeline:
+      name: "[${var.env}] health_platform — weekly_pipeline"
+      description: >
+        Weekly aggregation pipeline. Rebuilds gold dimension tables (dim_source,
+        dim_workout_type, dim_supplement, dim_lab_marker) that derive from silver
+        data, and runs data quality validation across all layers.
+
+      schedule:
+        quartz_cron_expression: "0 0 8 ? * SUN"
+        timezone_id: UTC
+        pause_status: UNPAUSED
+
+      tags:
+        pipeline: weekly
+        layer: gold
+        project: health_platform
+
+      job_clusters:
+        - job_cluster_key: weekly_cluster
+          new_cluster:
+            spark_version: ${var.spark_version}
+            node_type_id: ${var.node_type_id}
+            num_workers: ${var.num_workers}
+            spark_conf:
+              spark.databricks.delta.preview.enabled: "true"
+
+      tasks:
+        # =============================================================
+        # Phase 1: Rebuild data-driven gold dimensions
+        # =============================================================
+        - task_key: rebuild_gold_dimensions
+          job_cluster_key: weekly_cluster
+          notebook_task:
+            notebook_path: ../gold/gold_runner.py
+            base_parameters:
+              entity_name: ""
+              config_root: ${var.gold_config_root}
+              sql_root: ${var.gold_sql_root}
+          timeout_seconds: 1800
+
+        # =============================================================
+        # Phase 2: Unity Catalog table maintenance (OPTIMIZE + VACUUM)
+        # =============================================================
+        - task_key: table_maintenance
+          depends_on:
+            - task_key: rebuild_gold_dimensions
+          job_cluster_key: weekly_cluster
+          sql_task:
+            query:
+              value: |
+                -- Optimize key silver tables for query performance
+                OPTIMIZE health_dw.silver.daily_sleep;
+                OPTIMIZE health_dw.silver.daily_activity;
+                OPTIMIZE health_dw.silver.daily_readiness;
+                OPTIMIZE health_dw.silver.heart_rate;
+                OPTIMIZE health_dw.silver.weight;
+                OPTIMIZE health_dw.silver.step_count;
+                OPTIMIZE health_dw.silver.workout;
+                OPTIMIZE health_dw.silver.blood_pressure;
+
+                -- Vacuum old versions (retain 7 days for time travel)
+                VACUUM health_dw.silver.daily_sleep RETAIN 168 HOURS;
+                VACUUM health_dw.silver.daily_activity RETAIN 168 HOURS;
+                VACUUM health_dw.silver.heart_rate RETAIN 168 HOURS;
+                VACUUM health_dw.silver.weight RETAIN 168 HOURS;
+                VACUUM health_dw.silver.step_count RETAIN 168 HOURS;
+          timeout_seconds: 3600
+
+        # =============================================================
+        # Phase 3: Data quality validation
+        # =============================================================
+        - task_key: data_quality_check
+          depends_on:
+            - task_key: table_maintenance
+          job_cluster_key: weekly_cluster
+          sql_task:
+            query:
+              value: |
+                -- Row count summary across all silver tables
+                SELECT 'daily_sleep' AS table_name, COUNT(*) AS row_count FROM health_dw.silver.daily_sleep
+                UNION ALL
+                SELECT 'daily_activity', COUNT(*) FROM health_dw.silver.daily_activity
+                UNION ALL
+                SELECT 'daily_readiness', COUNT(*) FROM health_dw.silver.daily_readiness
+                UNION ALL
+                SELECT 'heart_rate', COUNT(*) FROM health_dw.silver.heart_rate
+                UNION ALL
+                SELECT 'weight', COUNT(*) FROM health_dw.silver.weight
+                UNION ALL
+                SELECT 'step_count', COUNT(*) FROM health_dw.silver.step_count
+                UNION ALL
+                SELECT 'workout', COUNT(*) FROM health_dw.silver.workout
+                UNION ALL
+                SELECT 'daily_stress', COUNT(*) FROM health_dw.silver.daily_stress
+                UNION ALL
+                SELECT 'water_intake', COUNT(*) FROM health_dw.silver.water_intake
+                UNION ALL
+                SELECT 'blood_pressure', COUNT(*) FROM health_dw.silver.blood_pressure
+                ORDER BY table_name
+          timeout_seconds: 600
+
+      email_notifications:
+        on_failure:
+          - ${var.alert_email}

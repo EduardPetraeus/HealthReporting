@@ -1,0 +1,37 @@
+# =============================================================================
+# prd.yml — Production environment configuration
+# =============================================================================
+
+environment: prd
+
+variables:
+  env: prd
+  catalog: health_dw
+  spark_version: "14.3.x-scala2.12"
+  node_type_id: "Standard_DS4_v2"
+  num_workers: 2
+
+  # Storage paths (production containers)
+  landing_zone: "abfss://landing@healthdatalake.dfs.core.windows.net"
+  checkpoint_root: "abfss://checkpoints@healthdatalake.dfs.core.windows.net/bronze"
+  schema_root: "abfss://checkpoints@healthdatalake.dfs.core.windows.net/bronze/schemas"
+
+  # Notebook config paths
+  config_root: "/Workspace/Shared/health_platform/config/sources"
+  silver_sql_root: "/Workspace/Shared/health_platform/notebooks/silver/sql"
+  gold_config_root: "/Workspace/Shared/health_platform/config/gold"
+  gold_sql_root: "/Workspace/Shared/health_platform/notebooks/gold/sql"
+
+  # Alerting
+  alert_email: "health-pipeline-alerts@example.com"
+
+  # Feature flags
+  enable_dlt: true
+  enable_streaming: true
+  log_level: INFO
+
+permissions:
+  - group_name: data_engineers
+    permission_level: CAN_MANAGE
+  - group_name: bi_consumers
+    permission_level: CAN_VIEW
