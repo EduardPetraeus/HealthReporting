@@ -80,10 +80,15 @@ def write_records(
         _write_partition(df, endpoint, date.today(), root=root)
         return
 
-    # Parse date field — handles both YYYY-MM-DD strings and ISO 8601 datetimes
-    df["_partition_date"] = pd.to_datetime(
-        df[date_field], utc=True, errors="coerce"
-    ).dt.date
+    # Parse date field — handles YYYY-MM-DD strings, ISO 8601 datetimes,
+    # and Unix epoch seconds (e.g. Withings heart_list timestamps)
+    raw = df[date_field]
+    if pd.api.types.is_numeric_dtype(raw):
+        df["_partition_date"] = pd.to_datetime(
+            raw, unit="s", utc=True, errors="coerce"
+        ).dt.date
+    else:
+        df["_partition_date"] = pd.to_datetime(raw, utc=True, errors="coerce").dt.date
 
     missing = df["_partition_date"].isna().sum()
     if missing:
