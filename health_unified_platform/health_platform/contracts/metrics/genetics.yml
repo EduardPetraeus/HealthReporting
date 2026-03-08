@@ -59,6 +59,42 @@ metric:
         WHERE variant_detected = true
         ORDER BY clinical_relevance
 
+    ancestry_overview:
+      sql: >
+        SELECT ancestry_category,
+               COUNT(*) AS segment_count,
+               SUM(segment_length_bp) AS total_bp,
+               ROUND(SUM(segment_length_bp) * 100.0 / 6400000000, 2) AS pct_of_genome
+        FROM silver.ancestry_segments
+        WHERE copy = 1
+        GROUP BY ancestry_category
+        ORDER BY total_bp DESC
+
+    ancestry_by_chromosome:
+      sql: >
+        SELECT chromosome, ancestry_category, copy,
+               segment_length_bp, pct_of_chromosome
+        FROM silver.ancestry_segments
+        WHERE chromosome = :chromosome
+        ORDER BY copy, start_bp
+
+    family_tree:
+      sql: >
+        SELECT relationship_to_user, generation, side,
+               num_shared_segments, has_dna_match,
+               first_name, last_name
+        FROM silver.family_tree
+        ORDER BY generation, relationship_to_user
+
+    family_by_side:
+      sql: >
+        SELECT relationship_to_user, generation,
+               num_shared_segments, has_dna_match,
+               first_name, last_name
+        FROM silver.family_tree
+        WHERE side = :side OR side = 'both'
+        ORDER BY generation
+
   related_metrics:
     - { metric: sleep_score, relationship: "Deep sleep genetic predisposition affects sleep scores", lag: 0 }
     - { metric: deep_sleep, relationship: "Genetically less likely to be deep sleeper", lag: 0 }
@@ -75,4 +111,8 @@ metric:
     - question: "Which genetic variants were detected?"
       tool: "query_health(metric='genetics', computation='variants_detected')"
     - question: "What's my ancestry breakdown?"
-      tool: "query_health(metric='genetics', computation='by_category', category='ancestry')"
+      tool: "query_genetics(query_type='ancestry')"
+    - question: "What chromosome is my Scandinavian ancestry on?"
+      tool: "query_genetics(query_type='ancestry', category='Scandinavian')"
+    - question: "Who are my DNA relatives?"
+      tool: "query_genetics(query_type='family')"

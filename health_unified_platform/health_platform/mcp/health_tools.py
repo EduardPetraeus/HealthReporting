@@ -14,7 +14,6 @@ from pathlib import Path
 from typing import Optional
 
 import duckdb
-
 from health_platform.mcp.formatter import (
     format_as_markdown_kv,
     format_as_markdown_table,
@@ -678,8 +677,7 @@ class HealthTools:
             }
             if check_type not in valid_types:
                 return format_error(
-                    f"Unknown check type '{check_type}'. "
-                    f"Valid: {', '.join(sorted(valid_types))}"
+                    f"Unknown check type '{check_type}'. Valid: {', '.join(sorted(valid_types))}"
                 )
 
         try:
@@ -763,15 +761,10 @@ class HealthTools:
             columns = [d[0] for d in result.description]
 
             if not rows:
-                return (
-                    f"Computed {count} correlations. "
-                    "No strong relationships found (|r| > 0.3)."
-                )
+                return f"Computed {count} correlations. No strong relationships found (|r| > 0.3)."
 
-            header = (
-                f"# Cross-Source Insights\n\n"
-                f"Computed {count} correlations. Showing strongest:\n\n"
-            )
+            title = "# Cross-Source Insights\n\n"
+            header = title + f"Computed {count} correlations. Showing strongest:\n\n"
             return header + format_as_markdown_table(rows, columns)
         except Exception as exc:
             logger.error("Cross-source insights failed: %s", exc)
@@ -887,8 +880,7 @@ class HealthTools:
             valid_statuses = {"normal", "low", "high", "unknown"}
             if status.lower() not in valid_statuses:
                 return format_error(
-                    f"Invalid status '{status}'. "
-                    f"Valid: {', '.join(sorted(valid_statuses))}"
+                    f"Invalid status '{status}'. Valid: {', '.join(sorted(valid_statuses))}"
                 )
             conditions.append("LOWER(status) = LOWER(?)")
             params.append(status)
@@ -926,6 +918,213 @@ class HealthTools:
             return f"No lab results found ({filter_str})."
 
         return format_as_markdown_table(rows, columns)
+
+    # ------------------------------------------------------------------
+    # Private helpers
+    # ------------------------------------------------------------------
+
+    # ------------------------------------------------------------------
+    # Tool 16: query_genetics
+    # ------------------------------------------------------------------
+
+    def query_genetics(
+        self,
+        query_type: Optional[str] = None,
+        category: Optional[str] = None,
+        report_name: Optional[str] = None,
+    ) -> str:
+        """Query genetics data across health findings, ancestry, and family tree.
+
+        Args:
+            query_type: 'health', 'ancestry', 'family', or None (= dashboard overview).
+            category: Filter by category (e.g., 'Scandinavian', 'health_risk', 'maternal').
+            report_name: Filter by report name (partial match).
+
+        Returns:
+            Formatted markdown output.
+        """
+        if query_type == "health" or (query_type is None and report_name):
+            return self._query_genetics_health(category, report_name)
+        elif query_type == "ancestry":
+            return self._query_genetics_ancestry(category)
+        elif query_type == "family":
+            return self._query_genetics_family(category)
+        else:
+            return self._query_genetics_dashboard()
+
+    def _query_genetics_health(
+        self,
+        category: Optional[str] = None,
+        report_name: Optional[str] = None,
+    ) -> str:
+        """Query genetic health findings."""
+        conditions: list[str] = []
+        params: list = []
+
+        if category:
+            conditions.append("LOWER(category) = LOWER(?)")
+            params.append(category)
+        if report_name:
+            conditions.append("LOWER(report_name) LIKE '%' || LOWER(?) || '%'")
+            # Strip LIKE wildcards to prevent unintended pattern matching
+            params.append(report_name.replace("%", "").replace("_", ""))
+
+        where_clause = " AND ".join(conditions) if conditions else "1=1"
+        sql = f"""
+            SELECT report_name, category, gene, snp_id, genotype,
+                   risk_level, result_summary, variant_detected
+            FROM silver.genetic_health_findings
+            WHERE {where_clause}
+            ORDER BY
+                CASE risk_level
+                    WHEN 'high' THEN 1 WHEN 'medium' THEN 2
+                    WHEN 'low' THEN 3 ELSE 4
+                END,
+                category, report_name
+        """
+        try:
+            result = self.con.execute(sql, params)
+            columns = [d[0] for d in result.description]
+            rows = result.fetchall()
+        except Exception as exc:
+            logger.error("Genetics health query failed: %s", exc)
+            return format_error("Genetics health query failed.")
+
+        if not rows:
+            return "No genetic health findings found."
+        return "# Genetic Health Findings\n\n" + format_as_markdown_table(rows, columns)
+
+    def _query_genetics_ancestry(self, category: Optional[str] = None) -> str:
+        """Query ancestry segments."""
+        if category:
+            sql = """
+                SELECT ancestry_category, chromosome, copy,
+                       segment_length_bp, pct_of_chromosome
+                FROM silver.ancestry_segments
+                WHERE LOWER(ancestry_category) LIKE '%' || LOWER(?) || '%'
+                ORDER BY chromosome, copy, start_bp
+            """
+            params: list = [category]
+        else:
+            sql = """
+                SELECT ancestry_category,
+                       COUNT(*) AS segment_count,
+                       SUM(segment_length_bp) AS total_bp,
+                       ROUND(SUM(segment_length_bp) * 100.0 / 6400000000, 2) AS pct_of_genome
+                FROM silver.ancestry_segments
+                WHERE copy = 1
+                GROUP BY ancestry_category
+                ORDER BY total_bp DESC
+            """
+            params = []
+
+        try:
+            result = self.con.execute(sql, params)
+            columns = [d[0] for d in result.description]
+            rows = result.fetchall()
+        except Exception as exc:
+            logger.error("Genetics ancestry query failed: %s", exc)
+            return format_error("Genetics ancestry query failed.")
+
+        if not rows:
+            return "No ancestry data found."
+        return "# Ancestry Composition\n\n" + format_as_markdown_table(rows, columns)
+
+    def _query_genetics_family(self, side: Optional[str] = None) -> str:
+        """Query family tree."""
+        conditions: list[str] = []
+        params: list = []
+
+        if side:
+            conditions.append("(LOWER(side) = LOWER(?) OR side = 'both')")
+            params.append(side)
+
+        where_clause = " AND ".join(conditions) if conditions else "1=1"
+        sql = f"""
+            SELECT relationship_to_user, generation, side,
+                   num_shared_segments, has_dna_match,
+                   first_name, last_name
+            FROM silver.family_tree
+            WHERE {where_clause}
+            ORDER BY generation, relationship_to_user
+        """
+        try:
+            result = self.con.execute(sql, params)
+            columns = [d[0] for d in result.description]
+            rows = result.fetchall()
+        except Exception as exc:
+            logger.error("Genetics family query failed: %s", exc)
+            return format_error("Genetics family query failed.")
+
+        if not rows:
+            return "No family tree data found."
+        return "# Family Tree\n\n" + format_as_markdown_table(rows, columns)
+
+    def _query_genetics_dashboard(self) -> str:
+        """Return a dashboard overview of all genetics data."""
+        parts: list[str] = ["# Genetics Dashboard\n"]
+
+        # Health findings summary
+        try:
+            result = self.con.execute(
+                """
+                SELECT category, COUNT(*) AS findings,
+                       SUM(CASE WHEN variant_detected THEN 1 ELSE 0 END) AS variants_found
+                FROM silver.genetic_health_findings
+                GROUP BY category
+                ORDER BY category
+                """
+            )
+            rows = result.fetchall()
+            if rows:
+                columns = [d[0] for d in result.description]
+                parts.append("## Health Findings by Category\n")
+                parts.append(format_as_markdown_table(rows, columns))
+        except Exception:
+            pass
+
+        # Ancestry summary
+        try:
+            result = self.con.execute(
+                """
+                SELECT ancestry_category,
+                       ROUND(SUM(segment_length_bp) * 100.0 / 6400000000, 2) AS pct_of_genome
+                FROM silver.ancestry_segments
+                WHERE copy = 1
+                GROUP BY ancestry_category
+                HAVING pct_of_genome > 0.5
+                ORDER BY pct_of_genome DESC
+                """
+            )
+            rows = result.fetchall()
+            if rows:
+                columns = [d[0] for d in result.description]
+                parts.append("\n## Ancestry Overview\n")
+                parts.append(format_as_markdown_table(rows, columns))
+        except Exception:
+            pass
+
+        # Family tree summary
+        try:
+            result = self.con.execute(
+                """
+                SELECT COUNT(*) AS total_members,
+                       SUM(CASE WHEN has_dna_match THEN 1 ELSE 0 END) AS dna_matches,
+                       MIN(generation) AS oldest_generation,
+                       MAX(generation) AS youngest_generation
+                FROM silver.family_tree
+                """
+            )
+            row = result.fetchone()
+            if row and row[0] > 0:
+                parts.append("\n## Family Tree Summary\n")
+                parts.append(f"- **Total members:** {row[0]}")
+                parts.append(f"- **DNA matches:** {row[1]}")
+                parts.append(f"- **Generations:** {row[2]} to {row[3]}")
+        except Exception:
+            pass
+
+        return "\n".join(parts) if len(parts) > 1 else "No genetics data available."
 
     # ------------------------------------------------------------------
     # Private helpers

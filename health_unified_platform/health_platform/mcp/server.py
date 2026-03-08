@@ -17,10 +17,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import duckdb
-from mcp.server.fastmcp import FastMCP
-
 from health_platform.mcp.health_tools import HealthTools
 from health_platform.utils.logging_config import get_logger
+from mcp.server.fastmcp import FastMCP
 
 logger = get_logger("mcp_server")
 
@@ -48,7 +47,8 @@ def query_health(metric: str, date_range: str, computation: str = "daily_value")
 
     Args:
         metric: Metric name (e.g., 'sleep_score', 'readiness_score', 'steps')
-        date_range: Date range (e.g., 'today', 'yesterday', 'last_7_days', 'last_30_days', 'last_90_days', '2026-01-01:2026-01-31')
+        date_range: Date range (e.g., 'today', 'last_7_days',
+            'last_30_days', '2026-01-01:2026-01-31')
         computation: Computation type: 'daily_value', 'period_average', 'trend', 'anomaly'
     """
     tools = get_tools()
@@ -78,7 +78,8 @@ def get_profile(categories: str = "") -> str:
     """Load patient profile (core memory).
 
     Args:
-        categories: Comma-separated categories to filter (e.g., 'baselines,demographics'). Empty = all.
+        categories: Comma-separated categories to filter
+            (e.g., 'baselines,demographics'). Empty = all.
     """
     tools = get_tools()
     try:
@@ -152,7 +153,8 @@ def get_schema_context(category: str) -> str:
     """Get schema context for a question category (schema pruning).
 
     Args:
-        category: Category from index: 'sleep', 'vitals', 'activity', 'recovery', 'body', 'nutrition', 'cross_domain'
+        category: Category: 'sleep', 'vitals', 'activity',
+            'recovery', 'body', 'nutrition', 'cross_domain'
     """
     tools = get_tools()
     try:
@@ -182,7 +184,8 @@ def check_data_quality(table: str = "", check_type: str = "") -> str:
 
     Args:
         table: Single table to check (e.g., 'daily_sleep'). Empty = all tables.
-        check_type: Single check type to run: 'not_null', 'unique', 'freshness', 'row_count', 'value_range'. Empty = all types.
+        check_type: Check type: 'not_null', 'unique', 'freshness',
+            'row_count', 'value_range'. Empty = all types.
     """
     tools = get_tools()
     try:
@@ -298,10 +301,7 @@ def get_cross_source_insights() -> str:
 
         from health_platform.mcp.formatter import format_as_markdown_table
 
-        header = (
-            f"# Cross-Source Insights\n\n"
-            f"Computed {count} correlations. Showing strongest:\n\n"
-        )
+        header = f"# Cross-Source Insights\n\nComputed {count} correlations. Showing strongest:\n\n"
         return header + format_as_markdown_table(rows, columns)
     finally:
         tools.close()
@@ -359,10 +359,7 @@ def explain_recommendation(recommendation_title: str) -> str:
                 return "\n".join(parts)
 
         titles = [r.title for r in recs]
-        return (
-            f"Recommendation not found: '{recommendation_title}'. "
-            f"Available: {', '.join(titles)}"
-        )
+        return f"Recommendation not found: '{recommendation_title}'. Available: {', '.join(titles)}"
     finally:
         tools.close()
 
@@ -374,7 +371,8 @@ def query_lab_results(
     """Query lab test results (blood panels, biomarkers) with optional filters.
 
     Args:
-        marker_name: Filter by marker name (partial match, e.g., 'cholesterol', 'vitamin'). Empty = all markers.
+        marker_name: Filter by marker name (partial match,
+            e.g., 'cholesterol', 'vitamin'). Empty = all.
         date_range: Date range (e.g., 'last_30_days', '2026-01-01:2026-03-01'). Empty = all dates.
         status: Filter by result status: 'normal', 'low', 'high'. Empty = all statuses.
     """
@@ -384,6 +382,30 @@ def query_lab_results(
             marker_name=marker_name or None,
             date_range=date_range or None,
             status=status or None,
+        )
+    finally:
+        tools.close()
+
+
+@mcp.tool()
+def query_genetics(
+    query_type: str = "", category: str = "", report_name: str = ""
+) -> str:
+    """Query genetics data — health findings, ancestry composition, and family tree.
+
+    Args:
+        query_type: Data type to query: 'health', 'ancestry', 'family'. Empty = dashboard overview.
+        category: Filter by category (e.g., 'Scandinavian'
+            for ancestry, 'health_risk' for findings). Empty = all.
+        report_name: Filter by report name (partial match,
+            e.g., 'alzheimer'). Empty = all.
+    """
+    tools = get_tools()
+    try:
+        return tools.query_genetics(
+            query_type=query_type or None,
+            category=category or None,
+            report_name=report_name or None,
         )
     finally:
         tools.close()
