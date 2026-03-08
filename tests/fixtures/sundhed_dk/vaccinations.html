@@ -1,0 +1,50 @@
+<!-- SYNTHETIC TEST DATA — entirely fictional, not derived from any real patient records -->
+<sdk-app-vaccination>
+  <div class="vaccination-app">
+    <div class="application">
+      <div class="application-box">
+        <table class="sdk-table effectuated-vaccinations">
+          <thead>
+            <tr>
+              <th class="sorting_desc">Dato</th>
+              <th class="sorting">Vaccine</th>
+              <th class="sorting">Givet hos</th>
+              <th>Varighed</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="sdk-table-row row-click" data-ng-repeat-start="row in tableVm.rowsFilter(tableVm.rows)">
+              <td><span class="ng-binding ng-scope">01.04.2030</span></td>
+              <td><span class="ng-binding ng-scope">Testvaccine mod Fiktivvirus</span></td>
+              <td><span class="ng-binding ng-scope">Fiktivt Vaccinationscenter</span></td>
+              <td><span class="ng-binding ng-scope"></span></td>
+              <td class="text-right"><div class="no-mapping"><a class="icon-arrow-right" title="Ga til detaljevisning"></a></div></td>
+            </tr>
+            <tr class="sdk-table-row row-click odd" data-ng-repeat-start="row in tableVm.rowsFilter(tableVm.rows)">
+              <td><span class="ng-binding ng-scope">15.06.2030</span></td>
+              <td><span class="ng-binding ng-scope">Testvaccine mod Fiktivvirus</span></td>
+              <td><span class="ng-binding ng-scope">Fiktivt Vaccinationscenter</span></td>
+              <td><span class="ng-binding ng-scope"></span></td>
+              <td class="text-right"><div class="no-mapping"><a class="icon-arrow-right" title="Ga til detaljevisning"></a></div></td>
+            </tr>
+            <tr class="sdk-table-row row-click" data-ng-repeat-start="row in tableVm.rowsFilter(tableVm.rows)">
+              <td><span class="ng-binding ng-scope">10.10.2030</span></td>
+              <td><span class="ng-binding ng-scope">Demovax mod Influenza</span></td>
+              <td><span class="ng-binding ng-scope">Eksempel Laegehus</span></td>
+              <td><span class="ng-binding ng-scope">12 mdr.</span></td>
+              <td class="text-right"><div class="no-mapping"><a class="icon-arrow-right" title="Ga til detaljevisning"></a></div></td>
+            </tr>
+            <tr class="sdk-table-row row-click odd" data-ng-repeat-start="row in tableVm.rowsFilter(tableVm.rows)">
+              <td><span class="ng-binding ng-scope">20.01.2030</span></td>
+              <td><span class="ng-binding ng-scope">Syntetivax mod Difteri, tetanus</span></td>
+              <td><span class="ng-binding ng-scope"></span></td>
+              <td><span class="ng-binding ng-scope"></span></td>
+              <td class="text-right"><div class="no-mapping"><a class="icon-arrow-right" title="Ga til detaljevisning"></a></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</sdk-app-vaccination>

@@ -87,3 +87,6 @@ htmlcov/
 
 # Generated documentation
 docs/*.html
+
+# sundhed.dk debug HTML dumps (may contain real health data)
+_debug_html/

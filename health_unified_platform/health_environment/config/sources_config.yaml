@@ -564,35 +564,35 @@ sources:
   # sundhed.dk web scraper (clinical data via Playwright + MitID auth)
   - name: "sundhed_dk_lab_results"
     # Lab results (blood panels, biomarkers) scraped from sundhed.dk
-    relative_path: "sundhed_dk/raw/lab_results/**/*.parquet"
+    relative_path: "min sundhed/raw/lab_results/**/*.parquet"
     source_type: "parquet"
     target_schema: "bronze"
     target_table: "stg_sundhed_dk_lab_results"
 
   - name: "sundhed_dk_medications"
     # Active and historical medication prescriptions
-    relative_path: "sundhed_dk/raw/medications/**/*.parquet"
+    relative_path: "min sundhed/raw/medications/**/*.parquet"
     source_type: "parquet"
     target_schema: "bronze"
     target_table: "stg_sundhed_dk_medications"
 
   - name: "sundhed_dk_vaccinations"
     # Vaccination history (COVID, flu, childhood vaccines)
-    relative_path: "sundhed_dk/raw/vaccinations/**/*.parquet"
+    relative_path: "min sundhed/raw/vaccinations/**/*.parquet"
     source_type: "parquet"
     target_schema: "bronze"
     target_table: "stg_sundhed_dk_vaccinations"
 
   - name: "sundhed_dk_ejournal"
     # E-journal clinical notes (raw narrative text from hospital visits)
-    relative_path: "sundhed_dk/raw/ejournal/**/*.parquet"
+    relative_path: "min sundhed/raw/ejournal/**/*.parquet"
     source_type: "parquet"
     target_schema: "bronze"
     target_table: "stg_sundhed_dk_ejournal"
 
   - name: "sundhed_dk_appointments"
     # Hospital appointments (planned and completed)
-    relative_path: "sundhed_dk/raw/appointments/**/*.parquet"
+    relative_path: "min sundhed/raw/appointments/**/*.parquet"
     source_type: "parquet"
     target_schema: "bronze"
     target_table: "stg_sundhed_dk_appointments"
