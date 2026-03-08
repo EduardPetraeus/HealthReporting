@@ -274,6 +274,49 @@ sources:
     target_schema: "bronze"
     target_table: "stg_apple_health_bp_diastolic"
 
+  # Oura Ring CSV exports (converted via scripts/convert_oura_csv.sh)
+  - name: "oura_csv_dailyresilience"
+    relative_path: "oura_csv/raw/dailyresilience/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_oura_csv_dailyresilience"
+
+  - name: "oura_csv_dailycardiovascularage"
+    relative_path: "oura_csv/raw/dailycardiovascularage/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_oura_csv_dailycardiovascularage"
+
+  - name: "oura_csv_daytimestress"
+    relative_path: "oura_csv/raw/daytimestress/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_oura_csv_daytimestress"
+
+  - name: "oura_csv_temperature"
+    relative_path: "oura_csv/raw/temperature/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_oura_csv_temperature"
+
+  - name: "oura_csv_sleeptime"
+    relative_path: "oura_csv/raw/sleeptime/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_oura_csv_sleeptime"
+
+  - name: "oura_csv_enhancedtag"
+    relative_path: "oura_csv/raw/enhancedtag/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_oura_csv_enhancedtag"
+
+  - name: "oura_csv_sleepmodel"
+    relative_path: "oura_csv/raw/sleepmodel/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_oura_csv_sleepmodel"
+
   # Oura Ring endpoints (V2 API, fetched via source_connectors/oura/run_oura.py)
   - name: "oura_daily_sleep"
     relative_path: "oura/raw/daily_sleep/**/*.parquet"
@@ -344,6 +387,31 @@ sources:
     source_type: "parquet"
     target_schema: "bronze"
     target_table: "stg_withings_temperature"
+
+
+  - name: "withings_sleep"
+    relative_path: "withings/raw/sleep/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_withings_sleep"
+
+  - name: "withings_signal"
+    relative_path: "withings/raw/signal/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_withings_signal"
+
+  - name: "withings_pwv"
+    relative_path: "withings/raw/pwv/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_withings_pwv"
+
+  - name: "withings_body_temperature"
+    relative_path: "withings/raw/body_temperature/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_withings_body_temperature"
 
   # Strava endpoints (OAuth2 API, fetched via source_connectors/strava/run_strava.py)
   - name: "strava_activities"
