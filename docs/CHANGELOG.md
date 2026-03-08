@@ -4,6 +4,25 @@
 
 ---
 
+## [Unreleased] — 2026-03-08
+
+### Added
+- **A8:** Lifesum CSV expansion — bodymeasures, exercise, weighins, bodyfat merge scripts + sources_config entries
+- **A9:** Workout unification — Strava to silver.workout merge, Lifesum exercise to workout, source_system column, cross-source duplicate detection
+- **B1:** LLM chat engine rewrite — Claude tool-use (function calling), SSE streaming endpoint, multi-turn chat history
+- **B3:** Multi-stream anomaly detection — z-score analysis, constellation patterns, temporal degradation tracking
+- **B4:** Expanded correlation engine — 9 to 30+ metric pairs, cross-domain delayed effects
+- **C2:** Intelligence layer — trend forecaster (linear regression), recommendation engine (evidence-backed, CDS-safe)
+- **D4:** Notification system — ntfy.sh integration, severity-based push notifications
+- **F2:** Documentation — metric dictionary, data lineage diagram, WeasyPrint dependency confirmed
+
+### Changed
+- daily_sync.sh: added anomaly detection step (now 8 steps)
+- _business_rules.yml: added constellation patterns, notification rules, recommendation rules
+- MCP tools: added detect_anomalies, forecast_metric, get_cross_source_insights, get_recommendations, explain_recommendation
+
+---
+
 ## 2026-03-06 — Session 011: Keychain Migration, Cleanup, Security Hardening
 
 **Phase:** Post-review cleanup + secrets consolidation
