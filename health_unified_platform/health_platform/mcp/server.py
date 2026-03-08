@@ -214,5 +214,137 @@ def search_evidence(query: str, max_results: int = 5, min_year: str = "") -> str
         tools.close()
 
 
+@mcp.tool()
+def forecast_metric(
+    metric: str, lookback_days: int = 90, forecast_days: int = 7
+) -> str:
+    """Forecast a health metric's trajectory using linear regression.
+
+    Args:
+        metric: Metric in table.column format (e.g., 'daily_sleep.sleep_score')
+        lookback_days: Days of historical data to use (default 90)
+        forecast_days: Days to forecast forward (default 7, max 14)
+    """
+    from health_platform.ai.trend_forecaster import TrendForecaster, format_forecast
+
+    parts = metric.split(".", 1)
+    if len(parts) != 2:
+        return "Error: metric must be in table.column format (e.g., 'daily_sleep.sleep_score')"
+
+    table, column = f"silver.{parts[0]}", parts[1]
+    forecast_days = min(max(int(forecast_days), 1), 14)
+
+    tools = get_tools()
+    try:
+        forecaster = TrendForecaster(tools.con)
+        forecast = forecaster.forecast_metric(
+            table, column, lookback_days=lookback_days, forecast_days=forecast_days
+        )
+        return format_forecast(forecast)
+    finally:
+        tools.close()
+
+
+@mcp.tool()
+def get_cross_source_insights(lookback_days: int = 30) -> str:
+    """Get cross-source correlation insights -- which metrics influence each other.
+
+    Args:
+        lookback_days: Days to analyze (default 30)
+    """
+    from health_platform.ai.correlation_engine import compute_all_correlations
+
+    tools = get_tools(read_only=False)
+    try:
+        count = compute_all_correlations(tools.con)
+
+        # Fetch strongest correlations
+        result = tools.con.execute(
+            """
+            SELECT source_metric, target_metric, strength, lag_days,
+                   direction, confidence, description
+            FROM silver.metric_relationships
+            WHERE ABS(strength) > 0.3
+            ORDER BY ABS(strength) DESC
+            LIMIT 15
+        """
+        )
+        rows = result.fetchall()
+        columns = [d[0] for d in result.description]
+
+        if not rows:
+            return f"Computed {count} correlations. No strong relationships found (|r| > 0.3)."
+
+        from health_platform.mcp.formatter import format_as_markdown_table
+
+        header = (
+            f"# Cross-Source Insights\n\n"
+            f"Computed {count} correlations. Showing strongest:\n\n"
+        )
+        return header + format_as_markdown_table(rows, columns)
+    finally:
+        tools.close()
+
+
+@mcp.tool()
+def get_recommendations(max_results: int = 5) -> str:
+    """Get personalized health recommendations based on recent data patterns.
+
+    Evidence-backed, actionable suggestions. Safe -- no clinical diagnosis or treatment advice.
+
+    Args:
+        max_results: Maximum recommendations to return (default 5)
+    """
+    from health_platform.ai.recommendation_engine import (
+        RecommendationEngine,
+        format_recommendations,
+    )
+
+    tools = get_tools()
+    try:
+        engine = RecommendationEngine(tools.con)
+        recs = engine.get_recommendations(max_results=min(int(max_results), 10))
+        return format_recommendations(recs)
+    finally:
+        tools.close()
+
+
+@mcp.tool()
+def explain_recommendation(recommendation_title: str) -> str:
+    """Explain the data behind a recommendation in detail.
+
+    Args:
+        recommendation_title: Title of the recommendation to explain
+    """
+    from health_platform.ai.recommendation_engine import RecommendationEngine
+
+    tools = get_tools()
+    try:
+        engine = RecommendationEngine(tools.con)
+        recs = engine.get_recommendations(max_results=20)
+
+        for r in recs:
+            if recommendation_title.lower() in r.title.lower():
+                parts = [
+                    f"# {r.title}\n",
+                    f"**Category:** {r.category}",
+                    f"**Priority:** {r.priority}",
+                    f"**Confidence:** {r.confidence:.0%}\n",
+                    f"## Recommendation\n{r.recommendation}\n",
+                    f"## Data Rationale\n{r.rationale}\n",
+                    f"## Evidence Type\n{r.evidence_type}\n",
+                    "## Metrics Used\n" + "\n".join(f"- `{m}`" for m in r.metrics_used),
+                ]
+                return "\n".join(parts)
+
+        titles = [r.title for r in recs]
+        return (
+            f"Recommendation not found: '{recommendation_title}'. "
+            f"Available: {', '.join(titles)}"
+        )
+    finally:
+        tools.close()
+
+
 if __name__ == "__main__":
     mcp.run()

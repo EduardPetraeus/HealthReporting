@@ -8,7 +8,6 @@ by the agent memory layer and gold-layer views.
 from __future__ import annotations
 
 import sys
-from datetime import date, datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -28,7 +27,7 @@ _DATE_COLUMNS = {
     "daily_activity": "day",
     "daily_stress": "day",
     "daily_spo2": "day",
-    "weight": "day",
+    "weight": "CAST(datetime AS DATE)",
     "heart_rate": "CAST(timestamp AS DATE)",
     "heart_rate_variability": "CAST(timestamp AS DATE)",
 }
@@ -100,6 +99,7 @@ def _interpret_direction(pearson_r: float) -> str:
 # Core correlation computation
 # ---------------------------------------------------------------------------
 
+
 def compute_correlation(
     con,
     metric_a: str,
@@ -159,7 +159,10 @@ def compute_correlation(
     except Exception as exc:
         logger.error(
             "Correlation query failed for %s vs %s (lag %d): %s",
-            metric_a, metric_b, lag_days, exc,
+            metric_a,
+            metric_b,
+            lag_days,
+            exc,
         )
         return {
             "pearson_r": None,
@@ -174,7 +177,9 @@ def compute_correlation(
     if row is None or row[0] is None:
         logger.warning(
             "No correlation data for %s vs %s (lag %d)",
-            metric_a, metric_b, lag_days,
+            metric_a,
+            metric_b,
+            lag_days,
         )
         return {
             "pearson_r": None,
@@ -201,8 +206,13 @@ def compute_correlation(
 
     logger.debug(
         "Correlation %s vs %s (lag %d): r=%.4f (%s %s), n=%d",
-        metric_a, metric_b, lag_days,
-        pearson_r, result["direction"], result["strength"], sample_size,
+        metric_a,
+        metric_b,
+        lag_days,
+        pearson_r,
+        result["direction"],
+        result["strength"],
+        sample_size,
     )
     return result
 
@@ -238,6 +248,7 @@ def _build_daily_subquery(
 # ---------------------------------------------------------------------------
 
 _STANDARD_CORRELATIONS = [
+    # --- Sleep ↔ Readiness/Activity (existing 9) ---
     ("daily_sleep.sleep_score", "daily_readiness.readiness_score", 0),
     ("daily_sleep.sleep_score", "daily_readiness.readiness_score", 1),
     ("daily_sleep.sleep_score", "daily_activity.activity_score", 0),
@@ -247,13 +258,51 @@ _STANDARD_CORRELATIONS = [
     ("daily_activity.steps", "daily_activity.active_calories", 0),
     ("daily_stress.stress_high", "daily_sleep.sleep_score", 0),
     ("daily_stress.stress_high", "daily_sleep.sleep_score", 1),
+    # --- Sleep ↔ Recovery (5) ---
+    ("daily_sleep.sleep_score", "daily_stress.recovery_high", 0),
+    ("daily_sleep.sleep_score", "daily_stress.recovery_high", 1),
+    ("daily_sleep.sleep_score", "daily_spo2.spo2_avg_pct", 0),
+    ("daily_sleep.sleep_score", "heart_rate.bpm", 1),  # sleep → next day HR
+    ("daily_readiness.readiness_score", "daily_stress.stress_high", 0),
+    # --- Activity ↔ Recovery (5) ---
+    ("daily_activity.active_calories", "daily_readiness.readiness_score", 1),
+    ("daily_activity.steps", "daily_readiness.readiness_score", 1),
+    (
+        "daily_activity.steps",
+        "daily_sleep.sleep_score",
+        1,
+    ),  # exercise → next night sleep
+    ("daily_activity.activity_score", "daily_stress.stress_high", 0),
+    ("daily_activity.active_calories", "daily_stress.recovery_high", 1),
+    # --- Stress ↔ Others (4) ---
+    ("daily_stress.stress_high", "daily_readiness.readiness_score", 1),
+    ("daily_stress.stress_high", "daily_activity.activity_score", 0),
+    ("daily_stress.recovery_high", "daily_readiness.readiness_score", 0),
+    ("daily_stress.recovery_high", "daily_readiness.readiness_score", 1),
+    # --- Weight ↔ Activity (3) ---
+    ("weight.weight_kg", "daily_activity.steps", 0),
+    ("weight.weight_kg", "daily_activity.active_calories", 0),
+    ("weight.weight_kg", "daily_sleep.sleep_score", 0),
+    # --- SpO2 ↔ Others (3) ---
+    ("daily_spo2.spo2_avg_pct", "daily_readiness.readiness_score", 0),
+    ("daily_spo2.spo2_avg_pct", "daily_stress.stress_high", 0),
+    ("daily_spo2.breathing_disturbance_index", "daily_sleep.sleep_score", 0),
+    # --- Cross-domain delayed effects (3) ---
+    (
+        "daily_activity.active_calories",
+        "daily_sleep.sleep_score",
+        1,
+    ),  # Does exercise help sleep?
+    ("daily_stress.stress_high", "daily_spo2.spo2_avg_pct", 1),
+    ("heart_rate.bpm", "daily_readiness.readiness_score", 1),
 ]
 
 
 def _ensure_relationships_table(con) -> None:
     """Create silver.metric_relationships if it does not exist."""
     con.execute("CREATE SCHEMA IF NOT EXISTS silver")
-    con.execute("""
+    con.execute(
+        """
         CREATE TABLE IF NOT EXISTS silver.metric_relationships (
             metric_a VARCHAR NOT NULL,
             metric_b VARCHAR NOT NULL,
@@ -265,7 +314,8 @@ def _ensure_relationships_table(con) -> None:
             computed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (metric_a, metric_b, lag_days)
         )
-    """)
+    """
+    )
 
 
 def compute_all_correlations(con) -> int:
@@ -291,46 +341,58 @@ def compute_all_correlations(con) -> int:
             count += 1
             logger.info(
                 "Correlation: %s vs %s (lag %d) = %.4f (%s %s, n=%d)",
-                metric_a, metric_b, lag_days,
-                result["pearson_r"], result["direction"],
-                result["strength"], result["sample_size"],
+                metric_a,
+                metric_b,
+                lag_days,
+                result["pearson_r"],
+                result["direction"],
+                result["strength"],
+                result["sample_size"],
             )
         else:
             logger.warning(
                 "Skipped %s vs %s (lag %d): %s",
-                metric_a, metric_b, lag_days, result["strength"],
+                metric_a,
+                metric_b,
+                lag_days,
+                result["strength"],
             )
 
     logger.info(
         "Computed %d / %d standard correlations",
-        count, len(_STANDARD_CORRELATIONS),
+        count,
+        len(_STANDARD_CORRELATIONS),
     )
     return count
 
 
 def _upsert_relationship(con, result: dict) -> None:
     """Insert or replace a row in silver.metric_relationships."""
-    con.execute("""
+    con.execute(
+        """
         INSERT OR REPLACE INTO silver.metric_relationships
             (source_metric, target_metric, relationship_type, strength,
              lag_days, direction, evidence_type, confidence,
              description, last_computed_at)
         VALUES (?, ?, 'correlates_with', ?, ?, ?, 'statistical', ?,
                 ?, CURRENT_TIMESTAMP)
-    """, [
-        result["metric_a"],
-        result["metric_b"],
-        result.get("pearson_r"),
-        result.get("lag_days", 0),
-        result.get("direction"),
-        abs(result.get("pearson_r", 0)) if result.get("pearson_r") else None,
-        f"{result.get('strength', '')} correlation (r={result.get('pearson_r', 0):.4f}, n={result.get('sample_size', 0)})",
-    ])
+    """,
+        [
+            result["metric_a"],
+            result["metric_b"],
+            result.get("pearson_r"),
+            result.get("lag_days", 0),
+            result.get("direction"),
+            abs(result.get("pearson_r", 0)) if result.get("pearson_r") else None,
+            f"{result.get('strength', '')} correlation (r={result.get('pearson_r', 0):.4f}, n={result.get('sample_size', 0)})",
+        ],
+    )
 
 
 # ---------------------------------------------------------------------------
 # Lag discovery
 # ---------------------------------------------------------------------------
+
 
 def discover_correlations(
     con,
@@ -371,11 +433,20 @@ def discover_correlations(
     )
 
     logger.info(
-        "Discovered correlations for %s vs %s (lag 0-%d): "
-        "strongest at lag %d (r=%.4f)",
-        metric_a, metric_b, max_lag,
-        results[0]["lag_days"] if results and results[0]["pearson_r"] is not None else -1,
-        results[0]["pearson_r"] if results and results[0]["pearson_r"] is not None else 0,
+        "Discovered correlations for %s vs %s (lag 0-%d): strongest at lag %d (r=%.4f)",
+        metric_a,
+        metric_b,
+        max_lag,
+        (
+            results[0]["lag_days"]
+            if results and results[0]["pearson_r"] is not None
+            else -1
+        ),
+        (
+            results[0]["pearson_r"]
+            if results and results[0]["pearson_r"] is not None
+            else 0
+        ),
     )
 
     return results
