@@ -74,3 +74,27 @@ anomaly_detection:
       END AS status
     FROM {table} d, stats s
     WHERE d.{date_column} BETWEEN :start AND :end
+
+constellation_patterns:
+  recovery_stress:
+    description: "Poor recovery combined with elevated stress indicators"
+    metrics: ["readiness_score", "stress_high", "sleep_score"]
+    severity: "urgent"
+  overtraining:
+    description: "Signs of overtraining detected"
+    metrics: ["readiness_score", "heart_rate", "activity_score"]
+    severity: "urgent"
+  illness_onset:
+    description: "Multiple metrics degraded simultaneously"
+    metrics: ["sleep_score", "readiness_score", "spo2_avg_pct"]
+    severity: "urgent"
+
+notifications:
+  provider: "ntfy.sh"
+  severity_mapping:
+    anomaly: "urgent"
+    unusual: "high"
+    warning: "default"
+  rate_limit:
+    max_per_hour: 5
+    cooldown_minutes: 30

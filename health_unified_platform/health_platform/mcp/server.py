@@ -214,5 +214,30 @@ def search_evidence(query: str, max_results: int = 5, min_year: str = "") -> str
         tools.close()
 
 
+@mcp.tool()
+def detect_anomalies(lookback_days: int = 7) -> str:
+    """Detect anomalies across all health metrics.
+
+    Performs multi-stream z-score analysis, constellation pattern matching,
+    and temporal degradation detection.
+
+    Args:
+        lookback_days: Number of days to check for anomalies (default 7, max 90)
+    """
+    from health_platform.ai.anomaly_detector import (
+        AnomalyDetector,
+        format_anomaly_report,
+    )
+
+    lookback_days = min(max(int(lookback_days), 1), 90)
+    tools = get_tools()
+    try:
+        detector = AnomalyDetector(tools.con)
+        report = detector.detect(lookback_days)
+        return format_anomaly_report(report)
+    finally:
+        tools.close()
+
+
 if __name__ == "__main__":
     mcp.run()
