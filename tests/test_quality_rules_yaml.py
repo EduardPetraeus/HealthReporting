@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+import yaml
 
 from health_platform.quality.rule_loader import load_rules, _VALID_CHECK_TYPES
 
@@ -85,3 +87,52 @@ class TestColumnConventions:
                     f"Table '{table_name}' freshness column '{col}' "
                     f"not in {valid_date_columns}"
                 )
+
+
+class TestSchemaValidation:
+    """Test that malformed YAML is rejected at load time."""
+
+    def _write_rules(self, tmp_path, tables_dict):
+        path = tmp_path / "bad_rules.yaml"
+        path.write_text(yaml.dump({"tables": tables_dict}))
+        return path
+
+    def test_rejects_invalid_table_name(self, tmp_path):
+        path = self._write_rules(tmp_path, {"bad table;": {"not_null": ["col"]}})
+        with pytest.raises(ValueError, match="Invalid table name"):
+            load_rules(path)
+
+    def test_rejects_non_numeric_max_hours(self, tmp_path):
+        path = self._write_rules(
+            tmp_path,
+            {"good_table": {"freshness": {"column": "day", "max_hours": "banana"}}},
+        )
+        with pytest.raises(ValueError, match="must be numeric"):
+            load_rules(path)
+
+    def test_rejects_non_numeric_row_count_min(self, tmp_path):
+        path = self._write_rules(
+            tmp_path, {"good_table": {"row_count": {"min_rows": "lots"}}}
+        )
+        with pytest.raises(ValueError, match="must be numeric"):
+            load_rules(path)
+
+    def test_rejects_non_numeric_value_range_bound(self, tmp_path):
+        path = self._write_rules(
+            tmp_path,
+            {"good_table": {"value_range": {"score": {"min": "low", "max": 100}}}},
+        )
+        with pytest.raises(ValueError, match="must be numeric"):
+            load_rules(path)
+
+    def test_rejects_invalid_column_in_not_null(self, tmp_path):
+        path = self._write_rules(
+            tmp_path, {"good_table": {"not_null": ["valid_col", "bad col;"]}}
+        )
+        with pytest.raises(ValueError, match="Invalid column"):
+            load_rules(path)
+
+    def test_rejects_trailing_newline_in_table_name(self, tmp_path):
+        path = self._write_rules(tmp_path, {"daily_sleep\n": {"not_null": ["col"]}})
+        with pytest.raises(ValueError, match="Invalid table name"):
+            load_rules(path)
