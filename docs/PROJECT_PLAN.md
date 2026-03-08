@@ -1,7 +1,7 @@
 # PROJECT_PLAN.md — HealthReporting
 
-> Last updated: 2026-03-07 (Audit cleanup)
-> Current phase: **Phase 3b — AI-Native Data Model (COMPLETE) + Phase 5 (Databricks, parallel) + Phase 7 (AI Governance, active) + Roadmap Iterations A1 ✅, C1/A5 ✅ — next: A2 Data Quality Shield**
+> Last updated: 2026-03-08 (Multi-agent sprint)
+> Current phase: **Phase 3b — AI-Native Data Model (COMPLETE) + Phase 5 (Databricks, parallel) + Phase 7 (AI Governance, active) + Roadmap Iterations A1 ✅, C1/A5 ✅, A8 ✅, A9 ✅, B1 ✅, B3 ✅, B4 ✅, C2 ✅, D4 ✅, F2 ✅ — next: A2 Data Quality Shield**
 
 ---
 
@@ -224,8 +224,14 @@ Per `MASTER_PLAN.md`: `A1 → C1/A5 → A2 → B1 → A3 → B3 → B2 → C2`
 | A1 | MCP Goes Live | ✅ done | MCP server wired into Claude Code, 8 tools, 55 smoke tests |
 | C1/A5 | Daily Sync + API + Withings | ✅ done | 6-step sync pipeline, FastAPI server, Withings connectors merged |
 | **A2** | Data Quality Shield | ⬜ next | Automated quality checks — nulls, duplicates, stale data, schema drift |
-| B1 | LLM-Powered Chat Engine | ⬜ planned | Replace keyword routing with Claude tool-use (function calling) |
 | A3 | Smart Alerts | ⬜ planned | Proactive anomaly detection + ntfy.sh notifications |
-| B3 | Conversation Memory | ⬜ planned | Multi-turn chat context management |
 | B2 | Streaming Responses | ⬜ planned | SSE streaming in FastAPI |
-| C2 | Apple Health Auto-Import | ⬜ planned | Automated Apple Health XML ingestion |
+| A8 | Lifesum CSV Expansion | ✅ done | Bodymeasures, exercise, weighins, bodyfat merge scripts + sources_config entries |
+| A9 | Workout Unification | ✅ done | Strava to silver.workout merge, Lifesum exercise to workout, source_system column, cross-source duplicate detection |
+| B1 | LLM Chat Engine Rewrite | ✅ done | Claude tool-use (function calling), SSE streaming endpoint, multi-turn chat history |
+| B3 | Multi-Stream Anomaly Detection | ✅ done | Z-score analysis, constellation patterns, temporal degradation tracking |
+| B4 | Expanded Correlation Engine | ✅ done | 9 to 30+ metric pairs, cross-domain delayed effects |
+| C2 | Intelligence Layer | ✅ done | Trend forecaster (linear regression), recommendation engine (evidence-backed, CDS-safe) |
+| D4 | Notification System | ✅ done | ntfy.sh integration, severity-based push notifications |
+| F1 | Infrastructure Cleanup | ⬜ planned | Deferred |
+| F2 | Documentation + Cleanup | ✅ done | Metric dictionary, data lineage, changelog, WeasyPrint dependency confirmed |
