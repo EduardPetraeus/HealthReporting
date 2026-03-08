@@ -1,0 +1,68 @@
+<!-- SYNTHETIC TEST DATA — entirely fictional, not derived from any real patient records -->
+<app-root>
+  <div class="application-page" id="dnhf-pro">
+    <div class="content-top" id="content">
+      <div class="application">
+        <div class="container">
+          <div class="application-box">
+            <front-page>
+              <div class="row app-dnhf-front">
+                <h2>Aktive henvisninger</h2>
+                <sdk-list-component sortcol="henvisningsDato" sortdir="desc">
+                  <ngx-datatable class="ngx-datatable">
+                    <datatable-header>
+                      <datatable-header-cell title="Henvisningsdato"><span class="datatable-header-cell-label">Henvisningsdato</span></datatable-header-cell>
+                      <datatable-header-cell title="Udløbsdato"><span class="datatable-header-cell-label">Udløbsdato</span></datatable-header-cell>
+                      <datatable-header-cell title="Henvisende klinik"><span class="datatable-header-cell-label">Henvisende klinik</span></datatable-header-cell>
+                      <datatable-header-cell title="Modtagerklinik"><span class="datatable-header-cell-label">Modtagerklinik</span></datatable-header-cell>
+                      <datatable-header-cell title="Specialenavn"><span class="datatable-header-cell-label">Specialenavn</span></datatable-header-cell>
+                    </datatable-header>
+                    <datatable-body class="datatable-body">
+                      <datatable-selection>
+                        <datatable-row-wrapper>
+                          <datatable-body-row class="datatable-body-row">
+                            <div class="datatable-row-center">
+                              <datatable-body-cell class="datatable-body-cell">01.05.2030</datatable-body-cell>
+                              <datatable-body-cell class="datatable-body-cell">01.11.2030</datatable-body-cell>
+                              <datatable-body-cell class="datatable-body-cell">Fiktiv Laegepraksis</datatable-body-cell>
+                              <datatable-body-cell class="datatable-body-cell">Eksempel Hospital</datatable-body-cell>
+                              <datatable-body-cell class="datatable-body-cell">Testspeciale</datatable-body-cell>
+                              <datatable-body-cell class="datatable-body-cell"></datatable-body-cell>
+                            </div>
+                          </datatable-body-row>
+                        </datatable-row-wrapper>
+                      </datatable-selection>
+                    </datatable-body>
+                  </ngx-datatable>
+                </sdk-list-component>
+              </div>
+              <div class="row app-dnhf-front">
+                <h2>Tidligere henvisninger</h2>
+                <sdk-list-component sortcol="henvisningsDato" sortdir="desc">
+                  <ngx-datatable class="ngx-datatable">
+                    <datatable-body class="datatable-body">
+                      <datatable-selection>
+                        <datatable-row-wrapper>
+                          <datatable-body-row class="datatable-body-row">
+                            <div class="datatable-row-center">
+                              <datatable-body-cell class="datatable-body-cell">10.01.2030</datatable-body-cell>
+                              <datatable-body-cell class="datatable-body-cell">10.07.2030</datatable-body-cell>
+                              <datatable-body-cell class="datatable-body-cell">Fiktiv Laegepraksis</datatable-body-cell>
+                              <datatable-body-cell class="datatable-body-cell">Demo Sygehus</datatable-body-cell>
+                              <datatable-body-cell class="datatable-body-cell">Demospeciale</datatable-body-cell>
+                              <datatable-body-cell class="datatable-body-cell"></datatable-body-cell>
+                            </div>
+                          </datatable-body-row>
+                        </datatable-row-wrapper>
+                      </datatable-selection>
+                    </datatable-body>
+                  </ngx-datatable>
+                </sdk-list-component>
+              </div>
+            </front-page>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-root>

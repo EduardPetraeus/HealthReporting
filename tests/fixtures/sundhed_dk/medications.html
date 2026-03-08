@@ -1,0 +1,39 @@
+<!-- SYNTHETIC TEST DATA — entirely fictional, not derived from any real patient records -->
+<div class="container medicinkort-app borger">
+  <div class="application">
+    <table class="sdk-table">
+      <thead>
+        <tr>
+          <th>Startdato</th>
+          <th>Lægemiddel, form og styrke</th>
+          <th>Dosering</th>
+          <th>Årsag</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="sdk-table-row row-click" data-ng-repeat-start="row in tableVm.rowsFilter(tableVm.rows)">
+          <td><span class="ng-binding ng-scope no-textwrap"><div>01.06.2030</div></span></td>
+          <td><span class="ng-binding ng-scope">Testmedicin (Fiktivstof)<br>Tabletter, 100 mg</span></td>
+          <td><span class="ng-binding ng-scope">1 tablet dagligt</span></td>
+          <td><span class="ng-binding ng-scope">Til testformaal</span></td>
+          <td class="text-right"><div class="no-mapping"><a class="icon-arrow-right"></a></div></td>
+        </tr>
+        <tr class="sdk-table-row row-click odd" data-ng-repeat-start="row in tableVm.rowsFilter(tableVm.rows)">
+          <td><span class="ng-binding ng-scope no-textwrap"><div>15.03.2030</div></span></td>
+          <td><span class="ng-binding ng-scope">Demopille (Eksempelsubstans)<br>Kapsler, 250 mg</span></td>
+          <td><span class="ng-binding ng-scope">2 kapsler morgen og aften</span></td>
+          <td><span class="ng-binding ng-scope">Mod fiktiv tilstand</span></td>
+          <td class="text-right"><div class="no-mapping"><a class="icon-arrow-right"></a></div></td>
+        </tr>
+        <tr class="sdk-table-row row-click" data-ng-repeat-start="row in tableVm.rowsFilter(tableVm.rows)">
+          <td><span class="ng-binding ng-scope no-textwrap"><div>10.01.2030</div></span></td>
+          <td><span class="ng-binding ng-scope">Placebomax (Inertsubstans)<br>Tabletter, 50 mg</span></td>
+          <td><span class="ng-binding ng-scope">Ved behov, max 3 dagligt</span></td>
+          <td><span class="ng-binding ng-scope"></span></td>
+          <td class="text-right"><div class="no-mapping"><a class="icon-arrow-right"></a></div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
