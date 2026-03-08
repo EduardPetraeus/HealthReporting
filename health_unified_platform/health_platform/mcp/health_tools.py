@@ -720,6 +720,14 @@ class HealthTools:
         """Forecast a metric using linear regression."""
         from health_platform.ai.trend_forecaster import TrendForecaster, format_forecast
 
+        # Validate all user-supplied identifiers to prevent SQL injection
+        try:
+            self._validate_identifier(table)
+            self._validate_identifier(column)
+            self._validate_identifier(date_column)
+        except ValueError as exc:
+            return format_error(f"Invalid identifier: {exc}")
+
         try:
             forecaster = TrendForecaster(self.con)
             forecast = forecaster.forecast_metric(

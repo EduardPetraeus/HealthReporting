@@ -31,6 +31,14 @@ class Forecast:
     description: str
 
 
+_HIGHER_IS_WORSE: set[str] = {
+    "daily_stress",
+    "stress_high",
+    "resting_heart_rate",
+    "body_fat_percentage",
+}
+
+
 class TrendForecaster:
     """Forecast health metric trajectories."""
 
@@ -117,15 +125,16 @@ class TrendForecaster:
             forecast_date = end_date + timedelta(days=i)
             forecast_values.append((forecast_date, round(predicted, 2)))
 
-        # Classify trend
+        # Classify trend — invert for metrics where higher is worse
         daily_change = slope
         metric_name = f"{table}.{column}"
+        invert = table in _HIGHER_IS_WORSE or column in _HIGHER_IS_WORSE
         if abs(daily_change) < 0.5:
             direction = "stable"
         elif daily_change > 0:
-            direction = "improving"
+            direction = "declining" if invert else "improving"
         else:
-            direction = "declining"
+            direction = "improving" if invert else "declining"
 
         confidence = min(r_squared, 0.95) if r_squared and r_squared > 0 else 0.0
 

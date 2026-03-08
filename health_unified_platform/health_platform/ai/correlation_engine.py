@@ -304,15 +304,17 @@ def _ensure_relationships_table(con) -> None:
     con.execute(
         """
         CREATE TABLE IF NOT EXISTS silver.metric_relationships (
-            metric_a VARCHAR NOT NULL,
-            metric_b VARCHAR NOT NULL,
+            source_metric VARCHAR NOT NULL,
+            target_metric VARCHAR NOT NULL,
+            relationship_type VARCHAR NOT NULL DEFAULT 'correlates_with',
+            strength DOUBLE,
             lag_days INTEGER NOT NULL DEFAULT 0,
-            pearson_r DOUBLE,
-            strength VARCHAR,
             direction VARCHAR,
-            sample_size INTEGER,
-            computed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (metric_a, metric_b, lag_days)
+            evidence_type VARCHAR DEFAULT 'statistical',
+            confidence DOUBLE,
+            description VARCHAR,
+            last_computed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (source_metric, target_metric, lag_days)
         )
     """
     )
