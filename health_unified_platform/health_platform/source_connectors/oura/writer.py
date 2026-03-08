@@ -1,18 +1,18 @@
 """
-Parquet writer with Hive-style partitioning for Oura data.
+Parquet writer with Hive-style partitioning for health data.
 Output structure: {data_lake_root}/{endpoint}/year=YYYY/month=MM/day=DD/data.parquet
 """
 
 from __future__ import annotations
 
 import os
+import sys
 from datetime import date, datetime, timezone
 from pathlib import Path
 
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
-import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
@@ -20,29 +20,40 @@ from health_platform.utils.logging_config import get_logger
 
 logger = get_logger("oura.writer")
 
+
 def _resolve_data_lake_root() -> Path:
     """Resolve data lake root from env var or environment_config.yaml."""
     if env_val := os.environ.get("OURA_DATA_LAKE_ROOT"):
         return Path(env_val)
     # Read from environment_config.yaml (canonical source)
-    config_path = Path(__file__).resolve().parents[2] / "../../health_environment/config/environment_config.yaml"
+    config_path = (
+        Path(__file__).resolve().parents[2]
+        / "../../health_environment/config/environment_config.yaml"
+    )
     try:
         import yaml
+
         with open(config_path) as f:
             cfg = yaml.safe_load(f)
         return Path(cfg["paths"]["data_lake_root"]) / "oura" / "raw"
     except Exception:
         fallback = Path.home() / "health_data_lake" / "oura" / "raw"
-        logger.warning("No OURA_DATA_LAKE_ROOT env var or environment_config.yaml found. Using fallback: %s", fallback)
+        logger.warning(
+            "No OURA_DATA_LAKE_ROOT env var or environment_config.yaml found. Using fallback: %s",
+            fallback,
+        )
         return fallback
 
 
 DATA_LAKE_ROOT = _resolve_data_lake_root()
 
 
-def _partition_path(endpoint: str, partition_date: date) -> Path:
+def _partition_path(
+    endpoint: str, partition_date: date, root: Path | None = None
+) -> Path:
+    base = root if root is not None else DATA_LAKE_ROOT
     return (
-        DATA_LAKE_ROOT
+        base
         / endpoint
         / f"year={partition_date.year}"
         / f"month={partition_date.month:02d}"
@@ -50,8 +61,13 @@ def _partition_path(endpoint: str, partition_date: date) -> Path:
     )
 
 
-def _write_partition(df: pd.DataFrame, endpoint: str, partition_date: date) -> None:
-    path = _partition_path(endpoint, partition_date)
+def _write_partition(
+    df: pd.DataFrame,
+    endpoint: str,
+    partition_date: date,
+    root: Path | None = None,
+) -> None:
+    path = _partition_path(endpoint, partition_date, root=root)
     path.mkdir(parents=True, exist_ok=True)
     table = pa.Table.from_pandas(df, preserve_index=False)
     pq.write_table(table, path / "data.parquet", compression="snappy")
@@ -63,14 +79,19 @@ def write_records(
     endpoint: str,
     date_field: str,
     source_env: str = "dev",
+    data_lake_root: Path | None = None,
 ) -> None:
     """
     Adds metadata columns and writes records partitioned by date_field.
     Each distinct date gets its own parquet file (overwrites on re-run).
+
+    Pass data_lake_root to override the default Oura root (e.g. for Withings).
     """
     if not records:
         logger.warning("No records for %s.", endpoint)
         return
+
+    root = data_lake_root
 
     ingested_at = datetime.now(timezone.utc).isoformat()
     for record in records:
@@ -81,17 +102,24 @@ def write_records(
 
     if date_field not in df.columns:
         # Endpoint has no date field (e.g. personal_info) — write to today
-        _write_partition(df, endpoint, date.today())
+        _write_partition(df, endpoint, date.today(), root=root)
         return
 
     # Parse date field — handles both YYYY-MM-DD strings and ISO 8601 datetimes
-    df["_partition_date"] = (
-        pd.to_datetime(df[date_field], utc=True, errors="coerce").dt.date
-    )
+    df["_partition_date"] = pd.to_datetime(
+        df[date_field], utc=True, errors="coerce"
+    ).dt.date
 
     missing = df["_partition_date"].isna().sum()
     if missing:
         logger.warning("%d records with unparseable %s skipped.", missing, date_field)
 
-    for partition_date, group in df.dropna(subset=["_partition_date"]).groupby("_partition_date"):
-        _write_partition(group.drop(columns=["_partition_date"]), endpoint, partition_date)
+    for partition_date, group in df.dropna(subset=["_partition_date"]).groupby(
+        "_partition_date"
+    ):
+        _write_partition(
+            group.drop(columns=["_partition_date"]),
+            endpoint,
+            partition_date,
+            root=root,
+        )
