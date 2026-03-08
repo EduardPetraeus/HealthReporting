@@ -98,3 +98,25 @@ notifications:
   rate_limit:
     max_per_hour: 5
     cooldown_minutes: 30
+
+recommendation_rules:
+  sleep_declining:
+    trigger: "7d_avg < 30d_avg - 5"
+    priority: "high"
+    category: "sleep"
+  low_steps:
+    trigger: "7d_avg_steps < 6000"
+    priority: "high"
+    category: "activity"
+  low_readiness:
+    trigger: "7d_avg_readiness < 65"
+    priority: "high"
+    category: "recovery"
+  stress_imbalance:
+    trigger: "stress_high / recovery_high > 0.6"
+    priority: "high"
+    category: "stress"
+  weight_trend_up:
+    trigger: "30d_slope > 0.1"
+    priority: "low"
+    category: "nutrition"

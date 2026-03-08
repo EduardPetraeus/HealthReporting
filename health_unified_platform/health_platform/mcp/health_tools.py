@@ -706,6 +706,133 @@ class HealthTools:
         return format_for_mcp(report)
 
     # ------------------------------------------------------------------
+    # Tool 11: forecast_metric
+    # ------------------------------------------------------------------
+
+    def forecast_metric(
+        self,
+        table: str,
+        column: str,
+        date_column: str = "day",
+        lookback_days: int = 90,
+        forecast_days: int = 7,
+    ) -> str:
+        """Forecast a metric using linear regression."""
+        from health_platform.ai.trend_forecaster import TrendForecaster, format_forecast
+
+        # Validate all user-supplied identifiers to prevent SQL injection
+        try:
+            self._validate_identifier(table)
+            self._validate_identifier(column)
+            self._validate_identifier(date_column)
+        except ValueError as exc:
+            return format_error(f"Invalid identifier: {exc}")
+
+        try:
+            forecaster = TrendForecaster(self.con)
+            forecast = forecaster.forecast_metric(
+                table, column, date_column, lookback_days, forecast_days
+            )
+            return format_forecast(forecast)
+        except Exception as exc:
+            logger.error("Forecast failed: %s", exc)
+            return format_error(f"Forecast failed: {exc}")
+
+    # ------------------------------------------------------------------
+    # Tool 12: get_cross_source_insights
+    # ------------------------------------------------------------------
+
+    def get_cross_source_insights(self) -> str:
+        """Run all correlations and return strongest relationships."""
+        from health_platform.ai.correlation_engine import compute_all_correlations
+
+        try:
+            count = compute_all_correlations(self.con)
+
+            result = self.con.execute(
+                """
+                SELECT source_metric, target_metric, strength, lag_days,
+                       direction, confidence, description
+                FROM silver.metric_relationships
+                WHERE ABS(strength) > 0.3
+                ORDER BY ABS(strength) DESC
+                LIMIT 15
+            """
+            )
+            rows = result.fetchall()
+            columns = [d[0] for d in result.description]
+
+            if not rows:
+                return (
+                    f"Computed {count} correlations. "
+                    "No strong relationships found (|r| > 0.3)."
+                )
+
+            header = (
+                f"# Cross-Source Insights\n\n"
+                f"Computed {count} correlations. Showing strongest:\n\n"
+            )
+            return header + format_as_markdown_table(rows, columns)
+        except Exception as exc:
+            logger.error("Cross-source insights failed: %s", exc)
+            return format_error(f"Cross-source insights failed: {exc}")
+
+    # ------------------------------------------------------------------
+    # Tool 13: get_recommendations
+    # ------------------------------------------------------------------
+
+    def get_recommendations(self, max_results: int = 5) -> str:
+        """Generate personalized health recommendations."""
+        from health_platform.ai.recommendation_engine import (
+            RecommendationEngine,
+            format_recommendations,
+        )
+
+        try:
+            engine = RecommendationEngine(self.con)
+            recs = engine.get_recommendations(max_results=max_results)
+            return format_recommendations(recs)
+        except Exception as exc:
+            logger.error("Recommendations failed: %s", exc)
+            return format_error(f"Recommendations failed: {exc}")
+
+    # ------------------------------------------------------------------
+    # Tool 14: explain_recommendation
+    # ------------------------------------------------------------------
+
+    def explain_recommendation(self, recommendation_title: str) -> str:
+        """Explain the data behind a recommendation in detail."""
+        from health_platform.ai.recommendation_engine import RecommendationEngine
+
+        try:
+            engine = RecommendationEngine(self.con)
+            recs = engine.get_recommendations(max_results=20)
+
+            for r in recs:
+                if recommendation_title.lower() in r.title.lower():
+                    parts = [
+                        f"# {r.title}\n",
+                        f"**Category:** {r.category}",
+                        f"**Priority:** {r.priority}",
+                        f"**Confidence:** {r.confidence:.0%}\n",
+                        f"## Recommendation\n{r.recommendation}\n",
+                        f"## Data Rationale\n{r.rationale}\n",
+                        f"## Evidence Type\n{r.evidence_type}\n",
+                        "## Metrics Used\n"
+                        + "\n".join(f"- `{m}`" for m in r.metrics_used),
+                    ]
+                    return "\n".join(parts)
+
+            titles = [r.title for r in recs]
+            return (
+                f"Recommendation not found: '{recommendation_title}'. "
+                f"Available: {', '.join(titles)}"
+            )
+        except Exception as exc:
+            logger.error("Explain recommendation failed: %s", exc)
+            return format_error(f"Explain recommendation failed: {exc}")
+
+    # ------------------------------------------------------------------
     # Private helpers
     # ------------------------------------------------------------------
 
