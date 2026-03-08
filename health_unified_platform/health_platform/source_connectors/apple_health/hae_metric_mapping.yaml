@@ -1,0 +1,132 @@
+# Health Auto Export (HAE) metric name → Apple HealthKit type mapping.
+#
+# Maps HAE JSON metric keys to the canonical HKQuantityTypeIdentifier strings
+# used by process_health_data.py. This ensures HAE-ingested data lands in the
+# same data_lake partitions as XML-exported data.
+#
+# Format:
+#   <hae_metric_name>:
+#     hk_type: "HK...Identifier..."   — passed to get_area() and clean_name()
+#     unit: "<expected unit>"          — for documentation; HAE sends its own units
+
+metrics:
+  # Activity
+  step_count:
+    hk_type: "HKQuantityTypeIdentifierStepCount"
+    unit: "count"
+  active_energy:
+    hk_type: "HKQuantityTypeIdentifierActiveEnergyBurned"
+    unit: "kcal"
+  basal_energy_burned:
+    hk_type: "HKQuantityTypeIdentifierBasalEnergyBurned"
+    unit: "kcal"
+  distance_walking_running:
+    hk_type: "HKQuantityTypeIdentifierDistanceWalkingRunning"
+    unit: "km"
+  distance_cycling:
+    hk_type: "HKQuantityTypeIdentifierDistanceCycling"
+    unit: "km"
+  flights_climbed:
+    hk_type: "HKQuantityTypeIdentifierFlightsClimbed"
+    unit: "count"
+  apple_exercise_time:
+    hk_type: "HKQuantityTypeIdentifierAppleExerciseTime"
+    unit: "min"
+  apple_stand_time:
+    hk_type: "HKQuantityTypeIdentifierAppleStandTime"
+    unit: "min"
+  physical_effort:
+    hk_type: "HKQuantityTypeIdentifierPhysicalEffort"
+    unit: "appleEffortScore"
+  running_speed:
+    hk_type: "HKQuantityTypeIdentifierRunningSpeed"
+    unit: "m/s"
+
+  # Vitality
+  heart_rate:
+    hk_type: "HKQuantityTypeIdentifierHeartRate"
+    unit: "count/min"
+  heart_rate_variability:
+    hk_type: "HKQuantityTypeIdentifierHeartRateVariabilitySDNN"
+    unit: "ms"
+  resting_heart_rate:
+    hk_type: "HKQuantityTypeIdentifierRestingHeartRate"
+    unit: "count/min"
+  heart_rate_recovery:
+    hk_type: "HKQuantityTypeIdentifierHeartRateRecoveryOneMinute"
+    unit: "count/min"
+  vo2_max:
+    hk_type: "HKQuantityTypeIdentifierVO2Max"
+    unit: "mL/min·kg"
+  respiratory_rate:
+    hk_type: "HKQuantityTypeIdentifierRespiratoryRate"
+    unit: "count/min"
+  body_temperature:
+    hk_type: "HKQuantityTypeIdentifierBodyTemperature"
+    unit: "degC"
+  blood_pressure_systolic:
+    hk_type: "HKQuantityTypeIdentifierBloodPressureSystolic"
+    unit: "mmHg"
+  blood_pressure_diastolic:
+    hk_type: "HKQuantityTypeIdentifierBloodPressureDiastolic"
+    unit: "mmHg"
+
+  # Body Metrics
+  body_mass:
+    hk_type: "HKQuantityTypeIdentifierBodyMass"
+    unit: "kg"
+  body_fat_percentage:
+    hk_type: "HKQuantityTypeIdentifierBodyFatPercentage"
+    unit: "%"
+  lean_body_mass:
+    hk_type: "HKQuantityTypeIdentifierLeanBodyMass"
+    unit: "kg"
+  height:
+    hk_type: "HKQuantityTypeIdentifierHeight"
+    unit: "cm"
+  body_mass_index:
+    hk_type: "HKQuantityTypeIdentifierBodyMassIndex"
+    unit: "count"
+
+  # Mobility
+  walking_speed:
+    hk_type: "HKQuantityTypeIdentifierWalkingSpeed"
+    unit: "km/hr"
+  walking_step_length:
+    hk_type: "HKQuantityTypeIdentifierWalkingStepLength"
+    unit: "cm"
+  walking_asymmetry:
+    hk_type: "HKQuantityTypeIdentifierWalkingAsymmetryPercentage"
+    unit: "%"
+  walking_double_support:
+    hk_type: "HKQuantityTypeIdentifierWalkingDoubleSupportPercentage"
+    unit: "%"
+  walking_steadiness:
+    hk_type: "HKQuantityTypeIdentifierAppleWalkingSteadiness"
+    unit: "%"
+
+  # Environment
+  environmental_audio_exposure:
+    hk_type: "HKQuantityTypeIdentifierEnvironmentalAudioExposure"
+    unit: "dBASPL"
+  headphone_audio_exposure:
+    hk_type: "HKQuantityTypeIdentifierHeadphoneAudioExposure"
+    unit: "dBASPL"
+
+  # Nutrition
+  dietary_water:
+    hk_type: "HKQuantityTypeIdentifierDietaryWater"
+    unit: "mL"
+
+  # Sleep: sleep_analysis omitted — no sources_config.yaml entry exists yet.
+  # Add as separate task when bronze table stg_apple_health_sleep_analysis is created.
+
+  # Mindfulness
+  mindful_session:
+    hk_type: "HKCategoryTypeIdentifierMindfulSession"
+    unit: "min"
+
+  # Six minute walk
+  six_minute_walk:
+    hk_type: "HKQuantityTypeIdentifierSixMinuteWalkTestDistance"
+    unit: "m"
