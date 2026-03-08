@@ -246,12 +246,8 @@ def forecast_metric(
 
 
 @mcp.tool()
-def get_cross_source_insights(lookback_days: int = 30) -> str:
-    """Get cross-source correlation insights -- which metrics influence each other.
-
-    Args:
-        lookback_days: Days to analyze (default 30)
-    """
+def get_cross_source_insights() -> str:
+    """Get cross-source correlation insights -- which metrics influence each other."""
     from health_platform.ai.correlation_engine import compute_all_correlations
 
     tools = get_tools(read_only=False)

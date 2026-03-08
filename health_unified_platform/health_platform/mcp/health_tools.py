@@ -742,7 +742,7 @@ class HealthTools:
     # Tool 12: get_cross_source_insights
     # ------------------------------------------------------------------
 
-    def get_cross_source_insights(self, lookback_days: int = 30) -> str:
+    def get_cross_source_insights(self) -> str:
         """Run all correlations and return strongest relationships."""
         from health_platform.ai.correlation_engine import compute_all_correlations
 

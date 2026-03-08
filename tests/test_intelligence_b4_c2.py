@@ -750,6 +750,6 @@ class TestMCPToolIntegration:
         from health_platform.mcp.health_tools import HealthTools
 
         tools = HealthTools(seeded_db)
-        result = tools.get_cross_source_insights(lookback_days=30)
+        result = tools.get_cross_source_insights()
 
         assert "correlations" in result.lower()
