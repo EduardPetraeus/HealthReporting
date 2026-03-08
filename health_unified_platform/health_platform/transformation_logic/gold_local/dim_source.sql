@@ -18,9 +18,9 @@ WITH all_sources AS (
     UNION
     SELECT DISTINCT source_name FROM silver.water_intake WHERE source_name IS NOT NULL
     UNION
-    SELECT DISTINCT source FROM silver.blood_oxygen WHERE source IS NOT NULL
+    SELECT DISTINCT source AS source_name FROM silver.blood_oxygen WHERE source IS NOT NULL
     UNION
-    SELECT DISTINCT source FROM silver.workout WHERE source IS NOT NULL
+    SELECT DISTINCT source AS source_name FROM silver.workout WHERE source IS NOT NULL
 )
 
 SELECT

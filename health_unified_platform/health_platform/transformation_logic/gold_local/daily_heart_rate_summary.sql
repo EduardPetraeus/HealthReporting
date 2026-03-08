@@ -7,8 +7,8 @@
 -- Ported from: databricks/gold/sql/daily_heart_rate_summary.sql
 --
 -- DuckDB change:
---   PERCENTILE(col, 0.5) -> QUANTILE(col, 0.5)
---   (DuckDB uses quantile/quantile_cont, not percentile)
+--   PERCENTILE(col, 0.5) -> QUANTILE_CONT(col, 0.5)
+--   (DuckDB uses quantile_cont, not percentile)
 -- =============================================================================
 
 CREATE OR REPLACE VIEW gold.daily_heart_rate_summary AS

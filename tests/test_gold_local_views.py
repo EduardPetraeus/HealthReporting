@@ -868,7 +868,23 @@ class TestRunnerScript:
         import sys
 
         sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
-        from create_gold_views import get_gold_sql_dir
+        from create_gold_views import run_gold_views
 
-        sql_dir = get_gold_sql_dir()
-        assert sql_dir.exists()
+        # Run in dry_run mode — this should NOT create any gold tables/views
+        results = run_gold_views(db_path=":memory:", dry_run=True)
+
+        # Verify all files reported success
+        assert all(results.values())
+
+        # Verify SQL was printed to stdout
+        captured = capsys.readouterr()
+        assert "CREATE OR REPLACE" in captured.out
+
+        # Verify no gold tables/views were created in the test database
+        tables = gold_db.execute(
+            "SELECT table_name FROM information_schema.tables "
+            "WHERE table_schema = 'gold'"
+        ).fetchall()
+        assert (
+            len(tables) == 0
+        ), f"Dry run should not create gold objects, but found: {tables}"

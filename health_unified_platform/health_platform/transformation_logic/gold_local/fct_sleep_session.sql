@@ -40,7 +40,31 @@ SELECT
             ), 0),
         1
     )                                                   AS avg_contributor,
-    CASE LEAST(
+    CASE
+        WHEN deep_sleep IS NULL AND rem_sleep IS NULL AND efficiency IS NULL
+             AND latency IS NULL AND restfulness IS NULL AND timing IS NULL
+             AND total_sleep IS NULL THEN NULL
+        ELSE CASE LEAST(
+                COALESCE(deep_sleep, 999),
+                COALESCE(rem_sleep, 999),
+                COALESCE(efficiency, 999),
+                COALESCE(latency, 999),
+                COALESCE(restfulness, 999),
+                COALESCE(timing, 999),
+                COALESCE(total_sleep, 999)
+            )
+            WHEN deep_sleep   THEN 'deep_sleep'
+            WHEN rem_sleep    THEN 'rem_sleep'
+            WHEN efficiency   THEN 'efficiency'
+            WHEN latency      THEN 'latency'
+            WHEN restfulness  THEN 'restfulness'
+            WHEN timing       THEN 'timing'
+            WHEN total_sleep  THEN 'total_sleep'
+            ELSE NULL
+        END
+    END                                                 AS weakest_contributor,
+    NULLIF(
+        LEAST(
             COALESCE(deep_sleep, 999),
             COALESCE(rem_sleep, 999),
             COALESCE(efficiency, 999),
@@ -48,24 +72,8 @@ SELECT
             COALESCE(restfulness, 999),
             COALESCE(timing, 999),
             COALESCE(total_sleep, 999)
-        )
-        WHEN deep_sleep   THEN 'deep_sleep'
-        WHEN rem_sleep    THEN 'rem_sleep'
-        WHEN efficiency   THEN 'efficiency'
-        WHEN latency      THEN 'latency'
-        WHEN restfulness  THEN 'restfulness'
-        WHEN timing       THEN 'timing'
-        WHEN total_sleep  THEN 'total_sleep'
-        ELSE 'unknown'
-    END                                                 AS weakest_contributor,
-    LEAST(
-        COALESCE(deep_sleep, 999),
-        COALESCE(rem_sleep, 999),
-        COALESCE(efficiency, 999),
-        COALESCE(latency, 999),
-        COALESCE(restfulness, 999),
-        COALESCE(timing, 999),
-        COALESCE(total_sleep, 999)
+        ),
+        999
     )                                                   AS weakest_score
 
 FROM silver.daily_sleep

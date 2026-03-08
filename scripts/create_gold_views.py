@@ -100,24 +100,25 @@ def run_gold_views(
 
     print(f"Connecting to DuckDB: {db_path}")
     con = duckdb.connect(db_path)
-    con.execute("CREATE SCHEMA IF NOT EXISTS gold")
+    try:
+        con.execute("CREATE SCHEMA IF NOT EXISTS gold")
 
-    results: dict[str, bool] = {}
+        results: dict[str, bool] = {}
 
-    for sql_file in sql_files:
-        sql = sql_file.read_text()
-        try:
-            # Split on semicolons to handle files with multiple statements
-            statements = [s.strip() for s in sql.split(";") if s.strip()]
-            for stmt in statements:
-                con.execute(stmt)
-            results[sql_file.name] = True
-            print(f"  OK  {sql_file.name}")
-        except Exception as e:
-            results[sql_file.name] = False
-            print(f"  FAIL {sql_file.name}: {e}")
-
-    con.close()
+        for sql_file in sql_files:
+            sql = sql_file.read_text()
+            try:
+                # Split on semicolons to handle files with multiple statements
+                statements = [s.strip() for s in sql.split(";") if s.strip()]
+                for stmt in statements:
+                    con.execute(stmt)
+                results[sql_file.name] = True
+                print(f"  OK  {sql_file.name}")
+            except Exception as e:
+                results[sql_file.name] = False
+                print(f"  FAIL {sql_file.name}: {e}")
+    finally:
+        con.close()
 
     # Summary
     ok_count = sum(1 for v in results.values() if v)
