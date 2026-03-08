@@ -709,6 +709,25 @@ class HealthTools:
     # Private helpers
     # ------------------------------------------------------------------
 
+    # ------------------------------------------------------------------
+    # Tool 11: detect_anomalies
+    # ------------------------------------------------------------------
+
+    def detect_anomalies(self, lookback_days: int = 7) -> str:
+        """Run anomaly detection and return formatted report."""
+        from health_platform.ai.anomaly_detector import (
+            AnomalyDetector,
+            format_anomaly_report,
+        )
+
+        detector = AnomalyDetector(self.con)
+        report = detector.detect(lookback_days)
+        return format_anomaly_report(report)
+
+    # ------------------------------------------------------------------
+    # Private helpers
+    # ------------------------------------------------------------------
+
     def _ensure_knowledge_base_table(self) -> None:
         """Create agent.knowledge_base if it does not exist."""
         self.con.execute("CREATE SCHEMA IF NOT EXISTS agent")
