@@ -192,17 +192,20 @@ class GeneticsPdfParser:
     def _extract_report_name(path: Path) -> str:
         """Extract clean report name from filename."""
         name = path.stem
-        # Remove owner name prefix (any 2-4 word name) and " - 23andMe" suffix
-        name = re.sub(
-            r"^[A-Za-z\u00C0-\u017E]+"
-            r"(?:\s+[A-Za-z\u00C0-\u017E]+){1,3}\s+(?="
-            r"(?:Late|Early|Alpha|Hereditary|Type|Muscle|BRCA|"
-            r"Celiac|MUTYH|Factor|Maternal|Paternal|Age))",
-            "",
-            name,
-        )
+        # Remove " - 23andMe" suffix and "Report" suffix first
         name = re.sub(r"\s*-?\s*23andMe$", "", name)
         name = re.sub(r"\s+Report$", "", name)
+        # Remove owner name prefix: everything before the last
+        # occurrence of a known report keyword pattern.
+        # 23andMe filenames follow: "<Owner Name> <Report Name> Report - 23andMe"
+        # Strategy: strip leading words that look like person names
+        # (capitalized words not part of medical/genetic terms)
+        match = re.match(
+            r"^((?:[A-Z][a-z\u00C0-\u017E]+\s+){2,3})" r"([A-Z].*)",
+            name,
+        )
+        if match:
+            name = match.group(2)
         return name.strip()
 
     @staticmethod

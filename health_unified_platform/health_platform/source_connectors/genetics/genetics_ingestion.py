@@ -37,6 +37,8 @@ def ingest_genetics_data(input_dir: Path, output_dir: Path) -> dict[str, Path]:
     Returns:
         Dict mapping bronze table name to output parquet path.
     """
+    input_dir = Path(input_dir)
+    output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     now_str = datetime.now(timezone.utc).isoformat()
