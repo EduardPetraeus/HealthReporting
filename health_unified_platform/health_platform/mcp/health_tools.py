@@ -33,7 +33,7 @@ _CONTRACTS_DIR = Path(__file__).resolve().parents[1] / "contracts" / "metrics"
 
 
 class HealthTools:
-    """Implements all 9 MCP tool operations against a DuckDB connection."""
+    """Implements all 10 MCP tool operations against a DuckDB connection."""
 
     def __init__(self, con: duckdb.DuckDBPyConnection) -> None:
         self.con = con
@@ -633,6 +633,26 @@ class HealthTools:
             return "weak"
         else:
             return "negligible"
+
+    # ------------------------------------------------------------------
+    # Tool 10: search_evidence
+    # ------------------------------------------------------------------
+
+    def search_evidence(
+        self, query: str, max_results: int = 5, min_year: str = ""
+    ) -> str:
+        """Search PubMed for evidence supporting health claims."""
+        from health_platform.knowledge.evidence_store import EvidenceStore
+
+        try:
+            store = EvidenceStore(self.con)
+            articles = store.search(query, max_results=max_results, min_year=min_year)
+            return store.format_for_mcp(articles, query)
+        except Exception as exc:
+            logger.error("Evidence search failed: %s", exc)
+            return format_error(
+                "Evidence search failed. Check server logs for details."
+            )
 
     # ------------------------------------------------------------------
     # Tool 9: check_data_quality

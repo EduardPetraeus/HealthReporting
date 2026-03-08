@@ -126,6 +126,29 @@ CREATE TABLE IF NOT EXISTS silver.metric_relationships (
 );
 
 -- =============================================================================
+-- EVIDENCE CACHE: PubMed article cache for evidence-backed responses
+-- Cache-first strategy: checks here before calling PubMed API.
+-- Article TTL: 90 days (medical literature metadata is stable).
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS agent.evidence_cache (
+    pmid              VARCHAR PRIMARY KEY,
+    title             VARCHAR NOT NULL,
+    abstract          VARCHAR,
+    authors           VARCHAR,
+    journal           VARCHAR,
+    pub_date          VARCHAR,
+    pub_year          INTEGER,
+    doi               VARCHAR,
+    publication_types VARCHAR[],
+    mesh_terms        VARCHAR[],
+    evidence_level    VARCHAR,
+    evidence_score    DOUBLE,
+    search_query      VARCHAR NOT NULL,
+    fetched_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expires_at        TIMESTAMP NOT NULL
+);
+
+-- =============================================================================
 -- Vector similarity indexes (requires DuckDB vss extension)
 -- INSTALL vss; LOAD vss;
 -- CREATE INDEX idx_summaries_emb ON agent.daily_summaries USING HNSW (embedding) WITH (metric = 'cosine');

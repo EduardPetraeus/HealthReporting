@@ -6,6 +6,7 @@ in the local DuckDB database. Idempotent — safe to run multiple times.
 Usage:
     HEALTH_ENV=dev python -m health_platform.setup.setup_agent_schema
 """
+
 from __future__ import annotations
 
 import os
@@ -50,7 +51,11 @@ def split_sql_statements(sql: str) -> list[str]:
             stmt = "".join(current).strip()
             if stmt:
                 # Remove comment-only lines
-                lines = [l for l in stmt.split("\n") if not l.strip().startswith("--")]
+                lines = [
+                    line
+                    for line in stmt.split("\n")
+                    if not line.strip().startswith("--")
+                ]
                 clean = "\n".join(lines).strip()
                 if clean:
                     statements.append(clean)
@@ -61,7 +66,7 @@ def split_sql_statements(sql: str) -> list[str]:
     # Handle last statement
     stmt = "".join(current).strip()
     if stmt:
-        lines = [l for l in stmt.split("\n") if not l.strip().startswith("--")]
+        lines = [line for line in stmt.split("\n") if not line.strip().startswith("--")]
         clean = "\n".join(lines).strip()
         if clean:
             statements.append(clean)
@@ -150,6 +155,17 @@ def run_setup() -> None:
                 logger.info("Health graph seeded")
         else:
             logger.warning("Seed file not found — skipping")
+
+        # Add evidence columns to health_graph_edges (idempotent for existing DBs)
+        for col_stmt in [
+            "ALTER TABLE agent.health_graph_edges ADD COLUMN IF NOT EXISTS pmid VARCHAR",
+            "ALTER TABLE agent.health_graph_edges ADD COLUMN IF NOT EXISTS doi VARCHAR",
+            "ALTER TABLE agent.health_graph_edges ADD COLUMN IF NOT EXISTS citation_text VARCHAR",
+        ]:
+            try:
+                con.execute(col_stmt)
+            except Exception:
+                pass  # Column already exists or table not yet created
 
         # Verify setup
         schemas = con.execute(

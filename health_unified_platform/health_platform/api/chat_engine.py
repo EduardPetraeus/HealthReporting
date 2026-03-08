@@ -26,6 +26,7 @@ Your role:
 - Keep responses concise but informative — think "doctor's summary", not "raw data dump"
 - If data shows concerning patterns, mention them but don't diagnose — suggest they consult a doctor
 - Respond in the same language as the question (Danish or English)
+- When <evidence> tags contain PubMed articles, cite relevant ones using (PMID: XXXXX). Prefer meta-analyses and RCTs over case reports.
 
 Formatting guidelines:
 - Use ## for section headers
@@ -52,6 +53,47 @@ def _get_client():
     if _client is None:
         _client = anthropic.Anthropic(api_key=_get_api_key())
     return _client
+
+
+_EVIDENCE_KEYWORDS: dict[str, str] = {
+    "sleep": "sleep quality health outcomes",
+    "søvn": "sleep quality health outcomes",
+    "sov": "sleep quality health outcomes",
+    "hrv": "heart rate variability health",
+    "heart rate": "heart rate variability health",
+    "puls": "heart rate variability health",
+    "stress": "stress biomarkers cortisol health",
+    "readiness": "recovery readiness biomarkers",
+    "recovery": "recovery readiness biomarkers",
+    "steps": "physical activity step count health benefits",
+    "skridt": "physical activity step count health benefits",
+    "exercise": "exercise health outcomes meta-analysis",
+    "træning": "exercise health outcomes meta-analysis",
+    "weight": "body weight management health",
+    "vægt": "body weight management health",
+    "magnesium": "magnesium supplementation health",
+    "vitamin": "vitamin supplementation health outcomes",
+    "caffeine": "caffeine health effects",
+    "kaffe": "caffeine health effects",
+    "alcohol": "alcohol health effects",
+    "alkohol": "alcohol health effects",
+    "melatonin": "melatonin sleep supplementation",
+}
+
+
+def _build_evidence_query(question_lower: str) -> str | None:
+    """Map question keywords to PubMed search queries. Returns None if no match."""
+    matched_queries: list[str] = []
+    seen: set[str] = set()
+    for keyword, query in _EVIDENCE_KEYWORDS.items():
+        if keyword in question_lower and query not in seen:
+            matched_queries.append(query)
+            seen.add(query)
+        if len(matched_queries) >= 2:
+            break
+    if not matched_queries:
+        return None
+    return " OR ".join(matched_queries)
 
 
 def _gather_context(tools: HealthTools, question: str) -> str:
@@ -140,6 +182,20 @@ def _gather_context(tools: HealthTools, question: str) -> str:
                 context_parts.append(f"## {label}\n{result}")
         except Exception:
             logger.debug("Failed to query %s", metric, exc_info=True)
+
+    # Gather PubMed evidence if relevant keywords detected
+    evidence_query = _build_evidence_query(q)
+    if evidence_query:
+        try:
+            from health_platform.knowledge.evidence_store import EvidenceStore
+
+            store = EvidenceStore(tools.con)
+            articles = store.search(evidence_query, max_results=3)
+            evidence_block = store.format_for_context(articles)
+            if evidence_block:
+                context_parts.append(evidence_block)
+        except Exception:
+            logger.debug("Failed to gather evidence", exc_info=True)
 
     # Try to get recent daily summaries for richer context
     try:
