@@ -58,8 +58,10 @@ app = FastAPI(
 
 # Mount chat UI at root
 from health_platform.api.chat_ui import router as chat_ui_router  # noqa: E402
+from health_platform.api.routes.ingest import router as ingest_router  # noqa: E402
 
 app.include_router(chat_ui_router)
+app.include_router(ingest_router)
 
 
 def _get_tools(read_only: bool = True) -> HealthTools:
