@@ -1,0 +1,27 @@
+<div class="section">
+    <div class="section-title">Trends</div>
+
+    {% if trends and trends.days %}
+    <p class="mb-8 text-muted" style="font-size: 10px;">Sleep and readiness scores over the report period.</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Sleep Score</th>
+                <th>Readiness Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in range(trends.days|length) %}
+            <tr>
+                <td>{{ trends.days[i] }}</td>
+                <td>{{ trends.sleep[i]|default('--', true) }}</td>
+                <td>{{ trends.readiness[i]|default('--', true) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="no-data">No trend data available for this period.</p>
+    {% endif %}
+</div>

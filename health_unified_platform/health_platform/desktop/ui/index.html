@@ -8,6 +8,9 @@
 </head>
 <body>
 
+<!-- Toast notification area -->
+<div class="toast-container" id="toast-container"></div>
+
 <!-- Sidebar -->
 <div class="sidebar">
     <div class="sidebar-header">
@@ -50,11 +53,11 @@
             <div class="chat-messages" id="chat-messages">
                 <div class="msg bot">
                     <div class="bot-label">Health Assistant</div>
-                    <p>Hej! Stil mig et spørgsmål om din sundhed.</p>
+                    <p>Hej! Stil mig et sporgsmaal om din sundhed.</p>
                     <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px">
                         <button class="quick-action" onclick="quickChat('Hvordan har jeg sovet den seneste uge?')">Sleep</button>
                         <button class="quick-action" onclick="quickChat('Hvad er min readiness og energi?')">Energy</button>
-                        <button class="quick-action" onclick="quickChat('Hvor mange skridt har jeg gået?')">Steps</button>
+                        <button class="quick-action" onclick="quickChat('Hvor mange skridt har jeg gaaet?')">Steps</button>
                         <button class="quick-action" onclick="quickChat('Giv mig et overblik over min sundhed')">Overview</button>
                     </div>
                 </div>
@@ -72,37 +75,90 @@
         </div>
     </div>
 
-    <!-- Reports Page (Session 3) -->
+    <!-- Reports Page -->
     <div class="page" id="page-reports">
-        <div class="placeholder-page">
-            <div class="icon">&#x1F4C4;</div>
-            <h2>PDF Reports</h2>
-            <p>Coming in Session 3 — date picker, preview, and PDF export.</p>
+        <h2 class="page-title">PDF Reports</h2>
+        <p class="page-subtitle">Generate health reports for any date range</p>
+
+        <div class="reports-controls">
+            <div class="control-group">
+                <label for="report-start">Start Date</label>
+                <input type="date" id="report-start" class="date-input">
+            </div>
+            <div class="control-group">
+                <label for="report-end">End Date</label>
+                <input type="date" id="report-end" class="date-input">
+            </div>
+            <button class="btn-primary" id="btn-generate" onclick="generateReport()">
+                <span id="generate-text">Generate Report</span>
+                <span id="generate-spinner" class="btn-spinner" style="display:none"></span>
+            </button>
+            <button class="btn-secondary" id="btn-download" onclick="downloadReport()" style="display:none">
+                Download PDF
+            </button>
+        </div>
+
+        <div class="section-selector">
+            <span class="section-label">Sections:</span>
+            <label class="checkbox-label"><input type="checkbox" class="report-section" value="summary" checked> Summary</label>
+            <label class="checkbox-label"><input type="checkbox" class="report-section" value="vitals" checked> Vitals</label>
+            <label class="checkbox-label"><input type="checkbox" class="report-section" value="sleep" checked> Sleep</label>
+            <label class="checkbox-label"><input type="checkbox" class="report-section" value="activity" checked> Activity</label>
+            <label class="checkbox-label"><input type="checkbox" class="report-section" value="nutrition" checked> Nutrition</label>
+            <label class="checkbox-label"><input type="checkbox" class="report-section" value="trends" checked> Trends</label>
+            <label class="checkbox-label"><input type="checkbox" class="report-section" value="alerts" checked> Alerts</label>
+        </div>
+
+        <div class="report-preview" id="report-preview">
+            <div class="preview-placeholder">
+                <div class="icon">&#x1F4C4;</div>
+                <p>Select a date range and click Generate to preview your report.</p>
+            </div>
         </div>
     </div>
 
     <!-- Explorer Page -->
     <div class="page" id="page-explorer">
-        <h2 style="margin-bottom:20px;font-size:20px;font-weight:700">Data Explorer</h2>
+        <h2 class="page-title">Data Explorer</h2>
+        <p class="page-subtitle">Query and explore your health metrics</p>
+
         <div class="explorer-controls">
-            <select id="explorer-metric">
-                <option value="sleep_score">sleep score</option>
-            </select>
-            <select id="explorer-computation">
-                <option value="daily_value">Daily Value</option>
-                <option value="period_average">Period Average</option>
-                <option value="trend">Trend</option>
-                <option value="distribution">Distribution</option>
-            </select>
-            <select id="explorer-range">
-                <option value="last_7_days">Last 7 Days</option>
-                <option value="last_14_days">Last 14 Days</option>
-                <option value="last_30_days">Last 30 Days</option>
-                <option value="last_90_days">Last 90 Days</option>
-            </select>
-            <button onclick="runExplorer()">Query</button>
+            <div class="control-group">
+                <label for="explorer-metric">Metric</label>
+                <select id="explorer-metric">
+                    <option value="sleep_score">sleep score</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="explorer-computation">Computation</label>
+                <select id="explorer-computation">
+                    <option value="daily_value">Daily Value</option>
+                    <option value="period_average">Period Average</option>
+                    <option value="trend">Trend</option>
+                    <option value="distribution">Distribution</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="explorer-range">Date Range</label>
+                <select id="explorer-range">
+                    <option value="last_7_days">Last 7 Days</option>
+                    <option value="last_14_days">Last 14 Days</option>
+                    <option value="last_30_days">Last 30 Days</option>
+                    <option value="last_90_days">Last 90 Days</option>
+                </select>
+            </div>
+            <button class="btn-primary" id="btn-query" onclick="runExplorer()">
+                <span id="query-text">Query</span>
+                <span id="query-spinner" class="btn-spinner" style="display:none"></span>
+            </button>
         </div>
-        <div class="explorer-result" id="explorer-result">Select a metric and click Query.</div>
+
+        <div class="explorer-result" id="explorer-result">
+            <div class="preview-placeholder">
+                <div class="icon">&#x1F50D;</div>
+                <p>Select a metric and click Query to explore your data.</p>
+            </div>
+        </div>
     </div>
 
 </div>

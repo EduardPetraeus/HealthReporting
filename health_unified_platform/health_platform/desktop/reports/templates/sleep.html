@@ -1,0 +1,45 @@
+<div class="section">
+    <div class="section-title">Sleep</div>
+
+    {% if sleep and sleep.daily %}
+    <div class="card-grid mb-12">
+        <div class="card">
+            <div class="card-label">Average Sleep Score</div>
+            <div class="card-value {% if sleep.avg_score and sleep.avg_score >= 85 %}score-excellent{% elif sleep.avg_score and sleep.avg_score >= 70 %}score-good{% elif sleep.avg_score and sleep.avg_score >= 55 %}score-fair{% elif sleep.avg_score %}score-poor{% endif %}">
+                {{ sleep.avg_score|default('--', true) }}
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-label">Nights Tracked</div>
+            <div class="card-value">{{ sleep.daily|length }}</div>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Score</th>
+                <th>Deep Sleep</th>
+                <th>REM</th>
+                <th>Efficiency</th>
+                <th>Total Sleep</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for night in sleep.daily %}
+            <tr>
+                <td>{{ night.day }}</td>
+                <td>{{ night.score|default('--', true) }}</td>
+                <td>{{ night.deep_sleep|default('--', true) }}</td>
+                <td>{{ night.rem_sleep|default('--', true) }}</td>
+                <td>{{ night.efficiency|default('--', true) }}</td>
+                <td>{{ night.total_sleep|default('--', true) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="no-data">No sleep data available for this period.</p>
+    {% endif %}
+</div>

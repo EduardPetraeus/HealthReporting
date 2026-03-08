@@ -1,0 +1,30 @@
+<div class="section">
+    <div class="section-title">Nutrition</div>
+
+    {% if nutrition and nutrition.available and nutrition.daily %}
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Calories</th>
+                <th>Protein (g)</th>
+                <th>Carbs (g)</th>
+                <th>Fat (g)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for day in nutrition.daily %}
+            <tr>
+                <td>{{ day.day }}</td>
+                <td>{{ day.calories|default('--', true)|round|int if day.calories else '--' }}</td>
+                <td>{{ day.protein|default('--', true)|round(1) if day.protein else '--' }}</td>
+                <td>{{ day.carbs|default('--', true)|round(1) if day.carbs else '--' }}</td>
+                <td>{{ day.fat|default('--', true)|round(1) if day.fat else '--' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="no-data">No nutrition data available for this period. Connect a nutrition source (e.g., Lifesum) to see data here.</p>
+    {% endif %}
+</div>

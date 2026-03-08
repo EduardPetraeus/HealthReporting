@@ -143,6 +143,20 @@ body {
 .page { display: none; }
 .page.active { display: block; }
 
+/* ===== Page Titles ===== */
+.page-title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  margin-bottom: 4px;
+}
+
+.page-subtitle {
+  font-size: 13px;
+  color: var(--label-secondary);
+  margin-bottom: 20px;
+}
+
 /* ===== Dashboard ===== */
 .health-score-card {
   background: var(--bg-secondary);
@@ -520,19 +534,154 @@ body {
 
 .chat-input button svg { fill: #fff; width: 18px; height: 18px; }
 
-/* ===== Reports Page (placeholder) ===== */
-.placeholder-page {
+/* ===== Reports Page ===== */
+.reports-controls {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.control-group label {
+  font-size: 11px;
+  color: var(--label-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.date-input {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 0.5px solid var(--separator-opaque);
+  background: var(--bg-secondary);
+  color: var(--label-primary);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  color-scheme: dark;
+}
+
+.date-input:focus { border-color: var(--system-blue); }
+
+.section-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.section-label {
+  font-size: 12px;
+  color: var(--label-secondary);
+  font-weight: 500;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: var(--label-secondary);
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  accent-color: var(--system-blue);
+  width: 14px;
+  height: 14px;
+}
+
+.report-preview {
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  min-height: 400px;
+  overflow: hidden;
+}
+
+.report-preview iframe {
+  width: 100%;
+  height: 600px;
+  border: none;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.preview-placeholder {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 60vh;
+  height: 400px;
   color: var(--label-tertiary);
 }
 
-.placeholder-page .icon { font-size: 48px; margin-bottom: 16px; }
-.placeholder-page h2 { font-size: 20px; font-weight: 600; color: var(--label-secondary); }
-.placeholder-page p { font-size: 14px; margin-top: 8px; }
+.preview-placeholder .icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.preview-placeholder p {
+  font-size: 14px;
+}
+
+/* ===== Buttons ===== */
+.btn-primary {
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: none;
+  background: var(--system-blue);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary:hover { background: #0977e8; }
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: 0.5px solid var(--system-blue);
+  background: transparent;
+  color: var(--system-blue);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.btn-secondary:hover {
+  background: rgba(10,132,255,0.12);
+}
+
+/* ===== Button spinner ===== */
+.btn-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
 
 /* ===== Explorer Page ===== */
 .explorer-controls {
@@ -540,10 +689,10 @@ body {
   gap: 12px;
   margin-bottom: 20px;
   flex-wrap: wrap;
+  align-items: flex-end;
 }
 
-.explorer-controls select,
-.explorer-controls button {
+.explorer-controls select {
   padding: 10px 16px;
   border-radius: 10px;
   border: 0.5px solid var(--separator-opaque);
@@ -556,14 +705,6 @@ body {
 
 .explorer-controls select:focus { border-color: var(--system-blue); }
 
-.explorer-controls button {
-  background: var(--system-blue);
-  border: none;
-  color: #fff;
-  cursor: pointer;
-  font-weight: 500;
-}
-
 .explorer-result {
   background: var(--bg-secondary);
   border-radius: 12px;
@@ -573,6 +714,7 @@ body {
   white-space: pre-wrap;
   font-family: 'SF Mono', 'Menlo', monospace;
   overflow-x: auto;
+  min-height: 200px;
 }
 
 /* ===== Loading ===== */
@@ -634,3 +776,79 @@ body {
 .clear-btn:hover { color: var(--system-red, #ff453a); }
 
 .stream-content { line-height: 1.6; }
+
+/* ===== Toast Notifications ===== */
+.toast-container {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast {
+  background: var(--bg-tertiary);
+  border-radius: 10px;
+  padding: 12px 18px;
+  font-size: 13px;
+  color: var(--label-primary);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  animation: toastIn 0.3s cubic-bezier(0.16,1,0.3,1);
+  pointer-events: auto;
+  max-width: 360px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toast.toast-error {
+  border-left: 3px solid var(--system-red);
+}
+
+.toast.toast-success {
+  border-left: 3px solid var(--system-green);
+}
+
+.toast.toast-info {
+  border-left: 3px solid var(--system-blue);
+}
+
+.toast.toast-out {
+  animation: toastOut 0.3s ease forwards;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes toastOut {
+  from { opacity: 1; transform: none; }
+  to { opacity: 0; transform: translateX(40px); }
+}
+
+/* ===== Responsive — window resize ===== */
+@media (max-width: 900px) {
+  :root { --sidebar-width: 180px; }
+  .main-content { padding: 20px 24px; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .health-score-card { flex-direction: column; text-align: center; padding: 20px; }
+  .reports-controls { flex-direction: column; align-items: stretch; }
+  .explorer-controls { flex-direction: column; align-items: stretch; }
+}
+
+@media (max-width: 700px) {
+  .sidebar { width: 56px; padding-top: 8px; }
+  .sidebar-header { padding: 8px; }
+  .sidebar-header h1 { font-size: 14px; }
+  .sidebar-header .subtitle { display: none; }
+  .nav-item span:not(.icon) { display: none; }
+  .nav-item { justify-content: center; padding: 10px; }
+  .sidebar-footer { font-size: 0; padding: 8px; }
+  .sidebar-footer .status-dot { margin: 0; }
+  .main-content { padding: 16px; }
+  .kpi-grid { grid-template-columns: 1fr; }
+}

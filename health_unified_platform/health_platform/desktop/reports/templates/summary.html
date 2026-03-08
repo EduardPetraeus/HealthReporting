@@ -1,0 +1,40 @@
+<div class="section">
+    <div class="section-title">Summary</div>
+
+    {% if summary %}
+    <div class="card-grid">
+        <div class="card">
+            <div class="card-label">Health Score</div>
+            <div class="card-value {% if summary.avg_health_score and summary.avg_health_score >= 85 %}score-excellent{% elif summary.avg_health_score and summary.avg_health_score >= 70 %}score-good{% elif summary.avg_health_score and summary.avg_health_score >= 55 %}score-fair{% elif summary.avg_health_score %}score-poor{% endif %}">
+                {{ summary.avg_health_score|default('--', true) }}
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-label">Days with Data</div>
+            <div class="card-value">{{ summary.days_with_data }}</div>
+        </div>
+        <div class="card">
+            <div class="card-label">Avg Sleep</div>
+            <div class="card-value">{{ summary.avg_sleep|default('--', true) }} <span class="card-unit">score</span></div>
+        </div>
+        <div class="card">
+            <div class="card-label">Avg Readiness</div>
+            <div class="card-value">{{ summary.avg_readiness|default('--', true) }} <span class="card-unit">score</span></div>
+        </div>
+        <div class="card">
+            <div class="card-label">Avg Activity</div>
+            <div class="card-value">{{ summary.avg_activity|default('--', true) }} <span class="card-unit">score</span></div>
+        </div>
+        <div class="card">
+            <div class="card-label">Total Steps</div>
+            <div class="card-value">{{ "{:,}".format(summary.total_steps) }}</div>
+        </div>
+        <div class="card">
+            <div class="card-label">Avg Resting HR</div>
+            <div class="card-value">{{ summary.avg_resting_hr|default('--', true) }} <span class="card-unit">bpm</span></div>
+        </div>
+    </div>
+    {% else %}
+    <p class="no-data">No summary data available for this period.</p>
+    {% endif %}
+</div>

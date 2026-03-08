@@ -585,6 +585,64 @@ class DesktopAPI:
         return alerts
 
     # ------------------------------------------------------------------
+    # Reports
+    # ------------------------------------------------------------------
+
+    def generate_report(
+        self,
+        start_date: str,
+        end_date: str,
+        sections: list[str] | None = None,
+    ) -> dict[str, Any]:
+        """Generate a PDF report and return base64-encoded PDF.
+
+        Called from the Reports tab in the frontend.
+        Returns dict with 'pdf_base64' key on success, 'error' on failure.
+        """
+        import base64
+
+        from health_platform.desktop.reports.generator import ReportGenerator
+
+        try:
+            gen = ReportGenerator(self._db_path)
+            pdf_bytes = gen.generate_report(start_date, end_date, sections)
+            gen.close()
+            pdf_b64 = base64.b64encode(pdf_bytes).decode("ascii")
+            return {"pdf_base64": pdf_b64, "error": None}
+        except Exception as exc:
+            logger.error("Report generation failed: %s", exc)
+            return {"pdf_base64": None, "error": str(exc)}
+
+    def download_report(
+        self,
+        start_date: str,
+        end_date: str,
+        sections: list[str] | None = None,
+    ) -> dict[str, Any]:
+        """Generate a PDF report and save it to the Desktop.
+
+        Returns dict with 'path' key on success, 'error' on failure.
+        """
+        from health_platform.desktop.reports.generator import ReportGenerator
+
+        try:
+            gen = ReportGenerator(self._db_path)
+            pdf_bytes = gen.generate_report(start_date, end_date, sections)
+            gen.close()
+
+            desktop_dir = Path.home() / "Desktop"
+            desktop_dir.mkdir(exist_ok=True)
+            filename = f"health_report_{start_date}_to_{end_date}.pdf"
+            filepath = desktop_dir / filename
+            filepath.write_bytes(pdf_bytes)
+
+            logger.info("Report saved to %s", filepath)
+            return {"path": str(filepath), "error": None}
+        except Exception as exc:
+            logger.error("Report download failed: %s", exc)
+            return {"path": None, "error": str(exc)}
+
+    # ------------------------------------------------------------------
     # Metric query (for Data Explorer)
     # ------------------------------------------------------------------
 
