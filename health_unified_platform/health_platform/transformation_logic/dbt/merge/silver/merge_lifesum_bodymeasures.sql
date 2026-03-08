@@ -31,7 +31,7 @@ SELECT
     'lifesum'               AS source_system,
 
     -- Deterministic business key hash (identity: one row per date)
-    md5(coalesce(date, '')) AS business_key_hash,
+    md5(coalesce(cast(date as varchar), '') || '||lifesum') AS business_key_hash,
 
     -- Row hash (change detection on all measurable values)
     md5(
