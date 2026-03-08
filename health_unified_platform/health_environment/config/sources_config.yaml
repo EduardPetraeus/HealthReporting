@@ -276,43 +276,43 @@ sources:
 
   # Oura Ring CSV exports (converted via scripts/convert_oura_csv.sh)
   - name: "oura_csv_dailyresilience"
-    relative_path: "oura_csv/raw/dailyresilience/*.parquet"
+    relative_path: "oura/csv_raw/dailyresilience/*.parquet"
     source_type: "parquet"
     target_schema: "bronze"
     target_table: "stg_oura_csv_dailyresilience"
 
   - name: "oura_csv_dailycardiovascularage"
-    relative_path: "oura_csv/raw/dailycardiovascularage/*.parquet"
+    relative_path: "oura/csv_raw/dailycardiovascularage/*.parquet"
     source_type: "parquet"
     target_schema: "bronze"
     target_table: "stg_oura_csv_dailycardiovascularage"
 
   - name: "oura_csv_daytimestress"
-    relative_path: "oura_csv/raw/daytimestress/*.parquet"
+    relative_path: "oura/csv_raw/daytimestress/*.parquet"
     source_type: "parquet"
     target_schema: "bronze"
     target_table: "stg_oura_csv_daytimestress"
 
   - name: "oura_csv_temperature"
-    relative_path: "oura_csv/raw/temperature/*.parquet"
+    relative_path: "oura/csv_raw/temperature/*.parquet"
     source_type: "parquet"
     target_schema: "bronze"
     target_table: "stg_oura_csv_temperature"
 
   - name: "oura_csv_sleeptime"
-    relative_path: "oura_csv/raw/sleeptime/*.parquet"
+    relative_path: "oura/csv_raw/sleeptime/*.parquet"
     source_type: "parquet"
     target_schema: "bronze"
     target_table: "stg_oura_csv_sleeptime"
 
   - name: "oura_csv_enhancedtag"
-    relative_path: "oura_csv/raw/enhancedtag/*.parquet"
+    relative_path: "oura/csv_raw/enhancedtag/*.parquet"
     source_type: "parquet"
     target_schema: "bronze"
     target_table: "stg_oura_csv_enhancedtag"
 
   - name: "oura_csv_sleepmodel"
-    relative_path: "oura_csv/raw/sleepmodel/*.parquet"
+    relative_path: "oura/csv_raw/sleepmodel/*.parquet"
     source_type: "parquet"
     target_schema: "bronze"
     target_table: "stg_oura_csv_sleepmodel"
@@ -560,3 +560,39 @@ sources:
     source_type: "parquet"
     target_schema: "bronze"
     target_table: "stg_lifesum_bodyfat"
+
+  # sundhed.dk web scraper (clinical data via Playwright + MitID auth)
+  - name: "sundhed_dk_lab_results"
+    # Lab results (blood panels, biomarkers) scraped from sundhed.dk
+    relative_path: "sundhed_dk/raw/lab_results/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_sundhed_dk_lab_results"
+
+  - name: "sundhed_dk_medications"
+    # Active and historical medication prescriptions
+    relative_path: "sundhed_dk/raw/medications/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_sundhed_dk_medications"
+
+  - name: "sundhed_dk_vaccinations"
+    # Vaccination history (COVID, flu, childhood vaccines)
+    relative_path: "sundhed_dk/raw/vaccinations/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_sundhed_dk_vaccinations"
+
+  - name: "sundhed_dk_ejournal"
+    # E-journal clinical notes (raw narrative text from hospital visits)
+    relative_path: "sundhed_dk/raw/ejournal/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_sundhed_dk_ejournal"
+
+  - name: "sundhed_dk_appointments"
+    # Hospital appointments (planned and completed)
+    relative_path: "sundhed_dk/raw/appointments/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_sundhed_dk_appointments"

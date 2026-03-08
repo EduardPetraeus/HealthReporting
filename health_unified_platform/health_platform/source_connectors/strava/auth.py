@@ -8,7 +8,7 @@ Strava API reference: https://developers.strava.com/
 from __future__ import annotations
 
 import json
-import subprocess
+import sys
 import time
 import webbrowser
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -17,10 +17,9 @@ from urllib.parse import parse_qs, urlencode, urlparse
 
 import requests
 
-import sys
-
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
+from health_platform.utils.keychain import get_secret
 from health_platform.utils.logging_config import get_logger
 
 logger = get_logger("strava.auth")
@@ -35,25 +34,19 @@ OAUTH_SCOPES = "read,activity:read_all"
 
 
 def _load_credentials() -> tuple[str, str, str]:
-    """Load client_id and client_secret from 1Password CLI."""
-    try:
-        client_id = subprocess.run(
-            ["op", "read", "op://Health/Strava API/client_id"],
-            capture_output=True, text=True, check=True,
-        ).stdout.strip()
-        client_secret = subprocess.run(
-            ["op", "read", "op://Health/Strava API/client_secret"],
-            capture_output=True, text=True, check=True,
-        ).stdout.strip()
-    except (subprocess.CalledProcessError, FileNotFoundError) as exc:
-        raise ValueError(
-            "Failed to load Strava credentials from 1Password CLI. "
-            "Ensure `op` is installed and signed in."
-        ) from exc
-
+    """Load OAuth credentials from macOS Keychain (claude.keychain-db)."""
+    client_id = get_secret("STRAVA_CLIENT_ID", fallback_env=False)
+    client_secret = get_secret("STRAVA_CLIENT_SECRET", fallback_env=False)
     redirect_uri = f"http://localhost:{CALLBACK_PORT}/callback"
     if not client_id or not client_secret:
-        raise ValueError("Missing Strava client_id or client_secret in 1Password.")
+        raise ValueError(
+            "Missing STRAVA_CLIENT_ID or STRAVA_CLIENT_SECRET. "
+            "Store them in macOS Keychain:\n"
+            "  security add-generic-password -a claude -s STRAVA_CLIENT_ID "
+            "-w '<id>' ~/Library/Keychains/claude.keychain-db\n"
+            "  security add-generic-password -a claude -s STRAVA_CLIENT_SECRET "
+            "-w '<secret>' ~/Library/Keychains/claude.keychain-db"
+        )
     return client_id, client_secret, redirect_uri
 
 
@@ -116,15 +109,14 @@ class _CallbackHandler(BaseHTTPRequestHandler):
 
 def _run_auth_flow(client_id: str, client_secret: str, redirect_uri: str) -> dict:
     """Opens the browser for OAuth login and exchanges the code for tokens."""
-    auth_url = (
-        f"{AUTHORIZE_URL}?"
-        + urlencode({
+    auth_url = f"{AUTHORIZE_URL}?" + urlencode(
+        {
             "client_id": client_id,
             "redirect_uri": redirect_uri,
             "response_type": "code",
             "scope": OAUTH_SCOPES,
             "approval_prompt": "auto",
-        })
+        }
     )
     logger.info("Opening browser for Strava authorization...")
     webbrowser.open(auth_url)
@@ -174,13 +166,12 @@ def get_access_token() -> str:
 def build_authorize_url() -> str:
     """Build the OAuth authorization URL for testing or manual flows."""
     client_id, _, redirect_uri = _load_credentials()
-    return (
-        f"{AUTHORIZE_URL}?"
-        + urlencode({
+    return f"{AUTHORIZE_URL}?" + urlencode(
+        {
             "client_id": client_id,
             "redirect_uri": redirect_uri,
             "response_type": "code",
             "scope": OAUTH_SCOPES,
             "approval_prompt": "auto",
-        })
+        }
     )

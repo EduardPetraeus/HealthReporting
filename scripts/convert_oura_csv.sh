@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # convert_oura_csv.sh
 # Converts 7 Oura CSV exports (semicolon-delimited) to parquet files.
-# Source: /Users/Shared/data_lake/Oura/csv/App Data/
-# Target: /Users/Shared/data_lake/oura_csv/raw/{endpoint}/
+# Source: /Users/Shared/data_lake/oura/csv_export/App Data/
+# Target: /Users/Shared/data_lake/oura/csv_raw/{endpoint}/
 #
 # Usage: bash scripts/convert_oura_csv.sh
 
@@ -13,8 +13,8 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 CONVERTER="${REPO_ROOT}/health_unified_platform/health_platform/source_connectors/csv_to_parquet.py"
 PYTHON="${REPO_ROOT}/.venv/bin/python"
 
-SOURCE_DIR="/Users/Shared/data_lake/Oura/csv/App Data"
-TARGET_BASE="/Users/Shared/data_lake/oura_csv/raw"
+SOURCE_DIR="/Users/Shared/data_lake/oura/csv_export/App Data"
+TARGET_BASE="/Users/Shared/data_lake/oura/csv_raw"
 
 # Map: csv_filename -> endpoint_name
 declare -A CSV_MAP

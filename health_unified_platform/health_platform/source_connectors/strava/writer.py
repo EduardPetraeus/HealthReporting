@@ -1,5 +1,5 @@
 """
-Parquet writer with Hive-style partitioning for health data.
+Parquet writer with Hive-style partitioning for Strava data.
 Output structure: {data_lake_root}/{endpoint}/year=YYYY/month=MM/day=DD/data.parquet
 """
 
@@ -18,17 +18,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from health_platform.utils.logging_config import get_logger
 from health_platform.utils.paths import get_data_lake_root
 
-logger = get_logger("oura.writer")
+logger = get_logger("strava.writer")
 
-DATA_LAKE_ROOT = get_data_lake_root() / "oura" / "raw"
+DATA_LAKE_ROOT = get_data_lake_root() / "strava" / "raw"
 
 
-def _partition_path(
-    endpoint: str, partition_date: date, root: Path | None = None
-) -> Path:
-    base = root if root is not None else DATA_LAKE_ROOT
+def _partition_path(endpoint: str, partition_date: date) -> Path:
     return (
-        base
+        DATA_LAKE_ROOT
         / endpoint
         / f"year={partition_date.year}"
         / f"month={partition_date.month:02d}"
@@ -36,13 +33,8 @@ def _partition_path(
     )
 
 
-def _write_partition(
-    df: pd.DataFrame,
-    endpoint: str,
-    partition_date: date,
-    root: Path | None = None,
-) -> None:
-    path = _partition_path(endpoint, partition_date, root=root)
+def _write_partition(df: pd.DataFrame, endpoint: str, partition_date: date) -> None:
+    path = _partition_path(endpoint, partition_date)
     path.mkdir(parents=True, exist_ok=True)
     table = pa.Table.from_pandas(df, preserve_index=False)
     pq.write_table(table, path / "data.parquet", compression="snappy")
@@ -54,19 +46,14 @@ def write_records(
     endpoint: str,
     date_field: str,
     source_env: str = "dev",
-    data_lake_root: Path | None = None,
 ) -> None:
     """
     Adds metadata columns and writes records partitioned by date_field.
     Each distinct date gets its own parquet file (overwrites on re-run).
-
-    Pass data_lake_root to override the default Oura root (e.g. for Withings).
     """
     if not records:
         logger.warning("No records for %s.", endpoint)
         return
-
-    root = data_lake_root
 
     ingested_at = datetime.now(timezone.utc).isoformat()
     for record in records:
@@ -76,11 +63,9 @@ def write_records(
     df = pd.DataFrame(records)
 
     if date_field not in df.columns:
-        # Endpoint has no date field (e.g. personal_info) — write to today
-        _write_partition(df, endpoint, date.today(), root=root)
+        _write_partition(df, endpoint, date.today())
         return
 
-    # Parse date field — handles both YYYY-MM-DD strings and ISO 8601 datetimes
     df["_partition_date"] = pd.to_datetime(
         df[date_field], utc=True, errors="coerce"
     ).dt.date
@@ -93,8 +78,5 @@ def write_records(
         "_partition_date"
     ):
         _write_partition(
-            group.drop(columns=["_partition_date"]),
-            endpoint,
-            partition_date,
-            root=root,
+            group.drop(columns=["_partition_date"]), endpoint, partition_date
         )

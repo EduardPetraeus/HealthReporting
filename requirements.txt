@@ -73,3 +73,7 @@ pdfplumber>=0.9.0
 # Desktop application dependencies
 pywebview>=4.0
 weasyprint>=60.0
+# sundhed.dk web scraper dependencies
+playwright>=1.40.0
+beautifulsoup4>=4.12.0
+lxml>=5.0.0
