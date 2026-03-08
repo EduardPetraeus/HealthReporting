@@ -160,6 +160,66 @@ class TestRunCheckType:
         assert len(results) == 0
 
 
+class TestSchemaDrift:
+    """Tests for the schema_drift check type."""
+
+    @pytest.fixture
+    def schema_drift_rules(self, tmp_path):
+        rules = {
+            "tables": {
+                "dq_good": {
+                    "schema_drift": {
+                        "expected_columns": [
+                            "business_key_hash",
+                            "sk_date",
+                            "day",
+                            "score",
+                        ],
+                    },
+                },
+                "dq_nulls": {
+                    "schema_drift": {
+                        "expected_columns": [
+                            "business_key_hash",
+                            "sk_date",
+                            "nonexistent_column",
+                        ],
+                    },
+                },
+            }
+        }
+        path = tmp_path / "schema_drift_rules.yaml"
+        with open(path, "w") as f:
+            yaml.dump(rules, f)
+        return path
+
+    def test_passes_all_columns_present(self, quality_db, schema_drift_rules):
+        checker = DataQualityChecker(quality_db, schema_drift_rules)
+        results = checker.run_table_checks("dq_good")
+        drift_results = [r for r in results if r.check_type == "schema_drift"]
+        assert len(drift_results) == 1
+        assert drift_results[0].passed
+        assert "4 expected columns present" in drift_results[0].message
+
+    def test_fails_missing_column(self, quality_db, schema_drift_rules):
+        checker = DataQualityChecker(quality_db, schema_drift_rules)
+        results = checker.run_table_checks("dq_nulls")
+        drift_results = [r for r in results if r.check_type == "schema_drift"]
+        assert len(drift_results) == 1
+        assert not drift_results[0].passed
+        assert "nonexistent_column" in drift_results[0].message
+        assert drift_results[0].value > 0
+
+    def test_schema_drift_across_tables(self, quality_db, schema_drift_rules):
+        checker = DataQualityChecker(quality_db, schema_drift_rules)
+        results = checker.run_check_type("schema_drift")
+        assert len(results) >= 2
+        passed = [r for r in results if r.passed]
+        failed = [r for r in results if not r.passed]
+        assert len(passed) >= 1
+        assert len(failed) >= 1
+
+
 class TestNonexistentTable:
     def test_handled(self, quality_db, rules_path):
         checker = DataQualityChecker(quality_db, rules_path)

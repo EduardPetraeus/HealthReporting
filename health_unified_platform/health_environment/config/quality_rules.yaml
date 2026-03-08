@@ -212,6 +212,45 @@ tables:
       diastolic: { min: 30, max: 200 }
 
   # =====================================================================
+  # Oura CSV — Additional metrics
+  # =====================================================================
+
+  cardiovascular_age:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  daily_resilience:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  daytime_stress:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  enhanced_tag:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  skin_temperature:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  sleep_recommendation:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  sleep_session:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  # =====================================================================
   # Withings
   # =====================================================================
 
@@ -230,6 +269,16 @@ tables:
       systolic: { min: 50, max: 300 }
       diastolic: { min: 30, max: 200 }
 
+  ecg_session:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  pulse_wave_velocity:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
   # =====================================================================
   # Lifesum
   # =====================================================================
@@ -238,6 +287,16 @@ tables:
     not_null: [business_key_hash, sk_date, day]
     unique: [business_key_hash]
     freshness: { column: day, max_hours: 49 }
+    row_count: { min_rows: 1 }
+
+  body_fat:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  body_measures:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
     row_count: { min_rows: 1 }
 
   # =====================================================================

@@ -1,0 +1,635 @@
+version: 2
+
+models:
+
+  # ===========================================================================
+  # Oura — Daily aggregates
+  # ===========================================================================
+
+  - name: daily_sleep
+    description: "Daily sleep scores and contributor breakdowns from Oura Ring."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+      - name: day
+        tests:
+          - not_null
+      - name: sleep_score
+        tests:
+          - not_null
+
+  - name: daily_readiness
+    description: "Daily readiness scores and contributor breakdowns from Oura Ring."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+      - name: day
+        tests:
+          - not_null
+      - name: readiness_score
+        tests:
+          - not_null
+
+  - name: daily_activity
+    description: "Daily activity metrics including steps, calories, and scores from Oura Ring."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+      - name: day
+        tests:
+          - not_null
+
+  - name: daily_stress
+    description: "Daily stress and recovery summaries from Oura Ring."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+      - name: day
+        tests:
+          - not_null
+
+  - name: daily_spo2
+    description: "Daily blood oxygen averages and breathing disturbance index from Oura Ring."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+      - name: day
+        tests:
+          - not_null
+
+  - name: workout
+    description: "Unified workout records from Oura, Lifesum, and Strava."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  - name: blood_oxygen
+    description: "Event-level blood oxygen readings from Oura Ring."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  - name: personal_info
+    description: "User profile information from Oura Ring."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+
+  # ===========================================================================
+  # Oura CSV — Additional metrics
+  # ===========================================================================
+
+  - name: cardiovascular_age
+    description: "Cardiovascular age estimates from Oura CSV export."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  - name: daily_resilience
+    description: "Daily resilience metrics from Oura CSV export."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  - name: daytime_stress
+    description: "Daytime stress and recovery metrics from Oura CSV export."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  - name: enhanced_tag
+    description: "User-created enhanced tags from Oura CSV export."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  - name: skin_temperature
+    description: "Skin temperature metrics from Oura CSV export."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  - name: sleep_recommendation
+    description: "Sleep timing recommendations from Oura CSV export."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  - name: sleep_session
+    description: "Detailed sleep session data from Oura and Withings."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  # ===========================================================================
+  # Oura + Apple Health — Event-level (shared tables)
+  # ===========================================================================
+
+  - name: heart_rate
+    description: "Event-level heart rate readings from Oura Ring and Apple Health."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+      - name: bpm
+        tests:
+          - not_null
+
+  # ===========================================================================
+  # Apple Health — Daily aggregates
+  # ===========================================================================
+
+  - name: daily_energy_by_source
+    description: "Daily energy expenditure broken down by source from Apple Health."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+      - name: day
+        tests:
+          - not_null
+
+  - name: daily_walking_gait
+    description: "Daily walking gait metrics from Apple Health."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+      - name: day
+        tests:
+          - not_null
+
+  # ===========================================================================
+  # Apple Health — Event-level
+  # ===========================================================================
+
+  - name: step_count
+    description: "Step count records from Apple Health."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  - name: distance
+    description: "Distance records from Apple Health."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  - name: exercise_time
+    description: "Exercise time records from Apple Health."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  - name: flights_climbed
+    description: "Flights climbed records from Apple Health."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  - name: stand_time
+    description: "Stand time records from Apple Health."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  - name: mindful_session
+    description: "Mindfulness session records from Apple Health."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  - name: toothbrushing
+    description: "Toothbrushing event records from Apple Health."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  - name: hand_washing
+    description: "Hand washing event records from Apple Health."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  - name: audio_exposure
+    description: "Environmental audio exposure records from Apple Health."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  - name: body_temperature
+    description: "Body temperature records from Apple Health and Withings."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  - name: body_measurement
+    description: "Body measurement records from Apple Health and Withings."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  - name: respiratory_rate
+    description: "Respiratory rate records from Apple Health."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  - name: resting_heart_rate
+    description: "Resting heart rate records from Apple Health."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  - name: hrv
+    description: "Heart rate variability records from Apple Health."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  - name: hr_recovery
+    description: "Heart rate recovery records from Apple Health."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  - name: vo2_max
+    description: "VO2 max records from Apple Health."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  - name: six_min_walk
+    description: "Six minute walk test results from Apple Health."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  - name: running_speed
+    description: "Running speed records from Apple Health."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  - name: physical_effort
+    description: "Physical effort records from Apple Health."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  # ===========================================================================
+  # Apple Health — Blood pressure
+  # ===========================================================================
+
+  - name: blood_pressure_v2
+    description: "Blood pressure readings from Apple Health and Withings (unified)."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  # ===========================================================================
+  # Withings
+  # ===========================================================================
+
+  - name: weight
+    description: "Body weight and composition from Withings scale."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+      - name: weight_kg
+        tests:
+          - not_null
+
+  - name: blood_pressure
+    description: "Blood pressure readings from Withings BPM device."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  - name: ecg_session
+    description: "ECG session recordings from Withings."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  - name: pulse_wave_velocity
+    description: "Pulse wave velocity measurements from Withings."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  # ===========================================================================
+  # Lifesum
+  # ===========================================================================
+
+  - name: daily_meal
+    description: "Daily meal and nutrition logs from Lifesum."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  - name: body_fat
+    description: "Body fat percentage records from Lifesum."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  - name: body_measures
+    description: "Body measurements from Lifesum (weight, fat, muscle, waist, hip, chest)."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  # ===========================================================================
+  # Nutrition (Apple Health water tracking)
+  # ===========================================================================
+
+  - name: water_intake
+    description: "Water intake records from Apple Health (Lifesum source)."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  # ===========================================================================
+  # Strava
+  # ===========================================================================
+
+  - name: strava_activity
+    description: "Activity records from Strava (also merged into workout table)."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+
+  # ===========================================================================
+  # Weather
+  # ===========================================================================
+
+  - name: daily_weather
+    description: "Daily weather data from Open-Meteo API."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+      - name: sk_date
+        tests:
+          - not_null
+      - name: day
+        tests:
+          - not_null
+
+  # ===========================================================================
+  # Manual / Other
+  # ===========================================================================
+
+  - name: daily_annotations
+    description: "Manually curated daily annotations."
+    columns:
+      - name: sk_date
+        tests:
+          - not_null
+
+  - name: supplement_log
+    description: "Supplement intake log."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
+
+  - name: lab_results
+    description: "Lab test results and biomarkers."
+    columns:
+      - name: business_key_hash
+        tests:
+          - not_null
+          - unique
