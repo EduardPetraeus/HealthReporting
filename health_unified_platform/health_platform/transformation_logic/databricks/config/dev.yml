@@ -1,0 +1,35 @@
+# =============================================================================
+# dev.yml — Development environment configuration
+# =============================================================================
+
+environment: dev
+
+variables:
+  env: dev
+  catalog: health_dw
+  spark_version: "14.3.x-scala2.12"
+  node_type_id: "Standard_DS3_v2"
+  num_workers: 1
+
+  # Storage paths (dev uses separate containers)
+  landing_zone: "abfss://landing-dev@healthdatalake.dfs.core.windows.net"
+  checkpoint_root: "abfss://checkpoints-dev@healthdatalake.dfs.core.windows.net/bronze"
+  schema_root: "abfss://checkpoints-dev@healthdatalake.dfs.core.windows.net/bronze/schemas"
+
+  # Notebook config paths
+  config_root: "/Workspace/Shared/health_platform/config/sources"
+  silver_sql_root: "/Workspace/Shared/health_platform/notebooks/silver/sql"
+  gold_config_root: "/Workspace/Shared/health_platform/config/gold"
+  gold_sql_root: "/Workspace/Shared/health_platform/notebooks/gold/sql"
+
+  # Alerting
+  alert_email: "dev-alerts@example.com"
+
+  # Feature flags
+  enable_dlt: false
+  enable_streaming: false
+  log_level: DEBUG
+
+permissions:
+  - group_name: data_engineers
+    permission_level: CAN_MANAGE
