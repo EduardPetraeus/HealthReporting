@@ -33,7 +33,7 @@ _CONTRACTS_DIR = Path(__file__).resolve().parents[1] / "contracts" / "metrics"
 
 
 class HealthTools:
-    """Implements all 10 MCP tool operations against a DuckDB connection."""
+    """Implements all MCP tool operations against a DuckDB connection."""
 
     def __init__(self, con: duckdb.DuckDBPyConnection) -> None:
         self.con = con
@@ -850,6 +850,82 @@ class HealthTools:
         detector = AnomalyDetector(self.con)
         report = detector.detect(lookback_days)
         return format_anomaly_report(report)
+
+    # ------------------------------------------------------------------
+    # Tool 15: query_lab_results
+    # ------------------------------------------------------------------
+
+    def query_lab_results(
+        self,
+        marker_name: Optional[str] = None,
+        date_range: Optional[str] = None,
+        status: Optional[str] = None,
+    ) -> str:
+        """Query lab test results with optional filters.
+
+        Args:
+            marker_name: Filter by marker name (case-insensitive partial match).
+            date_range: Date range string (see _parse_date_range).
+            status: Filter by status ('normal', 'low', 'high').
+
+        Returns:
+            Formatted markdown table of matching lab results.
+        """
+        conditions: list[str] = []
+        params: list = []
+
+        if marker_name:
+            conditions.append("LOWER(marker_name) LIKE '%' || LOWER(?) || '%'")
+            params.append(marker_name)
+
+        if date_range:
+            start, end = self._parse_date_range(date_range)
+            conditions.append("test_date BETWEEN ? AND ?")
+            params.extend([start.isoformat(), end.isoformat()])
+
+        if status:
+            valid_statuses = {"normal", "low", "high", "unknown"}
+            if status.lower() not in valid_statuses:
+                return format_error(
+                    f"Invalid status '{status}'. "
+                    f"Valid: {', '.join(sorted(valid_statuses))}"
+                )
+            conditions.append("LOWER(status) = LOWER(?)")
+            params.append(status)
+
+        where_clause = " AND ".join(conditions) if conditions else "1=1"
+
+        sql = f"""
+            SELECT test_date, marker_name, marker_category, value_numeric,
+                   value_text, unit, reference_min, reference_max, status
+            FROM silver.lab_results
+            WHERE {where_clause}
+            ORDER BY test_date DESC, marker_category, marker_name
+            LIMIT 100
+        """
+
+        try:
+            result = self.con.execute(sql, params)
+            columns = [desc[0] for desc in result.description]
+            rows = result.fetchall()
+        except Exception as exc:
+            logger.error("Lab results query failed: %s", exc)
+            return format_error(
+                "Lab results query failed. Check server logs for details."
+            )
+
+        if not rows:
+            filter_desc = []
+            if marker_name:
+                filter_desc.append(f"marker='{marker_name}'")
+            if date_range:
+                filter_desc.append(f"dates='{date_range}'")
+            if status:
+                filter_desc.append(f"status='{status}'")
+            filter_str = ", ".join(filter_desc) if filter_desc else "no filters"
+            return f"No lab results found ({filter_str})."
+
+        return format_as_markdown_table(rows, columns)
 
     # ------------------------------------------------------------------
     # Private helpers

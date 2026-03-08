@@ -262,6 +262,19 @@ tables:
   # Weather
   # =====================================================================
 
+  # =====================================================================
+  # Lab Results
+  # =====================================================================
+
+  lab_results:
+    not_null: [business_key_hash, test_id, test_date, marker_name, status]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  # =====================================================================
+  # Weather
+  # =====================================================================
+
   daily_weather:
     not_null: [business_key_hash, sk_date, day]
     unique: [business_key_hash]

@@ -443,6 +443,13 @@ sources:
     target_schema: "silver"
     target_table: "lab_results"
 
+  - name: "lab_pdf_results"
+    # Lab test results parsed from PDF files (GetTested, sundhed.dk)
+    relative_path: "lab_results/pdf_parsed/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_lab_pdf_results"
+
   - name: "manual_supplements"
     # Supplement protocol — YAML file imported via import_manual_data.py
     relative_path: "manual/supplement_protocol.yaml"
