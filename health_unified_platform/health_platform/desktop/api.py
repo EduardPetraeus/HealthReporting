@@ -588,6 +588,14 @@ class DesktopAPI:
     # Reports
     # ------------------------------------------------------------------
 
+    _DATE_RE = __import__("re").compile(r"^\d{4}-\d{2}-\d{2}$")
+
+    def _validate_dates(self, start_date: str, end_date: str) -> str | None:
+        """Return error message if dates are invalid, None if OK."""
+        if not self._DATE_RE.match(start_date) or not self._DATE_RE.match(end_date):
+            return "Invalid date format. Use YYYY-MM-DD."
+        return None
+
     def generate_report(
         self,
         start_date: str,
@@ -599,6 +607,9 @@ class DesktopAPI:
         Called from the Reports tab in the frontend.
         Returns dict with 'pdf_base64' key on success, 'error' on failure.
         """
+        if err := self._validate_dates(start_date, end_date):
+            return {"pdf_base64": None, "error": err}
+
         import base64
 
         from health_platform.desktop.reports.generator import ReportGenerator
@@ -623,6 +634,9 @@ class DesktopAPI:
 
         Returns dict with 'path' key on success, 'error' on failure.
         """
+        if err := self._validate_dates(start_date, end_date):
+            return {"path": None, "error": err}
+
         from health_platform.desktop.reports.generator import ReportGenerator
 
         try:

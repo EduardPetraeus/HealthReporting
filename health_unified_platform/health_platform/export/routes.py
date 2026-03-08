@@ -45,7 +45,10 @@ async def export_fhir(
     resources for the specified date range. Suitable for import into any
     FHIR-compatible EHR system.
     """
-    resource_list = [r.strip() for r in resources.split(",") if r.strip()]
+    _VALID_RESOURCES = {"Patient", "Observation", "DiagnosticReport"}
+    resource_list = [
+        r.strip() for r in resources.split(",") if r.strip() in _VALID_RESOURCES
+    ]
     if not resource_list:
         resource_list = ["Patient", "Observation"]
 
