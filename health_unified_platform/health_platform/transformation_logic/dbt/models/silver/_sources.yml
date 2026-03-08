@@ -9,3 +9,14 @@ sources:
       - name: stg_oura_blood_oxygen
       - name: stg_withings_blood_pressure
       - name: stg_withings_weight
+      - name: stg_oura_csv_dailyresilience
+      - name: stg_oura_csv_dailycardiovascularage
+      - name: stg_oura_csv_daytimestress
+      - name: stg_oura_csv_temperature
+      - name: stg_oura_csv_sleeptime
+      - name: stg_oura_csv_enhancedtag
+      - name: stg_oura_csv_sleepmodel
+      - name: stg_withings_signal
+      - name: stg_withings_pwv
+      - name: stg_withings_sleep
+      - name: stg_withings_body_temperature
