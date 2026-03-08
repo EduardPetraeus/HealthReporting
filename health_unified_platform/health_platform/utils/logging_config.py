@@ -5,17 +5,18 @@ Format: 2026-02-28 10:00:00 | INFO     | module_name | message
 Output: console + rotating daily log file (append, no deletion of old files).
 """
 
+from __future__ import annotations
+
 import logging
 import os
 from datetime import date
 from pathlib import Path
 from typing import Optional
 
+from health_platform.utils.paths import get_log_dir
 
 LOG_FORMAT = "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
-
-_DEFAULT_LOG_ROOT = "/Users/Shared/data_lake/logs"
 
 
 def get_logger(name: str, log_root: Optional[str] = None) -> logging.Logger:
@@ -40,7 +41,7 @@ def get_logger(name: str, log_root: Optional[str] = None) -> logging.Logger:
     logger.addHandler(console_handler)
 
     # File handler — append, daily rotation via filename
-    root = Path(log_root or os.environ.get("HEALTH_LOG_ROOT", _DEFAULT_LOG_ROOT))
+    root = Path(log_root or os.environ.get("HEALTH_LOG_ROOT", str(get_log_dir())))
     root.mkdir(parents=True, exist_ok=True)
     log_file = root / f"health_platform_{date.today().isoformat()}.log"
 
