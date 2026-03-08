@@ -24,7 +24,7 @@ logger = get_logger("lab_pdf_parser")
 _DANISH_NUMBER_RE = re.compile(r"^-?\d[\d.]*,\d+$")
 
 # Regex for reference range patterns: "3.5-5.0", "3,5 - 5,0", "< 50", "> 200"
-_RANGE_DASH_RE = re.compile(r"(?P<min>[\d.,]+)\s*[-–]\s*(?P<max>[\d.,]+)")
+_RANGE_DASH_RE = re.compile(r"(?P<min>[\d.,]+)\s*[-–—]\s*(?P<max>[\d.,]+)")
 _RANGE_LT_RE = re.compile(r"<\s*(?P<max>[\d.,]+)")
 _RANGE_GT_RE = re.compile(r">\s*(?P<min>[\d.,]+)")
 
@@ -144,12 +144,16 @@ class LabPdfParser:
     Usage:
         parser = LabPdfParser()
         markers = parser.parse_pdf(Path("my_blood_test.pdf"))
+        fmt = parser.last_detected_format  # format from most recent parse_pdf call
     """
 
     # Known format detection keywords
     # sundhed.dk checked first — more specific than GetTested generic terms
     _SUNDHED_DK_KEYWORDS = ["sundhed.dk", "sundhed dk", "min sundhed", "e-journal"]
     _GETTESTED_KEYWORDS = ["gettested", "bodypanel", "analysesvar"]
+
+    def __init__(self) -> None:
+        self.last_detected_format: str = "unknown"
 
     def detect_format(self, text: str) -> str:
         """Detect the lab PDF format from extracted text.
@@ -201,6 +205,7 @@ class LabPdfParser:
             return []
 
         fmt = self.detect_format(full_text)
+        self.last_detected_format = fmt
         logger.info("Detected format '%s' for %s", fmt, path.name)
 
         if fmt == "gettested":

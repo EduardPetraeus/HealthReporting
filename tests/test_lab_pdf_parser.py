@@ -97,6 +97,11 @@ class TestReferenceRangeParsing:
         assert ref_min == 10.0
         assert ref_max == 20.0
 
+    def test_em_dash_range(self):
+        ref_min, ref_max, direction = _parse_reference_range("10\u201420")
+        assert ref_min == 10.0
+        assert ref_max == 20.0
+
     def test_less_than(self):
         ref_min, ref_max, direction = _parse_reference_range("< 50")
         assert ref_min is None
@@ -331,6 +336,9 @@ class TestIngestionPipeline:
     def test_extract_date_compact(self):
         assert _extract_date_from_filename("20260115_gettested.pdf") == "2026-01-15"
 
+    def test_extract_date_underscore_separated(self):
+        assert _extract_date_from_filename("lab_results_2026_01_15.pdf") == "2026-01-15"
+
     def test_extract_date_no_date(self):
         assert _extract_date_from_filename("lab_report.pdf") is None
 
@@ -368,6 +376,25 @@ class TestIngestionPipeline:
         assert _categorize_marker("Pancreatic Elastase") == "gut_health"
         assert _categorize_marker("Secretory IgA") == "gut_health"
 
+    def test_categorize_marker_hba1c(self):
+        """HbA1c is a glucose marker, not blood_count (H1 fix)."""
+        assert _categorize_marker("Hemoglobin A1c") == "glucose"
+        assert _categorize_marker("HbA1c") == "glucose"
+
+    def test_categorize_marker_microalbuminuria(self):
+        """Microalbuminuria is a kidney marker, not liver (H2 fix)."""
+        assert _categorize_marker("Microalbuminuria") == "kidney"
+        assert _categorize_marker("Microalbumin") == "kidney"
+
+    def test_categorize_marker_plain_hemoglobin_still_blood_count(self):
+        """Plain Hemoglobin (without A1c) should still be blood_count."""
+        assert _categorize_marker("Hemoglobin") == "blood_count"
+        assert _categorize_marker("Hæmoglobin") == "blood_count"
+
+    def test_categorize_marker_plain_albumin_still_liver(self):
+        """Plain Albumin (without micro prefix) should still be liver."""
+        assert _categorize_marker("Albumin") == "liver"
+
     @patch("health_platform.source_connectors.lab.lab_ingestion.LabPdfParser")
     def test_ingest_writes_parquet(self, mock_parser_class):
         """Test that ingestion writes a valid parquet file."""
@@ -395,7 +422,7 @@ class TestIngestionPipeline:
                 "status": "normal",
             },
         ]
-        mock_parser.detect_format.return_value = "gettested"
+        mock_parser.last_detected_format = "gettested"
 
         with tempfile.TemporaryDirectory() as tmpdir:
             pdf_dir = Path(tmpdir) / "pdfs"
@@ -406,19 +433,7 @@ class TestIngestionPipeline:
             dummy_pdf = pdf_dir / "blood_test_2026-01-15.pdf"
             dummy_pdf.write_bytes(b"%PDF-1.4 dummy")
 
-            # Mock pdfplumber open for format detection inside ingestion
-            with patch(
-                "health_platform.source_connectors.lab.lab_ingestion.pdfplumber"
-            ) as mock_plumber:
-                mock_pdf_ctx = MagicMock()
-                mock_page = MagicMock()
-                mock_page.extract_text.return_value = "gettested bodypanel"
-                mock_pdf_ctx.pages = [mock_page]
-                mock_pdf_ctx.__enter__ = MagicMock(return_value=mock_pdf_ctx)
-                mock_pdf_ctx.__exit__ = MagicMock(return_value=False)
-                mock_plumber.open.return_value = mock_pdf_ctx
-
-                result_path = ingest_lab_pdfs(pdf_dir, output_dir)
+            result_path = ingest_lab_pdfs(pdf_dir, output_dir)
 
             assert result_path.exists()
             assert result_path.suffix == ".parquet"

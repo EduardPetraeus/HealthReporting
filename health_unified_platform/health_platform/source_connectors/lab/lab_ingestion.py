@@ -14,7 +14,6 @@ from pathlib import Path
 from typing import Optional
 
 import pandas as pd
-import pdfplumber  # noqa: F401 — used in ingest_lab_pdfs
 
 from health_platform.source_connectors.lab.pdf_parser import LabPdfParser
 from health_platform.utils.logging_config import get_logger
@@ -22,7 +21,7 @@ from health_platform.utils.logging_config import get_logger
 logger = get_logger("lab_ingestion")
 
 # Pattern for extracting date from filenames: 2026-01-15, 20260115, etc.
-_DATE_FROM_FILENAME_RE = re.compile(r"(\d{4})-?(\d{2})-?(\d{2})")
+_DATE_FROM_FILENAME_RE = re.compile(r"(\d{4})[-_]?(\d{2})[-_]?(\d{2})")
 
 
 def _extract_date_from_filename(filename: str) -> Optional[str]:
@@ -85,15 +84,8 @@ def ingest_lab_pdfs(pdf_dir: Path, output_dir: Path) -> Path:
             logger.warning("No markers extracted from %s", pdf_path.name)
             continue
 
-        # Detect format for metadata
-        try:
-            with pdfplumber.open(pdf_path) as pdf:
-                full_text = "\n".join(page.extract_text() or "" for page in pdf.pages)
-            fmt = parser.detect_format(full_text)
-        except Exception:
-            fmt = "unknown"
-
-        lab_name = _format_to_lab_name(fmt)
+        # Use format already detected during parse_pdf (avoids opening PDF twice)
+        lab_name = _format_to_lab_name(parser.last_detected_format)
 
         for marker in markers:
             business_key = _compute_hash(
@@ -187,11 +179,25 @@ def _format_to_lab_name(fmt: str) -> str:
 
 
 # Basic marker categorization based on common blood panel groupings.
-# Order matters: more specific categories (gut_health with "elastase") must
-# come before broader ones (liver with "ast") to avoid false matches.
+# Order matters: more specific categories must come before broader ones to
+# avoid false matches. E.g. "hemoglobin a1c" must match glucose before
+# blood_count's "hemoglobin", and "microalbumin" must match kidney before
+# liver's "albumin".
 _CATEGORY_PATTERNS: list[tuple[str, list[str]]] = [
     ("lipids", ["cholesterol", "ldl", "hdl", "triglycerid", "apolipoprotein"]),
+    ("glucose", ["glucose", "hba1c", "hemoglobin a1c", "blodsukker"]),
     ("gut_health", ["elastase", "zonulin", "iga", "microbiome", "flora"]),
+    (
+        "kidney",
+        [
+            "kreatinin",
+            "creatinin",
+            "gfr",
+            "urea",
+            "cystatin",
+            "microalbumin",
+        ],
+    ),
     (
         "liver",
         [
@@ -205,7 +211,6 @@ _CATEGORY_PATTERNS: list[tuple[str, list[str]]] = [
             "asat",
         ],
     ),
-    ("kidney", ["kreatinin", "creatinin", "gfr", "urea", "cystatin"]),
     ("thyroid", ["tsh", "thyroxin", " t3", " t4", "free t3", "free t4"]),
     (
         "blood_count",
@@ -242,7 +247,6 @@ _CATEGORY_PATTERNS: list[tuple[str, list[str]]] = [
         ["testosteron", "cortisol", "insulin", "shbg", "estradiol", "progesteron"],
     ),
     ("fatty_acids", ["epa", "dha", "omega", "arachidonic"]),
-    ("glucose", ["glucose", "hba1c", "blodsukker"]),
 ]
 
 
