@@ -1,0 +1,38 @@
+{% extends "clinical_base.html" %}
+
+{% block title %}Clinical Health Report — {{ patient_name | default("Patient", true) }}{% endblock %}
+
+{% block content %}
+<div class="header">
+    <div class="header-title">Clinical Health Report</div>
+    <div class="header-subtitle">
+        Period: {{ start_date }} to {{ end_date }} |
+        Generated: {{ report_date }}
+    </div>
+</div>
+
+{# Patient Information #}
+{% if "patient_info" in sections %}
+{% include "patient_info.html" %}
+{% endif %}
+
+{# Vitals Summary #}
+{% if "vitals_summary" in sections %}
+{% include "vitals_summary.html" %}
+{% endif %}
+
+{# Lab Results #}
+{% if "lab_results" in sections %}
+{% include "lab_results.html" %}
+{% endif %}
+
+{# Trend Analysis #}
+{% if "trend_analysis" in sections %}
+{% include "trend_analysis.html" %}
+{% endif %}
+
+{# Medication List #}
+{% if "medication_list" in sections %}
+{% include "medication_list.html" %}
+{% endif %}
+{% endblock %}

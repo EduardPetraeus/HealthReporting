@@ -1,0 +1,72 @@
+{# Vitals summary section partial #}
+<div class="section">
+    <h2 class="section-title">Vital Signs Summary</h2>
+
+    {% if vitals_summary %}
+    <div class="metric-grid">
+        {% if vitals_summary.avg_sleep_score is defined and vitals_summary.avg_sleep_score is not none %}
+        <div class="metric-card">
+            <div class="metric-value">{{ "%.0f" | format(vitals_summary.avg_sleep_score) }}</div>
+            <div class="metric-label">Avg Sleep Score</div>
+        </div>
+        {% endif %}
+        {% if vitals_summary.avg_readiness_score is defined and vitals_summary.avg_readiness_score is not none %}
+        <div class="metric-card">
+            <div class="metric-value">{{ "%.0f" | format(vitals_summary.avg_readiness_score) }}</div>
+            <div class="metric-label">Avg Readiness</div>
+        </div>
+        {% endif %}
+        {% if vitals_summary.avg_steps is defined and vitals_summary.avg_steps is not none %}
+        <div class="metric-card">
+            <div class="metric-value">{{ "{:,.0f}".format(vitals_summary.avg_steps) }}</div>
+            <div class="metric-label">Avg Daily Steps</div>
+        </div>
+        {% endif %}
+        {% if vitals_summary.avg_resting_hr is defined and vitals_summary.avg_resting_hr is not none %}
+        <div class="metric-card">
+            <div class="metric-value">{{ "%.0f" | format(vitals_summary.avg_resting_hr) }}</div>
+            <div class="metric-label">Avg Resting HR</div>
+        </div>
+        {% endif %}
+        {% if vitals_summary.avg_spo2 is defined and vitals_summary.avg_spo2 is not none %}
+        <div class="metric-card">
+            <div class="metric-value">{{ "%.1f" | format(vitals_summary.avg_spo2) }}%</div>
+            <div class="metric-label">Avg SpO2</div>
+        </div>
+        {% endif %}
+        {% if vitals_summary.latest_weight is defined and vitals_summary.latest_weight is not none %}
+        <div class="metric-card">
+            <div class="metric-value">{{ "%.1f" | format(vitals_summary.latest_weight) }} kg</div>
+            <div class="metric-label">Latest Weight</div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if vitals_daily %}
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Sleep</th>
+                <th>Readiness</th>
+                <th>Steps</th>
+                <th>SpO2 (%)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in vitals_daily %}
+            <tr>
+                <td>{{ row.day }}</td>
+                <td>{{ row.sleep_score | default("-", true) }}</td>
+                <td>{{ row.readiness_score | default("-", true) }}</td>
+                <td>{{ "{:,}".format(row.steps) if row.steps else "-" }}</td>
+                <td>{{ "%.1f" | format(row.spo2) if row.spo2 else "-" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="no-data">No vital sign data available for the selected period.</p>
+    {% endif %}
+</div>

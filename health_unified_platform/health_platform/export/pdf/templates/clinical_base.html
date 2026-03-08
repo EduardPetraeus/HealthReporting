@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Clinical Report{% endblock %}</title>
+    <style>
+        /* Base clinical report styling */
+        @page {
+            size: A4;
+            margin: 20mm 15mm 25mm 15mm;
+            @bottom-center {
+                content: "Page " counter(page) " of " counter(pages);
+                font-size: 9px;
+                color: #666;
+            }
+            @bottom-left {
+                content: "Generated {{ report_date }} — For clinical use only";
+                font-size: 8px;
+                color: #999;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 11px;
+            line-height: 1.5;
+            color: #1a1a1a;
+        }
+
+        .header {
+            border-bottom: 2px solid #2c5282;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2c5282;
+            margin-bottom: 4px;
+        }
+
+        .header-subtitle {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .patient-banner {
+            background-color: #ebf4ff;
+            border: 1px solid #bee3f8;
+            border-radius: 4px;
+            padding: 10px 14px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .patient-banner .label {
+            font-size: 9px;
+            color: #4a5568;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .patient-banner .value {
+            font-size: 12px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .section {
+            margin-bottom: 20px;
+            page-break-inside: avoid;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #2c5282;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 4px;
+            margin-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 12px;
+            font-size: 10px;
+        }
+
+        th {
+            background-color: #f7fafc;
+            border: 1px solid #e2e8f0;
+            padding: 6px 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        td {
+            border: 1px solid #e2e8f0;
+            padding: 5px 8px;
+            vertical-align: top;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f7fafc;
+        }
+
+        .flag-high {
+            color: #c53030;
+            font-weight: 600;
+        }
+
+        .flag-low {
+            color: #dd6b20;
+            font-weight: 600;
+        }
+
+        .flag-normal {
+            color: #2f855a;
+        }
+
+        .trend-up::after { content: " ▲"; color: #38a169; }
+        .trend-down::after { content: " ▼"; color: #e53e3e; }
+        .trend-stable::after { content: " ─"; color: #718096; }
+
+        .summary-box {
+            background-color: #f0fff4;
+            border: 1px solid #c6f6d5;
+            border-radius: 4px;
+            padding: 10px 14px;
+            margin-bottom: 12px;
+        }
+
+        .warning-box {
+            background-color: #fffaf0;
+            border: 1px solid #feebc8;
+            border-radius: 4px;
+            padding: 10px 14px;
+            margin-bottom: 12px;
+        }
+
+        .disclaimer {
+            margin-top: 30px;
+            padding-top: 10px;
+            border-top: 1px solid #e2e8f0;
+            font-size: 8px;
+            color: #a0aec0;
+            line-height: 1.4;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .metric-card {
+            background-color: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            padding: 8px 10px;
+            text-align: center;
+        }
+
+        .metric-card .metric-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .metric-card .metric-label {
+            font-size: 9px;
+            color: #718096;
+            text-transform: uppercase;
+        }
+
+        .no-data {
+            color: #a0aec0;
+            font-style: italic;
+            padding: 10px 0;
+        }
+    </style>
+    {% block extra_styles %}{% endblock %}
+</head>
+<body>
+    {% block content %}{% endblock %}
+
+    <div class="disclaimer">
+        This report is generated from self-tracked health data (wearable devices, apps) and is
+        intended for informational purposes only. It does not constitute medical advice, diagnosis,
+        or treatment. Always consult a qualified healthcare provider for medical decisions.
+        Data accuracy depends on device calibration and consistent usage.
+    </div>
+</body>
+</html>
