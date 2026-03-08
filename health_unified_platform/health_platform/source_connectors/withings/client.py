@@ -58,8 +58,7 @@ class WithingsClient:
         status = result.get("status", -1)
         if status != 0:
             raise RuntimeError(
-                f"Withings API error: status={status}, "
-                f"error={result.get('error', 'unknown')}"
+                f"Withings API error: status={status}, error={result.get('error', 'unknown')}"
             )
         return result.get("body", {})
 
@@ -126,6 +125,132 @@ class WithingsClient:
         return self.fetch_measure(start, end, measure_types=TEMPERATURE_TYPES)
 
     # ------------------------------------------------------------------
+    # Endpoints — Activity (Measure v2)
+    # ------------------------------------------------------------------
+
+    def fetch_activity(self, start: date, end: date) -> list[dict]:
+        """Fetch daily aggregated activity data (steps, distance, calories).
+
+        Uses Measure v2 API with action=getactivity.
+        Returns one record per day with activity metrics.
+        """
+        body = self._post(
+            "/v2/measure",
+            {
+                "action": "getactivity",
+                "startdateymd": start.isoformat(),
+                "enddateymd": end.isoformat(),
+            },
+        )
+        activities = body.get("activities", [])
+        records = []
+        for entry in activities:
+            record = {
+                "date": entry.get("date"),
+                "steps": entry.get("steps"),
+                "distance": entry.get("distance"),
+                "elevation": entry.get("elevation"),
+                "calories": entry.get("calories"),
+                "soft_activity_duration": entry.get("soft"),
+                "moderate_activity_duration": entry.get("moderate"),
+                "intense_activity_duration": entry.get("intense"),
+                "active_calories": entry.get("active"),
+                "total_calories": entry.get("totalcalories"),
+                "hr_average": entry.get("hr_average"),
+                "hr_min": entry.get("hr_min"),
+                "hr_max": entry.get("hr_max"),
+                "hr_zone_0": entry.get("hr_zone_0"),
+                "hr_zone_1": entry.get("hr_zone_1"),
+                "hr_zone_2": entry.get("hr_zone_2"),
+                "hr_zone_3": entry.get("hr_zone_3"),
+                "deviceid": entry.get("deviceid"),
+                "brand": entry.get("brand"),
+                "is_tracker": entry.get("is_tracker"),
+            }
+            records.append(record)
+        return records
+
+    def fetch_intraday_activity(self, start: date, end: date) -> list[dict]:
+        """Fetch intraday activity data (minute-level steps, HR, calories).
+
+        Uses Measure v2 API with action=getintradayactivity.
+        Returns time-bucketed records within the requested range.
+        """
+        body = self._post(
+            "/v2/measure",
+            {
+                "action": "getintradayactivity",
+                "startdate": self._date_to_epoch(start),
+                "enddate": self._date_to_epoch(end) + 86400,
+            },
+        )
+        series = body.get("series", {})
+        records = []
+        for timestamp, entry in series.items():
+            record = {
+                "timestamp": int(timestamp),
+                "datetime": datetime.fromtimestamp(int(timestamp)).isoformat(),
+                "steps": entry.get("steps"),
+                "elevation": entry.get("elevation"),
+                "calories": entry.get("calories"),
+                "distance": entry.get("distance"),
+                "heart_rate": entry.get("heart_rate"),
+                "duration": entry.get("duration"),
+                "stroke": entry.get("stroke"),
+                "pool_lap": entry.get("pool_lap"),
+                "spo2_auto": entry.get("spo2_auto"),
+            }
+            records.append(record)
+        return records
+
+    def fetch_workouts(self, start: date, end: date) -> list[dict]:
+        """Fetch workout sessions (category, duration, HR, calories).
+
+        Uses Measure v2 API with action=getworkouts.
+        Returns one record per workout session.
+        """
+        body = self._post(
+            "/v2/measure",
+            {
+                "action": "getworkouts",
+                "startdateymd": start.isoformat(),
+                "enddateymd": end.isoformat(),
+            },
+        )
+        series = body.get("series", [])
+        records = []
+        for entry in series:
+            data = entry.get("data", {})
+            record = {
+                "id": entry.get("id"),
+                "category": entry.get("category"),
+                "startdate": entry.get("startdate"),
+                "enddate": entry.get("enddate"),
+                "date": entry.get("date"),
+                "model": entry.get("model"),
+                "deviceid": entry.get("deviceid"),
+                "calories": data.get("calories"),
+                "intensity": data.get("intensity"),
+                "manual_distance": data.get("manual_distance"),
+                "manual_calories": data.get("manual_calories"),
+                "hr_average": data.get("hr_average"),
+                "hr_min": data.get("hr_min"),
+                "hr_max": data.get("hr_max"),
+                "hr_zone_0": data.get("hr_zone_0"),
+                "hr_zone_1": data.get("hr_zone_1"),
+                "hr_zone_2": data.get("hr_zone_2"),
+                "hr_zone_3": data.get("hr_zone_3"),
+                "steps": data.get("steps"),
+                "distance": data.get("distance"),
+                "elevation": data.get("elevation"),
+                "pause_duration": data.get("pause_duration"),
+                "algo_pause_duration": data.get("algo_pause_duration"),
+                "spo2_average": data.get("spo2_average"),
+            }
+            records.append(record)
+        return records
+
+    # ------------------------------------------------------------------
     # Endpoints — DS1 expansion (Sleep v2, Heart v2)
     # ------------------------------------------------------------------
 
@@ -133,13 +258,14 @@ class WithingsClient:
         """Fetch sleep summary data (duration, phases, scores).
 
         Uses Sleep v2 API with action=getsummary.
+        Requires startdateymd/enddateymd (YYYY-MM-DD), not epoch timestamps.
         """
         body = self._post(
             "/v2/sleep",
             {
                 "action": "getsummary",
-                "startdate": self._date_to_epoch(start),
-                "enddate": self._date_to_epoch(end) + 86400,
+                "startdateymd": start.isoformat(),
+                "enddateymd": end.isoformat(),
             },
         )
         series = body.get("series", [])
@@ -241,6 +367,9 @@ class WithingsClient:
             "weight",
             "blood_pressure",
             "temperature",
+            "activity",
+            "intraday_activity",
+            "workouts",
             "sleep_summary",
             "sleep_raw",
             "heart_list",

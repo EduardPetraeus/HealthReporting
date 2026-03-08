@@ -13,7 +13,6 @@ import time
 from pathlib import Path
 from unittest.mock import patch
 
-
 # Connector root paths
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 _WITHINGS_DIR = (
@@ -60,7 +59,10 @@ class TestWithingsClient:
         assert "weight" in endpoints
         assert "blood_pressure" in endpoints
         assert "temperature" in endpoints
-        assert len(endpoints) == 6
+        assert "activity" in endpoints
+        assert "intraday_activity" in endpoints
+        assert "workouts" in endpoints
+        assert len(endpoints) == 9
 
     def test_measure_types_defined(self) -> None:
         assert "weight_kg" in withings_client.MEASURE_TYPES
@@ -82,8 +84,36 @@ class TestWithingsClient:
         assert epoch > 0
 
 
+class TestWithingsNewEndpoints:
+    """Tests for the new activity, intraday, and workouts endpoints."""
+
+    def test_fetch_activity_method_exists(self) -> None:
+        client = withings_client.WithingsClient(access_token="test_token_abc123")
+        assert hasattr(client, "fetch_activity")
+        assert callable(client.fetch_activity)
+
+    def test_fetch_intraday_activity_method_exists(self) -> None:
+        client = withings_client.WithingsClient(access_token="test_token_abc123")
+        assert hasattr(client, "fetch_intraday_activity")
+        assert callable(client.fetch_intraday_activity)
+
+    def test_fetch_workouts_method_exists(self) -> None:
+        client = withings_client.WithingsClient(access_token="test_token_abc123")
+        assert hasattr(client, "fetch_workouts")
+        assert callable(client.fetch_workouts)
+
+
 class TestWithingsAuth:
     """Tests for Withings OAuth configuration and token paths."""
+
+    def test_credentials_use_keychain(self) -> None:
+        """Verify _load_credentials uses get_secret, not subprocess/op."""
+        import inspect
+
+        source = inspect.getsource(withings_auth._load_credentials)
+        assert "get_secret" in source
+        assert "op read" not in source
+        assert "subprocess" not in source
 
     def test_token_file_path_uses_home(self) -> None:
         assert str(withings_auth.TOKEN_FILE).startswith(str(Path.home()))
@@ -129,8 +159,9 @@ class TestWithingsAuth:
 
     def test_save_tokens_creates_file(self, tmp_path: Path) -> None:
         test_file = tmp_path / "test_tokens.json"
-        with patch.object(withings_auth, "TOKEN_FILE", test_file), patch.object(
-            withings_auth, "CONFIG_DIR", tmp_path
+        with (
+            patch.object(withings_auth, "TOKEN_FILE", test_file),
+            patch.object(withings_auth, "CONFIG_DIR", tmp_path),
         ):
             withings_auth._save_tokens(
                 {"access_token": "test", "expires_at": 9999999999}
