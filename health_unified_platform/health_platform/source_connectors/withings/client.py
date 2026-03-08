@@ -68,7 +68,7 @@ class WithingsClient:
         return int(datetime.combine(d, datetime.min.time()).timestamp())
 
     # ------------------------------------------------------------------
-    # Endpoints
+    # Endpoints — original (Measure v1)
     # ------------------------------------------------------------------
 
     def fetch_measure(
@@ -125,6 +125,123 @@ class WithingsClient:
         """Fetch body temperature measurements."""
         return self.fetch_measure(start, end, measure_types=TEMPERATURE_TYPES)
 
+    # ------------------------------------------------------------------
+    # Endpoints — DS1 expansion (Sleep v2, Heart v2)
+    # ------------------------------------------------------------------
+
+    def fetch_sleep_summary(self, start: date, end: date) -> list[dict]:
+        """Fetch sleep summary data (duration, phases, scores).
+
+        Uses Sleep v2 API with action=getsummary.
+        """
+        body = self._post(
+            "/v2/sleep",
+            {
+                "action": "getsummary",
+                "startdate": self._date_to_epoch(start),
+                "enddate": self._date_to_epoch(end) + 86400,
+            },
+        )
+        series = body.get("series", [])
+        records = []
+        for entry in series:
+            record = {
+                "startdate": entry.get("startdate"),
+                "enddate": entry.get("enddate"),
+                "date": entry.get("date"),
+                "model": entry.get("model"),
+                "model_id": entry.get("model_id"),
+            }
+            for key, value in entry.get("data", {}).items():
+                record[key] = value
+            records.append(record)
+        return records
+
+    def fetch_sleep_raw(self, start: date, end: date) -> list[dict]:
+        """Fetch raw sleep sensor data (HR, RR, snoring, SDNN, RMSSD).
+
+        Uses Sleep v2 API with action=get.
+        Returns one record per sleep session with time-series arrays.
+        """
+        body = self._post(
+            "/v2/sleep",
+            {
+                "action": "get",
+                "startdate": self._date_to_epoch(start),
+                "enddate": self._date_to_epoch(end) + 86400,
+            },
+        )
+        series = body.get("series", [])
+        records = []
+        for entry in series:
+            record = {
+                "startdate": entry.get("startdate"),
+                "enddate": entry.get("enddate"),
+                "model": entry.get("model"),
+                "model_id": entry.get("model_id"),
+                "hr": entry.get("hr"),
+                "rr": entry.get("rr"),
+                "snoring": entry.get("snoring"),
+                "sdnn_1": entry.get("sdnn_1"),
+                "rmssd": entry.get("rmssd"),
+            }
+            records.append(record)
+        return records
+
+    def fetch_heart_list(self, start: date, end: date) -> list[dict]:
+        """Fetch ECG recording metadata (signal IDs, classification, HR).
+
+        Uses Heart v2 API with action=list.
+        """
+        body = self._post(
+            "/v2/heart",
+            {
+                "action": "list",
+                "startdate": self._date_to_epoch(start),
+                "enddate": self._date_to_epoch(end) + 86400,
+            },
+        )
+        series = body.get("series", [])
+        records = []
+        for entry in series:
+            record = {
+                "signalid": entry.get("signalid"),
+                "ecg": entry.get("ecg", {}),
+                "bloodpressure": entry.get("bloodpressure", {}),
+                "heart_rate": entry.get("heart_rate"),
+                "model": entry.get("model"),
+                "deviceid": entry.get("deviceid"),
+                "timestamp": entry.get("timestamp"),
+            }
+            records.append(record)
+        return records
+
+    def fetch_heart_signal(self, signal_id: int) -> dict:
+        """Fetch a single ECG waveform by signal ID.
+
+        Uses Heart v2 API with action=get.
+        Returns the raw signal data including waveform array.
+        """
+        body = self._post(
+            "/v2/heart",
+            {
+                "action": "get",
+                "signalid": signal_id,
+            },
+        )
+        return body
+
+    # ------------------------------------------------------------------
+    # Interface
+    # ------------------------------------------------------------------
+
     def get_endpoints(self) -> list[str]:
         """Return available endpoint names for this source."""
-        return ["weight", "blood_pressure", "temperature"]
+        return [
+            "weight",
+            "blood_pressure",
+            "temperature",
+            "sleep_summary",
+            "sleep_raw",
+            "heart_list",
+        ]
