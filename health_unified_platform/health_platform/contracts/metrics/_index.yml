@@ -61,8 +61,8 @@ metrics:
 
   genetics:
     metrics: [alpha1_antitrypsin, actn3, deep_sleep_predisposition, caffeine_metabolism, ancestry]
-    source_tables: [agent.genetic_profile]
-    max_columns: 10
+    source_tables: [agent.genetic_profile, silver.genetic_health_findings, silver.ancestry_segments, silver.family_tree]
+    max_columns: 12
 
   supplements:
     metrics: [active_supplements, supplement_protocol, intervention_tracking]
@@ -101,9 +101,9 @@ query_routing:
     description: "Questions about lab tests, biomarkers, blood panels, microbiome results"
 
   genetics_questions:
-    tables: [agent.genetic_profile]
-    max_columns: 10
-    description: "Questions about genetic predispositions, carrier status, ancestry, DNA"
+    tables: [agent.genetic_profile, silver.genetic_health_findings, silver.ancestry_segments, silver.family_tree]
+    max_columns: 12
+    description: "Questions about genetic predispositions, carrier status, ancestry, DNA, family tree"
 
   supplement_questions:
     tables: [silver.supplement_log]
