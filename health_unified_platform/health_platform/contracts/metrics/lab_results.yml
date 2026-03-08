@@ -1,0 +1,84 @@
+metric:
+  name: lab_results
+  display_name: "Lab Results (PDF)"
+  description: >
+    Lab test results ingested from PDF blood test reports.
+    Supports GetTested and sundhed.dk formats. Each row represents a single
+    biomarker measurement with its value, unit, reference range, and status.
+    Complements the YAML-based lab_biomarkers contract for PDF-sourced data.
+  category: lab_results
+  source_table: silver.lab_results
+  source_column: value_numeric
+  grain: per_marker
+  business_key: "test_id + marker_name"
+  unit: "varies by marker"
+
+  computations:
+    latest_results:
+      sql: >
+        SELECT test_date, marker_name, marker_category, value_numeric,
+               unit, reference_min, reference_max, status
+        FROM silver.lab_results
+        WHERE test_date = (SELECT MAX(test_date) FROM silver.lab_results)
+        ORDER BY marker_category, marker_name
+
+    marker_history:
+      sql: >
+        SELECT test_date, value_numeric, unit, reference_min, reference_max, status
+        FROM silver.lab_results
+        WHERE LOWER(marker_name) LIKE '%' || LOWER(:marker_name) || '%'
+        ORDER BY test_date DESC
+
+    out_of_range:
+      sql: >
+        SELECT test_date, marker_name, marker_category, value_numeric,
+               unit, reference_min, reference_max, status
+        FROM silver.lab_results
+        WHERE status IN ('low', 'high')
+          AND test_date BETWEEN :start AND :end
+        ORDER BY test_date DESC, marker_category, marker_name
+
+    category_overview:
+      sql: >
+        SELECT marker_category,
+               COUNT(*) AS total_markers,
+               SUM(CASE WHEN status = 'normal' THEN 1 ELSE 0 END) AS normal,
+               SUM(CASE WHEN status != 'normal' THEN 1 ELSE 0 END) AS abnormal
+        FROM silver.lab_results
+        WHERE test_date = (SELECT MAX(test_date) FROM silver.lab_results)
+        GROUP BY marker_category
+        ORDER BY abnormal DESC, marker_category
+
+  thresholds:
+    cholesterol_total:
+      optimal: { max: 5.0, label: "Normal" }
+      elevated: { min: 5.1, max: 6.5, label: "Borderline high" }
+      high: { min: 6.6, label: "High" }
+    ldl:
+      optimal: { max: 3.0, label: "Normal" }
+      elevated: { min: 3.1, label: "Elevated" }
+    hdl:
+      optimal: { min: 1.0, label: "Normal" }
+      low: { max: 0.99, label: "Low — cardiovascular risk" }
+    hba1c:
+      normal: { max: 42, label: "Normal" }
+      prediabetes: { min: 42, max: 47, label: "Pre-diabetes" }
+      diabetes: { min: 48, label: "Diabetes range" }
+    crp:
+      normal: { max: 5, label: "Normal" }
+      elevated: { min: 5, label: "Elevated — inflammation" }
+
+  related_metrics:
+    - { metric: weight, relationship: "Body composition affects lab markers", lag: 0 }
+    - { metric: sleep_score, relationship: "Sleep quality correlates with inflammation markers", lag: 0 }
+    - { metric: supplements, relationship: "Supplement protocol targets deficient markers", lag: 0 }
+
+  examples:
+    - question: "What are my latest lab results?"
+      tool: "query_lab_results()"
+    - question: "Which markers are out of range?"
+      tool: "query_lab_results(status='high')"
+    - question: "What is my vitamin D level?"
+      tool: "query_lab_results(marker_name='vitamin d')"
+    - question: "Show my cholesterol history"
+      tool: "query_lab_results(marker_name='cholesterol')"

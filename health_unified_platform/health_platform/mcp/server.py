@@ -367,5 +367,27 @@ def explain_recommendation(recommendation_title: str) -> str:
         tools.close()
 
 
+@mcp.tool()
+def query_lab_results(
+    marker_name: str = "", date_range: str = "", status: str = ""
+) -> str:
+    """Query lab test results (blood panels, biomarkers) with optional filters.
+
+    Args:
+        marker_name: Filter by marker name (partial match, e.g., 'cholesterol', 'vitamin'). Empty = all markers.
+        date_range: Date range (e.g., 'last_30_days', '2026-01-01:2026-03-01'). Empty = all dates.
+        status: Filter by result status: 'normal', 'low', 'high'. Empty = all statuses.
+    """
+    tools = get_tools()
+    try:
+        return tools.query_lab_results(
+            marker_name=marker_name or None,
+            date_range=date_range or None,
+            status=status or None,
+        )
+    finally:
+        tools.close()
+
+
 if __name__ == "__main__":
     mcp.run()
