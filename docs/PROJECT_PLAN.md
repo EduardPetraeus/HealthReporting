@@ -1,7 +1,7 @@
 # PROJECT_PLAN.md — HealthReporting
 
-> Last updated: 2026-03-08 (Multi-agent sprint)
-> Current phase: **Phase 3b — AI-Native Data Model (COMPLETE) + Phase 5 (Databricks, parallel) + Phase 7 (AI Governance, active) + Roadmap Iterations A1 ✅, C1/A5 ✅, A8 ✅, A9 ✅, B1 ✅, B3 ✅, B4 ✅, C2 ✅, D4 ✅, F2 ✅ — next: A2 Data Quality Shield**
+> Last updated: 2026-03-08 (Session 5 — Withings operational)
+> Current phase: **Phase 3b ✅ + Phase 5 (Databricks) + Phase 7 (Governance). Iterations done: A1-A9 ✅, B1-B4 ✅, C1 (2/3), C2 ✅, D2 (2/5), D4 ✅, DS1-DS4 ✅, E0 ✅, F1-F2 ✅. Withings operational (9 endpoints, full load). Next: C1 Session 3 / D1 Mobile / D2 Desktop**
 
 ---
 
@@ -47,12 +47,12 @@
 | Apple Health XML → parquet | ✅ done | 15 types via process_health_data.py |
 | Oura connector | ✅ done | OAuth 2.0, incremental, 8 endpoints |
 | Lifesum connector | ✅ done | csv_to_parquet.py |
-| Withings connector | ⬜ not started | API-based — planned |
+| Withings connector | ✅ done | OAuth 2.0 keychain auth, 9 endpoints, full load 2020→now (1,947 records) |
 | Strava connector | ⬜ not started | API-based — planned |
 | GetTested connector | ⬜ not started | Manual/export — planned |
 | sources_config.yaml — full schema | ✅ done | 27 sources defined (19 Apple Health + 8 Oura + 1 Lifesum) |
 | Ingestion engine — all active sources | ✅ done | Works for Apple Health, Oura, Lifesum |
-| Bronze validation tests | ⬜ not started | Row counts, null checks |
+| Bronze validation tests | ✅ done | Session 3: A2 quality shield — 48 tables, 6 check types |
 
 **Exit criteria:** All 3 active sources ingested into bronze, validated, repeatable. *(Withings/Strava/GetTested are stretch goals.)*
 
@@ -70,8 +70,8 @@
 | Lifesum silver transforms | ✅ done | daily_meal |
 | Withings silver transforms | ✅ done | blood_pressure + weight merge scripts merged |
 | DuckDB local silver runner | ✅ done | run_merge.py — 21 merge scripts working locally |
-| Silver validation tests | ⬜ not started | TDD framework — pytest + conftest.py |
-| dbt schema tests on all 17 entities | ⬜ not started | not-null, unique, accepted-values |
+| Silver validation tests | ✅ done | Session 3: dbt _schema.yml with 49 models |
+| dbt schema tests on all 17 entities | ✅ done | 49 silver models in _schema.yml (Session 3) |
 
 **Exit criteria:** All active source entities in silver, validated, repeatable locally.
 
@@ -217,13 +217,13 @@
 
 ## MVP Iteration Roadmap
 
-Per `MASTER_PLAN.md`: `A1 → C1/A5 → A2 → B1 → A3 → B3 → B2 → C2`
+Per `MASTER_PLAN.md`: `A1 → C1/A5 → A2 ✅ → B1 ✅ → A3 → B3 ✅ → B2 → C2 ✅`
 
 | Iteration | Name | Status | Notes |
 |-----------|------|--------|-------|
 | A1 | MCP Goes Live | ✅ done | MCP server wired into Claude Code, 8 tools, 55 smoke tests |
 | C1/A5 | Daily Sync + API + Withings | ✅ done | 6-step sync pipeline, FastAPI server, Withings connectors merged |
-| **A2** | Data Quality Shield | ⬜ next | Automated quality checks — nulls, duplicates, stale data, schema drift |
+| **A2** | Data Quality Shield | ✅ done | Session 3: quality_rules.yaml (48 tables), schema_drift, dbt _schema.yml (49 models), bronze validation |
 | A3 | Smart Alerts | ⬜ planned | Proactive anomaly detection + ntfy.sh notifications |
 | B2 | Streaming Responses | ⬜ planned | SSE streaming in FastAPI |
 | A8 | Lifesum CSV Expansion | ✅ done | Bodymeasures, exercise, weighins, bodyfat merge scripts + sources_config entries |
@@ -233,5 +233,5 @@ Per `MASTER_PLAN.md`: `A1 → C1/A5 → A2 → B1 → A3 → B3 → B2 → C2`
 | B4 | Expanded Correlation Engine | ✅ done | 9 to 30+ metric pairs, cross-domain delayed effects |
 | C2 | Intelligence Layer | ✅ done | Trend forecaster (linear regression), recommendation engine (evidence-backed, CDS-safe) |
 | D4 | Notification System | ✅ done | ntfy.sh integration, severity-based push notifications |
-| F1 | Infrastructure Cleanup | ⬜ planned | Deferred |
+| F1 | Infrastructure Cleanup | ✅ done | Session 3: pyproject.toml, .editorconfig, conftest.py, logging fix |
 | F2 | Documentation + Cleanup | ✅ done | Metric dictionary, data lineage, changelog, WeasyPrint dependency confirmed |
