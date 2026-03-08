@@ -1,0 +1,377 @@
+# Gold Views Contract
+# Index of all gold layer views/tables with metadata for both
+# Databricks (cloud) and DuckDB (local) materializations.
+
+gold_views:
+  # -------------------------------------------------------------------------
+  # Dimension Tables (static reference data or derived from silver)
+  # -------------------------------------------------------------------------
+  dim_body_system:
+    description: "Body system classification for cross-domain health analysis"
+    materialization: table
+    grain: one row per body system
+    source_tables: []
+    columns:
+      - sk_body_system
+      - body_system_code
+      - body_system_name
+      - metric_category
+    row_count_expected: 12
+
+  dim_date:
+    description: "Calendar date dimension for all date-grain analysis (2020-2030)"
+    materialization: table
+    grain: one row per calendar day
+    source_tables: []
+    columns:
+      - sk_date
+      - date
+      - year
+      - quarter
+      - month
+      - month_name
+      - iso_week
+      - day_of_week
+      - day_name
+      - day_of_month
+      - day_of_year
+      - is_weekend
+      - day_type
+      - season
+      - year_month
+      - days_ago
+
+  dim_health_zone:
+    description: "Pre-computed health zones for score classification across metrics"
+    materialization: table
+    grain: one row per zone per metric type
+    source_tables: []
+    columns:
+      - sk_health_zone
+      - zone_type
+      - zone_label
+      - score_min
+      - score_max
+      - zone_color
+      - zone_severity
+    row_count_expected: 42
+
+  dim_lab_marker:
+    description: "Lab marker catalog with reference ranges and body system mapping"
+    materialization: table
+    grain: one row per distinct lab marker
+    source_tables:
+      - silver.lab_results
+    columns:
+      - sk_lab_marker
+      - marker_name
+      - marker_display_name
+      - marker_category
+      - body_system
+      - unit
+      - reference_min
+      - reference_max
+      - test_type
+
+  dim_meal_type:
+    description: "Meal type classification for nutrition analysis"
+    materialization: table
+    grain: one row per meal type
+    source_tables: []
+    columns:
+      - sk_meal_type
+      - meal_type
+      - meal_display_name
+      - meal_order
+      - is_main_meal
+    row_count_expected: 4
+
+  dim_metric:
+    description: "Master metric catalog for cross-domain analysis with thresholds"
+    materialization: table
+    grain: one row per tracked health metric
+    source_tables: []
+    columns:
+      - sk_metric
+      - metric_name
+      - display_name
+      - category
+      - unit
+      - source_table
+      - grain
+      - body_system_code
+      - threshold_optimal_min
+      - threshold_optimal_max
+    row_count_expected: 28
+
+  dim_source:
+    description: "Data source classification across all silver tables"
+    materialization: table
+    grain: one row per distinct data source
+    source_tables:
+      - silver.heart_rate
+      - silver.resting_heart_rate
+      - silver.step_count
+      - silver.water_intake
+      - silver.blood_oxygen
+      - silver.workout
+    columns:
+      - sk_source
+      - source_name
+      - source_display_name
+      - source_type
+      - data_collection_method
+
+  dim_supplement:
+    description: "Supplement catalog with category classification"
+    materialization: table
+    grain: one row per distinct supplement
+    source_tables:
+      - silver.supplement_log
+    columns:
+      - sk_supplement
+      - supplement_name
+      - category
+      - dose
+      - unit
+      - target_condition
+
+  dim_time_of_day:
+    description: "Time-of-day dimension for intraday analysis (1440 rows)"
+    materialization: table
+    grain: one row per minute of the day
+    source_tables: []
+    columns:
+      - sk_time
+      - hour
+      - minute
+      - time_label
+      - time_bucket
+      - is_sleeping_hours
+      - is_active_hours
+    row_count_expected: 1440
+
+  dim_workout_type:
+    description: "Workout activity classification with energy system and category"
+    materialization: table
+    grain: one row per distinct workout activity
+    source_tables:
+      - silver.workout
+    columns:
+      - sk_workout_type
+      - activity_raw
+      - activity_name
+      - activity_category
+      - is_cardio
+      - is_outdoor
+      - estimated_energy_system
+
+  # -------------------------------------------------------------------------
+  # Fact Views (always fresh from silver)
+  # -------------------------------------------------------------------------
+  fct_body_measurement:
+    description: "Body composition measurements with computed fat/muscle percentages"
+    materialization: view
+    grain: one row per weight measurement
+    source_tables:
+      - silver.weight
+    columns:
+      - sk_date
+      - sk_time
+      - datetime
+      - weight_kg
+      - fat_mass_kg
+      - muscle_mass_kg
+      - bone_mass_kg
+      - hydration_kg
+      - fat_pct
+      - muscle_pct
+
+  fct_daily_health_score:
+    description: "Composite daily health score combining sleep (0.35), readiness (0.35), activity (0.30)"
+    materialization: view
+    grain: one row per day
+    source_tables:
+      - silver.daily_sleep
+      - silver.daily_readiness
+      - silver.daily_activity
+      - silver.daily_stress
+      - silver.workout
+    columns:
+      - sk_date
+      - day
+      - sleep_score
+      - readiness_score
+      - activity_score
+      - composite_health_score
+      - health_status
+      - steps
+      - total_calories
+      - active_calories
+      - temperature_deviation
+      - stress_day_summary
+      - is_workout_day
+      - workout_count
+
+  fct_daily_nutrition:
+    description: "Aggregated daily nutrition with macro breakdown and per-meal calories"
+    materialization: view
+    grain: one row per day
+    source_tables:
+      - silver.daily_meal
+    columns:
+      - sk_date
+      - day
+      - total_calories
+      - total_protein_g
+      - total_carbs_g
+      - total_fat_g
+      - total_fiber_g
+      - total_sugar_g
+      - protein_pct
+      - carbs_pct
+      - fat_pct
+      - breakfast_calories
+      - lunch_calories
+      - dinner_calories
+      - snack_calories
+      - item_count
+      - meal_count
+
+  fct_daily_vitals_summary:
+    description: "Wide daily vitals summary joining rhr, spo2, bp, water, gait, mindfulness"
+    materialization: view
+    grain: one row per day
+    source_tables:
+      - silver.resting_heart_rate
+      - silver.daily_spo2
+      - silver.blood_pressure
+      - silver.water_intake
+      - silver.daily_walking_gait
+      - silver.mindful_session
+    columns:
+      - sk_date
+      - day
+      - resting_hr_bpm
+      - avg_spo2_pct
+      - avg_systolic
+      - avg_diastolic
+      - avg_pulse
+      - bp_reading_count
+      - total_water_ml
+      - water_reading_count
+      - avg_walking_speed
+      - avg_step_length
+      - avg_walking_asymmetry
+      - avg_double_support
+      - walking_steadiness
+      - mindful_session_count
+      - total_mindful_minutes
+
+  fct_lab_result:
+    description: "Lab test results with reference deviation and body system mapping"
+    materialization: view
+    grain: one row per marker per test date
+    source_tables:
+      - silver.lab_results
+    columns:
+      - sk_date
+      - test_date
+      - test_id
+      - test_type
+      - test_name
+      - lab_name
+      - marker_name
+      - marker_category
+      - value_numeric
+      - value_text
+      - unit
+      - reference_min
+      - reference_max
+      - status
+      - deviation_from_ref_pct
+      - body_system
+
+  fct_sleep_session:
+    description: "Sleep session details with all contributor scores and weakest contributor"
+    materialization: view
+    grain: one row per sleep session (daily from Oura)
+    source_tables:
+      - silver.daily_sleep
+    columns:
+      - sk_date
+      - day
+      - sleep_score
+      - deep_sleep_score
+      - rem_sleep_score
+      - efficiency_score
+      - latency_score
+      - restfulness_score
+      - timing_score
+      - total_sleep_score
+      - avg_contributor
+      - weakest_contributor
+      - weakest_score
+
+  fct_workout:
+    description: "Individual workout sessions with computed duration/distance"
+    materialization: view
+    grain: one row per workout session
+    source_tables:
+      - silver.workout
+    columns:
+      - sk_date
+      - sk_time
+      - day
+      - workout_id
+      - activity
+      - intensity
+      - duration_seconds
+      - duration_minutes
+      - calories
+      - distance_meters
+      - distance_km
+      - start_datetime
+      - end_datetime
+      - source
+      - label
+
+  # -------------------------------------------------------------------------
+  # Legacy Views
+  # -------------------------------------------------------------------------
+  daily_heart_rate_summary:
+    description: "Daily heart rate statistics per source and combined cross-source"
+    materialization: view
+    grain: one row per day per source (plus 'all' rollup)
+    source_tables:
+      - silver.heart_rate
+    columns:
+      - day
+      - source_system
+      - reading_count
+      - avg_bpm
+      - min_bpm
+      - max_bpm
+      - p50_bpm
+      - p95_bpm
+
+  vw_daily_annotations_valid:
+    description: "Valid daily annotations (training events, incidents, travel)"
+    materialization: view
+    grain: one row per valid annotation
+    source_tables:
+      - silver.daily_annotations
+    columns:
+      - sk_date
+      - activity_type
+      - comment
+
+  vw_heart_rate_avg_per_day:
+    description: "Simple average heart rate per day"
+    materialization: view
+    grain: one row per sk_date
+    source_tables:
+      - silver.heart_rate
+    columns:
+      - sk_date
+      - avg_bpm
