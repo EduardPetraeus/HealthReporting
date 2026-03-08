@@ -1,4 +1,5 @@
 """Shared fixtures for health platform tests."""
+
 from __future__ import annotations
 
 import pytest
@@ -16,12 +17,134 @@ def memory_db():
 
 
 @pytest.fixture
+def quality_db(memory_db):
+    """In-memory DuckDB with intentional DQ issues for quality testing."""
+    con = memory_db
+
+    # Table with good data (all checks should pass)
+    con.execute(
+        """
+        CREATE TABLE silver.dq_good (
+            business_key_hash VARCHAR NOT NULL,
+            sk_date INTEGER NOT NULL,
+            day DATE NOT NULL,
+            score INTEGER,
+            load_datetime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """
+    )
+    con.execute(
+        """
+        INSERT INTO silver.dq_good VALUES
+            ('hash_1', 20260307, CURRENT_DATE, 85, CURRENT_TIMESTAMP),
+            ('hash_2', 20260306, CURRENT_DATE - INTERVAL '1 day', 72, CURRENT_TIMESTAMP)
+    """
+    )
+
+    # Table with NULL violations
+    con.execute(
+        """
+        CREATE TABLE silver.dq_nulls (
+            business_key_hash VARCHAR,
+            sk_date INTEGER,
+            day DATE,
+            score INTEGER,
+            load_datetime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """
+    )
+    con.execute(
+        """
+        INSERT INTO silver.dq_nulls VALUES
+            ('hash_1', 20260307, '2026-03-07', 85, CURRENT_TIMESTAMP),
+            (NULL, 20260306, '2026-03-06', NULL, CURRENT_TIMESTAMP),
+            ('hash_3', NULL, NULL, 70, CURRENT_TIMESTAMP)
+    """
+    )
+
+    # Table with duplicate business keys
+    con.execute(
+        """
+        CREATE TABLE silver.dq_dupes (
+            business_key_hash VARCHAR NOT NULL,
+            sk_date INTEGER NOT NULL,
+            day DATE NOT NULL,
+            score INTEGER,
+            load_datetime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """
+    )
+    con.execute(
+        """
+        INSERT INTO silver.dq_dupes VALUES
+            ('hash_1', 20260307, '2026-03-07', 85, CURRENT_TIMESTAMP),
+            ('hash_1', 20260306, '2026-03-06', 72, CURRENT_TIMESTAMP),
+            ('hash_2', 20260305, '2026-03-05', 90, CURRENT_TIMESTAMP)
+    """
+    )
+
+    # Table with stale data (48 hours old)
+    con.execute(
+        """
+        CREATE TABLE silver.dq_stale (
+            business_key_hash VARCHAR NOT NULL,
+            sk_date INTEGER NOT NULL,
+            day DATE NOT NULL,
+            load_datetime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """
+    )
+    con.execute(
+        """
+        INSERT INTO silver.dq_stale VALUES
+            ('hash_1', 20260305, CURRENT_DATE - INTERVAL '2 days',
+             CURRENT_TIMESTAMP - INTERVAL '48 hours')
+    """
+    )
+
+    # Table with out-of-range values
+    con.execute(
+        """
+        CREATE TABLE silver.dq_range (
+            business_key_hash VARCHAR NOT NULL,
+            sk_date INTEGER NOT NULL,
+            score INTEGER,
+            bpm INTEGER,
+            load_datetime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """
+    )
+    con.execute(
+        """
+        INSERT INTO silver.dq_range VALUES
+            ('hash_1', 20260307, 85, 72, CURRENT_TIMESTAMP),
+            ('hash_2', 20260306, 150, 300, CURRENT_TIMESTAMP),
+            ('hash_3', 20260305, -5, 15, CURRENT_TIMESTAMP)
+    """
+    )
+
+    # Empty table
+    con.execute(
+        """
+        CREATE TABLE silver.dq_empty (
+            business_key_hash VARCHAR NOT NULL,
+            sk_date INTEGER NOT NULL,
+            load_datetime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """
+    )
+
+    yield con
+
+
+@pytest.fixture
 def seeded_db(memory_db):
     """In-memory DuckDB with silver tables containing synthetic test data."""
     con = memory_db
 
     # Create silver.daily_sleep
-    con.execute("""
+    con.execute(
+        """
         CREATE TABLE silver.daily_sleep (
             sk_date INTEGER, day DATE, sleep_score INTEGER,
             timestamp TIMESTAMP,
@@ -32,8 +155,10 @@ def seeded_db(memory_db):
             business_key_hash VARCHAR, row_hash VARCHAR,
             load_datetime TIMESTAMP, update_datetime TIMESTAMP
         )
-    """)
-    con.execute("""
+    """
+    )
+    con.execute(
+        """
         INSERT INTO silver.daily_sleep (sk_date, day, sleep_score, contributor_deep_sleep,
             contributor_efficiency, contributor_latency, contributor_rem_sleep,
             contributor_restfulness, contributor_timing, contributor_total_sleep)
@@ -41,10 +166,12 @@ def seeded_db(memory_db):
             (20260301, '2026-03-01', 82, 88, 90, 65, 78, 85, 72, 80),
             (20260302, '2026-03-02', 75, 70, 85, 72, 80, 75, 68, 77),
             (20260303, '2026-03-03', 91, 95, 92, 88, 85, 90, 85, 93)
-    """)
+    """
+    )
 
     # Create silver.daily_readiness
-    con.execute("""
+    con.execute(
+        """
         CREATE TABLE silver.daily_readiness (
             sk_date INTEGER, day DATE, readiness_score INTEGER,
             timestamp TIMESTAMP,
@@ -57,17 +184,21 @@ def seeded_db(memory_db):
             business_key_hash VARCHAR, row_hash VARCHAR,
             load_datetime TIMESTAMP, update_datetime TIMESTAMP
         )
-    """)
-    con.execute("""
+    """
+    )
+    con.execute(
+        """
         INSERT INTO silver.daily_readiness (sk_date, day, readiness_score)
         VALUES
             (20260301, '2026-03-01', 79),
             (20260302, '2026-03-02', 72),
             (20260303, '2026-03-03', 88)
-    """)
+    """
+    )
 
     # Create silver.daily_activity
-    con.execute("""
+    con.execute(
+        """
         CREATE TABLE silver.daily_activity (
             sk_date INTEGER, day DATE, activity_score INTEGER,
             timestamp TIMESTAMP, steps INTEGER,
@@ -85,59 +216,73 @@ def seeded_db(memory_db):
             business_key_hash VARCHAR, row_hash VARCHAR,
             load_datetime TIMESTAMP, update_datetime TIMESTAMP
         )
-    """)
-    con.execute("""
+    """
+    )
+    con.execute(
+        """
         INSERT INTO silver.daily_activity (sk_date, day, activity_score, steps, active_calories, total_calories)
         VALUES
             (20260301, '2026-03-01', 91, 12450, 650, 2400),
             (20260302, '2026-03-02', 68, 5200, 320, 2100),
             (20260303, '2026-03-03', 85, 9800, 520, 2300)
-    """)
+    """
+    )
 
     # Create silver.daily_stress
-    con.execute("""
+    con.execute(
+        """
         CREATE TABLE silver.daily_stress (
             sk_date INTEGER, day DATE, day_summary VARCHAR,
             stress_high INTEGER, recovery_high INTEGER,
             business_key_hash VARCHAR, row_hash VARCHAR,
             load_datetime TIMESTAMP, update_datetime TIMESTAMP
         )
-    """)
-    con.execute("""
+    """
+    )
+    con.execute(
+        """
         INSERT INTO silver.daily_stress (sk_date, day, day_summary, stress_high, recovery_high)
         VALUES
             (20260301, '2026-03-01', 'restored', 120, 480),
             (20260302, '2026-03-02', 'stressed', 360, 240),
             (20260303, '2026-03-03', 'normal', 200, 400)
-    """)
+    """
+    )
 
     # Create silver.daily_spo2
-    con.execute("""
+    con.execute(
+        """
         CREATE TABLE silver.daily_spo2 (
             sk_date INTEGER, day DATE,
             spo2_avg_pct DOUBLE, breathing_disturbance_index DOUBLE,
             business_key_hash VARCHAR, row_hash VARCHAR,
             load_datetime TIMESTAMP, update_datetime TIMESTAMP
         )
-    """)
-    con.execute("""
+    """
+    )
+    con.execute(
+        """
         INSERT INTO silver.daily_spo2 (sk_date, day, spo2_avg_pct, breathing_disturbance_index)
         VALUES
             (20260301, '2026-03-01', 97.5, 0.8),
             (20260302, '2026-03-02', 96.2, 1.2),
             (20260303, '2026-03-03', 98.1, 0.5)
-    """)
+    """
+    )
 
     # Create silver.heart_rate
-    con.execute("""
+    con.execute(
+        """
         CREATE TABLE silver.heart_rate (
             sk_date INTEGER, sk_time VARCHAR,
             timestamp TIMESTAMP, bpm INTEGER, source_name VARCHAR,
             business_key_hash VARCHAR, row_hash VARCHAR,
             load_datetime TIMESTAMP, update_datetime TIMESTAMP
         )
-    """)
-    con.execute("""
+    """
+    )
+    con.execute(
+        """
         INSERT INTO silver.heart_rate (sk_date, timestamp, bpm, source_name)
         VALUES
             (20260301, '2026-03-01 03:00:00', 52, 'Oura Ring'),
@@ -145,10 +290,12 @@ def seeded_db(memory_db):
             (20260302, '2026-03-02 03:00:00', 55, 'Oura Ring'),
             (20260302, '2026-03-02 14:00:00', 85, 'Apple Watch'),
             (20260303, '2026-03-03 03:00:00', 50, 'Oura Ring')
-    """)
+    """
+    )
 
     # Create silver.weight
-    con.execute("""
+    con.execute(
+        """
         CREATE TABLE silver.weight (
             sk_date INTEGER, sk_time VARCHAR,
             datetime TIMESTAMP, weight_kg DOUBLE,
@@ -157,26 +304,33 @@ def seeded_db(memory_db):
             business_key_hash VARCHAR, row_hash VARCHAR,
             load_datetime TIMESTAMP, update_datetime TIMESTAMP
         )
-    """)
-    con.execute("""
+    """
+    )
+    con.execute(
+        """
         INSERT INTO silver.weight (sk_date, datetime, weight_kg, fat_mass_kg, muscle_mass_kg)
         VALUES
             (20260301, '2026-03-01 07:00:00', 82.5, 15.2, 38.1),
             (20260303, '2026-03-03 07:00:00', 82.3, 15.0, 38.3)
-    """)
+    """
+    )
 
     # Create silver.personal_info
-    con.execute("""
+    con.execute(
+        """
         CREATE TABLE silver.personal_info (
             age INTEGER, weight_kg DOUBLE, height_m DOUBLE,
             biological_sex VARCHAR, email VARCHAR,
             business_key_hash VARCHAR, row_hash VARCHAR,
             load_datetime TIMESTAMP, update_datetime TIMESTAMP
         )
-    """)
-    con.execute("""
+    """
+    )
+    con.execute(
+        """
         INSERT INTO silver.personal_info (age, weight_kg, height_m, biological_sex, email)
         VALUES (45, 75.0, 1.78, 'male', 'test@example.com')
-    """)
+    """
+    )
 
     yield con
