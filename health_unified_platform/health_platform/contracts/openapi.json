@@ -1,0 +1,515 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Health Data API",
+    "description": "Personal health data access via Tailscale VPN",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "tags": [
+          "ui"
+        ],
+        "summary": "Chat Ui",
+        "description": "Serve the mobile chat interface.",
+        "operationId": "chat_ui__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/ingest/apple-health": {
+      "post": {
+        "tags": [
+          "ingest"
+        ],
+        "summary": "Ingest Apple Health",
+        "description": "Receive and persist a Health Auto Export JSON payload.\n\nExpected JSON structure:\n    {\"data\": {\"metrics\": [{\"name\": \"...\", \"units\": \"...\", \"data\": [...]}]}}\n\nReturns:\n    {\"status\": \"ok\", \"records_written\": N, \"files_created\": N}",
+        "operationId": "ingest_apple_health_v1_ingest_apple_health_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/mobile/sync": {
+      "get": {
+        "tags": [
+          "mobile"
+        ],
+        "summary": "Sync",
+        "description": "Bulk data sync for mobile app.\n\nReturns all dashboard metrics, patient profile, alerts, and daily\nsummaries in a single response. Replaces 4+ separate API calls.",
+        "operationId": "sync_v1_mobile_sync_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "since",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "ISO timestamp \u2014 sync data since this point. Defaults to 30 days ago.",
+              "title": "Since"
+            },
+            "description": "ISO timestamp \u2014 sync data since this point. Defaults to 30 days ago."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/mobile/thresholds": {
+      "get": {
+        "tags": [
+          "mobile"
+        ],
+        "summary": "Thresholds",
+        "description": "Metric threshold definitions for UI coloring.\n\nParses all YAML semantic contracts and returns the thresholds\nsection for each metric. Loaded once by the mobile app, cached\nindefinitely on-device.",
+        "operationId": "thresholds_v1_mobile_thresholds_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Health Check",
+        "description": "Health check endpoint (no auth required).",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/chat": {
+      "post": {
+        "tags": [
+          "ai"
+        ],
+        "summary": "Chat",
+        "description": "Ask a natural language health question.\n\nUses Claude AI to interpret the question and generate insights\nfrom the user's real health data.",
+        "operationId": "chat_v1_chat_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/query": {
+      "get": {
+        "tags": [
+          "data"
+        ],
+        "summary": "Query",
+        "description": "Query a specific health metric directly.",
+        "operationId": "query_v1_query_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "metric",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Metric name (e.g., sleep_score, steps)",
+              "title": "Metric"
+            },
+            "description": "Metric name (e.g., sleep_score, steps)"
+          },
+          {
+            "name": "date_range",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Date range (last_7_days, last_30_days, etc.)",
+              "default": "last_7_days",
+              "title": "Date Range"
+            },
+            "description": "Date range (last_7_days, last_30_days, etc.)"
+          },
+          {
+            "name": "computation",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Computation type (daily_value, period_average, trend)",
+              "default": "daily_value",
+              "title": "Computation"
+            },
+            "description": "Computation type (daily_value, period_average, trend)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueryResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/profile": {
+      "get": {
+        "tags": [
+          "data"
+        ],
+        "summary": "Profile",
+        "description": "Load patient profile (core memory).",
+        "operationId": "profile_v1_profile_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "categories",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated categories to filter",
+              "default": "",
+              "title": "Categories"
+            },
+            "description": "Comma-separated categories to filter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/alerts": {
+      "get": {
+        "tags": [
+          "intelligence"
+        ],
+        "summary": "Alerts",
+        "description": "Get proactive health alerts.\n\nChecks for anomalies in recent data based on business rules.",
+        "operationId": "alerts_v1_alerts_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertsResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AlertsResponse": {
+        "properties": {
+          "alerts": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Alerts"
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "alerts",
+          "timestamp"
+        ],
+        "title": "AlertsResponse"
+      },
+      "ChatRequest": {
+        "properties": {
+          "question": {
+            "type": "string",
+            "maxLength": 2000,
+            "title": "Question",
+            "description": "Natural language health question"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "plain"
+            ],
+            "title": "Format",
+            "description": "Output format: markdown or plain",
+            "default": "markdown"
+          }
+        },
+        "type": "object",
+        "required": [
+          "question"
+        ],
+        "title": "ChatRequest"
+      },
+      "ChatResponse": {
+        "properties": {
+          "answer": {
+            "type": "string",
+            "title": "Answer"
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "answer",
+          "timestamp"
+        ],
+        "title": "ChatResponse"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "QueryResponse": {
+        "properties": {
+          "result": {
+            "type": "string",
+            "title": "Result"
+          },
+          "metric": {
+            "type": "string",
+            "title": "Metric"
+          },
+          "date_range": {
+            "type": "string",
+            "title": "Date Range"
+          },
+          "computation": {
+            "type": "string",
+            "title": "Computation"
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "result",
+          "metric",
+          "date_range",
+          "computation",
+          "timestamp"
+        ],
+        "title": "QueryResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

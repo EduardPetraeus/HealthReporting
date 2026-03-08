@@ -1,0 +1,249 @@
+# Cross-layer interface definitions
+# All agents read, none modify. Contract gaps go to /tmp/{domain}-needs.md
+#
+# Authoritative source for data shapes across desktop, export, databricks,
+# and mobile consumers. Each section defines what a consumer expects to
+# receive — not what the producer internally stores.
+
+version: "1.0"
+
+# ---------------------------------------------------------------------------
+# Desktop App (pywebview native)
+# ---------------------------------------------------------------------------
+desktop:
+  dashboard_data:
+    description: "Shape returned by DesktopAPI.get_dashboard_data()"
+    fields:
+      - { name: timestamp, type: str, description: "ISO date of data snapshot" }
+      - name: health_score
+        type: object
+        fields:
+          - { name: score, type: "float | null", range: "0-100" }
+          - { name: status, type: str, enum: [excellent, good, fair, poor, unknown] }
+          - { name: day, type: "str | null", description: "ISO date" }
+          - name: components
+            type: object
+            fields:
+              - { name: sleep, type: "int | null" }
+              - { name: readiness, type: "int | null" }
+              - { name: activity, type: "int | null" }
+      - name: kpis
+        type: object
+        description: "Latest values for sleep_score, readiness_score, steps, resting_hr"
+        item_shape:
+          - { name: label, type: str }
+          - { name: value, type: "float | null" }
+          - { name: day, type: "str | null" }
+          - { name: unit, type: str }
+      - name: sparklines
+        type: "dict[str → list[{day: str, value: float}]]"
+        description: "7-day data series for each KPI"
+        keys: [sleep_score, readiness_score, steps, resting_hr]
+      - name: trends
+        type: object
+        description: "30-day overlay data for sleep + readiness"
+        fields:
+          - { name: days, type: "list[str]" }
+          - { name: sleep, type: "list[int | null]" }
+          - { name: readiness, type: "list[int | null]" }
+      - name: alerts
+        type: "list[object]"
+        item_shape:
+          - { name: type, type: str, enum: [warning, info, critical] }
+          - { name: metric, type: str }
+          - { name: message, type: str }
+
+  chat_response:
+    description: "Shape returned by DesktopAPI.chat()"
+    type: str
+    notes: "Plain text or markdown string streamed via evaluate_js()"
+
+  report_output:
+    description: "PDF report generated from gold data (NEW — D2 S3)"
+    format: PDF
+    sections:
+      - summary          # composite health score + status
+      - vitals           # fct_daily_vitals_summary
+      - sleep            # fct_sleep_session + silver.daily_sleep
+      - activity         # fct_daily_health_score (steps, calories, workouts)
+      - nutrition         # fct_daily_nutrition
+      - trends           # 30-day trend charts
+      - alerts           # business rule violations
+    data_sources:
+      - gold.fct_daily_health_score
+      - gold.fct_daily_vitals_summary
+      - gold.fct_sleep_session
+      - gold.fct_daily_nutrition
+      - gold.fct_body_measurement
+      - contracts/metrics/*.yml
+
+# ---------------------------------------------------------------------------
+# Clinician Export (NEW — D3)
+# ---------------------------------------------------------------------------
+clinician_export:
+  fhir_bundle:
+    description: "FHIR R4 Bundle for clinical data exchange"
+    format: "FHIR R4 Bundle (JSON)"
+    resources:
+      - resourceType: Patient
+        source: agent.patient_profile
+        mapping: "name, gender, birthDate from patient_profile rows"
+      - resourceType: Observation
+        source: "gold.fct_daily_health_score, gold.fct_daily_vitals_summary"
+        categories:
+          - vital-signs        # HR, BP, SpO2, temperature, respiratory rate
+          - activity           # steps, calories, workouts
+          - sleep              # sleep score, duration, stages
+        coding_system: "http://loinc.org"
+      - resourceType: DiagnosticReport
+        source: "gold.fct_lab_result"
+        mapping: "lab_biomarkers.yml metric definitions → LOINC codes"
+    validation: "FHIR R4 StructureDefinition compliance"
+
+  pdf_report:
+    description: "Clinical-grade PDF report for healthcare providers"
+    format: PDF
+    sections:
+      - patient_info       # from agent.patient_profile
+      - vitals_summary     # fct_daily_vitals_summary (last 30d)
+      - lab_results        # fct_lab_result
+      - trend_analysis     # 90-day trends for key vitals
+      - medication_list    # silver.supplement_log (supplements as medications)
+    data_sources:
+      - agent.patient_profile
+      - gold.fct_daily_vitals_summary
+      - gold.fct_lab_result
+      - gold.fct_daily_health_score
+      - silver.supplement_log
+      - contracts/metrics/lab_biomarkers.yml
+
+  api_endpoints:
+    - path: /v1/export/fhir
+      method: GET
+      params:
+        - { name: start_date, type: str, description: "ISO date" }
+        - { name: end_date, type: str, description: "ISO date" }
+        - { name: resources, type: str, description: "Comma-separated: Patient,Observation,DiagnosticReport" }
+      response: "FHIR R4 Bundle JSON"
+      auth: Bearer token
+
+    - path: /v1/export/pdf
+      method: GET
+      params:
+        - { name: start_date, type: str, description: "ISO date" }
+        - { name: end_date, type: str, description: "ISO date" }
+        - { name: sections, type: str, description: "Comma-separated section names" }
+      response: "application/pdf"
+      auth: Bearer token
+
+# ---------------------------------------------------------------------------
+# Databricks Cloud (E1)
+# ---------------------------------------------------------------------------
+databricks:
+  silver_expectations:
+    description: "What Databricks Silver (DLT) expects — ported from local dbt models"
+    tables_required:
+      # Core — already in Databricks silver/sql/ (11 files)
+      - silver.daily_sleep
+      - silver.daily_readiness
+      - silver.daily_activity
+      - silver.heart_rate
+      - silver.oura_heart_rate
+      - silver.blood_oxygen
+      - silver.blood_pressure
+      - silver.weight
+      - silver.daily_meal
+      - silver.daily_annotations
+      # Additional — port from local dbt (36 remaining)
+      - silver.step_count
+      - silver.daily_stress
+      - silver.workout
+      - silver.daily_spo2
+      - silver.body_temperature
+      - silver.resting_heart_rate
+      - silver.water_intake
+      - silver.daily_walking_gait
+      - silver.mindful_session
+      - silver.respiratory_rate
+      - silver.toothbrushing
+      - silver.supplement_log
+      - silver.lab_results
+      - silver.daily_energy_by_source
+      - silver.hrv
+      - silver.ecg_session
+      - silver.vo2_max
+      - silver.daily_resilience
+      - silver.daily_meal
+      - silver.hand_washing
+      - silver.flights_climbed
+    schema_source: "Local dbt models in transformation_logic/dbt/models/silver/"
+    merge_source: "Local merge scripts in transformation_logic/dbt/merge/silver/"
+    format: "Delta tables via DLT (converted from DuckDB SQL)"
+
+  gold_views:
+    description: "Databricks Gold layer — Kimball star schema"
+    dimensions:
+      - gold.dim_date
+      - gold.dim_source
+      - gold.dim_metric
+      - gold.dim_body_system
+      - gold.dim_health_zone
+      - gold.dim_meal_type
+      - gold.dim_supplement
+      - gold.dim_time_of_day
+      - gold.dim_workout_type
+      - gold.dim_lab_marker
+    facts:
+      - gold.fct_daily_health_score
+      - gold.fct_daily_vitals_summary
+      - gold.fct_daily_heart_rate_summary
+      - gold.fct_daily_nutrition
+      - gold.fct_body_measurement
+      - gold.fct_lab_result
+      - gold.fct_sleep_session
+      - gold.fct_workout
+    grain: "one row per day (daily facts), one row per event (session facts)"
+    local_source: "transformation_logic/gold/sql/"
+
+  bronze_sources:
+    description: "Autoloader landing zone — parquet → Delta"
+    config_source: "health_environment/config/sources_config.yaml"
+    format: "Parquet → Delta via Auto Loader"
+    catalog: health_dw
+    schemas: [bronze, silver, gold]
+
+# ---------------------------------------------------------------------------
+# Mobile App (Laege i Lommen)
+# ---------------------------------------------------------------------------
+mobile:
+  sync_response:
+    description: "Shape returned by GET /v1/mobile/sync"
+    fields:
+      - name: metrics
+        type: "dict[str → list[dict]]"
+        keys: [sleep_score, readiness_score, steps, activity_score, resting_heart_rate, weight, daily_stress]
+        item_shape: "varies by metric — see _SYNC_METRICS in routes/mobile.py"
+      - name: profile
+        type: "dict[category → dict[key → value]]"
+        source: agent.patient_profile
+      - name: alerts
+        type: "list[{day: str, anomaly_metrics: str}]"
+        source: "agent.daily_summaries WHERE has_anomaly = true"
+      - name: daily_summaries
+        type: "list[{day: str, summary_text: str}]"
+        source: agent.daily_summaries
+      - { name: sync_timestamp, type: str, description: "ISO datetime" }
+
+  thresholds_response:
+    description: "Shape returned by GET /v1/mobile/thresholds"
+    fields:
+      - name: thresholds
+        type: "dict[metric_name → threshold_definition]"
+        source: "contracts/metrics/*.yml → thresholds section"
+      - { name: metric_count, type: int }
+      - { name: timestamp, type: str }
+
+  auth:
+    method: "Bearer token"
+    header: "Authorization: Bearer <token>"
+    token_source: "claude.keychain-db → HEALTH_API_TOKEN"

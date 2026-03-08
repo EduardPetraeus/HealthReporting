@@ -1,0 +1,107 @@
+# Data model definitions for cross-layer consumers
+# Supplements the per-metric contracts in contracts/metrics/
+#
+# Defines schemas for patient profile, daily summaries, and auth —
+# data structures consumed by desktop, mobile, and export layers.
+
+version: "1.0"
+
+# ---------------------------------------------------------------------------
+# Patient Profile (agent.patient_profile)
+# ---------------------------------------------------------------------------
+patient_profile:
+  description: "Core patient identity and context. Always in AI context (~2000 tokens)."
+  table: agent.patient_profile
+  grain: "one row per (category, profile_key)"
+  columns:
+    - { name: category, type: VARCHAR, required: true, description: "Grouping: demographics, medical_history, lifestyle, goals, preferences" }
+    - { name: profile_key, type: VARCHAR, required: true, description: "Key within category" }
+    - { name: profile_value, type: TEXT, required: true, description: "Value as text" }
+    - { name: updated_at, type: TIMESTAMP, required: false, description: "Last update time" }
+
+  required_categories:
+    demographics:
+      required_keys: [name, birth_date, gender, height_cm, weight_kg]
+      optional_keys: [blood_type, nationality]
+    medical_history:
+      required_keys: []
+      optional_keys: [conditions, medications, allergies, surgeries, family_history]
+    lifestyle:
+      required_keys: []
+      optional_keys: [exercise_frequency, diet_type, sleep_target_hours, stress_level]
+    goals:
+      required_keys: []
+      optional_keys: [primary_goal, target_weight, target_steps, target_sleep_score]
+    preferences:
+      required_keys: [language, units]
+      optional_keys: [notification_frequency, report_format]
+
+  consumers:
+    - desktop (DesktopAPI.get_dashboard_data → health_score context)
+    - mobile (GET /v1/mobile/sync → profile section)
+    - export (FHIR Patient resource mapping)
+    - chat_engine (system prompt context)
+
+# ---------------------------------------------------------------------------
+# Daily Summary (agent.daily_summaries)
+# ---------------------------------------------------------------------------
+daily_summary:
+  description: "One-row-per-day health digest with AI-generated narrative and embeddings."
+  table: agent.daily_summaries
+  grain: "one row per day"
+  columns:
+    - { name: day, type: DATE, required: true, description: "Calendar date" }
+    - { name: summary_text, type: TEXT, required: true, description: "AI-generated natural language summary" }
+    - { name: embedding, type: "FLOAT[]", required: false, description: "Sentence-transformer embedding for vector search" }
+    - { name: has_anomaly, type: BOOLEAN, required: false, description: "True if any metric had z-score > 2.0" }
+    - { name: anomaly_metrics, type: TEXT, required: false, description: "Comma-separated metric names with anomalies" }
+    - { name: created_at, type: TIMESTAMP, required: false, description: "Row creation time" }
+
+  consumers:
+    - mobile (GET /v1/mobile/sync → daily_summaries section)
+    - desktop (chat context via search_memory)
+    - export (clinical report trend narrative)
+
+# ---------------------------------------------------------------------------
+# Auth Token Contract
+# ---------------------------------------------------------------------------
+auth:
+  description: "Bearer token authentication for all API endpoints."
+  method: "HTTP Bearer"
+  header: "Authorization"
+  header_format: "Bearer <token>"
+  token_resolution:
+    priority:
+      1: "macOS Keychain: claude.keychain-db → service=HEALTH_API_TOKEN, account=claude"
+      2: "Environment variable: HEALTH_API_TOKEN"
+      3: "Auto-generated ephemeral (dev only — logged as warning)"
+    implementation: "health_platform/api/auth.py → get_api_token()"
+  endpoints_requiring_auth:
+    - "POST /v1/chat"
+    - "GET /v1/query"
+    - "GET /v1/profile"
+    - "GET /v1/alerts"
+    - "POST /v1/ingest/apple-health"
+    - "GET /v1/mobile/sync"
+    - "GET /v1/mobile/thresholds"
+    - "GET /v1/export/fhir"    # NEW (D3)
+    - "GET /v1/export/pdf"     # NEW (D3)
+  no_auth:
+    - "GET /health"
+    - "GET / (chat UI)"
+
+# ---------------------------------------------------------------------------
+# Chat History (agent.chat_history)
+# ---------------------------------------------------------------------------
+chat_history:
+  description: "Persisted chat messages for multi-turn conversation context."
+  table: agent.chat_history
+  grain: "one row per message"
+  columns:
+    - { name: id, type: VARCHAR, required: true, description: "UUID primary key" }
+    - { name: session_id, type: VARCHAR, required: true, description: "Session grouping" }
+    - { name: role, type: VARCHAR, required: true, enum: [user, assistant] }
+    - { name: content, type: TEXT, required: true }
+    - { name: timestamp, type: TIMESTAMP, required: true }
+  consumers:
+    - desktop (DesktopAPI.get_chat_history, _build_message_history)
