@@ -4,18 +4,19 @@
     )
 }}
 
--- Schema-only definition for silver.blood_pressure_v2.
--- Run once with: dbt run --select blood_pressure_v2
+-- Schema-only definition for silver.enhanced_tag.
+-- Run once with: dbt run --select enhanced_tag
 -- Data is loaded by per-source merge scripts in dbt/merge/silver/.
--- Note: replaces silver.blood_pressure (Withings-only) in A7.
 
 select
     null::integer    as sk_date,
-    null::varchar    as sk_time,
-    null::timestamp  as timestamp,
-    null::double     as systolic_mmhg,
-    null::double     as diastolic_mmhg,
-    null::double     as pulse_bpm,
+    null::date       as start_day,
+    null::varchar    as start_time,
+    null::date       as end_day,
+    null::varchar    as end_time,
+    null::varchar    as tag_type_code,
+    null::varchar    as custom_tag_name,
+    null::varchar    as comment,
     null::varchar    as source_name,
     null::varchar    as business_key_hash,
     null::varchar    as row_hash,

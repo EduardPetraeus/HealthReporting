@@ -4,18 +4,18 @@
     )
 }}
 
--- Schema-only definition for silver.blood_pressure_v2.
--- Run once with: dbt run --select blood_pressure_v2
+-- Schema-only definition for silver.daytime_stress.
+-- Run once with: dbt run --select daytime_stress
 -- Data is loaded by per-source merge scripts in dbt/merge/silver/.
--- Note: replaces silver.blood_pressure (Withings-only) in A7.
 
 select
     null::integer    as sk_date,
-    null::varchar    as sk_time,
-    null::timestamp  as timestamp,
-    null::double     as systolic_mmhg,
-    null::double     as diastolic_mmhg,
-    null::double     as pulse_bpm,
+    null::date       as date,
+    null::double     as avg_stress,
+    null::double     as max_stress,
+    null::double     as avg_recovery,
+    null::double     as max_recovery,
+    null::integer    as sample_count,
     null::varchar    as source_name,
     null::varchar    as business_key_hash,
     null::varchar    as row_hash,

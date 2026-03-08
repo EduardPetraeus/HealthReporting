@@ -28,6 +28,16 @@ ENDPOINT_METHODS: dict[str, str] = {
     "workout": "fetch_workout",
     "daily_spo2": "fetch_daily_spo2",
     "daily_stress": "fetch_daily_stress",
+    "daily_cardiovascular_age": "fetch_daily_cardiovascular_age",
+    "daily_resilience": "fetch_daily_resilience",
+    "sleep_time": "fetch_sleep_time",
+    "enhanced_tag": "fetch_enhanced_tag",
+    "vo2_max": "fetch_vo2_max",
+    "session": "fetch_session",
+    "tag": "fetch_tag",
+    "rest_mode_period": "fetch_rest_mode_period",
+    "ring_configuration": "fetch_ring_configuration",
+    "sleep": "fetch_sleep",
 }
 
 
@@ -112,7 +122,7 @@ class OuraClient(BaseConnector):
         }
 
     # ------------------------------------------------------------------
-    # Endpoints
+    # Endpoints — original 7
     # ------------------------------------------------------------------
 
     def fetch_daily_sleep(self, start: date, end: date) -> list[dict]:
@@ -131,8 +141,8 @@ class OuraClient(BaseConnector):
         )
 
     def fetch_heartrate(self, start: date, end: date) -> list[dict]:
-        """
-        Heart rate uses full datetime range and must be fetched in chunks.
+        """Heart rate uses full datetime range and must be fetched in chunks.
+
         Oura rejects ranges larger than ~7 days for this high-frequency endpoint.
         """
         from datetime import timedelta
@@ -171,3 +181,67 @@ class OuraClient(BaseConnector):
         response = self.session.get(f"{BASE_URL}/v2/usercollection/personal_info")
         response.raise_for_status()
         return response.json()
+
+    # ------------------------------------------------------------------
+    # Endpoints — DS1 expansion (10 new)
+    # ------------------------------------------------------------------
+
+    def fetch_daily_cardiovascular_age(self, start: date, end: date) -> list[dict]:
+        return self._get_collection(
+            "/v2/usercollection/daily_cardiovascular_age",
+            self._date_params(start, end),
+        )
+
+    def fetch_daily_resilience(self, start: date, end: date) -> list[dict]:
+        return self._get_collection(
+            "/v2/usercollection/daily_resilience",
+            self._date_params(start, end),
+        )
+
+    def fetch_sleep_time(self, start: date, end: date) -> list[dict]:
+        return self._get_collection(
+            "/v2/usercollection/sleep_time",
+            self._date_params(start, end),
+        )
+
+    def fetch_enhanced_tag(self, start: date, end: date) -> list[dict]:
+        return self._get_collection(
+            "/v2/usercollection/enhanced_tag",
+            self._date_params(start, end),
+        )
+
+    def fetch_vo2_max(self, start: date, end: date) -> list[dict]:
+        return self._get_collection(
+            "/v2/usercollection/vo2_max",
+            self._date_params(start, end),
+        )
+
+    def fetch_session(self, start: date, end: date) -> list[dict]:
+        return self._get_collection(
+            "/v2/usercollection/session",
+            self._date_params(start, end),
+        )
+
+    def fetch_tag(self, start: date, end: date) -> list[dict]:
+        return self._get_collection(
+            "/v2/usercollection/tag",
+            self._date_params(start, end),
+        )
+
+    def fetch_rest_mode_period(self, start: date, end: date) -> list[dict]:
+        return self._get_collection(
+            "/v2/usercollection/rest_mode_period",
+            self._date_params(start, end),
+        )
+
+    def fetch_ring_configuration(self, start: date, end: date) -> list[dict]:
+        return self._get_collection(
+            "/v2/usercollection/ring_configuration",
+            self._date_params(start, end),
+        )
+
+    def fetch_sleep(self, start: date, end: date) -> list[dict]:
+        return self._get_collection(
+            "/v2/usercollection/sleep",
+            self._date_params(start, end),
+        )

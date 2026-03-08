@@ -33,13 +33,23 @@ END_DATE = date.today()
 # (endpoint_name, client_method, date_field_in_response)
 # date_field is used to determine the partition date for each record
 ENDPOINTS: list[tuple[str, str, str]] = [
-    ("daily_sleep",     "fetch_daily_sleep",     "day"),
-    ("daily_activity",  "fetch_daily_activity",  "day"),
+    ("daily_sleep", "fetch_daily_sleep", "day"),
+    ("daily_activity", "fetch_daily_activity", "day"),
     ("daily_readiness", "fetch_daily_readiness", "day"),
-    ("heartrate",       "fetch_heartrate",       "timestamp"),
-    ("workout",         "fetch_workout",         "day"),
-    ("daily_spo2",      "fetch_daily_spo2",      "day"),
-    ("daily_stress",    "fetch_daily_stress",    "day"),
+    ("heartrate", "fetch_heartrate", "timestamp"),
+    ("workout", "fetch_workout", "day"),
+    ("daily_spo2", "fetch_daily_spo2", "day"),
+    ("daily_stress", "fetch_daily_stress", "day"),
+    ("daily_cardiovascular_age", "fetch_daily_cardiovascular_age", "day"),
+    ("daily_resilience", "fetch_daily_resilience", "day"),
+    ("sleep_time", "fetch_sleep_time", "day"),
+    ("enhanced_tag", "fetch_enhanced_tag", "timestamp"),
+    ("vo2_max", "fetch_vo2_max", "day"),
+    ("session", "fetch_session", "day"),
+    ("tag", "fetch_tag", "timestamp"),
+    ("rest_mode_period", "fetch_rest_mode_period", "start_day"),
+    ("ring_configuration", "fetch_ring_configuration", "set_date"),
+    ("sleep", "fetch_sleep", "day"),
 ]
 
 
@@ -51,7 +61,9 @@ def _normalize_records(endpoint_name: str, records: list[dict]) -> list[dict]:
     if endpoint_name == "daily_spo2":
         for r in records:
             spo2 = r.get("spo2_percentage")
-            r["spo2_percentage"] = {"average": spo2.get("average") if isinstance(spo2, dict) else None}
+            r["spo2_percentage"] = {
+                "average": spo2.get("average") if isinstance(spo2, dict) else None
+            }
     return records
 
 
@@ -65,7 +77,6 @@ def main() -> None:
 
         # Fetch all dated endpoints
         for endpoint_name, method_name, date_field in ENDPOINTS:
-
             start_date = get_start_date(endpoint_name, state)
 
             if start_date > END_DATE:
@@ -89,8 +100,12 @@ def main() -> None:
         # personal_info has no date range — always refresh
         logger.info("personal_info: fetching...")
         personal_info = client.fetch_personal_info()
-        write_records([personal_info], "personal_info", date_field="", source_env=SOURCE_ENV)
-        audit.log_table("oura.personal_info", "WRITE_PARQUET", rows_after=1, status="success")
+        write_records(
+            [personal_info], "personal_info", date_field="", source_env=SOURCE_ENV
+        )
+        audit.log_table(
+            "oura.personal_info", "WRITE_PARQUET", rows_after=1, status="success"
+        )
 
         save_state(state)
 
