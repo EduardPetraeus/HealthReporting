@@ -13,11 +13,16 @@ import time
 from pathlib import Path
 from unittest.mock import patch
 
-import pytest
 
 # Connector root paths
 _REPO_ROOT = Path(__file__).resolve().parents[1]
-_WITHINGS_DIR = _REPO_ROOT / "health_unified_platform" / "health_platform" / "source_connectors" / "withings"
+_WITHINGS_DIR = (
+    _REPO_ROOT
+    / "health_unified_platform"
+    / "health_platform"
+    / "source_connectors"
+    / "withings"
+)
 _PLATFORM_DIR = _REPO_ROOT / "health_unified_platform" / "health_platform"
 
 # Ensure platform utils are importable
@@ -55,7 +60,7 @@ class TestWithingsClient:
         assert "weight" in endpoints
         assert "blood_pressure" in endpoints
         assert "temperature" in endpoints
-        assert len(endpoints) == 3
+        assert len(endpoints) == 6
 
     def test_measure_types_defined(self) -> None:
         assert "weight_kg" in withings_client.MEASURE_TYPES
@@ -84,14 +89,19 @@ class TestWithingsAuth:
         assert str(withings_auth.TOKEN_FILE).startswith(str(Path.home()))
         assert "withings_tokens.json" in str(withings_auth.TOKEN_FILE)
         # Must NOT contain hardcoded /Users/ path
-        assert "/Users/" not in str(withings_auth.TOKEN_FILE).replace(str(Path.home()), "")
+        assert "/Users/" not in str(withings_auth.TOKEN_FILE).replace(
+            str(Path.home()), ""
+        )
 
     def test_config_dir_path(self) -> None:
         expected = Path.home() / ".config" / "health_reporting"
         assert withings_auth.CONFIG_DIR == expected
 
     def test_authorize_url(self) -> None:
-        assert withings_auth.AUTHORIZE_URL == "https://account.withings.com/oauth2_user/authorize2"
+        assert (
+            withings_auth.AUTHORIZE_URL
+            == "https://account.withings.com/oauth2_user/authorize2"
+        )
 
     def test_token_url(self) -> None:
         assert withings_auth.TOKEN_URL == "https://wbsapi.withings.net/v2/oauth2"
@@ -119,9 +129,12 @@ class TestWithingsAuth:
 
     def test_save_tokens_creates_file(self, tmp_path: Path) -> None:
         test_file = tmp_path / "test_tokens.json"
-        with patch.object(withings_auth, "TOKEN_FILE", test_file), \
-             patch.object(withings_auth, "CONFIG_DIR", tmp_path):
-            withings_auth._save_tokens({"access_token": "test", "expires_at": 9999999999})
+        with patch.object(withings_auth, "TOKEN_FILE", test_file), patch.object(
+            withings_auth, "CONFIG_DIR", tmp_path
+        ):
+            withings_auth._save_tokens(
+                {"access_token": "test", "expires_at": 9999999999}
+            )
             assert test_file.exists()
             data = json.loads(test_file.read_text())
             assert data["access_token"] == "test"
