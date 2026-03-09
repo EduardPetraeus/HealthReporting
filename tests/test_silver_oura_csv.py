@@ -14,8 +14,10 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-import pytest
 import duckdb
+import pytest
+
+pytestmark = pytest.mark.integration
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "health_unified_platform"))
 from health_platform.utils.paths import get_db_path  # noqa: E402
@@ -78,8 +80,7 @@ class TestOuraCsvSkDateRange:
     @pytest.mark.parametrize("table", OURA_CSV_TABLES)
     def test_sk_date_in_range(self, db, table):
         out_of_range = db.execute(
-            f"SELECT COUNT(*) FROM silver.{table} "
-            f"WHERE sk_date < 20100101 OR sk_date > 20261231"
+            f"SELECT COUNT(*) FROM silver.{table} WHERE sk_date < 20100101 OR sk_date > 20261231"
         ).fetchone()[0]
         assert (
             out_of_range == 0

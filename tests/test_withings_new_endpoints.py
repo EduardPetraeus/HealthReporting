@@ -7,14 +7,12 @@ from datetime import date
 from pathlib import Path
 from unittest.mock import patch
 
-
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "health_unified_platform"))
 
 from health_platform.source_connectors.withings.client import WithingsClient
 
 
 class TestSleepSummary:
-
     def test_returns_flattened_records(self):
         client = WithingsClient(access_token="test-token")
         mock_body = {
@@ -50,7 +48,6 @@ class TestSleepSummary:
 
 
 class TestSleepRaw:
-
     def test_returns_sensor_arrays(self):
         client = WithingsClient(access_token="test-token")
         mock_body = {
@@ -76,7 +73,6 @@ class TestSleepRaw:
 
 
 class TestHeartList:
-
     def test_returns_ecg_metadata(self):
         client = WithingsClient(access_token="test-token")
         mock_body = {
@@ -100,7 +96,6 @@ class TestHeartList:
 
 
 class TestHeartSignal:
-
     def test_returns_signal_body(self):
         client = WithingsClient(access_token="test-token")
         mock_body = {
@@ -115,11 +110,10 @@ class TestHeartSignal:
 
 
 class TestGetEndpoints:
-
     def test_endpoint_count(self):
         client = WithingsClient(access_token="test-token")
         endpoints = client.get_endpoints()
-        assert len(endpoints) == 6
+        assert len(endpoints) == 9
 
     def test_new_endpoints_included(self):
         client = WithingsClient(access_token="test-token")

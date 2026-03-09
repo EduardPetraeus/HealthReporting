@@ -7,7 +7,6 @@ from pathlib import Path
 import pytest
 import yaml
 
-
 CONTRACTS_DIR = (
     Path(__file__).resolve().parents[1]
     / "health_unified_platform"
@@ -115,10 +114,16 @@ class TestMetricContracts:
     """Test individual metric contract files."""
 
     def _get_metric_files(self):
-        """List all metric YAML files (excluding _ prefixed)."""
+        """List all metric YAML files (excluding _ prefixed and non-metric files)."""
         if not CONTRACTS_DIR.exists():
             return []
-        return [f for f in CONTRACTS_DIR.glob("*.yml") if not f.name.startswith("_")]
+        # gold_views.yml is a gold layer index, not a metric contract
+        excluded = {"gold_views.yml"}
+        return [
+            f
+            for f in CONTRACTS_DIR.glob("*.yml")
+            if not f.name.startswith("_") and f.name not in excluded
+        ]
 
     def test_metric_files_exist(self):
         """At least 10 metric contract files exist."""

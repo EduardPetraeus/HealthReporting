@@ -129,7 +129,9 @@ def extended_db(memory_db):
         steps = 4500 + i * 50  # Low steps, gradually increasing
         active_cal = 200 + i * 2
         con.execute(
-            "INSERT INTO silver.daily_activity (day, activity_score, steps, active_calories) VALUES (?, ?, ?, ?)",
+            "INSERT INTO silver.daily_activity "
+            "(day, activity_score, steps, active_calories) "
+            "VALUES (?, ?, ?, ?)",
             [d, 70 + i % 10, steps, active_cal],
         )
 
@@ -167,7 +169,9 @@ def extended_db(memory_db):
     for i in range(30):
         d = date.today() - timedelta(days=30 - i)
         con.execute(
-            "INSERT INTO silver.daily_spo2 (day, spo2_avg_pct, breathing_disturbance_index) VALUES (?, ?, ?)",
+            "INSERT INTO silver.daily_spo2 "
+            "(day, spo2_avg_pct, breathing_disturbance_index) "
+            "VALUES (?, ?, ?)",
             [d, 97.0 + (i % 3) * 0.5, 0.5 + (i % 5) * 0.2],
         )
 
@@ -608,7 +612,10 @@ class TestRecommendationEngine:
         )
         memory_db.execute(
             """
-            CREATE TABLE silver.daily_activity (day DATE, steps INTEGER, active_calories INTEGER, activity_score INTEGER)
+            CREATE TABLE silver.daily_activity (
+                day DATE, steps INTEGER,
+                active_calories INTEGER, activity_score INTEGER
+            )
         """
         )
         memory_db.execute(
@@ -698,7 +705,7 @@ class TestMCPToolIntegration:
 
         tools = HealthTools(extended_db)
         result = tools.forecast_metric(
-            "silver.daily_sleep",
+            "daily_sleep",
             "sleep_score",
             lookback_days=90,
             forecast_days=7,

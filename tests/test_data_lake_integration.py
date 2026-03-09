@@ -18,6 +18,8 @@ import pyarrow.parquet as pq
 import pytest
 import yaml
 
+pytestmark = pytest.mark.integration
+
 # Ensure platform utils are importable
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 _PLATFORM_DIR = _REPO_ROOT / "health_unified_platform"

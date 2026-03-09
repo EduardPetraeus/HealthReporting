@@ -4,6 +4,9 @@ Validates Withings-only silver tables:
 - ecg_session (from Withings signal/ECG CSV)
 - pulse_wave_velocity (from Withings PWV CSV)
 - body_temperature feed check (Withings rows in shared table)
+
+These are integration tests that require exclusive access to the DuckDB database.
+Run with: pytest -m integration tests/test_silver_withings.py
 """
 
 from __future__ import annotations
@@ -11,11 +14,13 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-import pytest
 import duckdb
+import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "health_unified_platform"))
 from health_platform.utils.paths import get_db_path  # noqa: E402
+
+pytestmark = pytest.mark.integration
 
 WITHINGS_TABLES = [
     "ecg_session",
@@ -71,8 +76,7 @@ class TestWithingsSkDateRange:
     @pytest.mark.parametrize("table", WITHINGS_TABLES)
     def test_sk_date_in_range(self, db, table):
         out_of_range = db.execute(
-            f"SELECT COUNT(*) FROM silver.{table} "
-            f"WHERE sk_date < 20100101 OR sk_date > 20261231"
+            f"SELECT COUNT(*) FROM silver.{table} WHERE sk_date < 20100101 OR sk_date > 20261231"
         ).fetchone()[0]
         assert (
             out_of_range == 0
