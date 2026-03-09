@@ -16,7 +16,6 @@ from pathlib import Path
 from typing import Any, Optional
 
 import duckdb
-
 from health_platform.mcp.health_tools import HealthTools
 from health_platform.mcp.query_builder import QueryBuilder
 from health_platform.utils.logging_config import get_logger
@@ -101,6 +100,23 @@ class DesktopAPI:
             self._tools = HealthTools(self._get_connection())
         return self._tools
 
+    @staticmethod
+    def _gather_context(tools: HealthTools, question: str) -> str:
+        """Gather recent health data as context for the chat prompt."""
+        sections = []
+        for metric, label in [
+            ("sleep_score", "Sleep"),
+            ("readiness_score", "Readiness"),
+            ("steps", "Steps"),
+        ]:
+            try:
+                result = tools.query_health(metric, "last_7_days", "daily_value")
+                if result:
+                    sections.append(f"## {label} (last 7 days)\n{result}")
+            except Exception:
+                pass
+        return "\n\n".join(sections) if sections else "No health data available."
+
     # ------------------------------------------------------------------
     # Chat
     # ------------------------------------------------------------------
@@ -113,8 +129,7 @@ class DesktopAPI:
         evaluate_js(). Persists both user question and AI response.
         """
         import anthropic
-
-        from health_platform.api.chat_engine import SYSTEM_PROMPT, _gather_context
+        from health_platform.api.chat_engine import SYSTEM_PROMPT
         from health_platform.utils.keychain import get_secret
 
         self._save_chat_message("user", question)
@@ -127,7 +142,7 @@ class DesktopAPI:
 
         try:
             tools = self._get_tools()
-            context = _gather_context(tools, question)
+            context = self._gather_context(tools, question)
         except Exception as exc:
             logger.debug("Failed to gather context: %s", exc)
             context = "No health data available."
@@ -221,7 +236,9 @@ class DesktopAPI:
             with self._write_lock:
                 con = self._get_write_connection()
                 con.execute(
-                    "INSERT INTO agent.chat_history (id, session_id, role, content, timestamp) VALUES (?, ?, ?, ?, ?)",
+                    "INSERT INTO agent.chat_history "
+                    "(id, session_id, role, content, timestamp) "
+                    "VALUES (?, ?, ?, ?, ?)",
                     [
                         str(uuid.uuid4()),
                         self._session_id,
@@ -331,7 +348,8 @@ class DesktopAPI:
         # Sleep Score
         kpis["sleep_score"] = self._latest_value(
             con,
-            "SELECT day, sleep_score FROM silver.daily_sleep WHERE day <= ? ORDER BY day DESC LIMIT 1",
+            "SELECT day, sleep_score FROM silver.daily_sleep "
+            "WHERE day <= ? ORDER BY day DESC LIMIT 1",
             end,
             "Sleep Score",
             "score",
@@ -340,7 +358,8 @@ class DesktopAPI:
         # Readiness Score
         kpis["readiness_score"] = self._latest_value(
             con,
-            "SELECT day, readiness_score FROM silver.daily_readiness WHERE day <= ? ORDER BY day DESC LIMIT 1",
+            "SELECT day, readiness_score FROM silver.daily_readiness "
+            "WHERE day <= ? ORDER BY day DESC LIMIT 1",
             end,
             "Readiness",
             "score",
@@ -422,7 +441,8 @@ class DesktopAPI:
         # Sleep scores
         sparklines["sleep_score"] = self._series(
             con,
-            "SELECT day, sleep_score FROM silver.daily_sleep WHERE day BETWEEN ? AND ? ORDER BY day",
+            "SELECT day, sleep_score FROM silver.daily_sleep "
+            "WHERE day BETWEEN ? AND ? ORDER BY day",
             start,
             end,
         )
@@ -430,7 +450,8 @@ class DesktopAPI:
         # Readiness scores
         sparklines["readiness_score"] = self._series(
             con,
-            "SELECT day, readiness_score FROM silver.daily_readiness WHERE day BETWEEN ? AND ? ORDER BY day",
+            "SELECT day, readiness_score FROM silver.daily_readiness "
+            "WHERE day BETWEEN ? AND ? ORDER BY day",
             start,
             end,
         )
