@@ -39,9 +39,10 @@ def gold_db():
         """
         CREATE TABLE silver.daily_sleep (
             sk_date INTEGER, day DATE, sleep_score INTEGER,
-            deep_sleep INTEGER, rem_sleep INTEGER, efficiency INTEGER,
-            latency INTEGER, restfulness INTEGER, timing INTEGER,
-            total_sleep INTEGER
+            contributor_deep_sleep INTEGER, contributor_rem_sleep INTEGER,
+            contributor_efficiency INTEGER, contributor_latency INTEGER,
+            contributor_restfulness INTEGER, contributor_timing INTEGER,
+            contributor_total_sleep INTEGER
         )
     """
     )
@@ -308,18 +309,18 @@ def gold_db():
         """
         CREATE TABLE silver.heart_rate (
             sk_date INTEGER, sk_time VARCHAR,
-            recorded_at TIMESTAMP, heart_rate_bpm INTEGER,
-            bpm INTEGER, source_name VARCHAR, source_system VARCHAR
+            timestamp TIMESTAMP, bpm INTEGER,
+            source_name VARCHAR
         )
     """
     )
     con.execute(
         """
         INSERT INTO silver.heart_rate VALUES
-            (20260301, '0300', '2026-03-01 03:00:00', 52, 52, 'oura', 'oura'),
-            (20260301, '1200', '2026-03-01 12:00:00', 78, 78, 'apple_health', 'apple_health'),
-            (20260301, '1500', '2026-03-01 15:00:00', 85, 85, 'apple_health', 'apple_health'),
-            (20260302, '0300', '2026-03-02 03:00:00', 55, 55, 'oura', 'oura')
+            (20260301, '0300', '2026-03-01 03:00:00', 52, 'oura'),
+            (20260301, '1200', '2026-03-01 12:00:00', 78, 'apple_health'),
+            (20260301, '1500', '2026-03-01 15:00:00', 85, 'apple_health'),
+            (20260302, '0300', '2026-03-02 03:00:00', 55, 'oura')
     """
     )
 
@@ -576,8 +577,7 @@ class TestDataDrivenDimensions:
     def test_dim_lab_marker_body_system(self, gold_db):
         _execute_sql(gold_db, "dim_lab_marker.sql")
         row = gold_db.execute(
-            "SELECT body_system FROM gold.dim_lab_marker "
-            "WHERE marker_name = 'calprotectin'"
+            "SELECT body_system FROM gold.dim_lab_marker WHERE marker_name = 'calprotectin'"
         ).fetchone()
         assert row[0] == "gastrointestinal"
 
@@ -640,8 +640,7 @@ class TestFactViews:
     def test_fct_body_measurement_computed_cols(self, gold_db):
         _execute_sql(gold_db, "fct_body_measurement.sql")
         row = gold_db.execute(
-            "SELECT fat_pct, muscle_pct FROM gold.fct_body_measurement "
-            "WHERE sk_date = 20260301"
+            "SELECT fat_pct, muscle_pct FROM gold.fct_body_measurement WHERE sk_date = 20260301"
         ).fetchone()
         # fat_pct = 15.2 / 82.5 * 100 = 18.4
         assert abs(row[0] - 18.4) < 0.2
@@ -818,7 +817,7 @@ class TestLegacyViews:
         row = gold_db.execute(
             "SELECT reading_count, avg_bpm "
             "FROM gold.daily_heart_rate_summary "
-            "WHERE day = '2026-03-01' AND source_system = 'all'"
+            "WHERE day = '2026-03-01' AND source_name = 'all'"
         ).fetchone()
         assert row[0] == 3  # 3 readings on day 1
         assert row[1] is not None
@@ -882,8 +881,7 @@ class TestRunnerScript:
 
         # Verify no gold tables/views were created in the test database
         tables = gold_db.execute(
-            "SELECT table_name FROM information_schema.tables "
-            "WHERE table_schema = 'gold'"
+            "SELECT table_name FROM information_schema.tables WHERE table_schema = 'gold'"
         ).fetchall()
         assert (
             len(tables) == 0

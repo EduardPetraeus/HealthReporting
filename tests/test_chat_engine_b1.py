@@ -24,7 +24,6 @@ from health_platform.api.chat_engine import (
     generate_response_stream,
 )
 
-
 # ------------------------------------------------------------------
 # Fixtures
 # ------------------------------------------------------------------
@@ -211,7 +210,7 @@ class TestExecuteTool:
             {"metric": "sleep_score", "date_range": "today"},
         )
         assert "Error" in result
-        assert "DB connection lost" in result
+        assert "query failed" in result
 
 
 # ------------------------------------------------------------------
@@ -281,8 +280,7 @@ class TestChatHistory:
         # tool_use messages are not returned in _load_chat_history
         # (they're internal), but they should be stored
         result = memory_db.execute(
-            "SELECT role, tool_name, tool_input FROM agent.chat_history "
-            "WHERE session_id = ?",
+            "SELECT role, tool_name, tool_input FROM agent.chat_history WHERE session_id = ?",
             [session],
         ).fetchone()
         assert result[0] == "tool_use"
@@ -352,17 +350,16 @@ class TestGenerateResponse:
         )
         final_response = _make_text_response("Here is your summary.")
 
-        # MAX_TOOL_CALLS + 1 tool responses, then a text response for the forced final call
-        mock_client.messages.create.side_effect = [tool_response] * (
-            MAX_TOOL_CALLS + 1
-        ) + [final_response]
+        # MAX_TOOL_CALLS tool responses in the loop, then 1 forced text response
+        mock_client.messages.create.side_effect = [tool_response] * MAX_TOOL_CALLS + [
+            final_response
+        ]
 
         result = generate_response(mock_health_tools, "Overview please")
 
         assert "summary" in result.lower()
-        # Should have called the tool MAX_TOOL_CALLS + 1 times in the loop,
-        # plus 1 final forced text response = MAX_TOOL_CALLS + 2 total API calls
-        assert mock_client.messages.create.call_count <= MAX_TOOL_CALLS + 2
+        # MAX_TOOL_CALLS iterations in loop + 1 forced text call = MAX_TOOL_CALLS + 1
+        assert mock_client.messages.create.call_count == MAX_TOOL_CALLS + 1
 
     @patch("health_platform.api.chat_engine._get_client")
     def test_session_id_triggers_history_save(
