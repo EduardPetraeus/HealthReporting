@@ -8,6 +8,7 @@ Strava API reference: https://developers.strava.com/
 from __future__ import annotations
 
 import json
+import secrets
 import sys
 import time
 import webbrowser
@@ -53,6 +54,7 @@ def _load_credentials() -> tuple[str, str, str]:
 def _save_tokens(tokens: dict) -> None:
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     TOKEN_FILE.write_text(json.dumps(tokens, indent=2))
+    TOKEN_FILE.chmod(0o600)
 
 
 def _load_tokens() -> dict | None:
@@ -94,6 +96,13 @@ class _CallbackHandler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
         params = parse_qs(urlparse(self.path).query)
         if "code" in params:
+            received_state = params.get("state", [None])[0]
+            expected_state = getattr(self.server, "expected_state", None)
+            if received_state != expected_state:
+                self.send_response(403)
+                self.end_headers()
+                self.wfile.write(b"Invalid state parameter (CSRF check failed).")
+                return
             _CallbackHandler.auth_code = params["code"][0]
             self.send_response(200)
             self.end_headers()
@@ -109,6 +118,7 @@ class _CallbackHandler(BaseHTTPRequestHandler):
 
 def _run_auth_flow(client_id: str, client_secret: str, redirect_uri: str) -> dict:
     """Opens the browser for OAuth login and exchanges the code for tokens."""
+    state = secrets.token_urlsafe(16)
     auth_url = f"{AUTHORIZE_URL}?" + urlencode(
         {
             "client_id": client_id,
@@ -116,6 +126,7 @@ def _run_auth_flow(client_id: str, client_secret: str, redirect_uri: str) -> dic
             "response_type": "code",
             "scope": OAUTH_SCOPES,
             "approval_prompt": "auto",
+            "state": state,
         }
     )
     logger.info("Opening browser for Strava authorization...")
@@ -123,6 +134,7 @@ def _run_auth_flow(client_id: str, client_secret: str, redirect_uri: str) -> dic
 
     logger.info("Waiting for OAuth callback on port %d...", CALLBACK_PORT)
     server = HTTPServer(("localhost", CALLBACK_PORT), _CallbackHandler)
+    server.expected_state = state
     server.handle_request()
 
     code = _CallbackHandler.auth_code
@@ -166,6 +178,7 @@ def get_access_token() -> str:
 def build_authorize_url() -> str:
     """Build the OAuth authorization URL for testing or manual flows."""
     client_id, _, redirect_uri = _load_credentials()
+    state = secrets.token_urlsafe(16)
     return f"{AUTHORIZE_URL}?" + urlencode(
         {
             "client_id": client_id,
@@ -173,5 +186,6 @@ def build_authorize_url() -> str:
             "response_type": "code",
             "scope": OAUTH_SCOPES,
             "approval_prompt": "auto",
+            "state": state,
         }
     )

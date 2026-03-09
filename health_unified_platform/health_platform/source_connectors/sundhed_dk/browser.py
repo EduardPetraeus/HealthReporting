@@ -66,7 +66,8 @@ class SundhedDkBrowser:
 
         Returns the authenticated Page object ready for scraping.
         """
-        BROWSER_DATA_DIR.mkdir(parents=True, exist_ok=True)
+        BROWSER_DATA_DIR.mkdir(parents=True, exist_ok=True, mode=0o700)
+        BROWSER_DATA_DIR.chmod(0o700)
 
         self._playwright = sync_playwright().start()
         self._browser = self._playwright.chromium.launch_persistent_context(
