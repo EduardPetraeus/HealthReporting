@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import Any, Optional
 
 import duckdb
-
 from health_platform.quality.models import CheckResult, QualityReport
 from health_platform.quality.rule_loader import load_rules
 from health_platform.utils.logging_config import get_logger
@@ -195,11 +194,7 @@ class DataQualityChecker:
         tbl = _validate_id(table_name)
         for col in columns:
             c = _validate_id(col)
-            sql = (
-                f"SELECT COUNT(*) - COUNT(DISTINCT {c}) "
-                f"FROM silver.{tbl} "
-                f"WHERE {c} IS NOT NULL"
-            )
+            sql = f"SELECT COUNT(*) - COUNT(DISTINCT {c}) FROM silver.{tbl} WHERE {c} IS NOT NULL"
             dup_count = self._query_scalar(sql) or 0
             passed = dup_count == 0
             results.append(
@@ -223,10 +218,7 @@ class DataQualityChecker:
         column = _validate_id(config.get("column", "load_datetime"))
         max_hours = config.get("max_hours", 25)
         tbl = _validate_id(table_name)
-        sql = (
-            f"SELECT DATEDIFF('hour', MAX({column}), CURRENT_TIMESTAMP) "
-            f"FROM silver.{tbl}"
-        )
+        sql = f"SELECT DATEDIFF('hour', MAX({column}), CURRENT_TIMESTAMP) FROM silver.{tbl}"
         hours_stale = self._query_scalar(sql)
         if hours_stale is None:
             return [
@@ -335,11 +327,11 @@ class DataQualityChecker:
 
         # Query actual column names from the table
         sql = (
-            f"SELECT column_name FROM information_schema.columns "
-            f"WHERE table_schema = 'silver' AND table_name = '{tbl}'"
+            "SELECT column_name FROM information_schema.columns "
+            "WHERE table_schema = ? AND table_name = ?"
         )
         try:
-            rows = self.con.execute(sql).fetchall()
+            rows = self.con.execute(sql, ["silver", tbl]).fetchall()
             actual_columns = {row[0] for row in rows}
         except Exception as exc:
             return [

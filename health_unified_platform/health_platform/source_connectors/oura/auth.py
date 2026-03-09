@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import os
+import secrets
 import sys
 import time
 import webbrowser
@@ -29,18 +30,20 @@ TOKEN_FILE = CONFIG_DIR / "oura_tokens.json"
 AUTHORIZE_URL = "https://cloud.ouraring.com/oauth/authorize"
 TOKEN_URL = "https://api.ouraring.com/oauth/token"
 CALLBACK_PORT = 8080
-OAUTH_SCOPES = (
-    "email personal daily heartrate tag workout session "
-    "spo2 ring_configuration stress heart_health"
-)
+OAUTH_SCOPES = "email personal daily heartrate tag workout session spo2 ring_configuration stress heart_health"  # noqa: E501
 
 
 def _load_credentials() -> tuple[str, str, str]:
     """Load OAuth credentials from macOS Keychain (claude.keychain-db).
 
-    Setup:
-        security add-generic-password -a claude -s OURA_CLIENT_ID -w "<id>" ~/Library/Keychains/claude.keychain-db
-        security add-generic-password -a claude -s OURA_CLIENT_SECRET -w "<secret>" ~/Library/Keychains/claude.keychain-db
+    Setup::
+
+        security add-generic-password -a claude \
+            -s OURA_CLIENT_ID -w "<id>" \
+            ~/Library/Keychains/claude.keychain-db
+        security add-generic-password -a claude \
+            -s OURA_CLIENT_SECRET -w "<secret>" \
+            ~/Library/Keychains/claude.keychain-db
     """
     client_id = get_secret("OURA_CLIENT_ID", fallback_env=False)
     client_secret = get_secret("OURA_CLIENT_SECRET", fallback_env=False)
@@ -63,6 +66,7 @@ def _load_credentials() -> tuple[str, str, str]:
 def _save_tokens(tokens: dict) -> None:
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     TOKEN_FILE.write_text(json.dumps(tokens, indent=2))
+    TOKEN_FILE.chmod(0o600)
 
 
 def _load_tokens() -> dict | None:
@@ -103,6 +107,13 @@ class _CallbackHandler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
         params = parse_qs(urlparse(self.path).query)
         if "code" in params:
+            received_state = params.get("state", [None])[0]
+            expected_state = getattr(self.server, "expected_state", None)
+            if received_state != expected_state:
+                self.send_response(403)
+                self.end_headers()
+                self.wfile.write(b"Invalid state parameter (CSRF check failed).")
+                return
             _CallbackHandler.auth_code = params["code"][0]
             self.send_response(200)
             self.end_headers()
@@ -118,12 +129,14 @@ class _CallbackHandler(BaseHTTPRequestHandler):
 
 def _run_auth_flow(client_id: str, client_secret: str, redirect_uri: str) -> dict:
     """Opens the browser for OAuth login and exchanges the code for tokens."""
+    state = secrets.token_urlsafe(16)
     auth_url = f"{AUTHORIZE_URL}?" + urlencode(
         {
             "client_id": client_id,
             "redirect_uri": redirect_uri,
             "response_type": "code",
             "scope": OAUTH_SCOPES,
+            "state": state,
         }
     )
     logger.info("Opening browser for Oura authorization...")
@@ -131,6 +144,7 @@ def _run_auth_flow(client_id: str, client_secret: str, redirect_uri: str) -> dic
 
     logger.info("Waiting for OAuth callback on port %d...", CALLBACK_PORT)
     server = HTTPServer(("localhost", CALLBACK_PORT), _CallbackHandler)
+    server.expected_state = state
     server.handle_request()
 
     code = _CallbackHandler.auth_code

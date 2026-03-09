@@ -22,11 +22,10 @@ from typing import Literal
 import duckdb
 from fastapi import Depends, FastAPI, Query
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel, Field
-
 from health_platform.api.auth import verify_token
 from health_platform.mcp.health_tools import HealthTools
 from health_platform.utils.logging_config import get_logger
+from pydantic import BaseModel, Field
 
 logger = get_logger("api.server")
 
@@ -284,49 +283,3 @@ def _markdown_table_to_plain(text: str) -> str:
         else:
             result.append(line)
     return "\n".join(result)
-
-
-# --- Question routing ---
-
-
-def _route_question(tools: HealthTools, question_lower: str, original: str) -> str:
-    """Route a natural language question to the appropriate tool.
-
-    Simple keyword-based routing. For full AI understanding, use Claude + MCP.
-    """
-    # Sleep questions
-    if any(kw in question_lower for kw in ["sleep", "sov", "søvn", "slept"]):
-        if "trend" in question_lower or "getting" in question_lower:
-            return tools.query_health("sleep_score", "last_30_days", "trend")
-        if "average" in question_lower or "gennemsnit" in question_lower:
-            return tools.query_health("sleep_score", "last_30_days", "period_average")
-        return tools.query_health("sleep_score", "last_7_days")
-
-    # Readiness questions
-    if any(kw in question_lower for kw in ["readiness", "ready", "klar"]):
-        return tools.query_health("readiness_score", "last_7_days")
-
-    # Activity/steps questions
-    if any(kw in question_lower for kw in ["step", "skridt", "walk", "activity"]):
-        return tools.query_health("steps", "last_7_days")
-
-    # Workout questions
-    if any(kw in question_lower for kw in ["workout", "exercise", "træning", "run"]):
-        return tools.query_health("workout", "last_30_days")
-
-    # Stress questions
-    if any(kw in question_lower for kw in ["stress", "recover"]):
-        return tools.query_health("daily_stress", "last_7_days")
-
-    # Weight questions
-    if any(kw in question_lower for kw in ["weight", "vægt", "body"]):
-        return tools.query_health("weight", "last_30_days")
-
-    # Profile questions
-    if any(
-        kw in question_lower for kw in ["profile", "who am i", "about me", "profil"]
-    ):
-        return tools.get_profile()
-
-    # Memory search as fallback
-    return tools.search_memory(original)

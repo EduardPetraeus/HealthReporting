@@ -17,7 +17,6 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "health_unified_platform"))
 
 from fastapi.testclient import TestClient
-
 from health_platform.api.server import app
 
 
@@ -258,54 +257,6 @@ class TestAuthentication:
             headers=AUTH_HEADERS,
         )
         assert response.status_code == 200
-
-
-class TestChatEndpoint:
-    def _mock_generate(self, tools, question):
-        """Mock generate_response that uses keyword routing instead of Claude API."""
-        from health_platform.api.server import _route_question
-
-        return _route_question(tools, question.lower(), question)
-
-    def test_sleep_question(self, client):
-        with patch(
-            "health_platform.api.chat_engine.generate_response", self._mock_generate
-        ):
-            response = client.post(
-                "/v1/chat",
-                json={"question": "how did I sleep?"},
-                headers=AUTH_HEADERS,
-            )
-        assert response.status_code == 200
-        data = response.json()
-        assert "answer" in data
-        assert "sleep_score" in data["answer"] or "82" in data["answer"]
-
-    def test_steps_question(self, client):
-        with patch(
-            "health_platform.api.chat_engine.generate_response", self._mock_generate
-        ):
-            response = client.post(
-                "/v1/chat",
-                json={"question": "how many steps?"},
-                headers=AUTH_HEADERS,
-            )
-        assert response.status_code == 200
-        data = response.json()
-        assert "answer" in data
-
-    def test_profile_question(self, client):
-        with patch(
-            "health_platform.api.chat_engine.generate_response", self._mock_generate
-        ):
-            response = client.post(
-                "/v1/chat",
-                json={"question": "who am i?"},
-                headers=AUTH_HEADERS,
-            )
-        assert response.status_code == 200
-        data = response.json()
-        assert "male" in data["answer"] or "Patient Profile" in data["answer"]
 
 
 class TestQueryEndpoint:
