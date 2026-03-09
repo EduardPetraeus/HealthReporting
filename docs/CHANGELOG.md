@@ -4,6 +4,29 @@
 
 ---
 
+## [Unreleased] — 2026-03-09
+
+### Fixed (Session 9: Security Audit P1 + Test Debt)
+- **5 P1 security fixes merged:** token file permissions (chmod 0o600), OAuth CSRF state param (secrets.token_urlsafe), browser dir permissions (0o700), dead code deletion (_route_question), SQL parameterization in forecast_metric
+- **19 pre-existing test failures resolved across 12 test files:**
+  - Deleted orphaned test_chat_evidence.py (tested removed B1 function)
+  - Fixed assertion drift in test_chat_engine_b1 (hardened error messages + mock off-by-one)
+  - Fixed test_daily_sync step count (7→8 steps)
+  - Aligned test_gold_local_views fixture columns with actual silver schema (contributor_ prefix)
+  - Fixed test_intelligence_b4_c2 forecast_metric input format (no silver. prefix)
+  - Updated test_withings_new_endpoints count (6→9 endpoints)
+  - Excluded gold_views.yml from metric contract validation in test_yaml_contracts
+- **5 integration test files marked with pytest.mark.integration** (live DB dependent, skipped in unit test runs)
+- **Integration marker registered in pyproject.toml**
+- **8 worktree-agent branches cleaned up**
+
+### Changed (Session 9)
+- Keychain convention updated: account name varies per key (not always `claude`)
+- ai-review.py help text corrected for keychain add command
+- security.md keychain rotation procedure simplified (no hardcoded `-a` flag)
+
+---
+
 ## [Unreleased] — 2026-03-08
 
 ### Added (Session 7: sundhed.dk Connector)

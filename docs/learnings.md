@@ -190,4 +190,22 @@ The chat UI stores the API token in `localStorage` and uses `unsafe-inline` for 
 
 All secrets are stored in `~/Library/Keychains/claude.keychain-db` and read via the shared `get_secret()` utility. Environment variables serve as fallback for CI/testing only. The `.env` file pattern has been fully removed from Oura auth in favour of keychain reads.
 
-*Last updated: 2026-03-06*
+### Test debt patterns (2026-03-09)
+
+Three categories of test debt accumulated over sessions 2-8:
+
+1. **Schema drift:** Test fixtures created tables with simplified column names (e.g., `deep_sleep`) while silver merge SQL used full names (`contributor_deep_sleep`). Root cause: fixtures written by hand, not derived from DDL.
+2. **Assertion drift:** Production code was hardened (error messages sanitized, step counts changed, endpoint lists expanded) but tests were never updated. Tests tested the *old* behaviour.
+3. **Orphaned tests:** Functions removed during rewrites (B1 chat engine) left test files importing dead code.
+
+**Prevention pattern:** After any source code change that modifies error messages, column names, or public API surface — grep for the old string in `tests/` and update.
+
+### Integration test marker pattern (2026-03-09)
+
+Tests that connect to live DuckDB (`health_dw_dev.db`) or depend on local filesystem state must be marked `pytestmark = pytest.mark.integration`. Run unit tests with `pytest -m "not integration"`. Register markers in `pyproject.toml` to avoid warnings.
+
+### MCP 1.26.0 breaking import (2026-03-09)
+
+`from mcp.server.fastmcp import FastMCP` fails with MCP SDK 1.26.0. The import path changed. This affects `test_intelligence_b4_c2.py::test_forecast_metric_tool_invalid_format`. Needs investigation — likely `from mcp.server import FastMCP` or similar.
+
+*Last updated: 2026-03-09*

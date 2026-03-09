@@ -1,7 +1,7 @@
 # PROJECT_PLAN.md — HealthReporting
 
-> Last updated: 2026-03-08 (Session 7 — sundhed.dk connector)
-> Current phase: **Phase 3b ✅ + Phase 5 (Databricks) + Phase 7 (Governance). Iterations done: A1-A9 ✅, B1-B4 ✅, C1 (2/3), C2 ✅, D2 (2/5), D4 ✅, DS1-DS4 ✅, E0 ✅, F1-F3 ✅. sundhed.dk connector operational (5 sections, 52 tests). Next: C1 Session 3 / D1 Mobile / D2 Desktop**
+> Last updated: 2026-03-09 (Session 9 — P1 security fixes + test debt cleanup)
+> Current phase: **Phase 3b ✅ + Phase 5 (Databricks) + Phase 7 (Governance). Iterations done: A1-A9 ✅, B1-B4 ✅, C1 (2/3), C2 ✅, D2 (2/5), D4 ✅, DS1-DS4 ✅, E0 ✅, F1-F3 ✅. 0 P1 audit findings open. 1141 unit tests green, 195 integration tests deselected. Next: P2 audit findings / C1 Session 3 / D2 Desktop**
 
 ---
 
@@ -171,7 +171,7 @@
 | Bundle validation on PRs | ✅ done | Runs build-validator on every PR |
 | Auto-deploy to dev on push | ✅ done | Feature branches → dev |
 | Auto-deploy to prd on merge | ✅ done | Main → prd |
-| Automated tests | ⬜ not started | pytest TDD framework |
+| Automated tests | 🔵 in progress | 1141 unit tests green, 195 integration tests (marked, deselected). 1 MCP import issue remains (mcp 1.26.0 breaking change). |
 | Oura daily job (cron) | ✅ done | `scripts/daily_sync.sh` + `com.health.daily-sync.plist` — runs daily at 06:00 |
 | Code-reviewer agent as PR gate | ⬜ not started | AI governance experiment |
 
