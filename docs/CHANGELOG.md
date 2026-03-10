@@ -4,6 +4,14 @@
 
 ---
 
+## [Unreleased] — 2026-03-10
+
+### Fixed
+- **Governance:** validate_naming.py no longer flags `__init__.py` as non-snake_case (dunder file exclusion)
+- **Governance:** validate_naming.py no longer flags its own `re.compile` pattern as a hardcoded prd reference
+
+---
+
 ## [Unreleased] — 2026-03-08
 
 ### Added
