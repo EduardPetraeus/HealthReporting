@@ -1,95 +1,131 @@
 # HealthReporting
 
-A personal health data platform that ingests, transforms, and surfaces data from wearable devices and nutrition apps.
+Personal health intelligence platform. Ingests data from wearables, nutrition apps, lab results, and genetics — transforms it through a medallion architecture — and surfaces insights via an AI agent with 16 MCP tools, anomaly detection, and evidence-backed recommendations.
+
+**1300+ tests · 68 bronze sources · 45 silver tables · 16 MCP tools · fully automated daily sync**
 
 ## Architecture
 
-Dual-stack architecture with shared Silver layer (see [ADR-005](docs/adr/ADR-005-ai-native-data-model.md)):
+Dual-stack with shared Silver layer ([ADR-005](docs/adr/ADR-005-ai-native-data-model.md)):
 
-**Local (DuckDB) — AI-Native 2+2:**
 ```
-Source APIs / files  →  parquet (hive-partitioned)
-  →  bronze (DuckDB stg_* tables via ingestion_engine.py)
-  →  silver (21 tables, dbt-duckdb + run_merge.py, COMMENT ON every column)
-  →  agent memory (patient profile, daily summaries + embeddings, knowledge graph)
-  →  semantic contracts (18 YAML metrics) → MCP server (8 tools)
+┌─────────────────────────────────────────────────────────────────────┐
+│ LOCAL (DuckDB) — AI-Native 2+2                                     │
+│                                                                     │
+│  Source APIs/files → parquet (hive-partitioned)                     │
+│    → Bronze (stg_* tables via ingestion_engine.py)                  │
+│    → Silver (45 tables, dbt-duckdb + MERGE, COMMENT ON columns)    │
+│    → Agent Memory (patient profile, daily summaries + embeddings,  │
+│                    knowledge graph, insight archive)                │
+│    → Semantic Contracts (26 YAML metrics) → MCP Server (16 tools)  │
+│                                                                     │
+│  Gold replaced by AI-native layer — Claude queries via typed MCP   │
+│  tools backed by YAML contracts. Never raw SQL.                    │
+├─────────────────────────────────────────────────────────────────────┤
+│ CLOUD (Databricks) — Traditional Medallion                         │
+│                                                                     │
+│  Cloud storage → Bronze (Autoloader → Delta)                       │
+│    → Silver (MERGE INTO → Delta, YAML-driven)                      │
+│    → Gold (Kimball star schema — 10 dimensions + 8 fact tables)    │
+└─────────────────────────────────────────────────────────────────────┘
 ```
-
-**Cloud (Databricks) — Traditional Medallion:**
-```
-Cloud storage (parquet)
-  →  bronze (Autoloader / cloudFiles → Delta table)
-  →  silver (MERGE INTO → Delta table, driven by YAML + SQL)
-  →  gold (CREATE OR REPLACE VIEW, driven by YAML + SQL)
-```
-
-The local stack replaces Gold with AI-native components: an AI agent (Claude Code) queries health data via typed MCP tools backed by YAML semantic contracts — never raw SQL. The cloud pipeline remains traditional medallion for BI dashboards.
-
-See `docs/databricks_framework.md` for the cloud pipeline reference and `docs/architecture.md` for the full dual-stack design.
 
 ## Data Sources
 
-| Source | Status | Entities |
+| Source | Status | Coverage |
 |---|---|---|
-| Apple Health | Active | activity, heart rate, steps, walking gait, sleep, nutrition, hygiene, body metrics |
-| Oura Ring | Active | sleep, activity, readiness, heart rate, workouts, SpO2, stress, personal info |
-| Lifesum | Active | food/nutrition logs |
-| Withings | Planned | weight, body composition, blood pressure |
-| Strava | Planned | workouts, GPS activities |
-| GetTested | Planned | lab results, blood tests |
-| DNA Complete (WGS) | Planned | genetic variants (WGS), SNP profile, pharmacogenomics, risk categories |
+| Apple Health | **Active** | 35 types — activity, heart rate, steps, sleep, walking gait, nutrition, body metrics, ECG, SpO2, HRV, VO2 max, audio exposure |
+| Oura Ring | **Active** | 18 API + 7 CSV — sleep, activity, readiness, heart rate, stress, resilience, SpO2, workouts |
+| Withings | **Active** | 7 types — weight, body composition, blood pressure, temperature |
+| Lifesum | **Active** | Food/nutrition logs, body measurements, exercise, weighins |
+| 23andMe | **Active** | Genetic variants — SNP parsing, trait reports, ancestry |
+| Lab/GetTested | **Active** | Blood test PDF parsing — automated biomarker extraction |
+| sundhed.dk | Scaffold | Danish national health portal (Playwright-based) |
+| Strava | Scaffold | Workouts, GPS activities |
+| Weather | Scaffold | Environmental context |
 
-## Silver Tables (21)
-
-`heart_rate` · `step_count` · `toothbrushing` · `daily_meal` · `daily_walking_gait` · `mindful_session` · `body_temperature` · `respiratory_rate` · `water_intake` · `daily_energy_by_source` · `daily_sleep` · `daily_activity` · `daily_readiness` · `daily_spo2` · `daily_stress` · `workout` · `personal_info` · `blood_pressure` · `weight` · `daily_annotations` · `metric_relationships`
-
-## AI-Native Components (Local)
+## Intelligence Layer
 
 | Component | Description |
 |---|---|
-| `agent.patient_profile` | Core memory — 9 entries (demographics + baselines), always in context |
-| `agent.daily_summaries` | Recall memory — 91 daily narratives with 384-dim embeddings |
-| `agent.health_graph` | Knowledge graph — 67 nodes, 108 edges (biomarkers, supplements, conditions) |
-| `agent.knowledge_base` | Archival memory — accumulated insights, vector-searchable |
-| `contracts/metrics/` | 18 YAML semantic contracts + index + business rules |
-| `mcp/server.py` | MCP server with 8 tools (query_health, search_memory, get_profile, etc.) |
+| **Claude Chat Engine** | Multi-turn health conversations with tool-use (function calling) and SSE streaming |
+| **16 MCP Tools** | `query_health`, `search_memory`, `get_profile`, `discover_correlations`, `get_metric_definition`, `record_insight`, `get_schema_context`, `run_custom_query`, `detect_anomalies`, `forecast_metric`, `get_cross_source_insights`, `get_recommendations`, `explain_recommendation`, and more |
+| **Anomaly Detection** | Multi-stream z-score analysis, constellation patterns, temporal degradation tracking |
+| **Correlation Engine** | 30+ metric pairs, cross-domain delayed effects, Pearson with lag analysis |
+| **Trend Forecaster** | Linear regression-based metric forecasting |
+| **Recommendation Engine** | Evidence-backed, CDS/FDA-safe health recommendations |
+| **PubMed Evidence** | Literature search and citation for clinical context |
+| **Notifications** | ntfy.sh push notifications with severity-based alerting |
 
-## Cross-Analysis: Genetics x Health Data
+## AI-Native Data Model
 
-DNA Complete whole genome sequencing (WGS) provides a static genetic context layer for all dynamic health metrics. Unlike time-series data from wearables, genetic data is sequenced once and valid for life — it acts as a permanent lens through which all other health signals are interpreted.
+| Layer | Contents |
+|---|---|
+| `agent.patient_profile` | Core memory — demographics, baselines, conditions (always in context) |
+| `agent.daily_summaries` | Daily narratives with 384-dim embeddings (sentence-transformers) |
+| `agent.health_graph` | Semantic knowledge graph — biomarkers, supplements, conditions, edges |
+| `agent.knowledge_base` | Accumulated insights — vector-searchable via DuckDB VSS (HNSW) |
+| `contracts/metrics/` | 26 YAML semantic contracts + business rules + index |
 
-The cross-analysis strategy maps specific gene variants to existing silver tables:
-- **Sleep** — CLOCK, PER2, PER3 variants contextualize sleep_score, timing, and latency
-- **Cardiovascular** — APOE, MTHFR, ACE variants inform heart_rate, blood_pressure, and readiness interpretation
-- **Metabolism** — FTO, MC4R, TCF7L2 variants add context to weight, calorie, and activity data
-- **Stress response** — COMT, BDNF variants correlate with stress_level, HRV, and readiness
-- **Athletic performance** — ACTN3, ACE, PPARGC1A variants inform workout effectiveness and activity_score
-- **Pharmacogenomics** — CYP1A2, CYP2D6, CYP2C19 variants affect supplement metabolism and caffeine timing
+## Genetics Integration
 
-This transforms HealthReporting from a reactive monitoring platform into a genetically-informed health intelligence system.
+23andMe SNP data provides a static genetic context for all dynamic health metrics — sequenced once, valid for life:
+
+- **Sleep** — CLOCK, PER2, PER3 variants contextualize sleep patterns
+- **Cardiovascular** — APOE, MTHFR, ACE inform heart rate, blood pressure interpretation
+- **Metabolism** — FTO, MC4R, TCF7L2 add context to weight and activity data
+- **Stress response** — COMT, BDNF correlate with HRV and readiness
+- **Athletic performance** — ACTN3, ACE, PPARGC1A inform workout effectiveness
+- **Pharmacogenomics** — CYP1A2, CYP2D6, CYP2C19 affect supplement metabolism
+
+## Apps
+
+- **Desktop** — pywebview dashboard with live health stats and Claude chat (S2/5 sessions complete)
+- **Mobile** — SwiftUI scaffold with direct Claude API integration (backend ready)
 
 ## Quick Start
 
 ```bash
 source .venv/bin/activate
 
-# Fetch Oura data (incremental)
-HEALTH_ENV=dev python health_unified_platform/health_platform/source_connectors/oura/run_oura.py
+# Full daily sync (what the 06:00 automation runs)
+HEALTH_ENV=dev bash scripts/daily_sync.sh
 
-# Load all sources into bronze
+# Or run individual steps:
+HEALTH_ENV=dev python health_unified_platform/health_platform/source_connectors/oura/run_oura.py
 HEALTH_ENV=dev python health_unified_platform/health_platform/transformation_logic/ingestion_engine.py
 
-# Merge into silver
-cd health_unified_platform/health_platform/transformation_logic/dbt/merge
-for f in silver/merge_oura_*.sql; do HEALTH_ENV=dev python run_merge.py "$f"; done
+# Run tests
+pytest tests/ -x -q
 ```
 
-See `docs/runbook.md` for the full runbook, `docs/architecture.md` for design details, `docs/paths.md` for key file locations, and `docs/databricks_framework.md` for the cloud pipeline reference.
+See `docs/runbook.md` for the full runbook, `docs/architecture.md` for design details, and `docs/paths.md` for key file paths.
 
 ## Stack
 
-- **Local**: Python 3.9/3.12, DuckDB, dbt-duckdb, sentence-transformers, MCP, pyarrow, pandas
+- **Local**: Python 3.9/3.12, DuckDB, dbt-duckdb, sentence-transformers, FastMCP, pywebview
 - **Cloud**: Databricks (Unity Catalog, Delta Lake, Autoloader, Asset Bundles)
-- **AI**: sentence-transformers (all-MiniLM-L6-v2), DuckDB VSS (HNSW), FastMCP
-- **CI/CD**: GitHub Actions → auto-deploy on merge to main
+- **AI**: Claude (chat + tool-use), sentence-transformers (all-MiniLM-L6-v2), DuckDB VSS (HNSW)
+- **CI/CD**: GitHub Actions — bundle validation, AI PR review, governance checks, auto-deploy
 - **Storage**: Parquet (hive-partitioned) locally; ADLS/S3 on cloud
+- **Testing**: 1300+ tests — pytest, smoke tests, data quality checks
+
+## Gold Layer (Cloud)
+
+Kimball star schema for BI dashboards (Databricks):
+
+- **10 dimension tables** — date, source, metric type, etc.
+- **8 fact tables/views** — daily aggregates, trends, cross-source metrics
+
+## Project Status
+
+Built in 25 sessions over 3 days. See `docs/PROJECT_PLAN.md` for phase details and `docs/CHANGELOG.md` for session history.
+
+| Phase | Status |
+|---|---|
+| A: Foundation (bronze + silver) | Complete |
+| B: Intelligence (chat + MCP + anomaly) | Complete |
+| C: Clinical (lab + genetics + recommendations) | In progress — gene-health mapping next |
+| D: Apps (desktop + mobile + notifications) | In progress — PDF reports next |
+| E: Cloud (Databricks gold) | Partial — star schema done |
+| F: Tech debt + docs | In progress |
