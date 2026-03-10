@@ -1,6 +1,6 @@
 """MCP server for health data access.
 
-Exposes 10 tools for AI agents to interact with health data through
+Exposes 17 tools for AI agents to interact with health data through
 semantic contracts instead of raw SQL.
 
 Usage:
@@ -9,46 +9,27 @@ Usage:
 
 from __future__ import annotations
 
-import os
 import sys
 from pathlib import Path
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-import re
-
 import duckdb
 from health_platform.mcp.health_tools import HealthTools
 from health_platform.utils.logging_config import get_logger
+from health_platform.utils.paths import get_db_path
+from health_platform.utils.sql_safety import validate_sql_identifier
 from mcp.server.fastmcp import FastMCP
-
-_SAFE_ID = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*\Z")
-
-
-def _validate_id(name: str) -> str:
-    """Validate a SQL identifier to prevent injection."""
-    if not _SAFE_ID.fullmatch(name):
-        raise ValueError(f"Invalid SQL identifier: {name!r}")
-    return name
-
 
 logger = get_logger("mcp_server")
 
 mcp = FastMCP("health")
 
 
-def get_db_path() -> str:
-    """Resolve DuckDB database path from environment."""
-    if path := os.environ.get("HEALTH_DB_PATH"):
-        return path
-    env = os.environ.get("HEALTH_ENV", "dev")
-    return str(Path.home() / "health_dw" / f"health_dw_{env}.db")
-
-
 def get_tools(read_only: bool = True) -> HealthTools:
     """Get or create HealthTools instance."""
-    db_path = get_db_path()
+    db_path = str(get_db_path())
     con = duckdb.connect(db_path, read_only=read_only)
     return HealthTools(con)
 
@@ -220,7 +201,7 @@ def search_evidence(query: str, max_results: int = 5, min_year: str = "") -> str
         max_results: Number of articles to return (default 5, max 20)
         min_year: Minimum publication year filter (e.g., '2020')
     """
-    tools = get_tools(read_only=False)
+    tools = get_tools()
     try:
         return tools.search_evidence(
             query, max_results=min(int(max_results), 20), min_year=min_year
@@ -272,8 +253,8 @@ def forecast_metric(
         return "Error: metric must be in table.column format (e.g., 'daily_sleep.sleep_score')"
 
     try:
-        table = f"silver.{_validate_id(parts[0])}"
-        column = _validate_id(parts[1])
+        table = f"silver.{validate_sql_identifier(parts[0])}"
+        column = validate_sql_identifier(parts[1])
     except ValueError as exc:
         return f"**Error:** {exc}"
     forecast_days = min(max(int(forecast_days), 1), 14)

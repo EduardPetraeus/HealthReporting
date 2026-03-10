@@ -24,6 +24,7 @@ from health_platform.mcp.formatter import (
 from health_platform.mcp.query_builder import QueryBuilder
 from health_platform.mcp.schema_pruner import SchemaPruner
 from health_platform.utils.logging_config import get_logger
+from health_platform.utils.sql_safety import _SAFE_IDENTIFIER, validate_sql_identifier
 
 logger = get_logger("health_tools")
 
@@ -583,14 +584,6 @@ class HealthTools:
         )
         return (today - timedelta(days=7), today)
 
-    _SAFE_IDENTIFIER = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*\Z")
-
-    def _validate_identifier(self, name: str) -> str:
-        """Validate that a string is a safe SQL identifier (prevents injection)."""
-        if not self._SAFE_IDENTIFIER.match(name):
-            raise ValueError(f"Invalid SQL identifier: {name!r}")
-        return name
-
     def _parse_metric_ref(self, metric_ref: str) -> tuple[str, str]:
         """Parse a metric reference like 'daily_sleep.sleep_score' into (table, column).
 
@@ -599,8 +592,8 @@ class HealthTools:
         """
         if "." in metric_ref:
             parts = metric_ref.split(".", 1)
-            table = self._validate_identifier(parts[0])
-            column = self._validate_identifier(parts[1])
+            table = validate_sql_identifier(parts[0])
+            column = validate_sql_identifier(parts[1])
             # Ensure table has schema prefix
             if not table.startswith("silver.") and not table.startswith("agent."):
                 table = f"silver.{table}"
@@ -614,12 +607,12 @@ class HealthTools:
             column = metric_def.get("source_column", metric_ref)
             # Validate table parts (schema.table)
             for part in table.split("."):
-                self._validate_identifier(part)
-            self._validate_identifier(column)
+                validate_sql_identifier(part)
+            validate_sql_identifier(column)
             return (table, column)
         except FileNotFoundError:
-            table = self._validate_identifier(metric_ref)
-            return (f"silver.{table}", self._validate_identifier(metric_ref))
+            table = validate_sql_identifier(metric_ref)
+            return (f"silver.{table}", validate_sql_identifier(metric_ref))
 
     @staticmethod
     def _interpret_correlation(abs_r: float) -> str:
@@ -665,7 +658,7 @@ class HealthTools:
         from health_platform.quality.models import QualityReport
         from health_platform.quality.reporters import format_for_mcp
 
-        if table and not self._SAFE_IDENTIFIER.match(table):
+        if table and not _SAFE_IDENTIFIER.match(table):
             return format_error(f"Invalid table name: {table!r}")
         if check_type:
             valid_types = {
@@ -720,9 +713,9 @@ class HealthTools:
 
         # Validate all user-supplied identifiers to prevent SQL injection
         try:
-            self._validate_identifier(table)
-            self._validate_identifier(column)
-            self._validate_identifier(date_column)
+            validate_sql_identifier(table)
+            validate_sql_identifier(column)
+            validate_sql_identifier(date_column)
         except ValueError as exc:
             return format_error(f"Invalid identifier: {exc}")
 

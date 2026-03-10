@@ -13,7 +13,6 @@ from pathlib import Path
 from typing import Any, Optional
 
 import duckdb
-
 from health_platform.export.fhir.mapper import FhirMapper
 from health_platform.utils.logging_config import get_logger
 

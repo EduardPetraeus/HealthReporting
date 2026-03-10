@@ -7,7 +7,6 @@ No authentication required.
 from __future__ import annotations
 
 import os
-from datetime import date
 
 import requests
 
@@ -37,8 +36,12 @@ class WeatherClient:
         longitude: float | None = None,
         timezone: str | None = None,
     ) -> None:
-        self.latitude = latitude or float(os.getenv("WEATHER_LATITUDE", str(DEFAULT_LATITUDE)))
-        self.longitude = longitude or float(os.getenv("WEATHER_LONGITUDE", str(DEFAULT_LONGITUDE)))
+        self.latitude = latitude or float(
+            os.getenv("WEATHER_LATITUDE", str(DEFAULT_LATITUDE))
+        )
+        self.longitude = longitude or float(
+            os.getenv("WEATHER_LONGITUDE", str(DEFAULT_LONGITUDE))
+        )
         self.timezone = timezone or os.getenv("WEATHER_TIMEZONE", DEFAULT_TIMEZONE)
         self.session = requests.Session()
 
@@ -82,8 +85,12 @@ class WeatherClient:
                     "date": day_str,
                     "temp_max_c": temp_max[i] if i < len(temp_max) else None,
                     "temp_min_c": temp_min[i] if i < len(temp_min) else None,
-                    "precipitation_mm": precipitation[i] if i < len(precipitation) else None,
-                    "wind_speed_max_kmh": wind_speed[i] if i < len(wind_speed) else None,
+                    "precipitation_mm": (
+                        precipitation[i] if i < len(precipitation) else None
+                    ),
+                    "wind_speed_max_kmh": (
+                        wind_speed[i] if i < len(wind_speed) else None
+                    ),
                     "uv_index_max": uv_index[i] if i < len(uv_index) else None,
                 }
             )

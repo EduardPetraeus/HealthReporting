@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-import re
 from pathlib import Path
 from typing import Any
 
 import yaml
-
 from health_platform.utils.logging_config import get_logger
+from health_platform.utils.sql_safety import _SAFE_IDENTIFIER
 
 logger = get_logger("rule_loader")
 
@@ -20,7 +19,6 @@ _VALID_CHECK_TYPES = {
     "value_range",
     "schema_drift",
 }
-_SAFE_IDENTIFIER = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*\Z")
 
 _DEFAULT_RULES_PATH = (
     Path(__file__).resolve().parents[1]
@@ -72,13 +70,11 @@ def _validate_rules(tables: dict[str, Any]) -> None:
     for table_name, checks in tables.items():
         if not _SAFE_IDENTIFIER.match(table_name):
             raise ValueError(
-                f"Invalid table name '{table_name}' -- "
-                f"must match [a-zA-Z_][a-zA-Z0-9_]*"
+                f"Invalid table name '{table_name}' -- must match [a-zA-Z_][a-zA-Z0-9_]*"
             )
         if not isinstance(checks, dict):
             raise ValueError(
-                f"Table '{table_name}' rules must be a dict, "
-                f"got {type(checks).__name__}"
+                f"Table '{table_name}' rules must be a dict, got {type(checks).__name__}"
             )
         for check_type, check_value in checks.items():
             if check_type not in _VALID_CHECK_TYPES:
@@ -105,8 +101,7 @@ def _validate_check_schema(table_name: str, check_type: str, check_value: Any) -
     elif check_type == "freshness":
         if not isinstance(check_value, dict):
             raise ValueError(
-                f"Table '{table_name}'.freshness must be a dict "
-                f"with 'column' and 'max_hours'"
+                f"Table '{table_name}'.freshness must be a dict with 'column' and 'max_hours'"
             )
         if "column" not in check_value or "max_hours" not in check_value:
             raise ValueError(
@@ -143,8 +138,7 @@ def _validate_check_schema(table_name: str, check_type: str, check_value: Any) -
                 raise ValueError(f"Invalid column '{col}' in {table_name}.value_range")
             if not isinstance(bounds, dict):
                 raise ValueError(
-                    f"Table '{table_name}'.value_range.{col} "
-                    f"must be a dict with min/max"
+                    f"Table '{table_name}'.value_range.{col} must be a dict with min/max"
                 )
             for key in ("min", "max"):
                 if key in bounds and not isinstance(bounds[key], (int, float)):
@@ -156,8 +150,7 @@ def _validate_check_schema(table_name: str, check_type: str, check_value: Any) -
     elif check_type == "schema_drift":
         if not isinstance(check_value, dict):
             raise ValueError(
-                f"Table '{table_name}'.schema_drift must be a dict "
-                f"with 'expected_columns' key"
+                f"Table '{table_name}'.schema_drift must be a dict with 'expected_columns' key"
             )
         if "expected_columns" not in check_value:
             raise ValueError(
@@ -166,8 +159,7 @@ def _validate_check_schema(table_name: str, check_type: str, check_value: Any) -
         cols = check_value["expected_columns"]
         if not isinstance(cols, list) or not all(isinstance(c, str) for c in cols):
             raise ValueError(
-                f"Table '{table_name}'.schema_drift.expected_columns "
-                f"must be a list of column names"
+                f"Table '{table_name}'.schema_drift.expected_columns must be a list of column names"
             )
         for col in cols:
             if not _SAFE_IDENTIFIER.match(col):

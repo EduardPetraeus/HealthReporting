@@ -15,7 +15,6 @@
 
 import os
 
-
 # Path to the SQL files directory — relative to the notebook location
 SQL_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sql")
 

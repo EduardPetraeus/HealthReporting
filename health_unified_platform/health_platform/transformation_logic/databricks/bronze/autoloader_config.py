@@ -21,7 +21,6 @@ from typing import Any
 
 import yaml
 
-
 # Default paths — overridable via environment variables
 _DEFAULT_CONFIG_PATH = os.path.join(
     os.path.dirname(__file__),

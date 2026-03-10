@@ -45,7 +45,7 @@ dbutils.widgets.text(
 
 entity_name = dbutils.widgets.get("entity_name").strip()
 config_root = dbutils.widgets.get("config_root").strip()
-sql_root    = dbutils.widgets.get("sql_root").strip()
+sql_root = dbutils.widgets.get("sql_root").strip()
 
 # COMMAND ----------
 
@@ -54,6 +54,7 @@ sql_root    = dbutils.widgets.get("sql_root").strip()
 # COMMAND ----------
 
 import glob as _glob
+
 import yaml
 
 VALID_ENTITY_TYPES = {"view", "table"}
@@ -86,10 +87,10 @@ def run_gold_entity(config: dict, sql_root: str, audit: AuditLogger) -> None:
     Template variables substituted into the SQL file:
         {target}  — fully-qualified gold table or view name
     """
-    name        = config["name"]
-    target      = config["target"]
+    name = config["name"]
+    target = config["target"]
     entity_type = config.get("type", "view").lower()
-    sql_file    = config["sql_file"]
+    sql_file = config["sql_file"]
 
     if entity_type not in VALID_ENTITY_TYPES:
         raise ValueError(
@@ -116,7 +117,9 @@ def run_gold_entity(config: dict, sql_root: str, audit: AuditLogger) -> None:
         print(f"[{name}] Executing statement {i}/{len(statements)}…")
         spark.sql(statement)
 
-    operation = "CREATE_OR_REPLACE_VIEW" if entity_type == "view" else "CREATE_OR_REPLACE_TABLE"
+    operation = (
+        "CREATE_OR_REPLACE_VIEW" if entity_type == "view" else "CREATE_OR_REPLACE_TABLE"
+    )
     audit.log_table(target, operation)
     print(f"[{name}] Done.")
 

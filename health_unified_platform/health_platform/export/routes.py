@@ -11,7 +11,6 @@ from datetime import date, timedelta
 
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import Response, StreamingResponse
-
 from health_platform.api.auth import verify_token
 from health_platform.export.fhir.bundle import FhirBundleGenerator
 from health_platform.export.pdf.clinical_report import (

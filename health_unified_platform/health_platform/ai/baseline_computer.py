@@ -8,7 +8,6 @@ longitudinal trend analysis.
 from __future__ import annotations
 
 import sys
-from datetime import date, datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -21,10 +20,12 @@ logger = get_logger("baseline_computer")
 # Profile table management
 # ---------------------------------------------------------------------------
 
+
 def _ensure_profile_table(con) -> None:
     """Create agent.patient_profile if it does not exist."""
     con.execute("CREATE SCHEMA IF NOT EXISTS agent")
-    con.execute("""
+    con.execute(
+        """
         CREATE TABLE IF NOT EXISTS agent.patient_profile (
             profile_key VARCHAR PRIMARY KEY,
             profile_value VARCHAR NOT NULL,
@@ -35,7 +36,8 @@ def _ensure_profile_table(con) -> None:
             last_updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             update_frequency VARCHAR
         )
-    """)
+    """
+    )
 
 
 def update_profile_entry(
@@ -70,12 +72,15 @@ def update_profile_entry(
         How often this should be recomputed (e.g. ``daily``, ``weekly``).
     """
     _ensure_profile_table(con)
-    con.execute("""
+    con.execute(
+        """
         INSERT OR REPLACE INTO agent.patient_profile
             (profile_key, profile_value, numeric_value, category, description,
              computed_from, update_frequency, last_updated_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-    """, [key, value, numeric, category, description, computed_from, frequency])
+    """,
+        [key, value, numeric, category, description, computed_from, frequency],
+    )
     logger.debug("Updated profile entry: %s = %s", key, value)
 
 
@@ -184,9 +189,7 @@ def compute_all_baselines(con) -> int:
         try:
             row = con.execute(spec["sql"]).fetchone()
             if row is None or row[0] is None:
-                logger.warning(
-                    "No data for baseline %s — skipping", spec["key"]
-                )
+                logger.warning("No data for baseline %s — skipping", spec["key"])
                 continue
 
             numeric_value = float(row[0])
@@ -283,6 +286,7 @@ def compute_demographics(con) -> int:
 # Profile reader
 # ---------------------------------------------------------------------------
 
+
 def get_profile(
     con,
     categories: list[str] | None = None,
@@ -314,10 +318,12 @@ def get_profile(
         """
         result = con.execute(sql, categories)
     else:
-        result = con.execute("""
+        result = con.execute(
+            """
             SELECT * FROM agent.patient_profile
             ORDER BY category, profile_key
-        """)
+        """
+        )
 
     columns = [desc[0] for desc in result.description]
     rows = result.fetchall()

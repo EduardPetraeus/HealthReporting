@@ -15,7 +15,6 @@ import os
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-
 from health_platform.api.auth import verify_token
 from health_platform.source_connectors.apple_health.json_to_parquet_writer import (
     parse_hae_payload,

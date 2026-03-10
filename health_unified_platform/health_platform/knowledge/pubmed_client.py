@@ -13,7 +13,6 @@ import time
 import xml.etree.ElementTree as ET
 
 import requests
-
 from health_platform.utils.keychain import get_secret
 from health_platform.utils.logging_config import get_logger
 

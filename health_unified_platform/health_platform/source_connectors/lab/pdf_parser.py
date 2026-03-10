@@ -14,7 +14,6 @@ from pathlib import Path
 from typing import Optional
 
 import pdfplumber
-
 from health_platform.utils.logging_config import get_logger
 
 logger = get_logger("lab_pdf_parser")

@@ -19,14 +19,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from auth import get_access_token
 from client import StravaClient
-
-from health_platform.utils.logging_config import get_logger
 from health_platform.utils.audit_logger import AuditLogger
+from health_platform.utils.logging_config import get_logger
 
 # Reuse the Oura writer and state modules — same parquet pattern
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "oura"))
-from writer import write_records
 from state import get_start_date, load_state, save_state, update_state
+from writer import write_records
 
 logger = get_logger("run_strava")
 
@@ -73,7 +72,9 @@ def main() -> None:
         logger.info("athlete_stats: fetching...")
         stats = client.fetch_athlete_stats()
         write_records([stats], "athlete_stats", date_field="", source_env=SOURCE_ENV)
-        audit.log_table("strava.athlete_stats", "WRITE_PARQUET", rows_after=1, status="success")
+        audit.log_table(
+            "strava.athlete_stats", "WRITE_PARQUET", rows_after=1, status="success"
+        )
 
         save_state(state)
 

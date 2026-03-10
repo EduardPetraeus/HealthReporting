@@ -13,7 +13,6 @@ Architecture:
 from __future__ import annotations
 
 import json
-import os
 from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
@@ -25,23 +24,16 @@ from fastapi.responses import StreamingResponse
 from health_platform.api.auth import verify_token
 from health_platform.mcp.health_tools import HealthTools
 from health_platform.utils.logging_config import get_logger
+from health_platform.utils.paths import get_db_path
 from pydantic import BaseModel, Field
 
 logger = get_logger("api.server")
 
 
-def _get_db_path() -> str:
-    """Resolve DuckDB database path from environment."""
-    if path := os.environ.get("HEALTH_DB_PATH"):
-        return path
-    env = os.environ.get("HEALTH_ENV", "dev")
-    return str(Path.home() / "health_dw" / f"health_dw_{env}.db")
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Verify DB exists on startup."""
-    db_path = _get_db_path()
+    db_path = str(get_db_path())
     if not Path(db_path).exists():
         logger.error("Database not found: %s", db_path)
     else:
@@ -77,7 +69,7 @@ app.include_router(export_router)
 
 def _get_tools(read_only: bool = True) -> HealthTools:
     """Create a fresh HealthTools instance."""
-    db_path = _get_db_path()
+    db_path = str(get_db_path())
     con = duckdb.connect(db_path, read_only=read_only)
     return HealthTools(con)
 
@@ -121,7 +113,7 @@ class AlertsResponse(BaseModel):
 @app.get("/health", tags=["system"])
 async def health_check():
     """Health check endpoint (no auth required)."""
-    db_path = _get_db_path()
+    db_path = str(get_db_path())
     db_exists = Path(db_path).exists()
     return {
         "status": "healthy" if db_exists else "degraded",
