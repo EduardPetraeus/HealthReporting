@@ -19,6 +19,24 @@ markers = [
 ]
 addopts = "-m 'not integration'"
 
+[tool.coverage.run]
+source = ["health_platform"]
+omit = [
+    "*/tests/*",
+    "*/__pycache__/*",
+    "*/databricks/*",
+    "*/archive/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.",
+    "if TYPE_CHECKING:",
+]
+
 [tool.ruff]
 target-version = "py39"
 line-length = 100

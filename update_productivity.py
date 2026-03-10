@@ -22,6 +22,7 @@ JSON_PATH = REPO_ROOT / "claude_code_productivity.json"
 # Git helpers
 # ---------------------------------------------------------------------------
 
+
 def git(args: list[str]) -> str:
     result = subprocess.run(
         ["git"] + args, capture_output=True, text=True, cwd=REPO_ROOT
@@ -31,21 +32,31 @@ def git(args: list[str]) -> str:
 
 def get_commits(since_date: str) -> list[dict]:
     """Return all commits after since_date, oldest first."""
-    log = git(["log", f"--after={since_date}", '--format=%H|%ad|%s', '--date=format:%Y-%m-%dT%H:%M:%S', "--reverse"])
+    log = git(
+        [
+            "log",
+            f"--after={since_date}",
+            "--format=%H|%ad|%s",
+            "--date=format:%Y-%m-%dT%H:%M:%S",
+            "--reverse",
+        ]
+    )
     commits = []
     for line in log.splitlines():
         if not line:
             continue
         sha, timestamp, message = line.split("|", 2)
         dt = datetime.fromisoformat(timestamp)
-        commits.append({
-            "sha": sha[:7],
-            "sha_full": sha,
-            "dt": dt,
-            "date": dt.strftime("%Y-%m-%d"),
-            "hour": dt.hour,
-            "message": message,
-        })
+        commits.append(
+            {
+                "sha": sha[:7],
+                "sha_full": sha,
+                "dt": dt,
+                "date": dt.strftime("%Y-%m-%d"),
+                "hour": dt.hour,
+                "message": message,
+            }
+        )
     return commits
 
 
@@ -74,14 +85,14 @@ def get_stats(sha_full: str) -> dict:
 # ---------------------------------------------------------------------------
 
 TASK_TYPE_RULES = [
-    (["fix", "bug", "hotfix", "correct", "patch"],           "starts", "fix"),
-    (["refactor", "restructure", "clean", "reorgani"],        "contains", "refactor"),
-    (["readme", " md ", ".md", "docs", "documentation"],      "contains", "docs"),
-    (["gitignore", "config", "yaml", "yml", "settings"],      "contains", "config"),
-    (["setup", "init", "initial", "scaffold"],                "contains", "setup"),
-    (["archive", "legacy", "migrate"],                        "contains", "archive"),
-    (["add", "new", "create", "implement", "build"],          "starts", "new_feature"),
-    (["update", "change", "improve"],                          "starts", "fix"),
+    (["fix", "bug", "hotfix", "correct", "patch"], "starts", "fix"),
+    (["refactor", "restructure", "clean", "reorgani"], "contains", "refactor"),
+    (["readme", " md ", ".md", "docs", "documentation"], "contains", "docs"),
+    (["gitignore", "config", "yaml", "yml", "settings"], "contains", "config"),
+    (["setup", "init", "initial", "scaffold"], "contains", "setup"),
+    (["archive", "legacy", "migrate"], "contains", "archive"),
+    (["add", "new", "create", "implement", "build"], "starts", "new_feature"),
+    (["update", "change", "improve"], "starts", "fix"),
 ]
 
 
@@ -110,11 +121,12 @@ def code_density(lines_added: int, files_changed: int) -> Optional[float]:
 
 def compute_streak(commits: list[dict], up_to_index: int) -> int:
     """Consecutive active days ending at commits[up_to_index]."""
-    from datetime import timedelta
-    dates = sorted(set(
-        datetime.strptime(c["date"], "%Y-%m-%d").date()
-        for c in commits[:up_to_index + 1]
-    ))
+    dates = sorted(
+        set(
+            datetime.strptime(c["date"], "%Y-%m-%d").date()
+            for c in commits[: up_to_index + 1]
+        )
+    )
     if not dates:
         return 1
     streak = 1
@@ -129,6 +141,7 @@ def compute_streak(commits: list[dict], up_to_index: int) -> int:
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+
 
 def build_entry(
     commit: dict,
@@ -204,13 +217,15 @@ def update():
 
     # Recompute summary (exclude outliers: files_factor is None)
     valid = [e for e in entries if e.get("files_factor") is not None]
-    avg_files = round(sum(e["files_changed"] for e in valid) / len(valid), 1) if valid else 0
+    avg_files = (
+        round(sum(e["files_changed"] for e in valid) / len(valid), 1) if valid else 0
+    )
 
     from collections import Counter
-    active_weeks = len(set(
-        datetime.strptime(c["date"], "%Y-%m-%d").strftime("%Y-%W")
-        for c in commits
-    ))
+
+    active_weeks = len(
+        set(datetime.strptime(c["date"], "%Y-%m-%d").strftime("%Y-%W") for c in commits)
+    )
     commits_per_week = round(len(commits) / active_weeks, 1) if active_weeks else 0
 
     data["claude_code_summary"] = {
@@ -239,11 +254,15 @@ def update():
     print(f"{'='*50}")
     print(f"  Commits tracked   : {len(commits)}")
     print(f"  Active weeks      : {active_weeks}")
-    print(f"  Velocity factor   : {data['factors']['velocity_factor']}x  (commits/active week)")
-    print(f"  Files factor      : {data['factors']['files_per_commit_factor']}x  (files/commit)")
+    print(
+        f"  Velocity factor   : {data['factors']['velocity_factor']}x  (commits/active week)"
+    )
+    print(
+        f"  Files factor      : {data['factors']['files_per_commit_factor']}x  (files/commit)"
+    )
 
     task_counts = Counter(e["task_type"] for e in entries)
-    print(f"\n  Task breakdown:")
+    print("\n  Task breakdown:")
     for task_type, count in sorted(task_counts.items(), key=lambda x: -x[1]):
         print(f"    {task_type:<20} {count}")
     print()

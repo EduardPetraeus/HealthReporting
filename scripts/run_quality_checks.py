@@ -20,7 +20,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "health_unified_platform"))
 
 import duckdb
-
 from health_platform.quality.data_quality_checker import DataQualityChecker
 from health_platform.quality.models import QualityReport
 from health_platform.quality.reporters import format_for_log

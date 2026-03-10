@@ -10,7 +10,6 @@ from datetime import date, timedelta
 
 import duckdb
 import pytest
-
 from health_platform.desktop.reports.generator import (
     VALID_SECTIONS,
     ReportGenerator,

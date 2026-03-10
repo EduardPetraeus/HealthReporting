@@ -9,10 +9,8 @@ Plus edge cases: malformed dates, null qty, duration, record cap, mapping integr
 
 from __future__ import annotations
 
-
 import pandas as pd
 import pytest
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -314,8 +312,8 @@ def _set_test_token(monkeypatch):
 def client(tmp_path, _set_test_token, monkeypatch):
     """TestClient with tmp_path as DATA_LAKE_ROOT."""
     monkeypatch.setenv("DATA_LAKE_ROOT", str(tmp_path))
-    from starlette.testclient import TestClient
     from health_platform.api.server import app
+    from starlette.testclient import TestClient
 
     return TestClient(app)
 
