@@ -8,21 +8,20 @@ from __future__ import annotations
 
 import importlib.util
 import json
-import sys
 import time
 from pathlib import Path
 from unittest.mock import patch
 
-import pytest
-
 # Connector root paths
 _REPO_ROOT = Path(__file__).resolve().parents[1]
-_STRAVA_DIR = _REPO_ROOT / "health_unified_platform" / "health_platform" / "source_connectors" / "strava"
+_STRAVA_DIR = (
+    _REPO_ROOT
+    / "health_unified_platform"
+    / "health_platform"
+    / "source_connectors"
+    / "strava"
+)
 _PLATFORM_DIR = _REPO_ROOT / "health_unified_platform" / "health_platform"
-
-# Ensure platform utils are importable
-if str(_PLATFORM_DIR.parent) not in sys.path:
-    sys.path.insert(0, str(_PLATFORM_DIR.parent))
 
 
 def _load_module(module_name: str, file_path: Path):
@@ -78,7 +77,9 @@ class TestStravaAuth:
         assert str(strava_auth.TOKEN_FILE).startswith(str(Path.home()))
         assert "strava_tokens.json" in str(strava_auth.TOKEN_FILE)
         # Must NOT contain hardcoded /Users/ path
-        assert "/Users/" not in str(strava_auth.TOKEN_FILE).replace(str(Path.home()), "")
+        assert "/Users/" not in str(strava_auth.TOKEN_FILE).replace(
+            str(Path.home()), ""
+        )
 
     def test_config_dir_path(self) -> None:
         expected = Path.home() / ".config" / "health_reporting"
@@ -112,8 +113,10 @@ class TestStravaAuth:
 
     def test_save_tokens_creates_file(self, tmp_path: Path) -> None:
         test_file = tmp_path / "test_tokens.json"
-        with patch.object(strava_auth, "TOKEN_FILE", test_file), \
-             patch.object(strava_auth, "CONFIG_DIR", tmp_path):
+        with (
+            patch.object(strava_auth, "TOKEN_FILE", test_file),
+            patch.object(strava_auth, "CONFIG_DIR", tmp_path),
+        ):
             strava_auth._save_tokens({"access_token": "test", "expires_at": 9999999999})
             assert test_file.exists()
             data = json.loads(test_file.read_text())

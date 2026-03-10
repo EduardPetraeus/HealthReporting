@@ -10,16 +10,11 @@ Validates all 15 new silver tables created in A3:
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
 import duckdb
 import pytest
+from health_platform.utils.paths import get_db_path
 
 pytestmark = pytest.mark.integration
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "health_unified_platform"))
-from health_platform.utils.paths import get_db_path  # noqa: E402
 
 # Tables with a non-null value column to validate: (table_name, value_column)
 SIMPLE_EVENT_TABLES = [

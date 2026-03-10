@@ -10,11 +10,8 @@ actual health data patterns. All recommendations are:
 
 from __future__ import annotations
 
-import sys
 from dataclasses import dataclass, field
-from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from health_platform.utils.logging_config import get_logger
 
 logger = get_logger("recommendation_engine")
@@ -141,8 +138,7 @@ class RecommendationEngine:
                         "(brisk walking, cycling, swimming)."
                     ),
                     rationale=(
-                        f"7-day avg active calories: {avg_active_cal:.0f} "
-                        f"(recommended: >300)"
+                        f"7-day avg active calories: {avg_active_cal:.0f} (recommended: >300)"
                     ),
                     evidence_type="data_pattern",
                     metrics_used=["daily_activity.active_calories"],

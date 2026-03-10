@@ -4,15 +4,9 @@ from __future__ import annotations
 
 import os
 import re
-import sys
 from pathlib import Path
 
 import pytest
-
-sys.path.insert(
-    0,
-    str(Path(__file__).resolve().parents[1] / "health_unified_platform"),
-)
 
 try:
     from health_platform.utils.sql_safety import validate_sql_identifier as _validate_id

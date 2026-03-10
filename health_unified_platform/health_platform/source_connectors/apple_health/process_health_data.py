@@ -18,9 +18,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
-
 from health_platform.utils.logging_config import get_logger
 
 logger = get_logger("process_health_data")

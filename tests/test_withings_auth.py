@@ -9,19 +9,11 @@ Covers: _load_credentials, _save_tokens, _load_tokens, _is_expired,
 from __future__ import annotations
 
 import json
-import sys
 import time
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
 import requests
-
-sys.path.insert(
-    0,
-    str(Path(__file__).resolve().parents[1] / "health_unified_platform"),
-)
-
 from health_platform.source_connectors.withings.auth import (
     _is_expired,
     _load_credentials,
@@ -32,7 +24,6 @@ from health_platform.source_connectors.withings.auth import (
 )
 
 MODULE = "health_platform.source_connectors.withings.auth"
-
 
 # ---------------------------------------------------------------------------
 # Helpers

@@ -11,22 +11,16 @@ Validates that:
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 
 import pyarrow.parquet as pq
 import pytest
 import yaml
+from health_platform.utils.paths import get_data_lake_root
 
 pytestmark = pytest.mark.integration
 
-# Ensure platform utils are importable
 _REPO_ROOT = Path(__file__).resolve().parents[1]
-_PLATFORM_DIR = _REPO_ROOT / "health_unified_platform"
-if str(_PLATFORM_DIR) not in sys.path:
-    sys.path.insert(0, str(_PLATFORM_DIR))
-
-from health_platform.utils.paths import get_data_lake_root  # noqa: E402
 
 CANONICAL_ROOT = Path("/Users/Shared/data_lake")
 LEGACY_FALLBACK = Path.home() / "health_data_lake"

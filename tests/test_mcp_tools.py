@@ -1,17 +1,10 @@
 """Tests for MCP health tools."""
+
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 
 import pytest
-import yaml
-
-sys.path.insert(
-    0,
-    str(Path(__file__).resolve().parents[1] / "health_unified_platform"),
-)
-
 
 CONTRACTS_DIR = (
     Path(__file__).resolve().parents[1]
@@ -149,7 +142,8 @@ class TestHealthToolsIntegration:
     def _setup_full_db(self, seeded_db):
         """Set up all required tables for integration testing."""
         # Agent tables
-        seeded_db.execute("""
+        seeded_db.execute(
+            """
             CREATE TABLE IF NOT EXISTS agent.patient_profile (
                 profile_key VARCHAR PRIMARY KEY,
                 profile_value VARCHAR NOT NULL,
@@ -160,8 +154,10 @@ class TestHealthToolsIntegration:
                 last_updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 update_frequency VARCHAR
             )
-        """)
-        seeded_db.execute("""
+        """
+        )
+        seeded_db.execute(
+            """
             CREATE TABLE IF NOT EXISTS agent.daily_summaries (
                 day DATE PRIMARY KEY,
                 sleep_score INTEGER, readiness_score INTEGER,
@@ -174,8 +170,10 @@ class TestHealthToolsIntegration:
                 data_completeness DOUBLE,
                 created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
-        """)
-        seeded_db.execute("""
+        """
+        )
+        seeded_db.execute(
+            """
             CREATE TABLE IF NOT EXISTS agent.knowledge_base (
                 insight_id VARCHAR PRIMARY KEY,
                 created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -189,7 +187,8 @@ class TestHealthToolsIntegration:
                 is_active BOOLEAN DEFAULT TRUE,
                 superseded_by VARCHAR
             )
-        """)
+        """
+        )
         return seeded_db
 
     def test_query_health_daily(self, seeded_db):
@@ -212,11 +211,13 @@ class TestHealthToolsIntegration:
         db = self._setup_full_db(seeded_db)
 
         # Seed some profile data
-        db.execute("""
+        db.execute(
+            """
             INSERT INTO agent.patient_profile
             (profile_key, profile_value, numeric_value, category, description)
             VALUES ('age', '45', 45, 'demographics', 'Patient age')
-        """)
+        """
+        )
 
         from health_platform.mcp.health_tools import HealthTools
 
@@ -237,7 +238,11 @@ class TestHealthToolsIntegration:
             "testing write rejection",
         )
 
-        assert "error" in result.lower() or "denied" in result.lower() or "not allowed" in result.lower()
+        assert (
+            "error" in result.lower()
+            or "denied" in result.lower()
+            or "not allowed" in result.lower()
+        )
 
     def test_run_custom_query_select(self, seeded_db):
         """Custom query allows SELECT."""

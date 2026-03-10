@@ -2,12 +2,8 @@
 
 from __future__ import annotations
 
-import sys
 from datetime import date
-from pathlib import Path
 from unittest.mock import patch
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "health_unified_platform"))
 
 from health_platform.source_connectors.withings.client import WithingsClient
 

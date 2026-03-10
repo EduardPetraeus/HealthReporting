@@ -10,17 +10,9 @@ All data is synthetic.
 
 from __future__ import annotations
 
-import sys
 from datetime import date, timedelta
-from pathlib import Path
 
 import pytest
-
-sys.path.insert(
-    0,
-    str(Path(__file__).resolve().parents[1] / "health_unified_platform"),
-)
-
 from health_platform.ai.trend_forecaster import TrendForecaster
 
 # ---------------------------------------------------------------------------

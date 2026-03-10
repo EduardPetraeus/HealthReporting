@@ -5,16 +5,12 @@ Output structure: {data_lake_root}/{endpoint}/year=YYYY/month=MM/day=DD/data.par
 
 from __future__ import annotations
 
-import sys
 from datetime import date, datetime, timezone
 from pathlib import Path
 
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
-
 from health_platform.utils.logging_config import get_logger
 from health_platform.utils.paths import get_data_lake_root
 

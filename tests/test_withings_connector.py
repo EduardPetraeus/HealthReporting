@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import importlib.util
 import json
-import sys
 import time
 from pathlib import Path
 from unittest.mock import patch
@@ -23,10 +22,6 @@ _WITHINGS_DIR = (
     / "withings"
 )
 _PLATFORM_DIR = _REPO_ROOT / "health_unified_platform" / "health_platform"
-
-# Ensure platform utils are importable
-if str(_PLATFORM_DIR.parent) not in sys.path:
-    sys.path.insert(0, str(_PLATFORM_DIR.parent))
 
 
 def _load_module(module_name: str, file_path: Path):

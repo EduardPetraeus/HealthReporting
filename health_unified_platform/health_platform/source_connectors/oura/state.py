@@ -6,11 +6,8 @@ Persisted to ~/.config/health_reporting/oura_state.json between runs.
 from __future__ import annotations
 
 import json
-import sys
 from datetime import date, timedelta
 from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from health_platform.utils.logging_config import get_logger
 

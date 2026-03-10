@@ -6,6 +6,7 @@ files execute correctly and produce expected results.
 
 from __future__ import annotations
 
+import importlib.util
 from pathlib import Path
 
 import duckdb
@@ -18,6 +19,17 @@ GOLD_SQL_DIR = (
     / "transformation_logic"
     / "gold_local"
 )
+
+SCRIPTS_DIR = Path(__file__).resolve().parent.parent / "scripts"
+
+
+def _load_script(module_name: str):
+    """Load a module from the scripts/ directory (not a package)."""
+    script_path = SCRIPTS_DIR / f"{module_name}.py"
+    spec = importlib.util.spec_from_file_location(module_name, script_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 # ---------------------------------------------------------------------------
@@ -847,12 +859,9 @@ class TestRunnerScript:
 
     def test_get_sql_files_ordering(self):
         """Dimensions should come before facts in execution order."""
-        import sys
+        gold_views = _load_script("create_gold_views")
 
-        sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
-        from create_gold_views import get_sql_files
-
-        files = get_sql_files(GOLD_SQL_DIR)
+        files = gold_views.get_sql_files(GOLD_SQL_DIR)
         names = [f.stem for f in files]
 
         # Find first fct_ index
@@ -864,13 +873,10 @@ class TestRunnerScript:
 
     def test_dry_run_does_not_modify_db(self, gold_db, capsys):
         """Dry run should print SQL but not create tables/views."""
-        import sys
-
-        sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
-        from create_gold_views import run_gold_views
+        gold_views = _load_script("create_gold_views")
 
         # Run in dry_run mode — this should NOT create any gold tables/views
-        results = run_gold_views(db_path=":memory:", dry_run=True)
+        results = gold_views.run_gold_views(db_path=":memory:", dry_run=True)
 
         # Verify all files reported success
         assert all(results.values())

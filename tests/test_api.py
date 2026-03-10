@@ -7,15 +7,10 @@ from __future__ import annotations
 
 import os
 import subprocess
-import sys
-from pathlib import Path
 from unittest.mock import patch
 
 import duckdb
 import pytest
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "health_unified_platform"))
-
 from fastapi.testclient import TestClient
 from health_platform.api.server import app
 

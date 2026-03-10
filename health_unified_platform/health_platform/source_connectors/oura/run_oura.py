@@ -11,11 +11,7 @@ Usage:
 from __future__ import annotations
 
 import os
-import sys
 from datetime import date
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from auth import get_access_token
 from client import OuraClient

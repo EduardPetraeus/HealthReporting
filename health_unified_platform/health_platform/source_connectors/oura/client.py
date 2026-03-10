@@ -6,15 +6,9 @@ Implements BaseConnector for a consistent connector interface.
 
 from __future__ import annotations
 
-import sys
 from datetime import date
-from pathlib import Path
 
 import requests
-
-# Ensure the source_connectors package is importable
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-
 from health_platform.source_connectors.base import BaseConnector
 
 BASE_URL = "https://api.ouraring.com"
@@ -81,8 +75,7 @@ class OuraClient(BaseConnector):
         method_name = ENDPOINT_METHODS.get(endpoint)
         if not method_name:
             raise ValueError(
-                f"Unknown endpoint '{endpoint}'. "
-                f"Available: {list(ENDPOINT_METHODS.keys())}"
+                f"Unknown endpoint '{endpoint}'. Available: {list(ENDPOINT_METHODS.keys())}"
             )
         method = getattr(self, method_name)
         return method(date.fromisoformat(start_date), date.fromisoformat(end_date))

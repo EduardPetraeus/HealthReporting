@@ -8,16 +8,11 @@ Validates tables that receive data from both Oura and Withings:
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
 import duckdb
 import pytest
+from health_platform.utils.paths import get_db_path
 
 pytestmark = pytest.mark.integration
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "health_unified_platform"))
-from health_platform.utils.paths import get_db_path  # noqa: E402
 
 
 @pytest.fixture(scope="module")

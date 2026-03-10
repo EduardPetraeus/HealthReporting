@@ -5,26 +5,12 @@ All test data is synthetic — no real health data is used.
 
 from __future__ import annotations
 
-import sys
 import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import duckdb
 import pandas as pd
-
-# Ensure the health_platform package is importable
-sys.path.insert(
-    0,
-    str(Path(__file__).resolve().parents[1] / "health_unified_platform"),
-)
-
-from health_platform.source_connectors.lab.pdf_parser import (
-    LabPdfParser,
-    _determine_status,
-    _parse_danish_number,
-    _parse_reference_range,
-)
 from health_platform.source_connectors.lab.lab_ingestion import (
     _categorize_marker,
     _compute_hash,
@@ -32,6 +18,13 @@ from health_platform.source_connectors.lab.lab_ingestion import (
     ingest_lab_pdfs,
 )
 
+# Ensure the health_platform package is importable
+from health_platform.source_connectors.lab.pdf_parser import (
+    LabPdfParser,
+    _determine_status,
+    _parse_danish_number,
+    _parse_reference_range,
+)
 
 # =====================================================================
 # Danish number format tests

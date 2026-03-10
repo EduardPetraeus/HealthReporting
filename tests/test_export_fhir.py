@@ -7,19 +7,13 @@ from __future__ import annotations
 
 import os
 import subprocess
-import sys
 from datetime import date, datetime
-from pathlib import Path
 from unittest.mock import patch
 
 import duckdb
 import pytest
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "health_unified_platform"))
-
-from health_platform.export.fhir.mapper import LOINC_CODES, FhirMapper
 from health_platform.export.fhir.bundle import FhirBundleGenerator
-
+from health_platform.export.fhir.mapper import LOINC_CODES, FhirMapper
 
 # ---------------------------------------------------------------------------
 # Fixtures

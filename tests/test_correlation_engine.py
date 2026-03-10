@@ -1,15 +1,6 @@
 """Tests for correlation engine."""
+
 from __future__ import annotations
-
-import sys
-from pathlib import Path
-
-import pytest
-
-sys.path.insert(
-    0,
-    str(Path(__file__).resolve().parents[1] / "health_unified_platform"),
-)
 
 
 class TestCorrelationEngine:
@@ -17,7 +8,8 @@ class TestCorrelationEngine:
 
     def _setup_relationships_table(self, con):
         """Create silver.metric_relationships table."""
-        con.execute("""
+        con.execute(
+            """
             CREATE TABLE IF NOT EXISTS silver.metric_relationships (
                 source_metric VARCHAR NOT NULL,
                 target_metric VARCHAR NOT NULL,
@@ -31,7 +23,8 @@ class TestCorrelationEngine:
                 last_computed_at TIMESTAMP,
                 PRIMARY KEY (source_metric, target_metric, relationship_type, lag_days)
             )
-        """)
+        """
+        )
 
     def test_compute_correlation(self, seeded_db):
         """Compute Pearson correlation between two metrics."""

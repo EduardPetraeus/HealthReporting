@@ -6,14 +6,9 @@ without requiring the real health database.
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
 import pytest
 
 # Add project to path
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "health_unified_platform"))
-
 from health_platform.mcp.health_tools import HealthTools
 
 

@@ -9,12 +9,6 @@ Usage:
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
-# Add project root to path
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-
 import duckdb
 from health_platform.mcp.health_tools import HealthTools
 from health_platform.utils.logging_config import get_logger

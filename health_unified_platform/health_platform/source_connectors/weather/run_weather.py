@@ -11,16 +11,12 @@ Usage:
 from __future__ import annotations
 
 import os
-import sys
 from datetime import date, datetime, timezone
 from pathlib import Path
 
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
-
 from client import WeatherClient
 from health_platform.utils.logging_config import get_logger
 from health_platform.utils.paths import get_data_lake_root

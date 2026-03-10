@@ -5,25 +5,10 @@ Uses mock responses — no real API calls.
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pytest
-
-# Make source_connectors importable
-sys.path.insert(
-    0,
-    str(
-        Path(__file__).resolve().parents[1]
-        / "health_unified_platform"
-        / "health_platform"
-        / "source_connectors"
-        / "weather"
-    ),
-)
-
-from client import WeatherClient
+from health_platform.source_connectors.weather.client import WeatherClient
 
 # Synthetic Open-Meteo API response matching the real format
 MOCK_API_RESPONSE = {
@@ -100,7 +85,7 @@ class TestWeatherClientParsing:
 class TestWeatherClientFetch:
     """Test the fetch method with mocked HTTP calls."""
 
-    @patch("client.requests.Session")
+    @patch("health_platform.source_connectors.weather.client.requests.Session")
     def test_fetch_daily_weather_calls_api(self, mock_session_cls: MagicMock) -> None:
         mock_session = MagicMock()
         mock_response = MagicMock()
@@ -116,7 +101,7 @@ class TestWeatherClientFetch:
         mock_session.get.assert_called_once()
         assert len(records) == 3
 
-    @patch("client.requests.Session")
+    @patch("health_platform.source_connectors.weather.client.requests.Session")
     def test_fetch_passes_correct_params(self, mock_session_cls: MagicMock) -> None:
         mock_session = MagicMock()
         mock_response = MagicMock()
@@ -125,7 +110,9 @@ class TestWeatherClientFetch:
         mock_session.get.return_value = mock_response
         mock_session_cls.return_value = mock_session
 
-        client = WeatherClient(latitude=55.68, longitude=12.56, timezone="Europe/Copenhagen")
+        client = WeatherClient(
+            latitude=55.68, longitude=12.56, timezone="Europe/Copenhagen"
+        )
         client.session = mock_session
         client.fetch_daily_weather(past_days=30)
 
@@ -152,7 +139,9 @@ class TestMergeSqlValidity:
     )
 
     def test_merge_sql_file_exists(self) -> None:
-        assert self.MERGE_SQL_PATH.exists(), f"Merge SQL not found at {self.MERGE_SQL_PATH}"
+        assert (
+            self.MERGE_SQL_PATH.exists()
+        ), f"Merge SQL not found at {self.MERGE_SQL_PATH}"
 
     def test_merge_sql_contains_staging_table(self) -> None:
         sql = self.MERGE_SQL_PATH.read_text()
@@ -176,5 +165,11 @@ class TestMergeSqlValidity:
 
     def test_merge_sql_contains_all_columns(self) -> None:
         sql = self.MERGE_SQL_PATH.read_text()
-        for col in ["temp_max_c", "temp_min_c", "precipitation_mm", "wind_speed_max_kmh", "uv_index_max"]:
+        for col in [
+            "temp_max_c",
+            "temp_min_c",
+            "precipitation_mm",
+            "wind_speed_max_kmh",
+            "uv_index_max",
+        ]:
             assert col in sql, f"Column {col} missing from merge SQL"

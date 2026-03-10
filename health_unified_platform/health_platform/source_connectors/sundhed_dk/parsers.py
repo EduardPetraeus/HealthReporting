@@ -14,15 +14,9 @@ Reuses Danish number parsing from the existing lab PDF parser.
 from __future__ import annotations
 
 import re
-import sys
-from pathlib import Path
 from typing import Optional
 
 from bs4 import BeautifulSoup, Tag
-
-# Make lab parser importable for reuse
-sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
-
 from health_platform.source_connectors.lab.pdf_parser import (
     _parse_danish_number,
 )

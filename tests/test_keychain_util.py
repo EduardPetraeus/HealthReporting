@@ -6,12 +6,7 @@ All tests are mocked — no real keychain access needed.
 from __future__ import annotations
 
 import subprocess
-import sys
-from pathlib import Path
 from unittest.mock import patch
-
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "health_unified_platform"))
 
 from health_platform.utils.keychain import get_secret
 

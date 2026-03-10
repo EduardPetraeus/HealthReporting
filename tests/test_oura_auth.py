@@ -3,17 +3,12 @@
 from __future__ import annotations
 
 import json
-import sys
 import time
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import health_platform.source_connectors.oura.auth as auth_module
 import pytest
 import requests
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "health_unified_platform"))
-
-import health_platform.source_connectors.oura.auth as auth_module
 from health_platform.source_connectors.oura.auth import (
     _is_expired,
     _load_credentials,

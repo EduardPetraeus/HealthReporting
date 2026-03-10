@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import json
 import secrets
-import sys
 import time
 import webbrowser
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -17,9 +16,6 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlencode, urlparse
 
 import requests
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
-
 from health_platform.utils.keychain import get_secret
 from health_platform.utils.logging_config import get_logger
 

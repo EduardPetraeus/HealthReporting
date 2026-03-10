@@ -224,7 +224,7 @@ class SchemaPruner:
             if not _safe.fullmatch(table_name):
                 logger.warning("Invalid table name for PRAGMA: %s", table_name)
                 return []
-            result = self.con.execute(f"PRAGMA table_info('{table_name}')")
+            result = self.con.execute(f"PRAGMA table_info({table_name})")
             rows = result.fetchall()
         except Exception as exc:
             logger.debug("PRAGMA table_info failed for %s: %s", table_name, exc)
