@@ -121,7 +121,7 @@ jobs:
 
       - name: Run pip-audit
         run: |
-          pip install pip-audit
+          pip install pip-audit "filelock>=3.20.3"
           pip-audit --desc
 
   lint:
