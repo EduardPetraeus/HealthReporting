@@ -5,19 +5,11 @@ All test data is synthetic. No real health data is used.
 
 from __future__ import annotations
 
-import sys
 from datetime import date, timedelta
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import duckdb
 import pytest
-
-sys.path.insert(
-    0,
-    str(Path(__file__).resolve().parents[1] / "health_unified_platform"),
-)
-
 from health_platform.ai.anomaly_detector import (
     CONSTELLATION_RULES,
     MONITORED_METRICS,
@@ -28,8 +20,7 @@ from health_platform.ai.anomaly_detector import (
     _classify_severity,
     format_anomaly_report,
 )
-from health_platform.ai.notification_manager import NotificationManager, PRIORITY_MAP
-
+from health_platform.ai.notification_manager import PRIORITY_MAP, NotificationManager
 
 # ---------------------------------------------------------------------------
 # Fixtures

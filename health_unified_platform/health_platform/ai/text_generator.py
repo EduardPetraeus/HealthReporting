@@ -8,11 +8,8 @@ No external AI APIs — pure template-based text generation.
 
 from __future__ import annotations
 
-import sys
 from datetime import date
-from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from health_platform.utils.logging_config import get_logger
 
 logger = get_logger("text_generator")
@@ -21,6 +18,7 @@ logger = get_logger("text_generator")
 # ---------------------------------------------------------------------------
 # Score interpretation helpers
 # ---------------------------------------------------------------------------
+
 
 def _interpret_score(value: float | None, label: str) -> str:
     """Return a parenthetical interpretation for a 0-100 score."""
@@ -108,6 +106,7 @@ def _detect_anomalies(con, day: date) -> list[str]:
 # Main summary generation
 # ---------------------------------------------------------------------------
 
+
 def generate_daily_summary(con, day: date) -> str:
     """Generate a concise natural language summary for a single day.
 
@@ -137,10 +136,14 @@ def generate_daily_summary(con, day: date) -> str:
             parts.append(f"{score_str}.")
         deep = sleep.get("deep_sleep_score")
         if deep is not None:
-            parts.append(f"Deep sleep {'strong' if deep >= 75 else 'moderate'} ({int(deep)}).")
+            parts.append(
+                f"Deep sleep {'strong' if deep >= 75 else 'moderate'} ({int(deep)})."
+            )
         latency = sleep.get("latency_score")
         if latency is not None and latency < 70:
-            parts.append(f"Latency low ({int(latency)}) \u2014 took longer to fall asleep.")
+            parts.append(
+                f"Latency low ({int(latency)}) \u2014 took longer to fall asleep."
+            )
 
     # --- Readiness ---
     readiness = _query_row(con, "silver.daily_readiness", "day", day)
@@ -208,12 +211,11 @@ def generate_daily_summary(con, day: date) -> str:
 # Query helpers
 # ---------------------------------------------------------------------------
 
+
 def _query_row(con, table: str, date_col: str, day: date) -> dict | None:
     """Query a single row from a silver table by date, return as dict or None."""
     try:
-        result = con.execute(
-            f"SELECT * FROM {table} WHERE {date_col} = ?", [day]
-        )
+        result = con.execute(f"SELECT * FROM {table} WHERE {date_col} = ?", [day])
         columns = [desc[0] for desc in result.description]
         row = result.fetchone()
         if row is None:
@@ -242,6 +244,7 @@ def _query_resting_hr(con, day: date) -> float | None:
 # ---------------------------------------------------------------------------
 # Backfill and pipeline entry points
 # ---------------------------------------------------------------------------
+
 
 def backfill_summaries(
     con,
@@ -292,9 +295,7 @@ def backfill_summaries(
             logger.error("Failed to generate summary for %s: %s", current, exc)
         current = _next_day(current)
 
-    logger.info(
-        "Backfilled %d summaries from %s to %s", count, start_date, end_date
-    )
+    logger.info("Backfilled %d summaries from %s to %s", count, start_date, end_date)
     return count
 
 
@@ -324,10 +325,12 @@ def generate_summary_for_pipeline(con, day: date) -> str:
 # Internal helpers
 # ---------------------------------------------------------------------------
 
+
 def _ensure_summary_table(con) -> None:
     """Create agent.daily_summaries if it does not exist."""
     con.execute("CREATE SCHEMA IF NOT EXISTS agent")
-    con.execute("""
+    con.execute(
+        """
         CREATE TABLE IF NOT EXISTS agent.daily_summaries (
             day DATE PRIMARY KEY,
             sleep_score INTEGER,
@@ -342,32 +345,37 @@ def _ensure_summary_table(con) -> None:
             data_completeness DOUBLE,
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )
-    """)
+    """
+    )
 
 
 def _upsert_summary(con, day: date, summary: str, **kwargs) -> None:
     """Insert or replace a daily summary row."""
-    con.execute("""
+    con.execute(
+        """
         INSERT OR REPLACE INTO agent.daily_summaries
             (day, sleep_score, readiness_score, steps, resting_hr,
              stress_level, has_anomaly, anomaly_metrics,
              summary_text, data_completeness, created_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-    """, [
-        day,
-        kwargs.get("sleep_score"),
-        kwargs.get("readiness_score"),
-        kwargs.get("steps"),
-        kwargs.get("resting_hr"),
-        kwargs.get("stress_level"),
-        kwargs.get("has_anomaly", False),
-        kwargs.get("anomaly_metrics"),
-        summary,
-        kwargs.get("data_completeness"),
-    ])
+    """,
+        [
+            day,
+            kwargs.get("sleep_score"),
+            kwargs.get("readiness_score"),
+            kwargs.get("steps"),
+            kwargs.get("resting_hr"),
+            kwargs.get("stress_level"),
+            kwargs.get("has_anomaly", False),
+            kwargs.get("anomaly_metrics"),
+            summary,
+            kwargs.get("data_completeness"),
+        ],
+    )
 
 
 def _next_day(d: date) -> date:
     """Return the next calendar day."""
     from datetime import timedelta
+
     return d + timedelta(days=1)

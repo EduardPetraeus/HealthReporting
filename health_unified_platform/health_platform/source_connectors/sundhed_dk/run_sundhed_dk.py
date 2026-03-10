@@ -14,14 +14,10 @@ import os
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
-
+from browser import SundhedDkBrowser
+from health_platform.source_connectors.oura.writer import write_records
 from health_platform.utils.audit_logger import AuditLogger
 from health_platform.utils.logging_config import get_logger
-
-# Reuse the Oura writer — same parquet pattern
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "oura"))
-from browser import SundhedDkBrowser
 from parsers import (
     parse_appointments,
     parse_ejournal,
@@ -30,7 +26,6 @@ from parsers import (
     parse_vaccinations,
 )
 from scraper import SessionExpiredError, SundhedDkScraper
-from writer import write_records
 
 logger = get_logger("run_sundhed_dk")
 

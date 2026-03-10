@@ -15,6 +15,7 @@ from health_platform.quality.models import CheckResult, QualityReport
 from health_platform.quality.rule_loader import load_rules
 from health_platform.utils.logging_config import get_logger
 from health_platform.utils.sql_safety import validate_sql_identifier as _validate_id
+from health_platform.utils.sql_safety import validate_where_clause as _validate_where
 
 logger = get_logger("data_quality_checker")
 
@@ -283,7 +284,7 @@ class DataQualityChecker:
             if not conditions:
                 continue
 
-            where = " OR ".join(conditions)
+            where = _validate_where(" OR ".join(conditions))
             sql = (
                 f"SELECT COUNT(*) FROM silver.{tbl} WHERE {c} IS NOT NULL AND ({where})"
             )

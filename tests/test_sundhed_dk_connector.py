@@ -8,7 +8,6 @@ ngx-datatable). No browser or network dependency — fully offline.
 from __future__ import annotations
 
 import importlib.util
-import sys
 from pathlib import Path
 
 # Connector root paths
@@ -22,10 +21,6 @@ _SUNDHED_DIR = (
 )
 _PLATFORM_DIR = _REPO_ROOT / "health_unified_platform" / "health_platform"
 _FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures" / "sundhed_dk"
-
-# Ensure platform utils are importable
-if str(_PLATFORM_DIR.parent) not in sys.path:
-    sys.path.insert(0, str(_PLATFORM_DIR.parent))
 
 
 def _load_module(module_name: str, file_path: Path):

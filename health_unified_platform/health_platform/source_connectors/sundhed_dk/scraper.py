@@ -7,16 +7,11 @@ handle pagination, and extract raw HTML for the parsers.
 from __future__ import annotations
 
 import random
-import sys
 import time
-from pathlib import Path
-
-from playwright.sync_api import Page
-from playwright.sync_api import TimeoutError as PlaywrightTimeout
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from health_platform.utils.logging_config import get_logger
+from playwright.sync_api import Page
+from playwright.sync_api import TimeoutError as PlaywrightTimeout
 
 logger = get_logger("sundhed_dk.scraper")
 

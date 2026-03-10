@@ -1,15 +1,6 @@
 """Tests for baseline computer."""
+
 from __future__ import annotations
-
-import sys
-from pathlib import Path
-
-import pytest
-
-sys.path.insert(
-    0,
-    str(Path(__file__).resolve().parents[1] / "health_unified_platform"),
-)
 
 
 class TestBaselineComputer:
@@ -17,7 +8,8 @@ class TestBaselineComputer:
 
     def _setup_agent_tables(self, con):
         """Create agent.patient_profile table."""
-        con.execute("""
+        con.execute(
+            """
             CREATE TABLE IF NOT EXISTS agent.patient_profile (
                 profile_key VARCHAR PRIMARY KEY,
                 profile_value VARCHAR NOT NULL,
@@ -28,7 +20,8 @@ class TestBaselineComputer:
                 last_updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 update_frequency VARCHAR
             )
-        """)
+        """
+        )
 
     def test_compute_demographics(self, seeded_db):
         """Demographics are extracted from personal_info."""

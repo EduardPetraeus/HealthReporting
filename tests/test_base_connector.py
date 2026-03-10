@@ -2,14 +2,9 @@
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
 import pytest
 
 # Ensure imports resolve correctly
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "health_unified_platform"))
-
 from health_platform.source_connectors.base import BaseConnector
 from health_platform.source_connectors.oura.client import OuraClient
 

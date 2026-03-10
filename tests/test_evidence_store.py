@@ -2,15 +2,10 @@
 
 from __future__ import annotations
 
-import sys
 from datetime import datetime, timedelta
-from pathlib import Path
 from unittest.mock import MagicMock
 
 import duckdb
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "health_unified_platform"))
-
 from health_platform.knowledge.evidence_store import EvidenceStore
 from health_platform.knowledge.pubmed_client import PubMedClient
 

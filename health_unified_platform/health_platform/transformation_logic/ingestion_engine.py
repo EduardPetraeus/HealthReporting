@@ -1,13 +1,9 @@
 import glob
 import os
-import sys
 from pathlib import Path
 
 import duckdb
 import yaml
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-
 from health_platform.utils.audit_logger import AuditLogger
 from health_platform.utils.logging_config import get_logger
 from health_platform.utils.path_resolver import get_project_root

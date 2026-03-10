@@ -1,15 +1,6 @@
 """Tests for daily summary text generation."""
+
 from __future__ import annotations
-
-import sys
-from pathlib import Path
-
-import pytest
-
-sys.path.insert(
-    0,
-    str(Path(__file__).resolve().parents[1] / "health_unified_platform"),
-)
 
 
 class TestTextGenerator:
@@ -54,10 +45,10 @@ class TestTextGenerator:
     def test_backfill_summaries(self, seeded_db):
         """Backfill creates rows in agent.daily_summaries."""
         from datetime import date
-        from pathlib import Path
 
         # Create agent schema first
-        seeded_db.execute("""
+        seeded_db.execute(
+            """
             CREATE TABLE IF NOT EXISTS agent.daily_summaries (
                 day DATE PRIMARY KEY,
                 sleep_score INTEGER, readiness_score INTEGER,
@@ -70,7 +61,8 @@ class TestTextGenerator:
                 data_completeness DOUBLE,
                 created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
-        """)
+        """
+        )
 
         from health_platform.ai.text_generator import backfill_summaries
 

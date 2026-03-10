@@ -11,21 +11,19 @@ Usage:
 from __future__ import annotations
 
 import os
-import sys
 from datetime import date, timedelta
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
-
 from auth import get_access_token
 from client import WithingsClient
+from health_platform.source_connectors.oura.state import (
+    load_state,
+    save_state,
+    update_state,
+)
+from health_platform.source_connectors.oura.writer import write_records
 from health_platform.utils.audit_logger import AuditLogger
 from health_platform.utils.logging_config import get_logger
-
-# Reuse the Oura writer and state modules — same parquet pattern
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "oura"))
-from state import load_state, save_state, update_state
-from writer import write_records
 
 logger = get_logger("run_withings")
 

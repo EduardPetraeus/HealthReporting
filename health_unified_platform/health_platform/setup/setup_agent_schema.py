@@ -10,10 +10,7 @@ Usage:
 from __future__ import annotations
 
 import os
-import sys
 from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import duckdb
 from health_platform.utils.logging_config import get_logger
@@ -168,8 +165,7 @@ def run_setup() -> None:
 
         # Verify setup
         schemas = con.execute(
-            "SELECT schema_name FROM information_schema.schemata "
-            "WHERE schema_name = 'agent'"
+            "SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'agent'"
         ).fetchall()
         if schemas:
             tables = con.execute(
