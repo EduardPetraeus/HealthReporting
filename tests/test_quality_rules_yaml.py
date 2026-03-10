@@ -6,8 +6,7 @@ from pathlib import Path
 
 import pytest
 import yaml
-
-from health_platform.quality.rule_loader import load_rules, _VALID_CHECK_TYPES
+from health_platform.quality.rule_loader import _VALID_CHECK_TYPES, load_rules
 
 RULES_PATH = (
     Path(__file__).resolve().parents[1]

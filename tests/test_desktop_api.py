@@ -6,7 +6,6 @@ Uses a temporary DuckDB database with synthetic data.
 from __future__ import annotations
 
 import pytest
-
 from health_platform.desktop.api import DesktopAPI, _sanitize
 
 

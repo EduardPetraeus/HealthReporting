@@ -1,11 +1,11 @@
 """Tests for agent schema creation and structure."""
+
 from __future__ import annotations
 
 from pathlib import Path
 
 import duckdb
 import pytest
-
 
 SETUP_DIR = (
     Path(__file__).resolve().parents[1]
@@ -36,7 +36,9 @@ def _split_sql(sql: str) -> list[str]:
         elif c == ";" and not in_string:
             s = "".join(current).strip()
             if s:
-                lines = [l for l in s.split("\n") if not l.strip().startswith("--")]
+                lines = [
+                    line for line in s.split("\n") if not line.strip().startswith("--")
+                ]
                 clean = "\n".join(lines).strip()
                 if clean:
                     statements.append(clean)
@@ -46,7 +48,7 @@ def _split_sql(sql: str) -> list[str]:
         i += 1
     s = "".join(current).strip()
     if s:
-        lines = [l for l in s.split("\n") if not l.strip().startswith("--")]
+        lines = [line for line in s.split("\n") if not line.strip().startswith("--")]
         clean = "\n".join(lines).strip()
         if clean:
             statements.append(clean)
@@ -148,8 +150,7 @@ class TestAgentSchema:
         _execute_sql_file(memory_db, schema_file)
 
         tables = memory_db.execute(
-            "SELECT COUNT(*) FROM information_schema.tables "
-            "WHERE table_schema = 'agent'"
+            "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'agent'"
         ).fetchone()
         assert tables[0] >= 4
 
@@ -167,9 +168,9 @@ class TestHealthGraphSeed:
         _execute_sql_file(memory_db, schema_file)
         _execute_sql_file(memory_db, seed_file)
 
-        count = memory_db.execute(
-            "SELECT COUNT(*) FROM agent.health_graph"
-        ).fetchone()[0]
+        count = memory_db.execute("SELECT COUNT(*) FROM agent.health_graph").fetchone()[
+            0
+        ]
         assert count >= 40, f"Expected 40+ nodes, got {count}"
 
     def test_seed_creates_edges(self, memory_db):

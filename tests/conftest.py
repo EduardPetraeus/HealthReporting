@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import pytest
 import duckdb
+import pytest
 
 
 @pytest.fixture

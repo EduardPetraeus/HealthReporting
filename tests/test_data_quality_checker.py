@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-
 import pytest
 import yaml
-
 from health_platform.quality.data_quality_checker import DataQualityChecker
 from health_platform.quality.models import QualityReport
 
