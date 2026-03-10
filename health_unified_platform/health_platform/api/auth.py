@@ -4,7 +4,8 @@ Loads the API token from macOS Keychain (claude.keychain-db) via `security` CLI.
 Falls back to HEALTH_API_TOKEN environment variable.
 
 Setup:
-    security add-generic-password -a claude -s HEALTH_API_TOKEN -w "<your-token>" ~/Library/Keychains/claude.keychain-db
+    security add-generic-password -a claude -s HEALTH_API_TOKEN \
+        -w "<your-token>" ~/Library/Keychains/claude.keychain-db
 """
 
 from __future__ import annotations
@@ -14,7 +15,6 @@ import secrets
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-
 from health_platform.utils.keychain import get_secret
 from health_platform.utils.logging_config import get_logger
 
@@ -53,8 +53,8 @@ def get_api_token() -> str:
 
     token = secrets.token_urlsafe(32)
     logger.warning(
-        "DEV MODE: No API token configured. Generated ephemeral token: %s",
-        token,
+        "DEV MODE: No API token configured. Generated ephemeral token: %s...",
+        token[:8],
     )
     _cached_token = token
     return token

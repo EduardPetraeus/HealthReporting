@@ -68,7 +68,8 @@ targets:
     mode: development
     default: true
     workspace:
-      host: https://dbc-23749322-8818.cloud.databricks.com
+      # Uses profile from ~/.databrickscfg (see line 64 comment)
+      profile: DEFAULT
     variables:
       env: dev
       catalog: health-platform-dev
@@ -76,7 +77,7 @@ targets:
   prd:
     mode: production
     workspace:
-      host: https://dbc-23749322-8818.cloud.databricks.com
+      profile: DEFAULT
       root_path: /Workspace/Shared/${bundle.name}/${bundle.target}
     variables:
       env: prd
