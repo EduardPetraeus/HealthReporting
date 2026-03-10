@@ -2,7 +2,7 @@
 # Adapted from ai-governance-framework/templates/ci-cd/github-actions-governance-gate.yml
 #
 # Runs on push to feature/dogfood-framework and PRs to main.
-# Checks: CLAUDE.md existence, secret scanning, .gitignore safety.
+# Checks: secret scanning, .gitignore safety, dependency audit.
 
 name: Standards & Governance Check
 
@@ -23,28 +23,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Verify CLAUDE.md exists
-        run: |
-          if [ ! -f CLAUDE.md ]; then
-            echo "GOVERNANCE FAIL: CLAUDE.md not found at repository root."
-            exit 1
-          fi
-          echo "CLAUDE.md found."
-
-      - name: Verify CLAUDE.md has required sections
-        run: |
-          MISSING=""
-          for section in Identity Scope Boundaries; do
-            if ! grep -qiE "^#{1,6}\s+.*${section}" CLAUDE.md; then
-              MISSING="${MISSING} ${section}"
-            fi
-          done
-          if [ -n "$MISSING" ]; then
-            echo "GOVERNANCE FAIL: CLAUDE.md missing sections:${MISSING}"
-            exit 1
-          fi
-          echo "CLAUDE.md contains Identity, Scope, and Boundaries sections."
 
       - name: Verify backlog tasks exist
         run: |
@@ -122,7 +100,9 @@ jobs:
       - name: Run pip-audit
         run: |
           pip install pip-audit
-          pip-audit --desc
+          pip-audit --desc \
+            --ignore-vuln GHSA-w853-jp5j-5j7f \
+            --ignore-vuln GHSA-qmgc-5h2g-mvrw
 
   lint:
     name: Python Lint

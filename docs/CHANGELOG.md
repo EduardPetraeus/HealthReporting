@@ -9,6 +9,8 @@
 ### Fixed
 - **Governance:** validate_naming.py no longer flags `__init__.py` as non-snake_case (dunder file exclusion)
 - **Governance:** validate_naming.py no longer flags its own `re.compile` pattern as a hardcoded prd reference
+- **CI:** Removed CLAUDE.md existence check from standards-check.yml (CLAUDE.md is gitignored — contains local paths and security config)
+- **CI:** Ignore filelock CVEs in pip-audit (transitive dep, fix requires Python 3.10+, CI runs 3.9)
 
 ---
 
