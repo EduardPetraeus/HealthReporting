@@ -17,6 +17,7 @@ pythonpath = ["health_unified_platform"]
 markers = [
     "integration: tests that require live database or external services",
 ]
+addopts = "-m 'not integration'"
 
 [tool.ruff]
 target-version = "py39"
