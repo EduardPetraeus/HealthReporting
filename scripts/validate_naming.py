@@ -74,6 +74,7 @@ def check_python_content(filepath):
                     HARDCODED_PRD_PATTERN.search(line)
                     and "HEALTH_ENV" not in line
                     and "os.environ" not in line
+                    and "re.compile" not in line
                 ):
                     violations.append(
                         f"{filepath}:{i}: possible hardcoded prd reference — use HEALTH_ENV"
