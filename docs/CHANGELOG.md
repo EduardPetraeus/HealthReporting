@@ -11,6 +11,8 @@
 - **Governance:** validate_naming.py no longer flags its own `re.compile` pattern as a hardcoded prd reference
 - **CI:** Removed CLAUDE.md existence check from standards-check.yml (CLAUDE.md is gitignored — contains local paths and security config)
 - **CI:** Ignore filelock CVEs in pip-audit (transitive dep, fix requires Python 3.10+, CI runs 3.9)
+- **Docs:** Full README rewrite — reflects current state (68 sources, 45 silver tables, 16 MCP tools, intelligence layer, desktop app, genetics)
+- **Docs:** Updated GitHub repo About description
 
 ---
 
