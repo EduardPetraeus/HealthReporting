@@ -201,7 +201,9 @@ def search_evidence(query: str, max_results: int = 5, min_year: str = "") -> str
         max_results: Number of articles to return (default 5, max 20)
         min_year: Minimum publication year filter (e.g., '2020')
     """
-    tools = get_tools()
+    tools = get_tools(
+        read_only=False
+    )  # EvidenceStore caches results in agent.evidence_cache
     try:
         return tools.search_evidence(
             query, max_results=min(int(max_results), 20), min_year=min_year
