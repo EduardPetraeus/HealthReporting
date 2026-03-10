@@ -6,12 +6,12 @@ category, reducing token usage and improving query accuracy.
 Reads the _index.yml contract to determine which tables are relevant,
 then queries DuckDB information_schema for column details.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
 
 import yaml
-
 from health_platform.utils.logging_config import get_logger
 
 logger = get_logger("schema_pruner")
@@ -88,10 +88,10 @@ class SchemaPruner:
             source_tables = routing_info.get("tables", [])
         else:
             available_categories = sorted(
-                set(list(metrics_section.keys()) + [
-                    k.replace("_questions", "")
-                    for k in query_routing.keys()
-                ])
+                set(
+                    list(metrics_section.keys())
+                    + [k.replace("_questions", "") for k in query_routing.keys()]
+                )
             )
             return (
                 f"**Error:** Unknown category '{category}'.\n\n"
@@ -138,7 +138,7 @@ class SchemaPruner:
         output_config = index.get("output_format", {})
         if output_config:
             default_fmt = output_config.get("default", "markdown-table")
-            parts.append(f"### Output format")
+            parts.append("### Output format")
             parts.append(f"Default: `{default_fmt}`")
             alternatives = output_config.get("alternatives", [])
             if alternatives:
@@ -183,9 +183,7 @@ class SchemaPruner:
             result = self.con.execute(sql, [schema, table])
             rows = result.fetchall()
         except Exception as exc:
-            logger.debug(
-                "Could not query duckdb_columns for %s: %s", table_name, exc
-            )
+            logger.debug("Could not query duckdb_columns for %s: %s", table_name, exc)
             # Fallback: try PRAGMA table_info
             return self._get_columns_via_pragma(table_name)
 
@@ -195,11 +193,13 @@ class SchemaPruner:
 
         columns = []
         for row in rows:
-            columns.append({
-                "name": row[0],
-                "type": row[1],
-                "description": row[2] if row[2] else "--",
-            })
+            columns.append(
+                {
+                    "name": row[0],
+                    "type": row[1],
+                    "description": row[2] if row[2] else "--",
+                }
+            )
 
         return columns
 
@@ -217,6 +217,13 @@ class SchemaPruner:
             List of dicts with keys: 'name', 'type', 'description'.
         """
         try:
+            # Validate table_name to prevent SQL injection via single-quote escape
+            import re
+
+            _safe = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_.]*\Z")
+            if not _safe.fullmatch(table_name):
+                logger.warning("Invalid table name for PRAGMA: %s", table_name)
+                return []
             result = self.con.execute(f"PRAGMA table_info('{table_name}')")
             rows = result.fetchall()
         except Exception as exc:
@@ -226,10 +233,12 @@ class SchemaPruner:
         columns = []
         for row in rows:
             # PRAGMA table_info returns: cid, name, type, notnull, dflt_value, pk
-            columns.append({
-                "name": row[1],
-                "type": row[2],
-                "description": "--",
-            })
+            columns.append(
+                {
+                    "name": row[1],
+                    "type": row[2],
+                    "description": "--",
+                }
+            )
 
         return columns

@@ -11,13 +11,13 @@ Routes:
 from __future__ import annotations
 
 import os
+import re
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Optional
 
 import duckdb
 from fastapi import APIRouter, Depends, Query
-
 from health_platform.api.auth import verify_token
 from health_platform.mcp.query_builder import QueryBuilder
 from health_platform.utils.logging_config import get_logger
@@ -28,6 +28,8 @@ router = APIRouter(prefix="/v1/mobile", tags=["mobile"])
 
 # Contracts directory for threshold parsing
 _CONTRACTS_DIR = Path(__file__).resolve().parents[2] / "contracts" / "metrics"
+
+_SAFE_ID = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*\Z")
 
 # Metrics to include in bulk sync (core dashboard metrics)
 _SYNC_METRICS = {
@@ -85,14 +87,24 @@ def _parse_since(since: Optional[str]) -> date:
         return date.today() - timedelta(days=30)
 
 
+def _validate_id(name: str) -> str:
+    """Validate a SQL identifier against injection. Raises ValueError."""
+    if not _SAFE_ID.fullmatch(name):
+        raise ValueError(f"Invalid SQL identifier: {name!r}")
+    return name
+
+
 def _query_metric(
     con: duckdb.DuckDBPyConnection, table: str, columns: list[str], since: date
 ) -> list[dict]:
     """Query a single metric table and return rows as dicts."""
-    col_list = ", ".join(columns)
-    # Determine the date column (first column)
-    date_col = columns[0]
-    sql = f"SELECT {col_list} FROM {table} WHERE {date_col} >= ? ORDER BY {date_col}"
+    # Validate all identifiers before interpolation (defense-in-depth)
+    parts = table.split(".", 1)
+    validated_table = ".".join(_validate_id(p) for p in parts)
+    validated_cols = [_validate_id(c) for c in columns]
+    col_list = ", ".join(validated_cols)
+    date_col = validated_cols[0]
+    sql = f"SELECT {col_list} FROM {validated_table} WHERE {date_col} >= ? ORDER BY {date_col}"
     try:
         result = con.execute(sql, [since]).fetchall()
         col_names = [c[0] for c in con.description]
@@ -137,8 +149,7 @@ def _get_daily_summaries(con: duckdb.DuckDBPyConnection, since: date) -> list[di
     """Load daily summaries since a given date."""
     try:
         result = con.execute(
-            "SELECT day, summary_text FROM agent.daily_summaries "
-            "WHERE day >= ? ORDER BY day",
+            "SELECT day, summary_text FROM agent.daily_summaries WHERE day >= ? ORDER BY day",
             [since],
         ).fetchall()
         return [
