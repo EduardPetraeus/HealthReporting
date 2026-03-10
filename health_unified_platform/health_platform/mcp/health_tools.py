@@ -24,7 +24,7 @@ from health_platform.mcp.formatter import (
 from health_platform.mcp.query_builder import QueryBuilder
 from health_platform.mcp.schema_pruner import SchemaPruner
 from health_platform.utils.logging_config import get_logger
-from health_platform.utils.sql_safety import _SAFE_IDENTIFIER, validate_sql_identifier
+from health_platform.utils.sql_safety import is_safe_identifier, validate_sql_identifier
 
 logger = get_logger("health_tools")
 
@@ -658,7 +658,7 @@ class HealthTools:
         from health_platform.quality.models import QualityReport
         from health_platform.quality.reporters import format_for_mcp
 
-        if table and not _SAFE_IDENTIFIER.match(table):
+        if table and not is_safe_identifier(table):
             return format_error(f"Invalid table name: {table!r}")
         if check_type:
             valid_types = {

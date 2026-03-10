@@ -7,7 +7,7 @@ from typing import Any
 
 import yaml
 from health_platform.utils.logging_config import get_logger
-from health_platform.utils.sql_safety import _SAFE_IDENTIFIER
+from health_platform.utils.sql_safety import is_safe_identifier
 
 logger = get_logger("rule_loader")
 
@@ -68,7 +68,7 @@ def load_rules(rules_path: Path | None = None) -> dict[str, Any]:
 def _validate_rules(tables: dict[str, Any]) -> None:
     """Validate table names, check types, and value schemas at load time."""
     for table_name, checks in tables.items():
-        if not _SAFE_IDENTIFIER.match(table_name):
+        if not is_safe_identifier(table_name):
             raise ValueError(
                 f"Invalid table name '{table_name}' -- must match [a-zA-Z_][a-zA-Z0-9_]*"
             )
@@ -95,7 +95,7 @@ def _validate_check_schema(table_name: str, check_type: str, check_value: Any) -
                 f"Table '{table_name}'.{check_type} must be a list of column names"
             )
         for col in check_value:
-            if not _SAFE_IDENTIFIER.match(col):
+            if not is_safe_identifier(col):
                 raise ValueError(f"Invalid column '{col}' in {table_name}.{check_type}")
 
     elif check_type == "freshness":
@@ -112,7 +112,7 @@ def _validate_check_schema(table_name: str, check_type: str, check_value: Any) -
                 f"Table '{table_name}'.freshness.max_hours must be numeric, "
                 f"got {type(check_value['max_hours']).__name__}"
             )
-        if not _SAFE_IDENTIFIER.match(check_value["column"]):
+        if not is_safe_identifier(check_value["column"]):
             raise ValueError(
                 f"Invalid column '{check_value['column']}' in {table_name}.freshness"
             )
@@ -134,7 +134,7 @@ def _validate_check_schema(table_name: str, check_type: str, check_value: Any) -
                 f"Table '{table_name}'.value_range must be a dict of column ranges"
             )
         for col, bounds in check_value.items():
-            if not _SAFE_IDENTIFIER.match(col):
+            if not is_safe_identifier(col):
                 raise ValueError(f"Invalid column '{col}' in {table_name}.value_range")
             if not isinstance(bounds, dict):
                 raise ValueError(
@@ -162,7 +162,7 @@ def _validate_check_schema(table_name: str, check_type: str, check_value: Any) -
                 f"Table '{table_name}'.schema_drift.expected_columns must be a list of column names"
             )
         for col in cols:
-            if not _SAFE_IDENTIFIER.match(col):
+            if not is_safe_identifier(col):
                 raise ValueError(f"Invalid column '{col}' in {table_name}.schema_drift")
 
 
