@@ -36,6 +36,7 @@ if not source_name:
 # COMMAND ----------
 
 import logging
+
 import yaml
 from pyspark.sql.functions import current_timestamp, lit
 
@@ -47,16 +48,16 @@ logger.info("Loading config: %s", config_path)
 with open(config_path) as f:
     config = yaml.safe_load(f)
 
-source_system   = config["source_system"]
-bronze_cfg      = config["bronze"]["autoloader"]
+source_system = config["source_system"]
+bronze_cfg = config["bronze"]["autoloader"]
 
-source_path          = bronze_cfg["source_path"]
-file_format          = bronze_cfg["format"]
-checkpoint_location  = bronze_cfg["checkpoint_location"]
-schema_location      = bronze_cfg.get("schema_location", checkpoint_location + "/schema")
-target_table         = bronze_cfg["target_table"]
-load_mode            = bronze_cfg.get("load_mode", "incremental")
-extra_options        = bronze_cfg.get("options", {}) or {}
+source_path = bronze_cfg["source_path"]
+file_format = bronze_cfg["format"]
+checkpoint_location = bronze_cfg["checkpoint_location"]
+schema_location = bronze_cfg.get("schema_location", checkpoint_location + "/schema")
+target_table = bronze_cfg["target_table"]
+load_mode = bronze_cfg.get("load_mode", "incremental")
+extra_options = bronze_cfg.get("options", {}) or {}
 
 logger.info("Source: %s | System: %s | Mode: %s", source_name, source_system, load_mode)
 logger.info("Source path: %s | Target table: %s", source_path, target_table)
@@ -71,16 +72,17 @@ with AuditLogger("bronze_autoloader", "bronze", source_system) as audit:
         # Processes all new files since the last checkpoint, then exits.
         # -------------------------------------------------------------------
         reader_options = {
-            "cloudFiles.format":          file_format,
-            "cloudFiles.schemaLocation":  schema_location,
+            "cloudFiles.format": file_format,
+            "cloudFiles.schemaLocation": schema_location,
             "cloudFiles.inferColumnTypes": "true",
-            **{f"cloudFiles.{k}" if not k.startswith("cloudFiles.") else k: v
-               for k, v in extra_options.items()},
+            **{
+                f"cloudFiles.{k}" if not k.startswith("cloudFiles.") else k: v
+                for k, v in extra_options.items()
+            },
         }
 
         df = (
-            spark.readStream
-            .format("cloudFiles")
+            spark.readStream.format("cloudFiles")
             .options(**reader_options)
             .load(source_path)
             .withColumn("source_system", lit(source_system))
@@ -88,8 +90,7 @@ with AuditLogger("bronze_autoloader", "bronze", source_system) as audit:
         )
 
         (
-            df.writeStream
-            .format("delta")
+            df.writeStream.format("delta")
             .outputMode("append")
             .option("checkpointLocation", checkpoint_location)
             .option("mergeSchema", "true")
@@ -105,8 +106,7 @@ with AuditLogger("bronze_autoloader", "bronze", source_system) as audit:
         # Use for sources where incremental detection is not reliable.
         # -------------------------------------------------------------------
         df = (
-            spark.read
-            .format(file_format)
+            spark.read.format(file_format)
             .options(**extra_options)
             .load(source_path)
             .withColumn("source_system", lit(source_system))
@@ -114,8 +114,7 @@ with AuditLogger("bronze_autoloader", "bronze", source_system) as audit:
         )
 
         (
-            df.write
-            .format("delta")
+            df.write.format("delta")
             .mode("overwrite")
             .option("mergeSchema", "true")
             .saveAsTable(target_table)
@@ -129,4 +128,9 @@ with AuditLogger("bronze_autoloader", "bronze", source_system) as audit:
 
     rows_after = spark.table(target_table).count()
     audit.log_table(target_table, "AUTOLOADER_WRITE", rows_after=rows_after)
-    logger.info("Bronze load complete: %s -> %s (%s rows)", source_name, target_table, f"{rows_after:,}")
+    logger.info(
+        "Bronze load complete: %s -> %s (%s rows)",
+        source_name,
+        target_table,
+        f"{rows_after:,}",
+    )

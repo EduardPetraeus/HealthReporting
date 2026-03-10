@@ -34,7 +34,7 @@ dbutils.widgets.text(
 
 source_name = dbutils.widgets.get("source_name").strip()
 config_root = dbutils.widgets.get("config_root").strip()
-sql_root    = dbutils.widgets.get("sql_root").strip()
+sql_root = dbutils.widgets.get("sql_root").strip()
 
 # COMMAND ----------
 
@@ -43,6 +43,7 @@ sql_root    = dbutils.widgets.get("sql_root").strip()
 # COMMAND ----------
 
 import glob as _glob
+
 import yaml
 
 
@@ -82,12 +83,12 @@ def run_silver_for_source(config: dict, sql_root: str, audit: AuditLogger) -> No
     The SQL file controls the operation type (MERGE INTO or INSERT INTO REPLACE WHERE).
     The runner executes every semicolon-delimited statement in the file.
     """
-    name          = config["name"]
+    name = config["name"]
     source_system = config["source_system"]
-    silver_cfg    = config["silver"]
-    sql_file      = silver_cfg["sql_file"]
-    target_table  = silver_cfg["target_table"]
-    bronze_table  = config["bronze"]["autoloader"]["target_table"]
+    silver_cfg = config["silver"]
+    sql_file = silver_cfg["sql_file"]
+    target_table = silver_cfg["target_table"]
+    bronze_table = config["bronze"]["autoloader"]["target_table"]
 
     sql_path = f"{sql_root}/{sql_file}"
 

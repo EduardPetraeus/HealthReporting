@@ -10,8 +10,6 @@ Routes:
 
 from __future__ import annotations
 
-import os
-import re
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Optional
@@ -21,6 +19,8 @@ from fastapi import APIRouter, Depends, Query
 from health_platform.api.auth import verify_token
 from health_platform.mcp.query_builder import QueryBuilder
 from health_platform.utils.logging_config import get_logger
+from health_platform.utils.paths import get_db_path
+from health_platform.utils.sql_safety import validate_sql_identifier as _validate_id
 
 logger = get_logger("api.mobile")
 
@@ -28,8 +28,6 @@ router = APIRouter(prefix="/v1/mobile", tags=["mobile"])
 
 # Contracts directory for threshold parsing
 _CONTRACTS_DIR = Path(__file__).resolve().parents[2] / "contracts" / "metrics"
-
-_SAFE_ID = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*\Z")
 
 # Metrics to include in bulk sync (core dashboard metrics)
 _SYNC_METRICS = {
@@ -64,17 +62,9 @@ _SYNC_METRICS = {
 }
 
 
-def _get_db_path() -> str:
-    """Resolve DuckDB database path from environment."""
-    if path := os.environ.get("HEALTH_DB_PATH"):
-        return path
-    env = os.environ.get("HEALTH_ENV", "dev")
-    return str(Path.home() / "health_dw" / f"health_dw_{env}.db")
-
-
 def _get_connection() -> duckdb.DuckDBPyConnection:
     """Create a read-only DuckDB connection."""
-    return duckdb.connect(_get_db_path(), read_only=True)
+    return duckdb.connect(str(get_db_path()), read_only=True)
 
 
 def _parse_since(since: Optional[str]) -> date:
@@ -85,13 +75,6 @@ def _parse_since(since: Optional[str]) -> date:
         return datetime.fromisoformat(since).date()
     except ValueError:
         return date.today() - timedelta(days=30)
-
-
-def _validate_id(name: str) -> str:
-    """Validate a SQL identifier against injection. Raises ValueError."""
-    if not _SAFE_ID.fullmatch(name):
-        raise ValueError(f"Invalid SQL identifier: {name!r}")
-    return name
 
 
 def _query_metric(

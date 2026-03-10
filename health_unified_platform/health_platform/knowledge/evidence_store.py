@@ -10,7 +10,6 @@ from __future__ import annotations
 from datetime import datetime, timedelta
 
 import duckdb
-
 from health_platform.knowledge.pubmed_client import PubMedClient
 from health_platform.utils.logging_config import get_logger
 

@@ -51,6 +51,7 @@ jobs:
             'sk-[a-zA-Z0-9]{48}'
             'sk-ant-[a-zA-Z0-9\-]{80,}'
             'ghp_[a-zA-Z0-9]{36}'
+            'dapi[a-f0-9]{32}'
           )
 
           FOUND=0

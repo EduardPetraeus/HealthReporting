@@ -19,11 +19,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from auth import get_access_token
 from client import OuraClient
+from health_platform.utils.audit_logger import AuditLogger
+from health_platform.utils.logging_config import get_logger
 from state import get_start_date, load_state, save_state, update_state
 from writer import write_records
-
-from health_platform.utils.logging_config import get_logger
-from health_platform.utils.audit_logger import AuditLogger
 
 logger = get_logger("run_oura")
 

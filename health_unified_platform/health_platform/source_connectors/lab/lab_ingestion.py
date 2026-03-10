@@ -14,7 +14,6 @@ from pathlib import Path
 from typing import Optional
 
 import pandas as pd
-
 from health_platform.source_connectors.lab.pdf_parser import LabPdfParser
 from health_platform.utils.logging_config import get_logger
 

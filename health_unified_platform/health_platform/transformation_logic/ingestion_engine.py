@@ -1,14 +1,15 @@
-import duckdb
-import yaml
-import os
 import glob
+import os
 import sys
 from pathlib import Path
 
+import duckdb
+import yaml
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from health_platform.utils.logging_config import get_logger
 from health_platform.utils.audit_logger import AuditLogger
+from health_platform.utils.logging_config import get_logger
 from health_platform.utils.path_resolver import get_project_root
 
 logger = get_logger("ingestion_engine")
@@ -16,8 +17,9 @@ logger = get_logger("ingestion_engine")
 
 def load_yaml(path):
     """loads_a_yaml_configuration_file"""
-    with open(path, 'r') as f:
+    with open(path, "r") as f:
         return yaml.safe_load(f)
+
 
 def run_ingestion():
     # load_environment_and_source_configurations
@@ -29,11 +31,11 @@ def run_ingestion():
     src_cfg = load_yaml(src_path)
 
     # setup_environment_and_database_paths
-    active_env = os.getenv("HEALTH_ENV", env_cfg['defaults']['environment'])
-    db_name = env_cfg['defaults']['database_name']
+    active_env = os.getenv("HEALTH_ENV", env_cfg["defaults"]["environment"])
+    db_name = env_cfg["defaults"]["database_name"]
 
-    db_file = Path(env_cfg['paths']['db_root']) / f"{db_name}_{active_env}.db"
-    lake_root = Path(env_cfg['paths']['data_lake_root'])
+    db_file = Path(env_cfg["paths"]["db_root"]) / f"{db_name}_{active_env}.db"
+    lake_root = Path(env_cfg["paths"]["data_lake_root"])
 
     logger.info(f"Starting ingestion engine [env: {active_env}]")
     logger.info(f"Target database: {db_file}")
@@ -42,11 +44,11 @@ def run_ingestion():
         # establish_connection_to_duckdb
         con = duckdb.connect(str(db_file))
 
-        for source in src_cfg['sources']:
-            name = source['name']
-            schema = source['target_schema']
-            table = source['target_table']
-            input_glob = str(lake_root / source['relative_path'])
+        for source in src_cfg["sources"]:
+            name = source["name"]
+            schema = source["target_schema"]
+            table = source["target_table"]
+            input_glob = str(lake_root / source["relative_path"])
 
             logger.info(f"Processing source: {name} -> {schema}.{table}")
             logger.debug(f"Searching path: {input_glob}")
@@ -57,8 +59,12 @@ def run_ingestion():
 
             if not found_files:
                 logger.warning(f"No files found at path: {input_glob}")
-                audit.log_table(f"{schema}.{table}", "CREATE_OR_REPLACE", status="error",
-                                error_message="no_files_found")
+                audit.log_table(
+                    f"{schema}.{table}",
+                    "CREATE_OR_REPLACE",
+                    status="error",
+                    error_message="no_files_found",
+                )
                 continue
 
             # ensure_target_schema_exists
@@ -79,21 +85,32 @@ def run_ingestion():
 
             try:
                 con.execute(query)
-                count = con.execute(f"SELECT count(*) FROM {schema}.{table}").fetchone()[0]
+                count = con.execute(
+                    f"SELECT count(*) FROM {schema}.{table}"
+                ).fetchone()[0]
                 logger.info(f"Success: {count:,} rows ingested -> {schema}.{table}")
-                audit.log_table(f"{schema}.{table}", "CREATE_OR_REPLACE",
-                                rows_after=count, status="success")
+                audit.log_table(
+                    f"{schema}.{table}",
+                    "CREATE_OR_REPLACE",
+                    rows_after=count,
+                    status="success",
+                )
             except Exception as e:
                 logger.error(f"Error during ingestion of {name}: {e}")
-                audit.log_table(f"{schema}.{table}", "CREATE_OR_REPLACE",
-                                status="error", error_message=str(e))
+                audit.log_table(
+                    f"{schema}.{table}",
+                    "CREATE_OR_REPLACE",
+                    status="error",
+                    error_message=str(e),
+                )
 
         con.close()
 
     # Post-ingestion: trigger daily summary generation for today
     try:
-        from health_platform.ai.text_generator import generate_summary_for_pipeline
         from datetime import date
+
+        from health_platform.ai.text_generator import generate_summary_for_pipeline
 
         con = duckdb.connect(str(db_file))
         summary = generate_summary_for_pipeline(con, date.today())

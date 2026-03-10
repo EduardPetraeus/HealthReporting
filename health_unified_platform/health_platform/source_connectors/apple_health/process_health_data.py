@@ -13,11 +13,11 @@ Usage:
 
 import argparse
 import sys
+import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
-import xml.etree.ElementTree as ET
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
@@ -82,14 +82,16 @@ def get_area(record_type: str) -> str:
 def clean_name(name: str) -> str:
     return (
         name.replace("HKQuantityTypeIdentifier", "")
-            .replace("HKCategoryTypeIdentifier", "")
-            .replace("HKCorrelationTypeIdentifier", "")
-            .replace("HKDataTypeIdentifier", "")
-            .replace("HKWorkoutEventType", "event")
+        .replace("HKCategoryTypeIdentifier", "")
+        .replace("HKCorrelationTypeIdentifier", "")
+        .replace("HKDataTypeIdentifier", "")
+        .replace("HKWorkoutEventType", "event")
     ).lower()
 
 
-def write_batch(records: list, output_folder: Path, ingested_at: str, batch_num: int) -> int:
+def write_batch(
+    records: list, output_folder: Path, ingested_at: str, batch_num: int
+) -> int:
     """Convert a list of records to DataFrame and write partitioned parquet files."""
     df = pd.DataFrame(records)
     df["_ingested_at"] = ingested_at
@@ -111,7 +113,9 @@ def write_batch(records: list, output_folder: Path, ingested_at: str, batch_num:
     files_written = 0
     filename = f"batch_{batch_num}_{ingested_at}.parquet"
 
-    for (domain, d_type, year), group in df.groupby(["data_domain", "data_type", "year"]):
+    for (domain, d_type, year), group in df.groupby(
+        ["data_domain", "data_type", "year"]
+    ):
         target_path = output_folder / domain / d_type / f"year={year}"
         target_path.mkdir(parents=True, exist_ok=True)
         group.to_parquet(target_path / filename, index=False, compression="snappy")
@@ -125,7 +129,9 @@ def parse_args() -> argparse.Namespace:
         description="Ingest Apple Health XML into a partitioned Parquet data lake."
     )
     parser.add_argument("--input", required=True, help="Path to eksport.xml")
-    parser.add_argument("--output", required=True, help="Path to data lake root directory")
+    parser.add_argument(
+        "--output", required=True, help="Path to data lake root directory"
+    )
     return parser.parse_args()
 
 
@@ -160,7 +166,9 @@ def main() -> None:
                 elem.clear()
 
                 if len(records) >= BATCH_SIZE:
-                    total_files += write_batch(records, output_folder, ingested_at, batch_num)
+                    total_files += write_batch(
+                        records, output_folder, ingested_at, batch_num
+                    )
                     total_records += len(records)
                     batch_num += 1
                     logger.info("Processed %s records...", f"{total_records:,}")
@@ -179,7 +187,11 @@ def main() -> None:
         logger.warning("No records found in XML file.")
         return
 
-    logger.info("Done. %s records written to %d parquet files.", f"{total_records:,}", total_files)
+    logger.info(
+        "Done. %s records written to %d parquet files.",
+        f"{total_records:,}",
+        total_files,
+    )
 
 
 if __name__ == "__main__":

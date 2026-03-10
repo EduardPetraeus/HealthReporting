@@ -15,9 +15,9 @@ sys.path.insert(
 )
 
 try:
-    from health_platform.mcp.server import _validate_id, get_db_path
+    from health_platform.utils.sql_safety import validate_sql_identifier as _validate_id
 except (ImportError, Exception):
-    # FastMCP or other dependency not available — define functions inline
+    # sql_safety not available — define function inline
     _SAFE_ID = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*\Z")
 
     def _validate_id(name: str) -> str:
@@ -25,6 +25,11 @@ except (ImportError, Exception):
         if not _SAFE_ID.fullmatch(name):
             raise ValueError(f"Invalid SQL identifier: {name!r}")
         return name
+
+
+try:
+    from health_platform.utils.paths import get_db_path
+except (ImportError, Exception):
 
     def get_db_path() -> str:
         """Resolve DuckDB database path from environment."""
@@ -96,25 +101,25 @@ class TestGetDbPath:
         """HEALTH_DB_PATH env var is returned verbatim."""
         monkeypatch.setenv("HEALTH_DB_PATH", "/custom/path.db")
         monkeypatch.delenv("HEALTH_ENV", raising=False)
-        assert get_db_path() == "/custom/path.db"
+        assert str(get_db_path()) == "/custom/path.db"
 
     def test_db_path_env_dev(self, monkeypatch):
         """HEALTH_ENV=dev produces a dev database filename."""
         monkeypatch.delenv("HEALTH_DB_PATH", raising=False)
         monkeypatch.setenv("HEALTH_ENV", "dev")
-        result = get_db_path()
+        result = str(get_db_path())
         assert "health_dw_dev.db" in result
 
     def test_db_path_env_prd(self, monkeypatch):
         """HEALTH_ENV=prd produces a prd database filename."""
         monkeypatch.delenv("HEALTH_DB_PATH", raising=False)
         monkeypatch.setenv("HEALTH_ENV", "prd")
-        result = get_db_path()
+        result = str(get_db_path())
         assert "health_dw_prd.db" in result
 
     def test_db_path_default_dev(self, monkeypatch):
         """No env vars set defaults to dev database filename."""
         monkeypatch.delenv("HEALTH_DB_PATH", raising=False)
         monkeypatch.delenv("HEALTH_ENV", raising=False)
-        result = get_db_path()
+        result = str(get_db_path())
         assert "health_dw_dev.db" in result

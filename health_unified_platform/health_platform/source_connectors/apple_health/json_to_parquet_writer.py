@@ -32,7 +32,6 @@ from pathlib import Path
 
 import pandas as pd
 import yaml
-
 from health_platform.source_connectors.apple_health.process_health_data import (
     clean_name,
     get_area,

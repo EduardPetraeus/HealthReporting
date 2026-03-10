@@ -11,9 +11,8 @@ from pathlib import Path
 from typing import Any, Optional
 
 import duckdb
-from jinja2 import Environment, FileSystemLoader
-
 from health_platform.utils.logging_config import get_logger
+from jinja2 import Environment, FileSystemLoader
 
 logger = get_logger("desktop.reports.generator")
 

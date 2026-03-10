@@ -16,7 +16,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import duckdb
-
 from health_platform.utils.logging_config import get_logger
 from health_platform.utils.path_resolver import get_project_root
 

@@ -11,7 +11,6 @@ from dataclasses import dataclass, field
 from datetime import date, timedelta
 
 import duckdb
-
 from health_platform.utils.logging_config import get_logger
 
 logger = get_logger("anomaly_detector")

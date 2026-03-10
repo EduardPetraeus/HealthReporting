@@ -3,14 +3,12 @@
 Loads metric contracts from the contracts/metrics/ directory, caches them,
 and substitutes parameters into SQL templates.
 """
+
 from __future__ import annotations
 
-import re
 from pathlib import Path
-from typing import Optional
 
 import yaml
-
 from health_platform.utils.logging_config import get_logger
 
 logger = get_logger("query_builder")
@@ -82,9 +80,7 @@ class QueryBuilder:
         logger.debug("Loaded contract for metric '%s'", metric_name)
         return data
 
-    def build_query(
-        self, metric_name: str, computation: str, params: dict
-    ) -> str:
+    def build_query(self, metric_name: str, computation: str, params: dict) -> str:
         """Build a complete SQL query from a metric contract.
 
         Parameters

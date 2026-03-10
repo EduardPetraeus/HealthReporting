@@ -15,7 +15,6 @@
 
 import builtins
 import os
-import time
 import uuid
 import warnings
 from datetime import datetime, timezone
@@ -68,7 +67,8 @@ class AuditLogger:
         try:
             catalog = _get_catalog()
             job_runs_table = _UC_JOB_RUNS_TABLE.format(catalog=catalog)
-            spark.sql(f"""
+            spark.sql(
+                f"""
                 INSERT INTO `{job_runs_table}` (
                     job_id, job_name, job_type, source_system, env, start_time, status
                 ) VALUES (
@@ -76,7 +76,8 @@ class AuditLogger:
                     '{self.source_system}', '{self.env}',
                     TIMESTAMP '{self.start_time.isoformat()}', 'running'
                 )
-            """)
+            """
+            )
         except Exception as exc:
             warnings.warn(f"[AuditLogger] start() failed (non-fatal): {exc}")
 
@@ -103,7 +104,8 @@ class AuditLogger:
         try:
             catalog = _get_catalog()
             table_runs_table = _UC_TABLE_RUNS_TABLE.format(catalog=catalog)
-            spark.sql(f"""
+            spark.sql(
+                f"""
                 INSERT INTO `{table_runs_table}` (
                     run_id, job_id, table_name, layer, operation,
                     rows_before, rows_after, rows_changed,
@@ -114,7 +116,8 @@ class AuditLogger:
                     TIMESTAMP '{start_time.isoformat()}', TIMESTAMP '{end_time.isoformat()}',
                     '{status}', {_str_val(error_message)}
                 )
-            """)
+            """
+            )
         except Exception as exc:
             warnings.warn(f"[AuditLogger] log_table() failed (non-fatal): {exc}")
 
@@ -132,7 +135,8 @@ class AuditLogger:
         end_time = _now()
         duration = (
             round((end_time - self.start_time).total_seconds(), 3)
-            if self.start_time else None
+            if self.start_time
+            else None
         )
 
         def _val(v):
@@ -144,7 +148,8 @@ class AuditLogger:
         try:
             catalog = _get_catalog()
             job_runs_table = _UC_JOB_RUNS_TABLE.format(catalog=catalog)
-            spark.sql(f"""
+            spark.sql(
+                f"""
                 UPDATE `{job_runs_table}`
                 SET end_time = TIMESTAMP '{end_time.isoformat()}',
                     duration_seconds = {_val(duration)},
@@ -155,7 +160,8 @@ class AuditLogger:
                     rows_updated = {_val(rows_updated)},
                     rows_deleted = {_val(rows_deleted)}
                 WHERE job_id = '{self.job_id}'
-            """)
+            """
+            )
         except Exception as exc:
             warnings.warn(f"[AuditLogger] finish() failed (non-fatal): {exc}")
 

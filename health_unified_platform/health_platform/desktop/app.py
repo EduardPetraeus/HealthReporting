@@ -10,7 +10,6 @@ import os
 from pathlib import Path
 
 import webview
-
 from health_platform.desktop.api import DesktopAPI
 from health_platform.utils.logging_config import get_logger
 

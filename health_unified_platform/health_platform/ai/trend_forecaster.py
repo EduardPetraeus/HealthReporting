@@ -7,8 +7,8 @@ short-term metric trajectories (7-14 day forecasts).
 from __future__ import annotations
 
 import sys
-from datetime import date, timedelta
 from dataclasses import dataclass
+from datetime import date, timedelta
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))

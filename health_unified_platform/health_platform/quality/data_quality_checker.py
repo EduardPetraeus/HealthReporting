@@ -6,7 +6,6 @@ Non-fatal: all check errors are captured as failed results, never crash the pipe
 
 from __future__ import annotations
 
-import re
 import warnings
 from pathlib import Path
 from typing import Any, Optional
@@ -15,17 +14,9 @@ import duckdb
 from health_platform.quality.models import CheckResult, QualityReport
 from health_platform.quality.rule_loader import load_rules
 from health_platform.utils.logging_config import get_logger
+from health_platform.utils.sql_safety import validate_sql_identifier as _validate_id
 
 logger = get_logger("data_quality_checker")
-
-_SAFE_IDENTIFIER = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*\Z")
-
-
-def _validate_id(name: str) -> str:
-    """Validate that a string is a safe SQL identifier (prevents injection)."""
-    if not _SAFE_IDENTIFIER.match(name):
-        raise ValueError(f"Invalid SQL identifier: {name!r}")
-    return name
 
 
 class DataQualityChecker:

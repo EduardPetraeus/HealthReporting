@@ -5,16 +5,17 @@ Purpose: Convert any CSV file to Parquet format for use in the health data lake.
 Usage:   python csv_to_parquet.py --input <csv_path> --output <output_dir> [options]
 """
 
-import pandas as pd
 import argparse
 import sys
-from pathlib import Path
 from datetime import datetime, timezone
+from pathlib import Path
+
+import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from health_platform.utils.logging_config import get_logger
 from health_platform.utils.audit_logger import AuditLogger
+from health_platform.utils.logging_config import get_logger
 
 logger = get_logger("csv_to_parquet")
 
@@ -24,40 +25,34 @@ def parse_args():
         description="Convert a CSV file to Parquet and write it to a target directory."
     )
     parser.add_argument(
-        "--input",
-        required=True,
-        help="Full path to the input CSV file."
+        "--input", required=True, help="Full path to the input CSV file."
     )
     parser.add_argument(
         "--output",
         required=True,
-        help="Full path to the output base directory. A subdirectory named after the source will be created inside."
+        help="Full path to the output base directory. A subdirectory named after the source will be created inside.",
     )
     parser.add_argument(
         "--source-name",
         default=None,
-        help="Override the source name (used as subdirectory name). Defaults to the CSV filename without extension."
+        help="Override the source name (used as subdirectory name). Defaults to the CSV filename without extension.",
     )
     parser.add_argument(
-        "--delimiter",
-        default=",",
-        help="CSV column delimiter. Default: ','."
+        "--delimiter", default=",", help="CSV column delimiter. Default: ','."
     )
     parser.add_argument(
-        "--encoding",
-        default="utf-8",
-        help="CSV file encoding. Default: 'utf-8'."
+        "--encoding", default="utf-8", help="CSV file encoding. Default: 'utf-8'."
     )
     parser.add_argument(
         "--compression",
         default="snappy",
         choices=["snappy", "gzip", "brotli", "zstd", "none"],
-        help="Parquet compression codec. Default: 'snappy'."
+        help="Parquet compression codec. Default: 'snappy'.",
     )
     parser.add_argument(
         "--no-metadata",
         action="store_true",
-        help="Skip adding _loaded_at metadata column."
+        help="Skip adding _loaded_at metadata column.",
     )
     return parser.parse_args()
 
