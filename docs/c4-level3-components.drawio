@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-03-11">
+  <diagram id="c4-level3" name="C4 Level 3 — Component Diagram">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1400" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- ===== ACTOR: Claude Code ===== -->
+        <mxCell id="actor_claude" value="&lt;b&gt;Claude Code&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;AI agent&lt;/font&gt;" style="shape=mxgraph.c4.person2;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontSize=12;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="800" y="20" width="100" height="120" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== BOUNDARY 1: MCP Server (FastMCP) ===== -->
+        <mxCell id="boundary_mcp" value="MCP Server (FastMCP)" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;dashPattern=5 5;fillColor=#E8F5E9;strokeColor=#388E3C;verticalAlign=top;fontStyle=1;fontSize=13;fontFamily=Helvetica;container=1;collapsible=0;opacity=30;" vertex="1" parent="1">
+          <mxGeometry x="100" y="180" width="1500" height="180" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="comp_server" value="&lt;b&gt;server.py&lt;/b&gt;&lt;br&gt;&lt;i&gt;[FastMCP]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Server entrypoint — registers 17 tools&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary_mcp">
+          <mxGeometry x="30" y="40" width="220" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="comp_health_tools" value="&lt;b&gt;health_tools.py&lt;/b&gt;&lt;br&gt;&lt;i&gt;[Python]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Tool implementations — query routing, memory ops, insight recording&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary_mcp">
+          <mxGeometry x="310" y="40" width="280" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="comp_query_builder" value="&lt;b&gt;query_builder.py&lt;/b&gt;&lt;br&gt;&lt;i&gt;[Python]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;YAML contract → parameterized SQL generation&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary_mcp">
+          <mxGeometry x="650" y="40" width="260" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="comp_formatter" value="&lt;b&gt;formatter.py&lt;/b&gt;&lt;br&gt;&lt;i&gt;[Python]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Query results → markdown output formatting&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary_mcp">
+          <mxGeometry x="970" y="40" width="240" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="comp_schema_pruner" value="&lt;b&gt;schema_pruner.py&lt;/b&gt;&lt;br&gt;&lt;i&gt;[Python]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Category-based schema pruning — only relevant tables in context&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary_mcp">
+          <mxGeometry x="1270" y="40" width="200" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== BOUNDARY 2: AI Modules ===== -->
+        <mxCell id="boundary_ai" value="AI Modules" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;dashPattern=5 5;fillColor=#E8F5E9;strokeColor=#388E3C;verticalAlign=top;fontStyle=1;fontSize=13;fontFamily=Helvetica;container=1;collapsible=0;opacity=30;" vertex="1" parent="1">
+          <mxGeometry x="100" y="420" width="700" height="380" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="comp_text_gen" value="&lt;b&gt;text_generator.py&lt;/b&gt;&lt;br&gt;&lt;i&gt;[Python]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Template-based daily health narrative generation&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary_ai">
+          <mxGeometry x="30" y="40" width="290" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="comp_embedding" value="&lt;b&gt;embedding_engine.py&lt;/b&gt;&lt;br&gt;&lt;i&gt;[Python]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;sentence-transformers (all-MiniLM-L6-v2) — 384-dim embeddings + vector search&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary_ai">
+          <mxGeometry x="370" y="40" width="300" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="comp_baseline" value="&lt;b&gt;baseline_computer.py&lt;/b&gt;&lt;br&gt;&lt;i&gt;[Python]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Rolling baselines + demographics → patient_profile entries&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary_ai">
+          <mxGeometry x="30" y="130" width="290" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="comp_correlation" value="&lt;b&gt;correlation_engine.py&lt;/b&gt;&lt;br&gt;&lt;i&gt;[Python]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Pearson correlations with lag detection → metric_relationships&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary_ai">
+          <mxGeometry x="370" y="130" width="300" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="comp_anomaly" value="&lt;b&gt;anomaly_detector.py&lt;/b&gt;&lt;br&gt;&lt;i&gt;[Python]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Statistical anomaly detection across health metrics&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary_ai">
+          <mxGeometry x="30" y="220" width="290" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="comp_recommendation" value="&lt;b&gt;recommendation_engine.py&lt;/b&gt;&lt;br&gt;&lt;i&gt;[Python]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Evidence-based health recommendations with confidence scores&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary_ai">
+          <mxGeometry x="370" y="220" width="300" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="comp_trend" value="&lt;b&gt;trend_forecaster.py&lt;/b&gt;&lt;br&gt;&lt;i&gt;[Python]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Time-series forecasting for health metrics&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary_ai">
+          <mxGeometry x="30" y="300" width="290" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="comp_notification" value="&lt;b&gt;notification_manager.py&lt;/b&gt;&lt;br&gt;&lt;i&gt;[Python]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Smart notification routing and prioritization&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary_ai">
+          <mxGeometry x="370" y="300" width="300" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== BOUNDARY 3: Semantic Contracts (YAML) ===== -->
+        <mxCell id="boundary_contracts" value="Semantic Contracts (YAML)" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;dashPattern=5 5;fillColor=#EDE7F6;strokeColor=#7E57C2;verticalAlign=top;fontStyle=1;fontSize=13;fontFamily=Helvetica;container=1;collapsible=0;opacity=30;" vertex="1" parent="1">
+          <mxGeometry x="860" y="420" width="740" height="280" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="comp_index_yml" value="&lt;b&gt;_index.yml&lt;/b&gt;&lt;br&gt;&lt;i&gt;[YAML]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Master index — 9 categories, query routing config, schema pruning rules&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary_contracts">
+          <mxGeometry x="30" y="50" width="310" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="comp_business_rules" value="&lt;b&gt;_business_rules.yml&lt;/b&gt;&lt;br&gt;&lt;i&gt;[YAML]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Composite health score (35/35/30 weighting), 5 alert thresholds, anomaly detection&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary_contracts">
+          <mxGeometry x="390" y="50" width="320" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="comp_metric_yamls" value="&lt;b&gt;24 metric YAMLs&lt;/b&gt;&lt;br&gt;&lt;i&gt;[YAML]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Per-metric: computation SQL, thresholds, baselines, related metrics, example queries&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary_contracts">
+          <mxGeometry x="170" y="160" width="380" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== BOUNDARY 4: Agent Memory (DuckDB agent schema) ===== -->
+        <mxCell id="boundary_memory" value="Agent Memory (DuckDB agent schema)" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;dashPattern=5 5;fillColor=#E1F0FF;strokeColor=#1E3A5F;verticalAlign=top;fontStyle=1;fontSize=13;fontFamily=Helvetica;container=1;collapsible=0;opacity=30;" vertex="1" parent="1">
+          <mxGeometry x="100" y="860" width="1500" height="180" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="db_patient_profile" value="&lt;b&gt;patient_profile&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Core memory — demographics + baselines, always in context (~2000 tokens)&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#E1F0FF;strokeColor=#1E3A5F;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="boundary_memory">
+          <mxGeometry x="40" y="50" width="280" height="100" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="db_daily_summaries" value="&lt;b&gt;daily_summaries&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Recall memory — one row per day + 384-dim embeddings for vector search&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#E1F0FF;strokeColor=#1E3A5F;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="boundary_memory">
+          <mxGeometry x="400" y="50" width="300" height="100" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="db_health_graph" value="&lt;b&gt;health_graph + edges&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Relationship memory — 67 nodes, 108 edges — semantic knowledge graph&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#E1F0FF;strokeColor=#1E3A5F;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="boundary_memory">
+          <mxGeometry x="780" y="50" width="310" height="100" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="db_knowledge_base" value="&lt;b&gt;knowledge_base&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px&quot;&gt;Archival memory — accumulated insights, vector-searchable, grows over time&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#E1F0FF;strokeColor=#1E3A5F;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="boundary_memory">
+          <mxGeometry x="1170" y="50" width="280" height="100" as="geometry"/>
+        </mxCell>
+
+        <!-- ===== ARROWS ===== -->
+
+        <!-- Claude Code → server.py: MCP protocol -->
+        <mxCell id="edge_claude_server" value="MCP protocol" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="actor_claude" target="comp_server" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- server.py → health_tools.py: Dispatches tool calls -->
+        <mxCell id="edge_server_tools" value="Dispatches tool calls" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="comp_server" target="comp_health_tools" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- health_tools.py → query_builder.py: Builds SQL from YAML contracts -->
+        <mxCell id="edge_tools_qb" value="Builds SQL from YAML contracts" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="comp_health_tools" target="comp_query_builder" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- health_tools.py → formatter.py: Formats results -->
+        <mxCell id="edge_tools_fmt" value="Formats results" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="comp_health_tools" target="comp_formatter" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- health_tools.py → schema_pruner.py: Selects relevant schema subset -->
+        <mxCell id="edge_tools_pruner" value="Selects relevant schema subset" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="comp_health_tools" target="comp_schema_pruner" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- query_builder.py → _index.yml: Reads routing config -->
+        <mxCell id="edge_qb_index" value="Reads routing config" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="comp_query_builder" target="comp_index_yml" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- query_builder.py → 24 metric YAMLs: Reads computation SQL -->
+        <mxCell id="edge_qb_metrics" value="Reads computation SQL" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="comp_query_builder" target="comp_metric_yamls" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- schema_pruner.py → _index.yml: Reads pruning rules -->
+        <mxCell id="edge_pruner_index" value="Reads pruning rules" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="comp_schema_pruner" target="comp_index_yml" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- health_tools.py → patient_profile: get_profile — loads core memory -->
+        <mxCell id="edge_tools_profile" value="get_profile — loads core memory" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="comp_health_tools" target="db_patient_profile" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- health_tools.py → daily_summaries: search_memory — vector search -->
+        <mxCell id="edge_tools_daily" value="search_memory — vector search" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="comp_health_tools" target="db_daily_summaries" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- health_tools.py → health_graph: discover_correlations — traverses graph -->
+        <mxCell id="edge_tools_graph" value="discover_correlations — traverses graph" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="comp_health_tools" target="db_health_graph" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- health_tools.py → knowledge_base: record_insight / search_memory -->
+        <mxCell id="edge_tools_kb" value="record_insight / search_memory" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="comp_health_tools" target="db_knowledge_base" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- text_generator.py → daily_summaries: Generates daily narratives -->
+        <mxCell id="edge_textgen_daily" value="Generates daily narratives" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="comp_text_gen" target="db_daily_summaries" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- embedding_engine.py → daily_summaries: Computes and stores embeddings -->
+        <mxCell id="edge_embed_daily" value="Computes and stores embeddings" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="comp_embedding" target="db_daily_summaries" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- baseline_computer.py → patient_profile: Computes and updates baselines -->
+        <mxCell id="edge_baseline_profile" value="Computes and updates baselines" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="comp_baseline" target="db_patient_profile" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- correlation_engine.py → health_graph: Writes correlation edges -->
+        <mxCell id="edge_corr_graph" value="Writes correlation edges" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="comp_correlation" target="db_health_graph" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- anomaly_detector.py → daily_summaries: Reads metrics for anomaly detection -->
+        <mxCell id="edge_anomaly_daily" value="Reads metrics for anomaly detection" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="comp_anomaly" target="db_daily_summaries" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- recommendation_engine.py → knowledge_base: Reads/writes recommendations -->
+        <mxCell id="edge_rec_kb" value="Reads/writes recommendations" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="comp_recommendation" target="db_knowledge_base" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- trend_forecaster.py → daily_summaries: Reads historical data for forecasting -->
+        <mxCell id="edge_trend_daily" value="Reads historical data for forecasting" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="comp_trend" target="db_daily_summaries" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- notification_manager.py → patient_profile: Reads notification preferences -->
+        <mxCell id="edge_notif_profile" value="Reads notification preferences" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="comp_notification" target="db_patient_profile" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- _business_rules.yml → health_tools.py: Defines alert logic and scoring -->
+        <mxCell id="edge_rules_tools" value="Defines alert logic and scoring" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="comp_business_rules" target="comp_health_tools" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

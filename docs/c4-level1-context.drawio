@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-03-11">
+  <diagram id="c4-level1" name="C4 Level 1 — System Context">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- ======================== -->
+        <!-- PERSONS (top-left)       -->
+        <!-- ======================== -->
+
+        <!-- Claus -->
+        <mxCell id="2" value="Claus&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Developer and data owner&lt;/font&gt;" style="shape=mxgraph.c4.person2;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontSize=12;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="80" y="80" width="140" height="140" as="geometry"/>
+        </mxCell>
+
+        <!-- Claude Code -->
+        <mxCell id="3" value="Claude Code&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;AI agent — primary local&lt;br&gt;data consumer&lt;/font&gt;" style="shape=mxgraph.c4.person2;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontSize=12;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="280" y="80" width="140" height="140" as="geometry"/>
+        </mxCell>
+
+        <!-- ================================== -->
+        <!-- INTERNAL SYSTEM (center)           -->
+        <!-- ================================== -->
+
+        <mxCell id="4" value="&lt;b&gt;HealthReporting Platform&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Dual-stack health data platform:&lt;br&gt;AI-native locally, traditional medallion in cloud&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=12;fontFamily=Helvetica;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="430" y="370" width="300" height="100" as="geometry"/>
+        </mxCell>
+
+        <!-- ================================== -->
+        <!-- DATA SOURCES — ACTIVE (right, green) -->
+        <!-- ================================== -->
+
+        <!-- Oura API -->
+        <mxCell id="5" value="Oura API&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Sleep, activity, readiness,&lt;br&gt;HR, SpO2, stress&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=12;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="900" y="60" width="220" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- Apple Health -->
+        <mxCell id="6" value="Apple Health&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;HR, steps, temperature, respiratory,&lt;br&gt;energy, gait, mindfulness, water&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=12;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="900" y="150" width="220" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- Lifesum -->
+        <mxCell id="7" value="Lifesum&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Nutrition and meal tracking&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=12;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="900" y="240" width="220" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- ================================== -->
+        <!-- DATA SOURCES — PLANNED (right, gray) -->
+        <!-- ================================== -->
+
+        <!-- Withings API -->
+        <mxCell id="8" value="Withings API&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Blood pressure, weight&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontSize=12;fontFamily=Helvetica;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="900" y="340" width="220" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- Strava API -->
+        <mxCell id="9" value="Strava API&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Workout activities&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontSize=12;fontFamily=Helvetica;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="900" y="430" width="220" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- sundhed.dk -->
+        <mxCell id="10" value="sundhed.dk&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Medical records&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontSize=12;fontFamily=Helvetica;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="900" y="520" width="220" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- ================================== -->
+        <!-- DATA SOURCES — ACTIVE (right, green, lower) -->
+        <!-- ================================== -->
+
+        <!-- Weather API -->
+        <mxCell id="11" value="Weather API&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Temperature, humidity, pressure&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=12;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="900" y="620" width="220" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- Genetics -->
+        <mxCell id="12" value="Genetics&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;SNP data, PRS scores&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=12;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="900" y="710" width="220" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- Lab Results -->
+        <mxCell id="13" value="Lab Results&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Blood biomarkers&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=12;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="900" y="800" width="220" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- ================================== -->
+        <!-- INFRASTRUCTURE (bottom, green)     -->
+        <!-- ================================== -->
+
+        <!-- Databricks -->
+        <mxCell id="14" value="Databricks&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Unity Catalog, Delta Lake,&lt;br&gt;Workflows, Dashboards&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=12;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="120" y="600" width="220" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- GitHub -->
+        <mxCell id="15" value="GitHub&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Source control, Actions CI/CD,&lt;br&gt;Projects board&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=12;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="120" y="700" width="220" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- Tailscale -->
+        <mxCell id="16" value="Tailscale&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;VPN mesh for remote&lt;br&gt;API access&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=12;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="380" y="600" width="220" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- ntfy.sh -->
+        <mxCell id="17" value="ntfy.sh&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Push notifications for&lt;br&gt;pipeline status&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=12;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="380" y="700" width="220" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- ================================== -->
+        <!-- EDGES — Persons to System          -->
+        <!-- ================================== -->
+
+        <!-- Claus → HealthReporting -->
+        <mxCell id="30" value="Manages, configures, reviews" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=10;fontFamily=Helvetica;" edge="1" source="2" target="4" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Claude Code → HealthReporting -->
+        <mxCell id="31" value="Queries via MCP tools&lt;br&gt;and REST API" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=10;fontFamily=Helvetica;" edge="1" source="3" target="4" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ================================== -->
+        <!-- EDGES — System to Data Sources     -->
+        <!-- ================================== -->
+
+        <!-- HealthReporting → Oura API -->
+        <mxCell id="32" value="OAuth 2.0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=10;fontFamily=Helvetica;" edge="1" source="4" target="5" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- HealthReporting → Apple Health -->
+        <mxCell id="33" value="XML export" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=10;fontFamily=Helvetica;" edge="1" source="4" target="6" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- HealthReporting → Lifesum -->
+        <mxCell id="34" value="CSV export" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=10;fontFamily=Helvetica;" edge="1" source="4" target="7" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- HealthReporting → Withings API -->
+        <mxCell id="35" value="OAuth 2.0 (planned)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=10;fontFamily=Helvetica;dashed=1;" edge="1" source="4" target="8" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- HealthReporting → Strava API -->
+        <mxCell id="36" value="OAuth 2.0 (planned)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=10;fontFamily=Helvetica;dashed=1;" edge="1" source="4" target="9" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- HealthReporting → sundhed.dk -->
+        <mxCell id="37" value="Playwright + MitID (planned)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=10;fontFamily=Helvetica;dashed=1;" edge="1" source="4" target="10" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- HealthReporting → Weather API -->
+        <mxCell id="38" value="REST API" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=10;fontFamily=Helvetica;" edge="1" source="4" target="11" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- HealthReporting → Genetics -->
+        <mxCell id="39" value="CSV import" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=10;fontFamily=Helvetica;" edge="1" source="4" target="12" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- HealthReporting → Lab Results -->
+        <mxCell id="40" value="CSV import" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=10;fontFamily=Helvetica;" edge="1" source="4" target="13" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ================================== -->
+        <!-- EDGES — System to Infrastructure   -->
+        <!-- ================================== -->
+
+        <!-- HealthReporting → Databricks -->
+        <mxCell id="41" value="Deploys bundles,&lt;br&gt;runs cloud pipelines" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=10;fontFamily=Helvetica;" edge="1" source="4" target="14" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- HealthReporting → GitHub -->
+        <mxCell id="42" value="CI/CD, PR validation" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=10;fontFamily=Helvetica;" edge="1" source="4" target="15" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- HealthReporting → Tailscale -->
+        <mxCell id="43" value="Exposes API over VPN" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=10;fontFamily=Helvetica;" edge="1" source="4" target="16" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- HealthReporting → ntfy.sh -->
+        <mxCell id="44" value="Sends notifications" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=10;fontFamily=Helvetica;" edge="1" source="4" target="17" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

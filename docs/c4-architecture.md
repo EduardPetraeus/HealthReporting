@@ -2,7 +2,7 @@
 
 > Solution architecture narrative + C4 diagrams (Level 1–3).
 > For detailed tables, file structure, and technology stack, see [ARCHITECTURE.md](./ARCHITECTURE.md).
-> For an interactive view, see [architecture-diagram.html](./architecture-diagram.html).
+> For editable diagrams, open the `.drawio` files in draw.io desktop app — see [Draw.io Diagrams](#draw-io-diagrams-editable) section.
 
 ---
 
@@ -26,7 +26,7 @@ This split exists because Gold encodes assumptions about what questions will be 
 ### Key Properties
 
 1. **Metadata-driven** — adding a new data source requires a YAML config entry, not code changes ([ADR-003](./adr/ADR-003-yaml-driven-pipeline.md))
-2. **MCP-first** — AI never writes raw SQL. All data access goes through 8 typed MCP tools with semantic contracts
+2. **MCP-first** — AI never writes raw SQL. All data access goes through 17 typed MCP tools with semantic contracts
 3. **Schema-as-documentation** — every column across 21 silver tables has a `COMMENT ON` description. The schema IS the AI's user interface (83% query accuracy vs 40% without)
 4. **DuckDB local-first** — zero-config OLAP runtime, Parquet interchange format, single-writer simplicity ([ADR-001](./adr/ADR-001-duckdb-local-runtime.md))
 5. **Medallion foundation** — Bronze → Silver shared across both stacks, source isolation via `source_system` column ([ADR-002](./adr/ADR-002-medallion-architecture.md))
@@ -93,10 +93,10 @@ C4Container
         Container(connectors, "Source Connectors", "Python", "Oura OAuth client, Apple Health XML parser, CSV-to-Parquet converter")
         Container(ingestion, "Ingestion Engine", "Python", "Reads sources_config.yaml, loads Parquet into Bronze tables")
         Container(dbt_merge, "dbt + Merge Runner", "Python/SQL", "Schema creation (dbt) + MERGE INTO (SQL scripts)")
-        Container(ai_modules, "AI Modules", "Python", "Text generation, embeddings, baselines, correlations")
+        Container(ai_modules, "AI Modules", "Python", "8 modules: text gen, embeddings, baselines, correlations, anomaly, recommendations, trends, notifications")
         Container(agent_memory, "Agent Memory", "DuckDB schema", "patient_profile, daily_summaries, health_graph, knowledge_base")
         Container(contracts, "Semantic Contracts", "YAML", "18 metric definitions + business rules + master index")
-        Container(mcp, "MCP Server", "Python/FastMCP", "8 typed tools — primary AI data access layer")
+        Container(mcp, "MCP Server", "Python/FastMCP", "17 typed tools — primary AI data access layer")
         Container(api, "FastAPI REST Server", "Python", "5 endpoints, Bearer auth, Tailscale-accessible")
         Container(sync, "Daily Sync", "Bash/launchd", "Oura fetch → Bronze → Silver → Summary at 06:00")
         ContainerDb(duckdb, "DuckDB Database", "DuckDB", "bronze, silver, agent schemas")
@@ -160,7 +160,7 @@ C4Component
     Person(claude, "Claude Code", "AI agent")
 
     Boundary(mcp_boundary, "MCP Server (FastMCP)") {
-        Component(server, "server.py", "FastMCP", "Server entrypoint — registers 8 tools")
+        Component(server, "server.py", "FastMCP", "Server entrypoint — registers 17 tools")
         Component(health_tools, "health_tools.py", "Python", "Tool implementations — query routing, memory ops, insight recording")
         Component(query_builder, "query_builder.py", "Python", "YAML contract → parameterized SQL generation")
         Component(formatter, "formatter.py", "Python", "Query results → markdown output formatting")
@@ -208,10 +208,25 @@ C4Component
 
 ---
 
+## Draw.io Diagrams (Editable)
+
+For editable, high-fidelity versions of these diagrams, open the `.drawio` files in [diagrams.net](https://app.diagrams.net):
+
+| File | Diagram | Description |
+|------|---------|-------------|
+| [`c4-level1-context.drawio`](./c4-level1-context.drawio) | C4 Level 1 | System Context — actors + external systems |
+| [`c4-level2-containers.drawio`](./c4-level2-containers.drawio) | C4 Level 2 | Container Diagram — local + cloud stack containers |
+| [`c4-level3-components.drawio`](./c4-level3-components.drawio) | C4 Level 3 | Component Diagram — AI-native data access layer zoom |
+| [`solution-architecture.drawio`](./solution-architecture.drawio) | Solution Architecture | End-to-end numbered flow (14 steps) |
+
+These draw.io files reflect the current state: 17 MCP tools, 8 AI modules, 9 source connectors, 24 semantic contracts.
+
+---
+
 ## Maintenance Notes
 
 - **When to update these diagrams:** When a new data source connector is added, a new MCP tool is created, or the dual-stack boundary changes (e.g., new cloud services or local components).
 - **For detailed tables** (bronze/silver/gold contents, file paths, technology stack): see [ARCHITECTURE.md](./ARCHITECTURE.md).
-- **For interactive exploration:** see [architecture-diagram.html](./architecture-diagram.html).
+- **Draw.io files:** Open `.drawio` files in the draw.io desktop app or [diagrams.net](https://app.diagrams.net) — editable and exportable to PNG/SVG/PDF. Draw.io is the standard tool for architecture diagrams in this project.
 - **Rendering:** GitHub renders Mermaid natively. For complex diagrams, use the [Mermaid Live Editor](https://mermaid.live) if nested boundaries render unexpectedly.
 - **C4 plugin:** These diagrams use Mermaid's C4 extension (`C4Context`, `C4Container`, `C4Component`). Ensure your viewer supports C4 syntax.
