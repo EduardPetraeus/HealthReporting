@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-03-11">
+  <diagram id="c4-level2" name="C4 Level 2 — Container Diagram">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- ======================== -->
+        <!-- PERSONS (top-left)       -->
+        <!-- ======================== -->
+
+        <!-- Claus -->
+        <mxCell id="person-claus" value="&lt;b&gt;Claus&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Developer&lt;/font&gt;" style="shape=mxgraph.c4.person2;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontSize=12;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="100" y="20" width="100" height="120" as="geometry"/>
+        </mxCell>
+
+        <!-- Claude Code -->
+        <mxCell id="person-claude" value="&lt;b&gt;Claude Code&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;AI agent&lt;/font&gt;" style="shape=mxgraph.c4.person2;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontSize=12;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="280" y="20" width="100" height="120" as="geometry"/>
+        </mxCell>
+
+        <!-- ======================== -->
+        <!-- EXTERNAL SOURCES (top)   -->
+        <!-- ======================== -->
+
+        <mxCell id="ext-oura" value="&lt;b&gt;Oura API&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="520" y="30" width="120" height="40" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="ext-apple" value="&lt;b&gt;Apple Health&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="660" y="30" width="120" height="40" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="ext-lifesum" value="&lt;b&gt;Lifesum&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="800" y="30" width="120" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================= -->
+        <!-- LOCAL STACK BOUNDARY (left, blue dashed)      -->
+        <!-- ============================================= -->
+
+        <mxCell id="boundary-local" value="&lt;b&gt;Local Stack (Mac Mini M4)&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;dashPattern=5 5;fillColor=#DCEEFB;strokeColor=#1F6FEB;verticalAlign=top;fontStyle=1;fontSize=14;fontFamily=Helvetica;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="160" width="720" height="830" as="geometry"/>
+        </mxCell>
+
+        <!-- Row 1: Source Connectors + Daily Sync -->
+
+        <mxCell id="c-source-connectors" value="&lt;b&gt;Source Connectors&lt;/b&gt;&lt;br&gt;&lt;i&gt;[Python]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;9 connectors: Oura OAuth, Apple Health&lt;br&gt;XML, Lifesum CSV, Withings, Strava,&lt;br&gt;sundhed.dk, Weather, Genetics, Lab&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary-local">
+          <mxGeometry x="30" y="50" width="250" height="100" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="c-daily-sync" value="&lt;b&gt;Daily Sync&lt;/b&gt;&lt;br&gt;&lt;i&gt;[Bash/launchd]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;Orchestrates at 06:00&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary-local">
+          <mxGeometry x="540" y="50" width="150" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- Row 2: Parquet Data Lake -->
+
+        <mxCell id="c-parquet" value="&lt;b&gt;Parquet Data Lake&lt;/b&gt;&lt;br&gt;&lt;i&gt;[Hive-partitioned]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;Hive-partitioned raw files&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="boundary-local">
+          <mxGeometry x="30" y="180" width="200" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- Row 2: Ingestion Engine -->
+
+        <mxCell id="c-ingestion" value="&lt;b&gt;Ingestion Engine&lt;/b&gt;&lt;br&gt;&lt;i&gt;[Python]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;Reads sources_config.yaml,&lt;br&gt;loads Parquet into Bronze&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary-local">
+          <mxGeometry x="280" y="180" width="200" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- Row 3: DuckDB (center) -->
+
+        <mxCell id="c-duckdb" value="&lt;b&gt;DuckDB&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;bronze, silver, agent schemas&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="boundary-local">
+          <mxGeometry x="250" y="300" width="180" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- Row 3: dbt + Merge Runner (right of DuckDB) -->
+
+        <mxCell id="c-dbt" value="&lt;b&gt;dbt + Merge Runner&lt;/b&gt;&lt;br&gt;&lt;i&gt;[Python/SQL]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;Schema creation (dbt) +&lt;br&gt;MERGE INTO (SQL scripts)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary-local">
+          <mxGeometry x="490" y="290" width="200" height="90" as="geometry"/>
+        </mxCell>
+
+        <!-- Row 3: Quality Engine (left of DuckDB) -->
+
+        <mxCell id="c-quality" value="&lt;b&gt;Quality Engine&lt;/b&gt;&lt;br&gt;&lt;i&gt;[Python]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;Data quality checker&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary-local">
+          <mxGeometry x="30" y="310" width="170" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- Row 4: AI Modules -->
+
+        <mxCell id="c-ai-modules" value="&lt;b&gt;AI Modules&lt;/b&gt;&lt;br&gt;&lt;i&gt;[Python]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;8 modules: text gen, embeddings,&lt;br&gt;baselines, correlations, anomaly,&lt;br&gt;recommendations, trends, notifications&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary-local">
+          <mxGeometry x="30" y="420" width="250" height="100" as="geometry"/>
+        </mxCell>
+
+        <!-- Row 4: Agent Memory -->
+
+        <mxCell id="c-agent-memory" value="&lt;b&gt;Agent Memory&lt;/b&gt;&lt;br&gt;&lt;i&gt;[DuckDB schema]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;patient_profile, daily_summaries,&lt;br&gt;health_graph, knowledge_base&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1F0FF;strokeColor=#1E3A5F;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary-local">
+          <mxGeometry x="320" y="420" width="210" height="100" as="geometry"/>
+        </mxCell>
+
+        <!-- Row 4: Semantic Contracts -->
+
+        <mxCell id="c-semantic" value="&lt;b&gt;Semantic Contracts&lt;/b&gt;&lt;br&gt;&lt;i&gt;[YAML]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;24 metric definitions +&lt;br&gt;business rules + master index&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#7E57C2;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary-local">
+          <mxGeometry x="560" y="420" width="150" height="100" as="geometry"/>
+        </mxCell>
+
+        <!-- Row 5: MCP Server -->
+
+        <mxCell id="c-mcp" value="&lt;b&gt;MCP Server&lt;/b&gt;&lt;br&gt;&lt;i&gt;[FastMCP]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;17 tools — primary AI&lt;br&gt;data access layer&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary-local">
+          <mxGeometry x="30" y="560" width="200" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- Row 5: FastAPI REST Server -->
+
+        <mxCell id="c-fastapi" value="&lt;b&gt;FastAPI REST Server&lt;/b&gt;&lt;br&gt;&lt;i&gt;[Python]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;5 endpoints, Bearer auth, Tailscale&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary-local">
+          <mxGeometry x="270" y="560" width="200" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- Row 6: Desktop App -->
+
+        <mxCell id="c-desktop" value="&lt;b&gt;Desktop App&lt;/b&gt;&lt;br&gt;&lt;i&gt;[Python]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;Reports, UI&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary-local">
+          <mxGeometry x="30" y="680" width="150" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- Row 6: Export -->
+
+        <mxCell id="c-export" value="&lt;b&gt;Export&lt;/b&gt;&lt;br&gt;&lt;i&gt;[Python]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;FHIR, PDF&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary-local">
+          <mxGeometry x="220" y="680" width="150" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================= -->
+        <!-- CLOUD STACK BOUNDARY (right, gold dashed)     -->
+        <!-- ============================================= -->
+
+        <mxCell id="boundary-cloud" value="&lt;b&gt;Cloud Stack (Databricks)&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;dashPattern=5 5;fillColor=#FFF2CC;strokeColor=#D29922;verticalAlign=top;fontStyle=1;fontSize=14;fontFamily=Helvetica;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="820" y="160" width="400" height="530" as="geometry"/>
+        </mxCell>
+
+        <!-- Cloud: Autoloader -->
+
+        <mxCell id="cloud-autoloader" value="&lt;b&gt;Autoloader&lt;/b&gt;&lt;br&gt;&lt;i&gt;[PySpark]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;Ingests Parquet into Bronze Delta&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary-cloud">
+          <mxGeometry x="30" y="50" width="200" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- Cloud: Silver Runner -->
+
+        <mxCell id="cloud-silver" value="&lt;b&gt;Silver Runner&lt;/b&gt;&lt;br&gt;&lt;i&gt;[SQL]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;10 SQL transforms via DAB&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary-cloud">
+          <mxGeometry x="30" y="160" width="200" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- Cloud: Gold Runner -->
+
+        <mxCell id="cloud-gold" value="&lt;b&gt;Gold Runner&lt;/b&gt;&lt;br&gt;&lt;i&gt;[SQL]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;3 reporting views&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary-cloud">
+          <mxGeometry x="30" y="270" width="200" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- Cloud: Unity Catalog (cylinder) -->
+
+        <mxCell id="cloud-unity" value="&lt;b&gt;Unity Catalog&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;health-platform-dev / prd&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="boundary-cloud">
+          <mxGeometry x="260" y="140" width="120" height="100" as="geometry"/>
+        </mxCell>
+
+        <!-- Cloud: Scheduled Workflows -->
+
+        <mxCell id="cloud-workflows" value="&lt;b&gt;Scheduled Workflows&lt;/b&gt;&lt;br&gt;&lt;i&gt;[DAB]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;Bronze, Silver, Gold jobs&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary-cloud">
+          <mxGeometry x="30" y="380" width="200" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- Cloud: GitHub Actions CI/CD -->
+
+        <mxCell id="cloud-gha" value="&lt;b&gt;GitHub Actions CI/CD&lt;/b&gt;&lt;br&gt;&lt;i&gt;[YAML]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;Bundle validation, auto-deploy&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary-cloud">
+          <mxGeometry x="250" y="380" width="130" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================= -->
+        <!-- EDGES — Actor to Container                    -->
+        <!-- ============================================= -->
+
+        <!-- Claus → FastAPI REST Server -->
+        <mxCell id="edge-claus-fastapi" value="Manages via REST" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="person-claus" target="c-fastapi" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Claude Code → MCP Server -->
+        <mxCell id="edge-claude-mcp" value="Queries via MCP tools" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="person-claude" target="c-mcp" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Claude Code → FastAPI -->
+        <mxCell id="edge-claude-fastapi" value="Queries via REST API" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="person-claude" target="c-fastapi" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================= -->
+        <!-- EDGES — External Sources to Connectors        -->
+        <!-- ============================================= -->
+
+        <!-- Oura → Source Connectors -->
+        <mxCell id="edge-oura-conn" value="OAuth" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="ext-oura" target="c-source-connectors" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Apple Health → Source Connectors -->
+        <mxCell id="edge-apple-conn" value="XML" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="ext-apple" target="c-source-connectors" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Lifesum → Source Connectors -->
+        <mxCell id="edge-lifesum-conn" value="CSV" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="ext-lifesum" target="c-source-connectors" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================= -->
+        <!-- EDGES — Local Data Flow                       -->
+        <!-- ============================================= -->
+
+        <!-- Source Connectors → Parquet Data Lake -->
+        <mxCell id="edge-conn-parquet" value="Writes Parquet" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="c-source-connectors" target="c-parquet" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Parquet → Ingestion Engine -->
+        <mxCell id="edge-parquet-ingestion" value="Reads Parquet" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="c-parquet" target="c-ingestion" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Ingestion Engine → DuckDB -->
+        <mxCell id="edge-ingestion-duckdb" value="Loads Bronze" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="c-ingestion" target="c-duckdb" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- DuckDB ↔ dbt + Merge (bidirectional shown as two arrows) -->
+        <mxCell id="edge-duckdb-dbt" value="Bronze → Silver" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="c-duckdb" target="c-dbt" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="edge-dbt-duckdb" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="c-dbt" target="c-duckdb" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="590" y="400"/>
+              <mxPoint x="340" y="400"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- DuckDB → AI Modules -->
+        <mxCell id="edge-duckdb-ai" value="Reads Silver data" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="c-duckdb" target="c-ai-modules" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- AI Modules → Agent Memory (via DuckDB) -->
+        <mxCell id="edge-ai-memory" value="Writes Agent Memory" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="c-ai-modules" target="c-agent-memory" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Semantic Contracts → MCP Server -->
+        <mxCell id="edge-semantic-mcp" value="Defines query semantics" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="c-semantic" target="c-mcp" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- DuckDB → MCP Server -->
+        <mxCell id="edge-duckdb-mcp" value="Executes queries" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="c-duckdb" target="c-mcp" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="290" y="500"/>
+              <mxPoint x="170" y="500"/>
+              <mxPoint x="170" y="720"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Agent Memory → MCP Server -->
+        <mxCell id="edge-memory-mcp" value="Provides memory context" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="c-agent-memory" target="c-mcp" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================= -->
+        <!-- EDGES — Daily Sync orchestration (dashed)     -->
+        <!-- ============================================= -->
+
+        <!-- Daily Sync → Source Connectors -->
+        <mxCell id="edge-sync-conn" value="Triggers" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;dashed=1;" edge="1" source="c-daily-sync" target="c-source-connectors" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="500" y="250"/>
+              <mxPoint x="500" y="50"/>
+              <mxPoint x="280" y="50"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Daily Sync → Ingestion Engine -->
+        <mxCell id="edge-sync-ingestion" value="Triggers" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;dashed=1;" edge="1" source="c-daily-sync" target="c-ingestion" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Daily Sync → dbt + Merge Runner -->
+        <mxCell id="edge-sync-dbt" value="Triggers" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;dashed=1;" edge="1" source="c-daily-sync" target="c-dbt" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Daily Sync → AI Modules -->
+        <mxCell id="edge-sync-ai" value="Triggers" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;dashed=1;" edge="1" source="c-daily-sync" target="c-ai-modules" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="700" y="580"/>
+              <mxPoint x="700" y="630"/>
+              <mxPoint x="195" y="630"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ============================================= -->
+        <!-- EDGES — Cloud Data Flow                       -->
+        <!-- ============================================= -->
+
+        <!-- Parquet → Autoloader (cloud copy) -->
+        <mxCell id="edge-parquet-cloud" value="Cloud copy" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="c-parquet" target="cloud-autoloader" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="780" y="380"/>
+              <mxPoint x="780" y="250"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Autoloader → Unity Catalog -->
+        <mxCell id="edge-autoloader-unity" value="Writes Bronze Delta" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="cloud-autoloader" target="cloud-unity" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Unity Catalog ↔ Silver Runner -->
+        <mxCell id="edge-unity-silver" value="Bronze → Silver" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="cloud-unity" target="cloud-silver" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="edge-silver-unity" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="cloud-silver" target="cloud-unity" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="240" y="360"/>
+              <mxPoint x="310" y="360"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Unity Catalog ↔ Gold Runner -->
+        <mxCell id="edge-unity-gold" value="Silver → Gold" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="cloud-unity" target="cloud-gold" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="edge-gold-unity" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="cloud-gold" target="cloud-unity" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="240" y="370"/>
+              <mxPoint x="310" y="370"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Scheduled Workflows → Autoloader/Silver/Gold (dashed) -->
+        <mxCell id="edge-wf-autoloader" value="Orchestrates" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;dashed=1;" edge="1" source="cloud-workflows" target="cloud-autoloader" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="130" y="370"/>
+              <mxPoint x="130" y="130"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="edge-wf-silver" value="Orchestrates" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;dashed=1;" edge="1" source="cloud-workflows" target="cloud-silver" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="edge-wf-gold" value="Orchestrates" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;dashed=1;" edge="1" source="cloud-workflows" target="cloud-gold" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- GitHub Actions → Scheduled Workflows -->
+        <mxCell id="edge-gha-wf" value="Deploys DAB bundles" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666;strokeWidth=1;fontSize=9;fontFamily=Helvetica;" edge="1" source="cloud-gha" target="cloud-workflows" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
