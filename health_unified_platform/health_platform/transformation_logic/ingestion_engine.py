@@ -1,5 +1,6 @@
 import glob
 import os
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -8,6 +9,8 @@ import yaml
 from health_platform.utils.audit_logger import AuditLogger
 from health_platform.utils.logging_config import get_logger
 from health_platform.utils.path_resolver import get_project_root
+
+_IDENTIFIER_RE = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
 
 logger = get_logger("ingestion_engine")
 
@@ -65,7 +68,10 @@ def _filter_new_files(
     new_files = []
     max_mtime = watermark
     for f in files:
-        mtime = datetime.fromtimestamp(os.path.getmtime(f), tz=timezone.utc)
+        try:
+            mtime = datetime.fromtimestamp(os.path.getmtime(f), tz=timezone.utc)
+        except OSError:
+            continue
         if mtime > watermark:
             new_files.append(f)
             if mtime > max_mtime:
@@ -110,6 +116,17 @@ def run_ingestion():
             input_glob = str(lake_root / source["relative_path"])
 
             logger.info(f"Processing source: {name} -> {schema}.{table}")
+
+            # validate identifiers before f-string SQL interpolation
+            if not _IDENTIFIER_RE.match(schema) or not _IDENTIFIER_RE.match(table):
+                logger.error(f"Invalid identifier in source {name}: {schema}.{table}")
+                continue
+
+            # containment check: relative_path must resolve inside data lake
+            resolved_glob = Path(input_glob).resolve()
+            if not str(resolved_glob).startswith(str(lake_root.resolve())):
+                logger.error(f"Path escape detected for {name}: {input_glob}")
+                continue
 
             # verify_file_existence
             found_files = glob.glob(input_glob, recursive=True)
