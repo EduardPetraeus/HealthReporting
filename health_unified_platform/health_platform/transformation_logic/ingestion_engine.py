@@ -1,5 +1,6 @@
 import glob
 import os
+from datetime import datetime, timezone
 from pathlib import Path
 
 import duckdb
@@ -10,11 +11,66 @@ from health_platform.utils.path_resolver import get_project_root
 
 logger = get_logger("ingestion_engine")
 
+_WATERMARK_DDL = """
+CREATE TABLE IF NOT EXISTS bronze._load_watermarks (
+    source_name VARCHAR PRIMARY KEY,
+    last_loaded_at TIMESTAMP WITH TIME ZONE,
+    files_loaded INTEGER,
+    rows_loaded BIGINT,
+    updated_at TIMESTAMP WITH TIME ZONE
+)
+"""
+
 
 def load_yaml(path):
     """loads_a_yaml_configuration_file"""
     with open(path, "r") as f:
         return yaml.safe_load(f)
+
+
+def _get_watermark(con, source_name: str) -> datetime:
+    """Return last_loaded_at for a source, or epoch 0 if first run."""
+    row = con.execute(
+        "SELECT last_loaded_at FROM bronze._load_watermarks WHERE source_name = ?",
+        [source_name],
+    ).fetchone()
+    if row and row[0]:
+        return row[0]
+    return datetime(1970, 1, 1, tzinfo=timezone.utc)
+
+
+def _update_watermark(
+    con, source_name: str, last_loaded_at: datetime, files: int, rows: int
+) -> None:
+    """Upsert watermark after successful incremental load."""
+    con.execute(
+        """
+        INSERT INTO bronze._load_watermarks
+            (source_name, last_loaded_at, files_loaded, rows_loaded, updated_at)
+        VALUES (?, ?, ?, ?, ?)
+        ON CONFLICT (source_name) DO UPDATE SET
+            last_loaded_at = EXCLUDED.last_loaded_at,
+            files_loaded = EXCLUDED.files_loaded,
+            rows_loaded = EXCLUDED.rows_loaded,
+            updated_at = EXCLUDED.updated_at
+        """,
+        [source_name, last_loaded_at, files, rows, datetime.now(timezone.utc)],
+    )
+
+
+def _filter_new_files(
+    files: list[str], watermark: datetime
+) -> tuple[list[str], datetime]:
+    """Return files with mtime > watermark and the max mtime among them."""
+    new_files = []
+    max_mtime = watermark
+    for f in files:
+        mtime = datetime.fromtimestamp(os.path.getmtime(f), tz=timezone.utc)
+        if mtime > watermark:
+            new_files.append(f)
+            if mtime > max_mtime:
+                max_mtime = mtime
+    return new_files, max_mtime
 
 
 def run_ingestion():
@@ -40,6 +96,13 @@ def run_ingestion():
         # establish_connection_to_duckdb
         con = duckdb.connect(str(db_file))
 
+        # ensure watermark table exists
+        con.execute("CREATE SCHEMA IF NOT EXISTS bronze")
+        con.execute(_WATERMARK_DDL)
+
+        sources_loaded = 0
+        sources_skipped = 0
+
         for source in src_cfg["sources"]:
             name = source["name"]
             schema = source["target_schema"]
@@ -47,17 +110,15 @@ def run_ingestion():
             input_glob = str(lake_root / source["relative_path"])
 
             logger.info(f"Processing source: {name} -> {schema}.{table}")
-            logger.debug(f"Searching path: {input_glob}")
 
             # verify_file_existence
             found_files = glob.glob(input_glob, recursive=True)
-            logger.debug(f"Found {len(found_files)} files matching the pattern")
 
             if not found_files:
                 logger.warning(f"No files found at path: {input_glob}")
                 audit.log_table(
                     f"{schema}.{table}",
-                    "CREATE_OR_REPLACE",
+                    "INCREMENTAL",
                     status="error",
                     error_message="no_files_found",
                 )
@@ -69,38 +130,129 @@ def run_ingestion():
             # Never pass user-supplied input into these variables.
             con.execute(f"CREATE SCHEMA IF NOT EXISTS {schema}")
 
-            # ingestion_logic_with_union_by_name_for_schema_evolution
+            # check if table exists — cold start requires full load
+            table_exists = (
+                con.execute(
+                    "SELECT COUNT(*) FROM information_schema.tables "
+                    "WHERE table_schema = ? AND table_name = ?",
+                    [schema, table],
+                ).fetchone()[0]
+                > 0
+            )
+
+            if not table_exists:
+                # cold start: full load to create the table
+                logger.info(
+                    f"  Cold start: creating {schema}.{table} from {len(found_files)} files"
+                )
+                query = f"""
+                    CREATE TABLE {schema}.{table} AS
+                    SELECT
+                        *,
+                        current_timestamp as _ingested_at,
+                        '{active_env}' as _source_env
+                    FROM read_parquet('{input_glob}', hive_partitioning=True, union_by_name=True)
+                """
+                try:
+                    con.execute(query)
+                    count = con.execute(
+                        f"SELECT count(*) FROM {schema}.{table}"
+                    ).fetchone()[0]
+                    max_mtime = max(
+                        datetime.fromtimestamp(os.path.getmtime(f), tz=timezone.utc)
+                        for f in found_files
+                    )
+                    _update_watermark(con, name, max_mtime, len(found_files), count)
+                    logger.info(
+                        f"  Cold start complete: {count:,} rows -> {schema}.{table}"
+                    )
+                    audit.log_table(
+                        f"{schema}.{table}",
+                        "FULL_LOAD",
+                        rows_after=count,
+                        status="success",
+                    )
+                    sources_loaded += 1
+                except Exception as e:
+                    logger.error(f"Error during cold start of {name}: {e}")
+                    audit.log_table(
+                        f"{schema}.{table}",
+                        "FULL_LOAD",
+                        status="error",
+                        error_message=str(e),
+                    )
+                continue
+
+            # incremental: filter files newer than watermark
+            watermark = _get_watermark(con, name)
+            new_files, max_mtime = _filter_new_files(found_files, watermark)
+
+            if not new_files:
+                logger.info(
+                    f"  No new data for {name} (watermark: {watermark.isoformat()})"
+                )
+                sources_skipped += 1
+                continue
+
+            logger.info(
+                f"  Incremental: {len(new_files)} new files (of {len(found_files)} total)"
+            )
+
+            # build file list for read_parquet
+            file_list = "[" + ", ".join(f"'{f}'" for f in new_files) + "]"
+
+            # INSERT BY NAME handles schema evolution: matches columns by name,
+            # missing columns in source get NULL. Works when HAE parquet has
+            # fewer columns than XML-origin bronze tables.
+            # columns() lambda strips _ingested_at/_source_env if present in
+            # parquet (HAE adds them), then we add fresh values. Works regardless
+            # of whether the parquet has those columns or not.
             query = f"""
-                CREATE OR REPLACE TABLE {schema}.{table} AS
+                INSERT INTO {schema}.{table} BY NAME
                 SELECT
-                    *,
+                    columns(c -> c NOT IN ('_ingested_at', '_source_env')),
                     current_timestamp as _ingested_at,
                     '{active_env}' as _source_env
-                FROM read_parquet('{input_glob}', hive_partitioning=True, union_by_name=True)
+                FROM read_parquet({file_list}, hive_partitioning=True, union_by_name=True)
             """
 
             try:
-                con.execute(query)
-                count = con.execute(
+                rows_before = con.execute(
                     f"SELECT count(*) FROM {schema}.{table}"
                 ).fetchone()[0]
-                logger.info(f"Success: {count:,} rows ingested -> {schema}.{table}")
+                con.execute(query)
+                rows_after = con.execute(
+                    f"SELECT count(*) FROM {schema}.{table}"
+                ).fetchone()[0]
+                rows_inserted = rows_after - rows_before
+
+                _update_watermark(con, name, max_mtime, len(new_files), rows_inserted)
+
+                logger.info(
+                    f"  Success: +{rows_inserted:,} rows ({rows_before:,} -> {rows_after:,}) -> {schema}.{table}"
+                )
                 audit.log_table(
                     f"{schema}.{table}",
-                    "CREATE_OR_REPLACE",
-                    rows_after=count,
+                    "INCREMENTAL",
+                    rows_before=rows_before,
+                    rows_after=rows_after,
                     status="success",
                 )
+                sources_loaded += 1
             except Exception as e:
-                logger.error(f"Error during ingestion of {name}: {e}")
+                logger.error(f"Error during incremental load of {name}: {e}")
                 audit.log_table(
                     f"{schema}.{table}",
-                    "CREATE_OR_REPLACE",
+                    "INCREMENTAL",
                     status="error",
                     error_message=str(e),
                 )
 
         con.close()
+
+    logger.info(
+        f"Ingestion complete: {sources_loaded} loaded, {sources_skipped} skipped (no new data)"
+    )
 
     # Post-ingestion: trigger daily summary generation for today
     try:
@@ -116,7 +268,7 @@ def run_ingestion():
     except Exception as e:
         logger.warning(f"Daily summary generation skipped: {e}")
 
-    logger.info("Ingestion complete")
+    logger.info("Done")
 
 
 # this_part_is_critical_to_actually_run_the_script
