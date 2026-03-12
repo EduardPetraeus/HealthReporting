@@ -26,7 +26,15 @@ from health_platform.utils.logging_config import get_logger
 
 logger = get_logger("api.ingest")
 
-_AUDIT_LOG = Path("/Users/Shared/data_lake/audit/hae_ingest_log.csv")
+_DEFAULT_DATA_LAKE = "/Users/Shared/data_lake"
+
+
+def _get_audit_log() -> Path:
+    """Resolve audit log path from DATA_LAKE_ROOT env var."""
+    lake = os.environ.get("DATA_LAKE_ROOT", _DEFAULT_DATA_LAKE)
+    return Path(lake) / "audit" / "hae_ingest_log.csv"
+
+
 _AUDIT_FIELDS = [
     "timestamp",
     "status",
@@ -48,9 +56,14 @@ def _write_audit_entry(
     error: str = "",
 ) -> None:
     """Append one row to the HAE ingest audit log."""
-    _AUDIT_LOG.parent.mkdir(parents=True, exist_ok=True)
-    write_header = not _AUDIT_LOG.exists()
-    with _AUDIT_LOG.open("a", newline="") as f:
+    audit_log = _get_audit_log()
+    audit_log.parent.mkdir(parents=True, exist_ok=True)
+    write_header = not audit_log.exists()
+    # Sanitise error string: strip control chars, truncate, prevent CSV injection
+    error = error[:200].replace("\r", "").replace("\n", " ")
+    if error and error[0] in ("=", "+", "-", "@"):
+        error = "'" + error
+    with audit_log.open("a", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=_AUDIT_FIELDS)
         if write_header:
             writer.writeheader()
@@ -71,8 +84,6 @@ router = APIRouter(prefix="/v1/ingest", tags=["ingest"])
 
 # 50 MB request body limit — enforced on actual body bytes, not Content-Length header
 MAX_BODY_BYTES = 50 * 1024 * 1024
-
-_DEFAULT_DATA_LAKE = "/Users/Shared/data_lake"
 
 
 def _get_apple_health_root() -> Path:
