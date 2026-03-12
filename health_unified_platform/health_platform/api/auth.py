@@ -13,14 +13,14 @@ from __future__ import annotations
 import os
 import secrets
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from health_platform.utils.keychain import get_secret
 from health_platform.utils.logging_config import get_logger
 
 logger = get_logger("api.auth")
 
-_bearer_scheme = HTTPBearer()
+_bearer_scheme = HTTPBearer(auto_error=False)
 
 _cached_token: str | None = None
 
@@ -61,13 +61,31 @@ def get_api_token() -> str:
 
 
 async def verify_token(
-    credentials: HTTPAuthorizationCredentials = Depends(_bearer_scheme),
+    request: Request,
+    credentials: HTTPAuthorizationCredentials | None = Depends(_bearer_scheme),
 ) -> str:
-    """FastAPI dependency that verifies the Bearer token."""
+    """FastAPI dependency that verifies the Bearer token.
+
+    Accepts both standard ``Authorization: Bearer <token>`` and the custom
+    ``Bearer: <token>`` header sent by Health Auto Export (HAE) iOS app.
+    """
+    token: str | None = None
+    if credentials is not None:
+        token = credentials.credentials
+    else:
+        # Fallback: HAE sends token as custom "Bearer" header
+        token = request.headers.get("Bearer")
+
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+        )
+
     expected = get_api_token()
-    if not secrets.compare_digest(credentials.credentials, expected):
+    if not secrets.compare_digest(token, expected):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or missing API token",
         )
-    return credentials.credentials
+    return token
