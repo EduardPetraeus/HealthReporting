@@ -10,8 +10,10 @@ Auth:  Bearer token (same as all other /v1 endpoints)
 
 from __future__ import annotations
 
+import csv
 import json as _json
 import os
+from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
@@ -23,6 +25,47 @@ from health_platform.source_connectors.apple_health.json_to_parquet_writer impor
 from health_platform.utils.logging_config import get_logger
 
 logger = get_logger("api.ingest")
+
+_AUDIT_LOG = Path("/Users/Shared/data_lake/audit/hae_ingest_log.csv")
+_AUDIT_FIELDS = [
+    "timestamp",
+    "status",
+    "records_written",
+    "files_created",
+    "metrics_received",
+    "payload_bytes",
+    "error",
+]
+
+
+def _write_audit_entry(
+    *,
+    audit_status: str,
+    records_written: int = 0,
+    files_created: int = 0,
+    metrics_received: int = 0,
+    payload_bytes: int = 0,
+    error: str = "",
+) -> None:
+    """Append one row to the HAE ingest audit log."""
+    _AUDIT_LOG.parent.mkdir(parents=True, exist_ok=True)
+    write_header = not _AUDIT_LOG.exists()
+    with _AUDIT_LOG.open("a", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=_AUDIT_FIELDS)
+        if write_header:
+            writer.writeheader()
+        writer.writerow(
+            {
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "status": audit_status,
+                "records_written": records_written,
+                "files_created": files_created,
+                "metrics_received": metrics_received,
+                "payload_bytes": payload_bytes,
+                "error": error,
+            }
+        )
+
 
 router = APIRouter(prefix="/v1/ingest", tags=["ingest"])
 
@@ -53,41 +96,82 @@ async def ingest_apple_health(
     """
     # Read full body and enforce size limit (works with chunked transfer too)
     body = await request.body()
-    if len(body) > MAX_BODY_BYTES:
+    body_len = len(body)
+    if body_len > MAX_BODY_BYTES:
+        _write_audit_entry(
+            audit_status="FAIL",
+            payload_bytes=body_len,
+            error=f"Payload too large ({body_len} bytes)",
+        )
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             detail=f"Request body exceeds {MAX_BODY_BYTES // (1024 * 1024)} MB limit",
         )
 
-    payload = _json.loads(body)
+    try:
+        payload = _json.loads(body)
+    except _json.JSONDecodeError as exc:
+        _write_audit_entry(
+            audit_status="FAIL",
+            payload_bytes=body_len,
+            error=f"Invalid JSON: {exc}",
+        )
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="Invalid JSON payload",
+        ) from exc
 
     # Validate top-level structure
     metrics = payload.get("data", {}).get("metrics")
     if not isinstance(metrics, list):
+        _write_audit_entry(
+            audit_status="FAIL",
+            payload_bytes=body_len,
+            error="Missing data.metrics list",
+        )
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Invalid payload: expected data.metrics to be a list",
         )
 
+    num_metrics = len(metrics)
     records = parse_hae_payload(payload)
     if not records:
         logger.warning("HAE payload contained no mappable metrics")
+        _write_audit_entry(
+            audit_status="OK",
+            metrics_received=num_metrics,
+            payload_bytes=body_len,
+        )
         return {"status": "ok", "records_written": 0, "files_created": 0}
 
     output_root = _get_apple_health_root()
     try:
         result = write_hae_records(records, output_root)
-    except Exception:
+    except Exception as exc:
         logger.exception("HAE write failed")
+        _write_audit_entry(
+            audit_status="FAIL",
+            metrics_received=num_metrics,
+            payload_bytes=body_len,
+            error=str(exc),
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Ingest processing failed",
-        )
+        ) from exc
 
     logger.info(
         "HAE ingest complete: %d records, %d files",
         result["records_written"],
         result["files_created"],
+    )
+    _write_audit_entry(
+        audit_status="OK",
+        records_written=result["records_written"],
+        files_created=result["files_created"],
+        metrics_received=num_metrics,
+        payload_bytes=body_len,
     )
 
     return {
