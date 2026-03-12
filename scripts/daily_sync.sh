@@ -1,5 +1,5 @@
 #!/bin/bash
-# daily_sync.sh — Automated daily health data refresh
+# daily_sync.sh — Automated health data refresh (every 3 hours)
 #
 # Pipeline:
 #   Step 1: Fetch data from all API sources (Oura, Withings, Strava, Weather)
@@ -13,7 +13,7 @@
 #
 # Usage:
 #   ./scripts/daily_sync.sh              (manual run)
-#   launchd runs this at 06:00 daily     (automated)
+#   launchd runs this every 3 hours      (automated)
 #
 # Environment:
 #   HEALTH_ENV        — dev/prd (default: dev)
