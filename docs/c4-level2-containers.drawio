@@ -50,7 +50,7 @@
           <mxGeometry x="30" y="50" width="250" height="100" as="geometry"/>
         </mxCell>
 
-        <mxCell id="c-daily-sync" value="&lt;b&gt;Daily Sync&lt;/b&gt;&lt;br&gt;&lt;i&gt;[Bash/launchd]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;Orchestrates at 06:00&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary-local">
+        <mxCell id="c-daily-sync" value="&lt;b&gt;Daily Sync&lt;/b&gt;&lt;br&gt;&lt;i&gt;[Bash/launchd]&lt;/i&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;Orchestrates every 3 hours&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=11;fontFamily=Helvetica;verticalAlign=top;fontStyle=0;spacingTop=5;" vertex="1" parent="boundary-local">
           <mxGeometry x="540" y="50" width="150" height="80" as="geometry"/>
         </mxCell>
 
