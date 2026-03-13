@@ -214,10 +214,10 @@ For editable, high-fidelity versions of these diagrams, open the `.drawio` files
 
 | File | Diagram | Description |
 |------|---------|-------------|
-| [`c4-level1-context.drawio`](./c4-level1-context.drawio) | C4 Level 1 | System Context — actors + external systems |
-| [`c4-level2-containers.drawio`](./c4-level2-containers.drawio) | C4 Level 2 | Container Diagram — local + cloud stack containers |
-| [`c4-level3-components.drawio`](./c4-level3-components.drawio) | C4 Level 3 | Component Diagram — AI-native data access layer zoom |
-| [`solution-architecture.drawio`](./solution-architecture.drawio) | Solution Architecture | End-to-end numbered flow (14 steps) |
+| [`c4-level1-context.drawio`](./architecture/c4-level1-context.drawio) | C4 Level 1 | System Context — actors + external systems |
+| [`c4-level2-containers.drawio`](./architecture/c4-level2-containers.drawio) | C4 Level 2 | Container Diagram — local + cloud stack containers |
+| [`c4-level3-components.drawio`](./architecture/c4-level3-components.drawio) | C4 Level 3 | Component Diagram — AI-native data access layer zoom |
+| [`solution-architecture.drawio`](./architecture/solution-architecture.drawio) | Solution Architecture | End-to-end numbered flow (14 steps) |
 
 These draw.io files reflect the current state: 17 MCP tools, 8 AI modules, 9 source connectors, 24 semantic contracts.
 
