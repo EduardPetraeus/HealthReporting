@@ -1,8 +1,8 @@
-"""Integration tests for DS1 Oura API silver merge SQL files.
+"""Integration tests for Oura silver merge SQL files.
 
-Validates 8 new silver tables created from Oura API bronze sources:
+Validates silver tables created from Oura bronze sources (API + CSV):
 - oura_vo2_max, oura_tag, oura_rest_mode_period, oura_ring_configuration,
-  oura_sleep, cardiovascular_age, daily_resilience, enhanced_tag
+  oura_sleep, cardiovascular_age, daily_resilience, enhanced_tag, daily_stress
 
 For each merge:
 - Table exists after merge and has rows
@@ -179,27 +179,43 @@ MERGE_CONFIGS = {
                 rem_sleep_duration VARCHAR, restless_periods VARCHAR,
                 sleep_score_delta VARCHAR, time_in_bed VARCHAR,
                 total_sleep_duration VARCHAR, type VARCHAR,
-                _ingested_at_1 TIMESTAMP
+                _ingested_at TIMESTAMP, _ingested_at_1 TIMESTAMP
             )
         """,
         "bronze_insert": """
             INSERT INTO bronze.stg_oura_sleep VALUES
-                (2026, '3', '1', 'slp-001',
+                (2026, '3', '1', 'slp-api-1',
                  '15.2', '54.0', '45', '1800',
                  '2026-03-01 07:00:00', '2026-03-01 23:00:00',
                  '5400', '88', '300', '14400',
                  false, '48', '0', '1.5',
                  '7200', '3', '-0.5', '28800',
                  '27000', 'long_sleep',
-                 '2026-03-01 10:00:00'),
-                (2026, '3', '2', 'slp-002',
+                 NULL, '2026-03-01 10:00:00'),
+                (2026, '3', '2', 'slp-api-2',
                  '14.8', '56.0', '40', '2100',
                  '2026-03-02 06:30:00', '2026-03-01 23:30:00',
                  '4800', '82', '600', '13200',
                  false, '50', '0', '0.8',
                  '6600', '5', '0.2', '27000',
                  '24900', 'long_sleep',
-                 '2026-03-02 10:00:00')
+                 NULL, '2026-03-02 10:00:00'),
+                (NULL, NULL, '2024-08-10', 'slp-csv-1',
+                 '14.5', '52.0', '42', '1500',
+                 '2024-08-10 06:00:00', '2024-08-09 23:00:00',
+                 '6000', '90', '200', '15000',
+                 false, '46', '0', NULL,
+                 '7500', '2', NULL, '29000',
+                 '27500', 'long_sleep',
+                 '2024-08-10 10:00:00', NULL),
+                (NULL, NULL, '2024-09-05', 'slp-csv-2',
+                 '15.0', '55.0', '38', '2000',
+                 '2024-09-05 07:00:00', '2024-09-04 23:30:00',
+                 '5000', '85', '500', '14000',
+                 false, '49', '0', NULL,
+                 '6800', '4', NULL, '27500',
+                 '25500', 'long_sleep',
+                 '2024-09-05 10:00:00', NULL)
         """,
         "silver_ddl": """
             CREATE TABLE silver.oura_sleep (
@@ -218,6 +234,45 @@ MERGE_CONFIGS = {
                 load_datetime TIMESTAMP, update_datetime TIMESTAMP
             )
         """,
+        "expected_rows": 4,
+    },
+    "daily_stress": {
+        "sql": "merge_oura_daily_stress.sql",
+        "bronze": "bronze.stg_oura_daily_stress",
+        "silver": "silver.daily_stress",
+        "bronze_ddl": """
+            CREATE TABLE bronze.stg_oura_daily_stress (
+                year INTEGER, month VARCHAR, day VARCHAR,
+                day_summary VARCHAR,
+                stress_high VARCHAR, recovery_high VARCHAR,
+                _ingested_at TIMESTAMP, _ingested_at_1 TIMESTAMP
+            )
+        """,
+        "bronze_insert": """
+            INSERT INTO bronze.stg_oura_daily_stress VALUES
+                (2026, '3', '1', 'restored',
+                 '3600', '7200',
+                 NULL, '2026-03-01 10:00:00'),
+                (2026, '3', '2', 'normal',
+                 '4200', '6800',
+                 NULL, '2026-03-02 10:00:00'),
+                (NULL, NULL, '2024-06-15', 'stressful',
+                 '5400', '4800',
+                 '2024-06-15 10:00:00', NULL),
+                (NULL, NULL, '2024-07-20', 'restored',
+                 '2400', '8400',
+                 '2024-07-20 10:00:00', NULL)
+        """,
+        "silver_ddl": """
+            CREATE TABLE silver.daily_stress (
+                sk_date INTEGER, day DATE,
+                day_summary VARCHAR,
+                stress_high INTEGER, recovery_high INTEGER,
+                business_key_hash VARCHAR, row_hash VARCHAR,
+                load_datetime TIMESTAMP, update_datetime TIMESTAMP
+            )
+        """,
+        "expected_rows": 4,
     },
     "cardiovascular_age": {
         "sql": "merge_oura_cardiovascular_age.sql",
@@ -226,14 +281,16 @@ MERGE_CONFIGS = {
         "bronze_ddl": """
             CREATE TABLE bronze.stg_oura_daily_cardiovascular_age (
                 year INTEGER, month VARCHAR, day VARCHAR,
-                vascular_age VARCHAR,
-                _ingested_at_1 TIMESTAMP
+                id VARCHAR, vascular_age VARCHAR,
+                _ingested_at TIMESTAMP, _ingested_at_1 TIMESTAMP
             )
         """,
         "bronze_insert": """
             INSERT INTO bronze.stg_oura_daily_cardiovascular_age VALUES
-                (2026, '3', '1', '38', '2026-03-01 10:00:00'),
-                (2026, '3', '2', '37', '2026-03-02 10:00:00')
+                (2026, '3', '1', 'cv-api-1', '38', NULL, '2026-03-01 10:00:00'),
+                (2026, '3', '2', 'cv-api-2', '37', NULL, '2026-03-02 10:00:00'),
+                (NULL, NULL, '2024-05-15', 'cv-csv-1', '41', '2024-05-15 10:00:00', NULL),
+                (NULL, NULL, '2024-06-20', 'cv-csv-2', '40', '2024-06-20 10:00:00', NULL)
         """,
         "silver_ddl": """
             CREATE TABLE silver.cardiovascular_age (
@@ -243,6 +300,7 @@ MERGE_CONFIGS = {
                 load_datetime TIMESTAMP, update_datetime TIMESTAMP
             )
         """,
+        "expected_rows": 4,
     },
     "daily_resilience": {
         "sql": "merge_oura_daily_resilience.sql",
@@ -257,17 +315,23 @@ MERGE_CONFIGS = {
                     daytime_recovery DOUBLE,
                     stress DOUBLE
                 ),
-                _ingested_at_1 TIMESTAMP
+                _ingested_at TIMESTAMP, _ingested_at_1 TIMESTAMP
             )
         """,
         "bronze_insert": """
             INSERT INTO bronze.stg_oura_daily_resilience VALUES
                 (2026, '3', '1', 'solid',
                  {'sleep_recovery': 82.0, 'daytime_recovery': 75.0, 'stress': 68.0},
-                 '2026-03-01 10:00:00'),
+                 NULL, '2026-03-01 10:00:00'),
                 (2026, '3', '2', 'strong',
                  {'sleep_recovery': 90.0, 'daytime_recovery': 85.0, 'stress': 72.0},
-                 '2026-03-02 10:00:00')
+                 NULL, '2026-03-02 10:00:00'),
+                (NULL, NULL, '2023-12-15', 'limited',
+                 {'sleep_recovery': 55.0, 'daytime_recovery': 50.0, 'stress': 45.0},
+                 '2023-12-15 10:00:00', NULL),
+                (NULL, NULL, '2024-01-20', 'adequate',
+                 {'sleep_recovery': 70.0, 'daytime_recovery': 65.0, 'stress': 60.0},
+                 '2024-01-20 10:00:00', NULL)
         """,
         "silver_ddl": """
             CREATE TABLE silver.daily_resilience (
@@ -280,6 +344,7 @@ MERGE_CONFIGS = {
                 load_datetime TIMESTAMP, update_datetime TIMESTAMP
             )
         """,
+        "expected_rows": 4,
     },
     "enhanced_tag": {
         "sql": "merge_oura_enhanced_tag.sql",
@@ -291,21 +356,30 @@ MERGE_CONFIGS = {
                 id VARCHAR,
                 start_day DATE, start_time VARCHAR,
                 end_day DATE, end_time VARCHAR,
-                tag_type_code VARCHAR, custom_tag_name VARCHAR,
+                tag_type_code VARCHAR,
+                custom_name VARCHAR, custom_tag_name VARCHAR,
                 comment VARCHAR,
-                _ingested_at_1 TIMESTAMP
+                _ingested_at TIMESTAMP, _ingested_at_1 TIMESTAMP
             )
         """,
         "bronze_insert": """
             INSERT INTO bronze.stg_oura_enhanced_tag VALUES
                 (2026, '3', '1', 'et-001',
                  '2026-03-01', '08:00', '2026-03-01', '09:00',
-                 'tag_generic', 'morning_run', 'easy 5k',
-                 '2026-03-01 10:00:00'),
+                 'tag_generic', 'morning_run', NULL, 'easy 5k',
+                 NULL, '2026-03-01 10:00:00'),
                 (2026, '3', '2', 'et-002',
                  '2026-03-02', '19:00', '2026-03-02', '19:30',
-                 'tag_generic', 'meditation', 'guided session',
-                 '2026-03-02 10:00:00')
+                 'tag_generic', 'meditation', NULL, 'guided session',
+                 NULL, '2026-03-02 10:00:00'),
+                (NULL, NULL, NULL, 'et-csv-001',
+                 '2022-07-02', '10:00', '2022-07-02', '11:00',
+                 'tag_generic', NULL, 'yoga_class', 'morning yoga',
+                 '2022-07-02 10:00:00', NULL),
+                (NULL, NULL, NULL, 'et-csv-002',
+                 '2023-01-15', '14:00', '2023-01-15', '14:30',
+                 'tag_generic', NULL, 'nap', 'afternoon nap',
+                 '2023-01-15 10:00:00', NULL)
         """,
         "silver_ddl": """
             CREATE TABLE silver.enhanced_tag (
@@ -318,6 +392,7 @@ MERGE_CONFIGS = {
                 load_datetime TIMESTAMP, update_datetime TIMESTAMP
             )
         """,
+        "expected_rows": 4,
     },
 }
 
@@ -369,6 +444,18 @@ class TestMergeSqlExecutes:
         silver_table = config["silver"]
         count = con.execute(f"SELECT COUNT(*) FROM {silver_table}").fetchone()[0]
         assert count > 0, f"{silver_table} is empty after merge"
+
+    def test_expected_row_count(self, merge_result):
+        """Verify dual-format merges produce rows from both API and CSV sources."""
+        con, config = merge_result
+        expected = config.get("expected_rows")
+        if expected is None:
+            pytest.skip("No expected_rows defined for this merge")
+        silver_table = config["silver"]
+        count = con.execute(f"SELECT COUNT(*) FROM {silver_table}").fetchone()[0]
+        assert (
+            count == expected
+        ), f"{silver_table}: expected {expected} rows (API + CSV), got {count}"
 
 
 class TestBusinessKeyIntegrity:

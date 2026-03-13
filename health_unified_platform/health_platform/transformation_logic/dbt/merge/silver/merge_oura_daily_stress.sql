@@ -1,24 +1,35 @@
 -- merge_oura_daily_stress.sql
--- Per-source merge: Oura API -> silver.daily_stress
+-- Per-source merge: Oura (API + CSV) -> silver.daily_stress
 -- Business key: day (one row per day)
+-- Handles both API rows (Hive year/month/day partitions) and CSV rows (day as full date).
+-- API is prioritized over CSV when both exist for the same day.
 -- Note: stress_high and recovery_high are in seconds.
--- Note: day col = hive partition day-of-month. Full date reconstructed from year/month/day.
 --
 -- Usage: python run_merge.py silver/merge_oura_daily_stress.sql
 
 CREATE OR REPLACE TABLE silver.daily_stress__staging AS
-WITH deduped AS (
+WITH source_data AS (
     SELECT *,
-        make_date(year::INTEGER, month::VARCHAR::INTEGER, day::VARCHAR::INTEGER) AS full_date,
-        ROW_NUMBER() OVER (
-            PARTITION BY year, month, day
-            ORDER BY _ingested_at_1 DESC
-        ) AS rn
+        COALESCE(
+            TRY_CAST(make_date(TRY_CAST(year AS INTEGER), TRY_CAST(month AS INTEGER), TRY_CAST(day AS INTEGER)) AS DATE),
+            TRY_CAST(day AS DATE)
+        ) AS full_date,
+        CASE WHEN year IS NOT NULL THEN 1 ELSE 2 END AS source_rank,
+        COALESCE(_ingested_at_1::TIMESTAMP, _ingested_at::TIMESTAMP) AS ingested_at
     FROM bronze.stg_oura_daily_stress
     WHERE day IS NOT NULL
+),
+deduped AS (
+    SELECT *,
+        ROW_NUMBER() OVER (
+            PARTITION BY full_date
+            ORDER BY source_rank ASC, ingested_at DESC
+        ) AS rn
+    FROM source_data
+    WHERE full_date IS NOT NULL
 )
 SELECT
-    (year::INTEGER * 10000 + month::VARCHAR::INTEGER * 100 + day::VARCHAR::INTEGER)::INTEGER AS sk_date,
+    (year(full_date) * 10000 + month(full_date) * 100 + day(full_date))::INTEGER AS sk_date,
     full_date                             AS day,
     day_summary,
     stress_high::INTEGER                  AS stress_high,

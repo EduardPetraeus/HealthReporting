@@ -1,21 +1,31 @@
 -- merge_oura_sleep.sql
--- Per-source merge: Oura API -> silver.oura_sleep
+-- Per-source merge: Oura (API + CSV) -> silver.oura_sleep
 -- Business key: id (each sleep session is unique)
--- Note: day col = hive partition day-of-month. Full date reconstructed from year/month/day.
+-- Handles both API rows (Hive year/month/day partitions) and CSV rows (day as full date).
+-- API is prioritized over CSV when both exist for the same id.
 -- Note: This is the detailed sleep session endpoint, not the daily_sleep summary.
 --
 -- Usage: python run_merge.py silver/merge_oura_sleep.sql
 
 CREATE OR REPLACE TABLE silver.oura_sleep__staging AS
-WITH deduped AS (
+WITH source_data AS (
     SELECT *,
-        make_date(year::INTEGER, month::VARCHAR::INTEGER, day::VARCHAR::INTEGER) AS full_date,
-        ROW_NUMBER() OVER (PARTITION BY id ORDER BY _ingested_at_1 DESC) AS rn
+        COALESCE(
+            TRY_CAST(make_date(TRY_CAST(year AS INTEGER), TRY_CAST(month AS INTEGER), TRY_CAST(day AS INTEGER)) AS DATE),
+            TRY_CAST(day AS DATE)
+        ) AS full_date,
+        CASE WHEN year IS NOT NULL THEN 1 ELSE 2 END AS source_rank,
+        COALESCE(_ingested_at_1::TIMESTAMP, _ingested_at::TIMESTAMP) AS ingested_at
     FROM bronze.stg_oura_sleep
-    WHERE day IS NOT NULL
+    WHERE id IS NOT NULL
+),
+deduped AS (
+    SELECT *,
+        ROW_NUMBER() OVER (PARTITION BY id ORDER BY source_rank ASC, ingested_at DESC) AS rn
+    FROM source_data
 )
 SELECT
-    (year::INTEGER * 10000 + month::VARCHAR::INTEGER * 100 + day::VARCHAR::INTEGER)::INTEGER AS sk_date,
+    (year(full_date) * 10000 + month(full_date) * 100 + day(full_date))::INTEGER AS sk_date,
     full_date                              AS day,
     id,
     average_breath::DOUBLE                 AS average_breath,
@@ -49,6 +59,16 @@ SELECT
         coalesce(cast(bedtime_start AS VARCHAR), '')            || '||' ||
         coalesce(cast(deep_sleep_duration AS VARCHAR), '')      || '||' ||
         coalesce(cast(efficiency AS VARCHAR), '')               || '||' ||
+        coalesce(cast(latency AS VARCHAR), '')                  || '||' ||
+        coalesce(cast(light_sleep_duration AS VARCHAR), '')     || '||' ||
+        coalesce(cast(low_battery_alert AS VARCHAR), '')        || '||' ||
+        coalesce(cast(lowest_heart_rate AS VARCHAR), '')        || '||' ||
+        coalesce(cast(period AS VARCHAR), '')                   || '||' ||
+        coalesce(cast(readiness_score_delta AS VARCHAR), '')    || '||' ||
+        coalesce(cast(rem_sleep_duration AS VARCHAR), '')       || '||' ||
+        coalesce(cast(restless_periods AS VARCHAR), '')         || '||' ||
+        coalesce(cast(sleep_score_delta AS VARCHAR), '')        || '||' ||
+        coalesce(cast(time_in_bed AS VARCHAR), '')              || '||' ||
         coalesce(cast(total_sleep_duration AS VARCHAR), '')     || '||' ||
         coalesce(type::VARCHAR, '')
     )                                      AS row_hash,
