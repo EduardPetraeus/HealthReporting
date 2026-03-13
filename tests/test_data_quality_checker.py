@@ -7,6 +7,8 @@ import yaml
 from health_platform.quality.data_quality_checker import DataQualityChecker
 from health_platform.quality.models import QualityReport
 
+pytestmark = pytest.mark.integration
+
 
 @pytest.fixture
 def rules_path(tmp_path):

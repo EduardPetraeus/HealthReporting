@@ -8,7 +8,10 @@ from __future__ import annotations
 import subprocess
 from unittest.mock import patch
 
+import pytest  # noqa: F401
 from health_platform.utils.keychain import get_secret
+
+pytestmark = pytest.mark.integration
 
 
 class TestGetSecret:

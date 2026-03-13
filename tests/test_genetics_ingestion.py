@@ -17,11 +17,14 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import duckdb
+import pytest  # noqa: F401
 from health_platform.source_connectors.genetics.csv_parser import (
     parse_ancestry_csv,
     parse_family_tree_json,
 )
 from health_platform.source_connectors.genetics.pdf_parser import GeneticsPdfParser
+
+pytestmark = pytest.mark.integration
 
 # ====================================================================
 # TestGeneticsPdfParser
