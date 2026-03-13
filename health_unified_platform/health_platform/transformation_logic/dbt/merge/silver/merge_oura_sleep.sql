@@ -49,6 +49,16 @@ SELECT
         coalesce(cast(bedtime_start AS VARCHAR), '')            || '||' ||
         coalesce(cast(deep_sleep_duration AS VARCHAR), '')      || '||' ||
         coalesce(cast(efficiency AS VARCHAR), '')               || '||' ||
+        coalesce(cast(latency AS VARCHAR), '')                  || '||' ||
+        coalesce(cast(light_sleep_duration AS VARCHAR), '')     || '||' ||
+        coalesce(cast(low_battery_alert AS VARCHAR), '')        || '||' ||
+        coalesce(cast(lowest_heart_rate AS VARCHAR), '')        || '||' ||
+        coalesce(cast(period AS VARCHAR), '')                   || '||' ||
+        coalesce(cast(readiness_score_delta AS VARCHAR), '')    || '||' ||
+        coalesce(cast(rem_sleep_duration AS VARCHAR), '')       || '||' ||
+        coalesce(cast(restless_periods AS VARCHAR), '')         || '||' ||
+        coalesce(cast(sleep_score_delta AS VARCHAR), '')        || '||' ||
+        coalesce(cast(time_in_bed AS VARCHAR), '')              || '||' ||
         coalesce(cast(total_sleep_duration AS VARCHAR), '')     || '||' ||
         coalesce(type::VARCHAR, '')
     )                                      AS row_hash,

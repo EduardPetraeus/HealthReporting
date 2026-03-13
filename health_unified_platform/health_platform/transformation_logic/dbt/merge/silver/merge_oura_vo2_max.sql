@@ -23,6 +23,7 @@ SELECT
     vo2_max::DOUBLE                        AS vo2_max,
     md5(full_date::VARCHAR)                AS business_key_hash,
     md5(
+        coalesce(id, '')                           || '||' ||
         coalesce(cast(vo2_max AS VARCHAR), '')
     )                                      AS row_hash,
     current_timestamp                      AS load_datetime
