@@ -24,6 +24,8 @@ from health_platform.source_connectors.strava.auth import (
     get_access_token,
 )
 
+pytestmark = pytest.mark.integration
+
 MODULE = "health_platform.source_connectors.strava.auth"
 
 # ---------------------------------------------------------------------------

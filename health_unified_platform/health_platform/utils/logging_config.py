@@ -41,13 +41,17 @@ def get_logger(name: str, log_root: Optional[str] = None) -> logging.Logger:
     logger.addHandler(console_handler)
 
     # File handler — append, daily rotation via filename
-    root = Path(log_root or os.environ.get("HEALTH_LOG_ROOT", str(get_log_dir())))
-    root.mkdir(parents=True, exist_ok=True)
-    log_file = root / f"health_platform_{date.today().isoformat()}.log"
+    # Gracefully skip file logging if directory cannot be created (e.g. CI on Linux)
+    try:
+        root = Path(log_root or os.environ.get("HEALTH_LOG_ROOT", str(get_log_dir())))
+        root.mkdir(parents=True, exist_ok=True)
+        log_file = root / f"health_platform_{date.today().isoformat()}.log"
 
-    file_handler = logging.FileHandler(log_file, mode="a", encoding="utf-8")
-    file_handler.setLevel(logging.DEBUG)
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
+        file_handler = logging.FileHandler(log_file, mode="a", encoding="utf-8")
+        file_handler.setLevel(logging.DEBUG)
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+    except (PermissionError, OSError):
+        pass
 
     return logger

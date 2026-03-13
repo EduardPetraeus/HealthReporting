@@ -16,6 +16,8 @@ from health_platform.desktop.reports.generator import (
     _to_float,
 )
 
+pytestmark = pytest.mark.integration
+
 
 @pytest.fixture
 def report_db(tmp_path):

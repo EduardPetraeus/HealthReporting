@@ -11,20 +11,23 @@ from unittest.mock import MagicMock, patch
 
 import duckdb
 import pandas as pd
+
+# Ensure the health_platform package is importable
+import pytest
 from health_platform.source_connectors.lab.lab_ingestion import (
     _categorize_marker,
     _compute_hash,
     _extract_date_from_filename,
     ingest_lab_pdfs,
 )
-
-# Ensure the health_platform package is importable
 from health_platform.source_connectors.lab.pdf_parser import (
     LabPdfParser,
     _determine_status,
     _parse_danish_number,
     _parse_reference_range,
 )
+
+pytestmark = pytest.mark.integration
 
 # =====================================================================
 # Danish number format tests
