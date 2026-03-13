@@ -83,6 +83,7 @@ build/
 
 # Test coverage
 .coverage
+coverage.json
 htmlcov/
 
 # Generated documentation
