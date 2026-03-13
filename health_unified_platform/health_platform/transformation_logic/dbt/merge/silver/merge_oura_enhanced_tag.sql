@@ -1,22 +1,35 @@
 -- merge_oura_enhanced_tag.sql
--- Per-source merge: Oura API -> silver.enhanced_tag
+-- Per-source merge: Oura (API + CSV) -> silver.enhanced_tag
 -- Business key: id (unique per enhanced tag)
--- Note: Bronze table may contain both API rows (year/month/day Hive partitions)
---       and CSV backfill rows. API pattern (make_date) is primary.
--- Note: day col = hive partition day-of-month. Full date reconstructed from year/month/day.
+-- Handles both API rows (Hive year/month/day partitions) and CSV rows (day as full date).
+-- API is prioritized over CSV when both exist for the same id.
+-- Note: API uses 'custom_name', CSV uses 'custom_tag_name' — COALESCE handles both.
 --
 -- Usage: python run_merge.py silver/merge_oura_enhanced_tag.sql
 
 CREATE OR REPLACE TABLE silver.enhanced_tag__staging AS
-WITH deduped AS (
+WITH source_data AS (
     SELECT *,
-        make_date(year::INTEGER, month::VARCHAR::INTEGER, day::VARCHAR::INTEGER) AS full_date,
-        ROW_NUMBER() OVER (PARTITION BY id ORDER BY _ingested_at_1 DESC) AS rn
+        -- Resolve date from either API (year/month/day partitions) or CSV (start_day as date)
+        COALESCE(
+            TRY_CAST(make_date(TRY_CAST(year AS INTEGER), TRY_CAST(month AS INTEGER), TRY_CAST(day AS INTEGER)) AS DATE),
+            TRY_CAST(start_day AS DATE)
+        ) AS full_date,
+        -- Resolve custom_tag_name from API (custom_name) or CSV (custom_tag_name)
+        COALESCE(custom_name, custom_tag_name) AS resolved_custom_tag_name,
+        -- API rows get priority (source_rank=1) over CSV (source_rank=2)
+        CASE WHEN year IS NOT NULL THEN 1 ELSE 2 END AS source_rank,
+        COALESCE(_ingested_at_1, _ingested_at) AS ingested_at
     FROM bronze.stg_oura_enhanced_tag
-    WHERE day IS NOT NULL
+    WHERE id IS NOT NULL
+),
+deduped AS (
+    SELECT *,
+        ROW_NUMBER() OVER (PARTITION BY id ORDER BY source_rank ASC, ingested_at DESC) AS rn
+    FROM source_data
 )
 SELECT
-    (year::INTEGER * 10000 + month::VARCHAR::INTEGER * 100 + day::VARCHAR::INTEGER)::INTEGER AS sk_date,
+    (year(full_date) * 10000 + month(full_date) * 100 + day(full_date))::INTEGER AS sk_date,
     full_date                              AS day,
     id,
     start_day::DATE                        AS start_day,
@@ -24,7 +37,7 @@ SELECT
     end_day::DATE                          AS end_day,
     end_time::VARCHAR                      AS end_time,
     tag_type_code::VARCHAR                 AS tag_type_code,
-    custom_tag_name::VARCHAR               AS custom_tag_name,
+    resolved_custom_tag_name::VARCHAR      AS custom_tag_name,
     comment::VARCHAR                       AS comment,
     md5(coalesce(id, ''))                  AS business_key_hash,
     md5(
@@ -34,7 +47,7 @@ SELECT
         coalesce(cast(end_day AS VARCHAR), '')          || '||' ||
         coalesce(end_time::VARCHAR, '')                 || '||' ||
         coalesce(tag_type_code::VARCHAR, '')             || '||' ||
-        coalesce(custom_tag_name::VARCHAR, '')           || '||' ||
+        coalesce(resolved_custom_tag_name::VARCHAR, '') || '||' ||
         coalesce(comment::VARCHAR, '')
     )                                      AS row_hash,
     current_timestamp                      AS load_datetime

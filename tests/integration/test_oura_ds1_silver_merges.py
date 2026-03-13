@@ -226,14 +226,16 @@ MERGE_CONFIGS = {
         "bronze_ddl": """
             CREATE TABLE bronze.stg_oura_daily_cardiovascular_age (
                 year INTEGER, month VARCHAR, day VARCHAR,
-                vascular_age VARCHAR,
-                _ingested_at_1 TIMESTAMP
+                id VARCHAR, vascular_age VARCHAR,
+                _ingested_at TIMESTAMP, _ingested_at_1 TIMESTAMP
             )
         """,
         "bronze_insert": """
             INSERT INTO bronze.stg_oura_daily_cardiovascular_age VALUES
-                (2026, '3', '1', '38', '2026-03-01 10:00:00'),
-                (2026, '3', '2', '37', '2026-03-02 10:00:00')
+                (2026, '3', '1', 'cv-api-1', '38', NULL, '2026-03-01 10:00:00'),
+                (2026, '3', '2', 'cv-api-2', '37', NULL, '2026-03-02 10:00:00'),
+                (NULL, NULL, '2024-05-15', 'cv-csv-1', '41', '2024-05-15 10:00:00', NULL),
+                (NULL, NULL, '2024-06-20', 'cv-csv-2', '40', '2024-06-20 10:00:00', NULL)
         """,
         "silver_ddl": """
             CREATE TABLE silver.cardiovascular_age (
@@ -243,6 +245,7 @@ MERGE_CONFIGS = {
                 load_datetime TIMESTAMP, update_datetime TIMESTAMP
             )
         """,
+        "expected_rows": 4,
     },
     "daily_resilience": {
         "sql": "merge_oura_daily_resilience.sql",
@@ -257,17 +260,23 @@ MERGE_CONFIGS = {
                     daytime_recovery DOUBLE,
                     stress DOUBLE
                 ),
-                _ingested_at_1 TIMESTAMP
+                _ingested_at TIMESTAMP, _ingested_at_1 TIMESTAMP
             )
         """,
         "bronze_insert": """
             INSERT INTO bronze.stg_oura_daily_resilience VALUES
                 (2026, '3', '1', 'solid',
                  {'sleep_recovery': 82.0, 'daytime_recovery': 75.0, 'stress': 68.0},
-                 '2026-03-01 10:00:00'),
+                 NULL, '2026-03-01 10:00:00'),
                 (2026, '3', '2', 'strong',
                  {'sleep_recovery': 90.0, 'daytime_recovery': 85.0, 'stress': 72.0},
-                 '2026-03-02 10:00:00')
+                 NULL, '2026-03-02 10:00:00'),
+                (NULL, NULL, '2023-12-15', 'limited',
+                 {'sleep_recovery': 55.0, 'daytime_recovery': 50.0, 'stress': 45.0},
+                 '2023-12-15 10:00:00', NULL),
+                (NULL, NULL, '2024-01-20', 'adequate',
+                 {'sleep_recovery': 70.0, 'daytime_recovery': 65.0, 'stress': 60.0},
+                 '2024-01-20 10:00:00', NULL)
         """,
         "silver_ddl": """
             CREATE TABLE silver.daily_resilience (
@@ -280,6 +289,7 @@ MERGE_CONFIGS = {
                 load_datetime TIMESTAMP, update_datetime TIMESTAMP
             )
         """,
+        "expected_rows": 4,
     },
     "enhanced_tag": {
         "sql": "merge_oura_enhanced_tag.sql",
@@ -291,21 +301,30 @@ MERGE_CONFIGS = {
                 id VARCHAR,
                 start_day DATE, start_time VARCHAR,
                 end_day DATE, end_time VARCHAR,
-                tag_type_code VARCHAR, custom_tag_name VARCHAR,
+                tag_type_code VARCHAR,
+                custom_name VARCHAR, custom_tag_name VARCHAR,
                 comment VARCHAR,
-                _ingested_at_1 TIMESTAMP
+                _ingested_at TIMESTAMP, _ingested_at_1 TIMESTAMP
             )
         """,
         "bronze_insert": """
             INSERT INTO bronze.stg_oura_enhanced_tag VALUES
                 (2026, '3', '1', 'et-001',
                  '2026-03-01', '08:00', '2026-03-01', '09:00',
-                 'tag_generic', 'morning_run', 'easy 5k',
-                 '2026-03-01 10:00:00'),
+                 'tag_generic', 'morning_run', NULL, 'easy 5k',
+                 NULL, '2026-03-01 10:00:00'),
                 (2026, '3', '2', 'et-002',
                  '2026-03-02', '19:00', '2026-03-02', '19:30',
-                 'tag_generic', 'meditation', 'guided session',
-                 '2026-03-02 10:00:00')
+                 'tag_generic', 'meditation', NULL, 'guided session',
+                 NULL, '2026-03-02 10:00:00'),
+                (NULL, NULL, NULL, 'et-csv-001',
+                 '2022-07-02', '10:00', '2022-07-02', '11:00',
+                 'tag_generic', NULL, 'yoga_class', 'morning yoga',
+                 '2022-07-02 10:00:00', NULL),
+                (NULL, NULL, NULL, 'et-csv-002',
+                 '2023-01-15', '14:00', '2023-01-15', '14:30',
+                 'tag_generic', NULL, 'nap', 'afternoon nap',
+                 '2023-01-15 10:00:00', NULL)
         """,
         "silver_ddl": """
             CREATE TABLE silver.enhanced_tag (
@@ -318,6 +337,7 @@ MERGE_CONFIGS = {
                 load_datetime TIMESTAMP, update_datetime TIMESTAMP
             )
         """,
+        "expected_rows": 4,
     },
 }
 
@@ -369,6 +389,18 @@ class TestMergeSqlExecutes:
         silver_table = config["silver"]
         count = con.execute(f"SELECT COUNT(*) FROM {silver_table}").fetchone()[0]
         assert count > 0, f"{silver_table} is empty after merge"
+
+    def test_expected_row_count(self, merge_result):
+        """Verify dual-format merges produce rows from both API and CSV sources."""
+        con, config = merge_result
+        expected = config.get("expected_rows")
+        if expected is None:
+            pytest.skip("No expected_rows defined for this merge")
+        silver_table = config["silver"]
+        count = con.execute(f"SELECT COUNT(*) FROM {silver_table}").fetchone()[0]
+        assert (
+            count == expected
+        ), f"{silver_table}: expected {expected} rows (API + CSV), got {count}"
 
 
 class TestBusinessKeyIntegrity:

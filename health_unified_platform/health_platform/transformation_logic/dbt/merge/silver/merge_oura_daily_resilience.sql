@@ -1,26 +1,37 @@
 -- merge_oura_daily_resilience.sql
--- Per-source merge: Oura API -> silver.daily_resilience
+-- Per-source merge: Oura (API + CSV) -> silver.daily_resilience
 -- Business key: day (one row per day)
--- Note: Bronze table may contain both API rows (year/month/day Hive partitions)
---       and CSV backfill rows. API pattern (make_date) is primary.
--- Note: day col = hive partition day-of-month. Full date reconstructed from year/month/day.
--- Note: contributors is a nested JSON object with sleep_recovery, daytime_recovery, stress.
+-- Handles both API rows (Hive year/month/day partitions) and CSV rows (day as full date).
+-- API is prioritized over CSV when both exist for the same day.
+-- Note: contributors is a nested STRUCT with sleep_recovery, daytime_recovery, stress.
 --
 -- Usage: python run_merge.py silver/merge_oura_daily_resilience.sql
 
 CREATE OR REPLACE TABLE silver.daily_resilience__staging AS
-WITH deduped AS (
+WITH source_data AS (
     SELECT *,
-        make_date(year::INTEGER, month::VARCHAR::INTEGER, day::VARCHAR::INTEGER) AS full_date,
-        ROW_NUMBER() OVER (
-            PARTITION BY year, month, day
-            ORDER BY _ingested_at_1 DESC
-        ) AS rn
+        -- Resolve date from either API (year/month/day partitions) or CSV (day as full date)
+        COALESCE(
+            TRY_CAST(make_date(TRY_CAST(year AS INTEGER), TRY_CAST(month AS INTEGER), TRY_CAST(day AS INTEGER)) AS DATE),
+            TRY_CAST(day AS DATE)
+        ) AS full_date,
+        -- API rows get priority (source_rank=1) over CSV (source_rank=2)
+        CASE WHEN year IS NOT NULL THEN 1 ELSE 2 END AS source_rank,
+        COALESCE(_ingested_at_1, _ingested_at) AS ingested_at
     FROM bronze.stg_oura_daily_resilience
     WHERE day IS NOT NULL
+),
+deduped AS (
+    SELECT *,
+        ROW_NUMBER() OVER (
+            PARTITION BY full_date
+            ORDER BY source_rank ASC, ingested_at DESC
+        ) AS rn
+    FROM source_data
+    WHERE full_date IS NOT NULL
 )
 SELECT
-    (year::INTEGER * 10000 + month::VARCHAR::INTEGER * 100 + day::VARCHAR::INTEGER)::INTEGER AS sk_date,
+    (year(full_date) * 10000 + month(full_date) * 100 + day(full_date))::INTEGER AS sk_date,
     full_date                              AS day,
     level::VARCHAR                         AS level,
     contributors.sleep_recovery::DOUBLE    AS contributor_sleep_recovery,
