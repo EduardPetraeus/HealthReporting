@@ -15,6 +15,9 @@ if sys.platform != "darwin":
         "test_*api*.py",
         "test_desktop_*.py",
         "test_export_*.py",
+        "test_hae_*.py",
+        "test_intelligence_*.py",
+        "test_mcp_*.py",
         "test_sundhed_*.py",
     ]
 
