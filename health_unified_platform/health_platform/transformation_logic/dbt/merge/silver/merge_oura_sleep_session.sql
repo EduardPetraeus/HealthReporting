@@ -1,27 +1,39 @@
--- merge_oura_csv_sleep_session.sql
--- Per-source merge: Oura CSV -> silver.sleep_session
+-- merge_oura_sleep_session.sql
+-- Per-source merge: Oura (API + CSV) -> silver.sleep_session
 -- Shared table: source_name distinguishes Oura from Withings sleep data.
+-- Handles both API rows (Hive year/month/day partitions) and CSV rows (day as full date).
+-- Normalizes sleep metrics to minutes for cross-source comparison.
 -- Filters out 'rest' type entries (naps without full sleep metrics).
 --
--- Usage: python run_merge.py silver/merge_oura_csv_sleep_session.sql
+-- Usage: python run_merge.py silver/merge_oura_sleep_session.sql
 
 -- Step 1: Create staging table with deduplication
 CREATE OR REPLACE TABLE silver.sleep_session__staging AS
-WITH deduped AS (
-    SELECT
-        *,
-        ROW_NUMBER() OVER (
-            PARTITION BY day, bedtime_start
-            ORDER BY _ingested_at DESC
-        ) AS rn
-    FROM bronze.stg_oura_csv_sleepmodel
+WITH source_data AS (
+    SELECT *,
+        COALESCE(
+            TRY_CAST(make_date(TRY_CAST(year AS INTEGER), TRY_CAST(month AS INTEGER), TRY_CAST(day AS INTEGER)) AS DATE),
+            TRY_CAST(day AS DATE)
+        ) AS full_date,
+        CASE WHEN year IS NOT NULL THEN 1 ELSE 2 END AS source_rank,
+        COALESCE(_ingested_at_1, _ingested_at) AS ingested_at
+    FROM bronze.stg_oura_sleep
     WHERE day IS NOT NULL
       AND type IS NOT NULL
       AND type != 'rest'
+),
+deduped AS (
+    SELECT *,
+        ROW_NUMBER() OVER (
+            PARTITION BY full_date, bedtime_start
+            ORDER BY source_rank ASC, ingested_at DESC
+        ) AS rn
+    FROM source_data
+    WHERE full_date IS NOT NULL
 )
 SELECT
-    (year(day::DATE) * 10000 + month(day::DATE) * 100 + day(day::DATE))::INTEGER AS sk_date,
-    day::DATE AS date,
+    (year(full_date) * 10000 + month(full_date) * 100 + day(full_date))::INTEGER AS sk_date,
+    full_date AS date,
     TRY_CAST(bedtime_start AS TIMESTAMP) AS bedtime_start,
     TRY_CAST(bedtime_end AS TIMESTAMP) AS bedtime_end,
     ROUND(TRY_CAST(total_sleep_duration AS DOUBLE) / 60.0, 1) AS total_sleep_min,
@@ -36,18 +48,21 @@ SELECT
     NULL::INTEGER AS max_hr,
     ROUND(TRY_CAST(average_hrv AS DOUBLE), 1) AS avg_hrv,
     TRY_CAST(lowest_heart_rate AS INTEGER) AS lowest_hr,
-    CASE WHEN readiness IS NOT NULL AND readiness != ''
-         THEN TRY_CAST(json_extract_string(readiness, '$.score') AS INTEGER)
-         ELSE NULL END AS readiness_score,
+    COALESCE(
+        CASE WHEN readiness IS NOT NULL AND readiness != ''
+             THEN TRY_CAST(json_extract_string(readiness, '$.score') AS INTEGER)
+             ELSE NULL END,
+        TRY_CAST(readiness_score_delta AS INTEGER)
+    ) AS readiness_score,
     NULL::DOUBLE AS snoring_min,
     NULL::INTEGER AS snoring_episodes,
     'oura' AS source_name,
     md5(
-        coalesce(cast(day AS VARCHAR), '') || '||' ||
+        coalesce(cast(full_date AS VARCHAR), '') || '||' ||
         coalesce(cast(bedtime_start AS VARCHAR), '') || '||' || 'oura'
     ) AS business_key_hash,
     md5(
-        coalesce(cast(day AS VARCHAR), '') || '||' ||
+        coalesce(cast(full_date AS VARCHAR), '') || '||' ||
         coalesce(cast(total_sleep_duration AS VARCHAR), '') || '||' ||
         coalesce(cast(deep_sleep_duration AS VARCHAR), '') || '||' ||
         coalesce(cast(efficiency AS VARCHAR), '') || '||' ||

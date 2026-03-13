@@ -1,8 +1,8 @@
-"""Integration tests for DS1 Oura API silver merge SQL files.
+"""Integration tests for Oura silver merge SQL files.
 
-Validates 8 new silver tables created from Oura API bronze sources:
+Validates silver tables created from Oura bronze sources (API + CSV):
 - oura_vo2_max, oura_tag, oura_rest_mode_period, oura_ring_configuration,
-  oura_sleep, cardiovascular_age, daily_resilience, enhanced_tag
+  oura_sleep, cardiovascular_age, daily_resilience, enhanced_tag, daily_stress
 
 For each merge:
 - Table exists after merge and has rows
@@ -179,27 +179,43 @@ MERGE_CONFIGS = {
                 rem_sleep_duration VARCHAR, restless_periods VARCHAR,
                 sleep_score_delta VARCHAR, time_in_bed VARCHAR,
                 total_sleep_duration VARCHAR, type VARCHAR,
-                _ingested_at_1 TIMESTAMP
+                _ingested_at TIMESTAMP, _ingested_at_1 TIMESTAMP
             )
         """,
         "bronze_insert": """
             INSERT INTO bronze.stg_oura_sleep VALUES
-                (2026, '3', '1', 'slp-001',
+                (2026, '3', '1', 'slp-api-1',
                  '15.2', '54.0', '45', '1800',
                  '2026-03-01 07:00:00', '2026-03-01 23:00:00',
                  '5400', '88', '300', '14400',
                  false, '48', '0', '1.5',
                  '7200', '3', '-0.5', '28800',
                  '27000', 'long_sleep',
-                 '2026-03-01 10:00:00'),
-                (2026, '3', '2', 'slp-002',
+                 NULL, '2026-03-01 10:00:00'),
+                (2026, '3', '2', 'slp-api-2',
                  '14.8', '56.0', '40', '2100',
                  '2026-03-02 06:30:00', '2026-03-01 23:30:00',
                  '4800', '82', '600', '13200',
                  false, '50', '0', '0.8',
                  '6600', '5', '0.2', '27000',
                  '24900', 'long_sleep',
-                 '2026-03-02 10:00:00')
+                 NULL, '2026-03-02 10:00:00'),
+                (NULL, NULL, '2024-08-10', 'slp-csv-1',
+                 '14.5', '52.0', '42', '1500',
+                 '2024-08-10 06:00:00', '2024-08-09 23:00:00',
+                 '6000', '90', '200', '15000',
+                 false, '46', '0', NULL,
+                 '7500', '2', NULL, '29000',
+                 '27500', 'long_sleep',
+                 '2024-08-10 10:00:00', NULL),
+                (NULL, NULL, '2024-09-05', 'slp-csv-2',
+                 '15.0', '55.0', '38', '2000',
+                 '2024-09-05 07:00:00', '2024-09-04 23:30:00',
+                 '5000', '85', '500', '14000',
+                 false, '49', '0', NULL,
+                 '6800', '4', NULL, '27500',
+                 '25500', 'long_sleep',
+                 '2024-09-05 10:00:00', NULL)
         """,
         "silver_ddl": """
             CREATE TABLE silver.oura_sleep (
@@ -218,6 +234,45 @@ MERGE_CONFIGS = {
                 load_datetime TIMESTAMP, update_datetime TIMESTAMP
             )
         """,
+        "expected_rows": 4,
+    },
+    "daily_stress": {
+        "sql": "merge_oura_daily_stress.sql",
+        "bronze": "bronze.stg_oura_daily_stress",
+        "silver": "silver.daily_stress",
+        "bronze_ddl": """
+            CREATE TABLE bronze.stg_oura_daily_stress (
+                year INTEGER, month VARCHAR, day VARCHAR,
+                day_summary VARCHAR,
+                stress_high VARCHAR, recovery_high VARCHAR,
+                _ingested_at TIMESTAMP, _ingested_at_1 TIMESTAMP
+            )
+        """,
+        "bronze_insert": """
+            INSERT INTO bronze.stg_oura_daily_stress VALUES
+                (2026, '3', '1', 'restored',
+                 '3600', '7200',
+                 NULL, '2026-03-01 10:00:00'),
+                (2026, '3', '2', 'normal',
+                 '4200', '6800',
+                 NULL, '2026-03-02 10:00:00'),
+                (NULL, NULL, '2024-06-15', 'stressful',
+                 '5400', '4800',
+                 '2024-06-15 10:00:00', NULL),
+                (NULL, NULL, '2024-07-20', 'restored',
+                 '2400', '8400',
+                 '2024-07-20 10:00:00', NULL)
+        """,
+        "silver_ddl": """
+            CREATE TABLE silver.daily_stress (
+                sk_date INTEGER, day DATE,
+                day_summary VARCHAR,
+                stress_high INTEGER, recovery_high INTEGER,
+                business_key_hash VARCHAR, row_hash VARCHAR,
+                load_datetime TIMESTAMP, update_datetime TIMESTAMP
+            )
+        """,
+        "expected_rows": 4,
     },
     "cardiovascular_age": {
         "sql": "merge_oura_cardiovascular_age.sql",
