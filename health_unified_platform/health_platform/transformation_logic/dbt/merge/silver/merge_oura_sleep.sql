@@ -15,7 +15,7 @@ WITH source_data AS (
             TRY_CAST(day AS DATE)
         ) AS full_date,
         CASE WHEN year IS NOT NULL THEN 1 ELSE 2 END AS source_rank,
-        COALESCE(_ingested_at_1, _ingested_at) AS ingested_at
+        COALESCE(_ingested_at_1::TIMESTAMP, _ingested_at::TIMESTAMP) AS ingested_at
     FROM bronze.stg_oura_sleep
     WHERE id IS NOT NULL
 ),

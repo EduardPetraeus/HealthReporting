@@ -17,7 +17,7 @@ WITH source_data AS (
         ) AS full_date,
         -- API rows get priority (source_rank=1) over CSV (source_rank=2)
         CASE WHEN year IS NOT NULL THEN 1 ELSE 2 END AS source_rank,
-        COALESCE(_ingested_at_1, _ingested_at) AS ingested_at
+        COALESCE(_ingested_at_1::TIMESTAMP, _ingested_at::TIMESTAMP) AS ingested_at
     FROM bronze.stg_oura_daily_resilience
     WHERE day IS NOT NULL
 ),

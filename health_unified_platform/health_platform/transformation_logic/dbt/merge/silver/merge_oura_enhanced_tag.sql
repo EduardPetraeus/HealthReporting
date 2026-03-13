@@ -19,7 +19,7 @@ WITH source_data AS (
         COALESCE(custom_name, custom_tag_name) AS resolved_custom_tag_name,
         -- API rows get priority (source_rank=1) over CSV (source_rank=2)
         CASE WHEN year IS NOT NULL THEN 1 ELSE 2 END AS source_rank,
-        COALESCE(_ingested_at_1, _ingested_at) AS ingested_at
+        COALESCE(_ingested_at_1::TIMESTAMP, _ingested_at::TIMESTAMP) AS ingested_at
     FROM bronze.stg_oura_enhanced_tag
     WHERE id IS NOT NULL
 ),
