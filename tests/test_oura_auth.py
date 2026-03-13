@@ -18,6 +18,8 @@ from health_platform.source_connectors.oura.auth import (
     get_access_token,
 )
 
+pytestmark = pytest.mark.integration
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------

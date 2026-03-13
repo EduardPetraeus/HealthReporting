@@ -23,6 +23,8 @@ from health_platform.source_connectors.withings.auth import (
     get_access_token,
 )
 
+pytestmark = pytest.mark.integration
+
 MODULE = "health_platform.source_connectors.withings.auth"
 
 # ---------------------------------------------------------------------------

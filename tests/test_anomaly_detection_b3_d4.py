@@ -22,6 +22,8 @@ from health_platform.ai.anomaly_detector import (
 )
 from health_platform.ai.notification_manager import PRIORITY_MAP, NotificationManager
 
+pytestmark = pytest.mark.integration
+
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------

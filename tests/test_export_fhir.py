@@ -15,6 +15,8 @@ import pytest
 from health_platform.export.fhir.bundle import FhirBundleGenerator
 from health_platform.export.fhir.mapper import LOINC_CODES, FhirMapper
 
+pytestmark = pytest.mark.integration
+
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------

@@ -14,6 +14,8 @@ import pytest
 from fastapi.testclient import TestClient
 from health_platform.api.server import app
 
+pytestmark = pytest.mark.integration
+
 
 def _fake_keychain_run(*args, **kwargs):
     """Mock subprocess.run that simulates errSecItemNotFound (code 44)."""

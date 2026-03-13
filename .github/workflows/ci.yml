@@ -172,6 +172,10 @@ jobs:
           pip install pip-audit
           pip-audit --desc \
             --ignore-vuln GHSA-w853-jp5j-5j7f \
-            --ignore-vuln GHSA-qmgc-5h2g-mvrw
+            --ignore-vuln GHSA-qmgc-5h2g-mvrw \
+            --ignore-vuln GHSA-f83h-ghpp-7wcc \
+            --ignore-vuln GHSA-cfh3-3jmp-rvhc
           # GHSA-w853-jp5j-5j7f: filelock <3.16.1 — requires Python 3.10+, CI runs 3.9. Accepted 2026-03-10.
           # GHSA-qmgc-5h2g-mvrw: filelock <3.16.1 — same transitive dep. Accepted 2026-03-10.
+          # GHSA-f83h-ghpp-7wcc: pdfminer-six pickle deserialization — local-only usage, no untrusted input. Accepted 2026-03-13.
+          # GHSA-cfh3-3jmp-rvhc: pillow PSD OOB write — not processing untrusted images. Accepted 2026-03-13.

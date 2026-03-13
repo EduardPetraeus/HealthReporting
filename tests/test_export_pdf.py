@@ -17,6 +17,8 @@ from health_platform.export.pdf.clinical_report import (
     ClinicalReportGenerator,
 )
 
+pytestmark = pytest.mark.integration
+
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------

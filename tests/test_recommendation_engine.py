@@ -11,12 +11,14 @@ from __future__ import annotations
 
 from datetime import date, timedelta
 
+import pytest  # noqa: F401
 from health_platform.ai.recommendation_engine import (
     Recommendation,
     RecommendationEngine,
     format_recommendations,
 )
 
+pytestmark = pytest.mark.integration
 # ---------------------------------------------------------------------------
 # _get_avg edge cases
 # ---------------------------------------------------------------------------

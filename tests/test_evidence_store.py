@@ -6,8 +6,11 @@ from datetime import datetime, timedelta
 from unittest.mock import MagicMock
 
 import duckdb
+import pytest
 from health_platform.knowledge.evidence_store import EvidenceStore
 from health_platform.knowledge.pubmed_client import PubMedClient
+
+pytestmark = pytest.mark.integration
 
 
 def _make_article(

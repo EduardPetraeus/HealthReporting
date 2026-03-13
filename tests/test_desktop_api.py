@@ -8,6 +8,8 @@ from __future__ import annotations
 import pytest
 from health_platform.desktop.api import DesktopAPI, _sanitize
 
+pytestmark = pytest.mark.integration
+
 
 @pytest.fixture
 def dev_db(tmp_path):

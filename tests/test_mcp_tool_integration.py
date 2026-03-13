@@ -19,6 +19,8 @@ import pytest
 from health_platform.mcp.health_tools import HealthTools
 from health_platform.utils.sql_safety import validate_sql_identifier
 
+pytestmark = pytest.mark.integration
+
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------

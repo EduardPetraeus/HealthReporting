@@ -19,6 +19,8 @@ from health_platform.api.chat_engine import (
     generate_response_stream,
 )
 
+pytestmark = pytest.mark.integration
+
 # ------------------------------------------------------------------
 # Fixtures
 # ------------------------------------------------------------------

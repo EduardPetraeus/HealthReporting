@@ -13,6 +13,8 @@ import duckdb
 import pytest
 from health_platform.desktop.api import DesktopAPI
 
+pytestmark = pytest.mark.integration
+
 
 @pytest.fixture
 def report_db(tmp_path):

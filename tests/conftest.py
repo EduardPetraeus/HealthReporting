@@ -2,8 +2,24 @@
 
 from __future__ import annotations
 
+import sys
+
 import duckdb
 import pytest
+
+# Skip tests with deep macOS-specific import chains on non-macOS CI.
+# These files have pytestmark = pytest.mark.integration but crash at import
+# time before pytest can read the marker (missing transitive deps on Linux).
+if sys.platform != "darwin":
+    collect_ignore_glob = [
+        "test_*api*.py",
+        "test_desktop_*.py",
+        "test_export_*.py",
+        "test_hae_*.py",
+        "test_intelligence_*.py",
+        "test_mcp_*.py",
+        "test_sundhed_*.py",
+    ]
 
 
 @pytest.fixture

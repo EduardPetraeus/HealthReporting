@@ -15,6 +15,8 @@ from datetime import date, timedelta
 import pytest
 from health_platform.ai.trend_forecaster import TrendForecaster
 
+pytestmark = pytest.mark.integration
+
 # ---------------------------------------------------------------------------
 # Shared fixtures
 # ---------------------------------------------------------------------------

@@ -4,6 +4,17 @@
 
 ---
 
+## [Unreleased] — 2026-03-13
+
+### Fixed
+- **CI:** Added missing runtime dependencies to pyproject.toml (duckdb, pandas, pyyaml, requests, fastapi, uvicorn, pdfplumber, pyarrow, beautifulsoup4)
+- **CI:** Added dev dependencies (pytest, pytest-cov, ruff, httpx, eval-type-backport)
+- **CI:** Fixed PermissionError in CI — logging_config.py now gracefully skips file logging when /Users/Shared/ does not exist (Linux CI)
+- **CI:** Marked 18 macOS-only tests as integration (excluded from CI via addopts)
+- **CI:** Added pip-audit ignore for pdfminer-six and pillow CVEs (local-only usage, no untrusted input)
+
+---
+
 ## [Unreleased] — 2026-03-10
 
 ### Fixed

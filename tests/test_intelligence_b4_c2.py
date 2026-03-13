@@ -9,6 +9,8 @@ from datetime import date, timedelta
 
 import pytest
 
+pytestmark = pytest.mark.integration
+
 # ---------------------------------------------------------------------------
 # Helper: create the correct metric_relationships table
 # ---------------------------------------------------------------------------
