@@ -279,19 +279,19 @@ sources:
     relative_path: "oura/csv_raw/dailyresilience/*.parquet"
     source_type: "parquet"
     target_schema: "bronze"
-    target_table: "stg_oura_csv_dailyresilience"
+    target_table: "stg_oura_daily_resilience"
 
   - name: "oura_csv_dailycardiovascularage"
     relative_path: "oura/csv_raw/dailycardiovascularage/*.parquet"
     source_type: "parquet"
     target_schema: "bronze"
-    target_table: "stg_oura_csv_dailycardiovascularage"
+    target_table: "stg_oura_daily_cardiovascular_age"
 
   - name: "oura_csv_daytimestress"
     relative_path: "oura/csv_raw/daytimestress/*.parquet"
     source_type: "parquet"
     target_schema: "bronze"
-    target_table: "stg_oura_csv_daytimestress"
+    target_table: "stg_oura_daily_stress"
 
   - name: "oura_csv_temperature"
     relative_path: "oura/csv_raw/temperature/*.parquet"
@@ -309,13 +309,13 @@ sources:
     relative_path: "oura/csv_raw/enhancedtag/*.parquet"
     source_type: "parquet"
     target_schema: "bronze"
-    target_table: "stg_oura_csv_enhancedtag"
+    target_table: "stg_oura_enhanced_tag"
 
   - name: "oura_csv_sleepmodel"
     relative_path: "oura/csv_raw/sleepmodel/*.parquet"
     source_type: "parquet"
     target_schema: "bronze"
-    target_table: "stg_oura_csv_sleepmodel"
+    target_table: "stg_oura_sleep"
 
   # Oura Ring endpoints (V2 API, fetched via source_connectors/oura/run_oura.py)
   - name: "oura_daily_sleep"

@@ -23,7 +23,8 @@
 set -euo pipefail
 
 # --- Configuration ---
-REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd -P)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd -P)"
 PLATFORM_ROOT="${REPO_ROOT}/health_unified_platform"
 VENV_PYTHON="${REPO_ROOT}/.venv/bin/python3"
 VENV_AI_PYTHON="${REPO_ROOT}/.venv-ai/bin/python3"

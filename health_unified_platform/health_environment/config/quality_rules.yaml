@@ -225,11 +225,6 @@ tables:
     unique: [business_key_hash]
     row_count: { min_rows: 1 }
 
-  daytime_stress:
-    not_null: [business_key_hash, sk_date]
-    unique: [business_key_hash]
-    row_count: { min_rows: 1 }
-
   enhanced_tag:
     not_null: [business_key_hash, sk_date]
     unique: [business_key_hash]
@@ -240,12 +235,38 @@ tables:
     unique: [business_key_hash]
     row_count: { min_rows: 1 }
 
-  sleep_recommendation:
+  sleep_session:
     not_null: [business_key_hash, sk_date]
     unique: [business_key_hash]
     row_count: { min_rows: 1 }
 
-  sleep_session:
+  # =====================================================================
+  # Oura — DS1 expansion (API endpoints)
+  # =====================================================================
+
+  oura_vo2_max:
+    not_null: [business_key_hash, sk_date, day]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+    value_range:
+      vo2_max: { min: 10, max: 90 }
+
+  oura_tag:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  oura_rest_mode_period:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  oura_ring_configuration:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  oura_sleep:
     not_null: [business_key_hash, sk_date]
     unique: [business_key_hash]
     row_count: { min_rows: 1 }
