@@ -17,6 +17,15 @@
 
 ### Fixed
 - **Governance:** validate_lab_data.py hardcoded path replaced with paths utility (PR #183)
+- **Strava pipeline (E2E):** Fixed 5 bugs blocking Strava data from reaching silver layer (INT-06, DB-26)
+  - `run_strava.py` imported state/writer from oura instead of strava — data landed in wrong path, state mixed
+  - `run_strava.py` updated watermark even when API returned 0 records — violated no-data guard contract
+  - `merge_strava_activities.sql` used raw API column names (id, type, distance, elapsed_time) instead of client output (activity_id, activity_type, distance_m, elapsed_time_s)
+  - `merge_strava_activities.sql` referenced `source_system` column that doesn't exist in silver.workout (uses `source`)
+- **Strava validated E2E:** API → parquet → bronze (597 rows) → silver.workout (593 rows), all columns populated, 0 NULLs
+
+### Added (Strava)
+- `test_strava_no_data_guard.py` — 3 tests: state unchanged on empty fetch, state advances on data, skip when up-to-date
 - **Security:** SQL injection in ingestion_engine.py cold-start path — escape single quotes in glob (PR #179)
 - **Security:** run_custom_query schema allowlist now catches comma-joined tables (PR #179)
 - **Security:** body_temperature dedup now prioritizes API over CSV source (PR #179)

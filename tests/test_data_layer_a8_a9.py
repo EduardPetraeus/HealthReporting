@@ -407,11 +407,14 @@ class TestStravaWorkout:
         con.execute(
             """
             CREATE TABLE bronze.stg_strava_activities (
-                id VARCHAR, name VARCHAR, type VARCHAR, sport_type VARCHAR,
-                distance VARCHAR, moving_time VARCHAR, elapsed_time VARCHAR,
-                total_elevation_gain VARCHAR, start_date VARCHAR,
+                activity_id VARCHAR, name VARCHAR, activity_type VARCHAR,
+                sport_type VARCHAR,
+                distance_m VARCHAR, moving_time_s VARCHAR,
+                elapsed_time_s VARCHAR,
+                total_elevation_gain_m VARCHAR, start_date VARCHAR,
                 average_heartrate VARCHAR, max_heartrate VARCHAR,
-                average_speed VARCHAR, kilojoules VARCHAR, calories VARCHAR,
+                average_speed_mps VARCHAR, kilojoules VARCHAR,
+                calories VARCHAR,
                 _ingested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """
@@ -423,7 +426,7 @@ class TestStravaWorkout:
                 activity VARCHAR, intensity VARCHAR, calories DOUBLE,
                 distance_meters DOUBLE, start_datetime TIMESTAMP,
                 end_datetime TIMESTAMP, duration_seconds DOUBLE,
-                label VARCHAR, source VARCHAR, source_system VARCHAR,
+                label VARCHAR, source VARCHAR,
                 business_key_hash VARCHAR, row_hash VARCHAR,
                 load_datetime TIMESTAMP, update_datetime TIMESTAMP
             )
@@ -437,7 +440,8 @@ class TestStravaWorkout:
         con.execute(
             """
             INSERT INTO bronze.stg_strava_activities
-            (id, name, type, sport_type, distance, moving_time, elapsed_time,
+            (activity_id, name, activity_type, sport_type, distance_m,
+             moving_time_s, elapsed_time_s,
              start_date, average_heartrate, calories)
             VALUES ('12345', 'Morning Run', 'Run', 'Run', '5000', '1800', '2000',
                     '2026-03-01 07:00:00', '140', '350')
@@ -466,7 +470,6 @@ class TestStravaWorkout:
         assert data["workout_id"] == "12345"
         assert data["activity"] == "Run"
         assert data["source"] == "strava"
-        assert data["source_system"] == "strava"
         assert data["distance_meters"] == 5000.0
         assert data["duration_seconds"] == 2000.0
         assert data["label"] == "Morning Run"
@@ -535,8 +538,8 @@ class TestStravaWorkout:
         result = con.execute("SELECT intensity FROM silver.workout").fetchone()
         assert result[0] is None
 
-    def test_source_system_populated(self, memory_db):
-        """Verify source_system is 'strava' for Strava entries."""
+    def test_source_populated(self, memory_db):
+        """Verify source is 'strava' for Strava entries."""
         con = memory_db
         self._create_strava_tables(con)
         con.execute(
@@ -548,7 +551,7 @@ class TestStravaWorkout:
         """
         )
         _run_sql_statements(con, _read_sql(SQL_STRAVA))
-        result = con.execute("SELECT source_system FROM silver.workout").fetchone()
+        result = con.execute("SELECT source FROM silver.workout").fetchone()
         assert result[0] == "strava"
 
 
@@ -619,7 +622,7 @@ class TestCrossSourceDuplication:
                 activity VARCHAR, intensity VARCHAR, calories DOUBLE,
                 distance_meters DOUBLE, start_datetime TIMESTAMP,
                 end_datetime TIMESTAMP, duration_seconds DOUBLE,
-                label VARCHAR, source VARCHAR, source_system VARCHAR,
+                label VARCHAR, source VARCHAR,
                 business_key_hash VARCHAR, row_hash VARCHAR,
                 load_datetime TIMESTAMP, update_datetime TIMESTAMP
             )
@@ -630,11 +633,14 @@ class TestCrossSourceDuplication:
         con.execute(
             """
             CREATE TABLE bronze.stg_strava_activities (
-                id VARCHAR, name VARCHAR, type VARCHAR, sport_type VARCHAR,
-                distance VARCHAR, moving_time VARCHAR, elapsed_time VARCHAR,
-                total_elevation_gain VARCHAR, start_date VARCHAR,
+                activity_id VARCHAR, name VARCHAR, activity_type VARCHAR,
+                sport_type VARCHAR,
+                distance_m VARCHAR, moving_time_s VARCHAR,
+                elapsed_time_s VARCHAR,
+                total_elevation_gain_m VARCHAR, start_date VARCHAR,
                 average_heartrate VARCHAR, max_heartrate VARCHAR,
-                average_speed VARCHAR, kilojoules VARCHAR, calories VARCHAR,
+                average_speed_mps VARCHAR, kilojoules VARCHAR,
+                calories VARCHAR,
                 _ingested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """
@@ -657,12 +663,12 @@ class TestCrossSourceDuplication:
             INSERT INTO silver.workout (
                 sk_date, day, workout_id, activity, intensity, calories,
                 distance_meters, start_datetime, end_datetime, duration_seconds,
-                label, source, source_system, business_key_hash, row_hash,
+                label, source, business_key_hash, row_hash,
                 load_datetime, update_datetime
             ) VALUES (
                 20260301, '2026-03-01', 'oura-uuid-1', 'running', 'moderate', 300,
                 5000, '2026-03-01 07:00:00', '2026-03-01 07:30:00', 1800,
-                'Running', 'manual', 'oura',
+                'Running', 'oura',
                 md5('oura-uuid-1' || '||oura'),
                 md5('oura-uuid-1||running||300||5000||moderate'),
                 CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
@@ -672,7 +678,7 @@ class TestCrossSourceDuplication:
 
         # Both should exist as separate rows
         result = con.execute(
-            "SELECT source_system, COUNT(*) FROM silver.workout GROUP BY source_system ORDER BY source_system"
+            "SELECT source, COUNT(*) FROM silver.workout GROUP BY source ORDER BY source"
         ).fetchall()
         assert len(result) == 2
         sources = {r[0]: r[1] for r in result}
