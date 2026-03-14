@@ -33,12 +33,13 @@ _DEFAULT_CONFIG_PATH = os.path.join(
     "sources_config.yaml",
 )
 
-_DEFAULT_LANDING_ZONE = "abfss://landing@healthdatalake.dfs.core.windows.net"
+_STORAGE_ACCOUNT = os.environ.get("HEALTH_STORAGE_ACCOUNT", "healthdatalake")
+_DEFAULT_LANDING_ZONE = f"abfss://landing@{_STORAGE_ACCOUNT}.dfs.core.windows.net"
 _DEFAULT_CHECKPOINT_ROOT = (
-    "abfss://checkpoints@healthdatalake.dfs.core.windows.net/bronze"
+    f"abfss://checkpoints@{_STORAGE_ACCOUNT}.dfs.core.windows.net/bronze"
 )
 _DEFAULT_SCHEMA_ROOT = (
-    "abfss://checkpoints@healthdatalake.dfs.core.windows.net/bronze/schemas"
+    f"abfss://checkpoints@{_STORAGE_ACCOUNT}.dfs.core.windows.net/bronze/schemas"
 )
 
 

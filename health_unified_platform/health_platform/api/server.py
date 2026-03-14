@@ -12,6 +12,7 @@ Architecture:
 
 from __future__ import annotations
 
+import hashlib
 import json
 from contextlib import asynccontextmanager
 from datetime import datetime
@@ -96,15 +97,11 @@ def _get_tools(read_only: bool = True) -> HealthTools:
 
 
 class ChatRequest(BaseModel):
-    question: str = Field(
-        ..., description="Natural language health question", max_length=2000
-    )
+    question: str = Field(..., description="Natural language health question", max_length=2000)
     format: Literal["markdown", "plain"] = Field(
         "markdown", description="Output format: markdown or plain"
     )
-    session_id: str | None = Field(
-        None, description="Session ID for multi-turn conversations"
-    )
+    session_id: str | None = Field(None, description="Session ID for multi-turn conversations")
 
 
 class ChatResponse(BaseModel):
@@ -154,11 +151,15 @@ async def chat(
     """
     from health_platform.api.chat_engine import generate_response  # noqa: E402
 
+    # Bind session_id to token hash so users cannot access other sessions
+    bound_session_id = None
+    if chat_request.session_id:
+        token_prefix = hashlib.sha256(_token.encode()).hexdigest()[:16]
+        bound_session_id = f"{token_prefix}:{chat_request.session_id}"
+
     tools = _get_tools()
     try:
-        answer = generate_response(
-            tools, chat_request.question, chat_request.session_id
-        )
+        answer = generate_response(tools, chat_request.question, bound_session_id)
     finally:
         tools.close()
 
@@ -185,13 +186,17 @@ async def chat_stream(
     """
     from health_platform.api.chat_engine import generate_response_stream  # noqa: E402
 
+    # Bind session_id to token hash so users cannot access other sessions
+    bound_session_id = None
+    if chat_request.session_id:
+        token_prefix = hashlib.sha256(_token.encode()).hexdigest()[:16]
+        bound_session_id = f"{token_prefix}:{chat_request.session_id}"
+
     tools = _get_tools()
 
     async def event_generator():
         try:
-            for chunk in generate_response_stream(
-                tools, chat_request.question, chat_request.session_id
-            ):
+            for chunk in generate_response_stream(tools, chat_request.question, bound_session_id):
                 yield f"data: {json.dumps({'text': chunk})}\n\n"
             yield f"data: {json.dumps({'done': True})}\n\n"
         finally:
@@ -238,11 +243,7 @@ async def profile(
     """Load patient profile (core memory)."""
     tools = _get_tools()
     try:
-        cat_list = (
-            [c.strip() for c in categories.split(",") if c.strip()]
-            if categories
-            else None
-        )
+        cat_list = [c.strip() for c in categories.split(",") if c.strip()] if categories else None
         result = tools.get_profile(cat_list)
     finally:
         tools.close()

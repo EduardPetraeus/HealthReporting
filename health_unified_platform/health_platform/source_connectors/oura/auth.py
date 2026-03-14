@@ -144,6 +144,7 @@ def _run_auth_flow(client_id: str, client_secret: str, redirect_uri: str) -> dic
     server.handle_request()
 
     code = _CallbackHandler.auth_code
+    _CallbackHandler.auth_code = None  # Clear after capture to prevent reuse
     if not code:
         raise RuntimeError("No authorization code received in callback.")
 

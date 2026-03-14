@@ -11,7 +11,9 @@ variables:
   node_type_id: "Standard_DS4_v2"
   num_workers: 2
 
-  # Storage paths (production containers)
+  # Storage account — override via HEALTH_STORAGE_ACCOUNT env var in production
+  storage_account: "healthdatalake"
+  # Storage paths (production containers) — use storage_account variable above
   landing_zone: "abfss://landing@healthdatalake.dfs.core.windows.net"
   checkpoint_root: "abfss://checkpoints@healthdatalake.dfs.core.windows.net/bronze"
   schema_root: "abfss://checkpoints@healthdatalake.dfs.core.windows.net/bronze/schemas"

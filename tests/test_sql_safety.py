@@ -114,73 +114,99 @@ class TestValidateWhereClause:
     # --- Dangerous keywords ---
 
     def test_rejects_union(self):
-        with pytest.raises(ValueError, match="dangerous keyword"):
+        with pytest.raises(
+            ValueError, match="disallowed token|disallowed keyword|invalid identifier"
+        ):
             validate_where_clause("1=1 UNION SELECT * FROM secrets")
 
     def test_rejects_drop(self):
-        with pytest.raises(ValueError, match="dangerous keyword"):
+        with pytest.raises(
+            ValueError, match="disallowed token|disallowed keyword|invalid identifier"
+        ):
             validate_where_clause("1=1 DROP TABLE users")
 
     def test_rejects_delete(self):
-        with pytest.raises(ValueError, match="dangerous keyword"):
+        with pytest.raises(
+            ValueError, match="disallowed token|disallowed keyword|invalid identifier"
+        ):
             validate_where_clause("DELETE FROM users WHERE 1=1")
 
     def test_rejects_insert(self):
-        with pytest.raises(ValueError, match="dangerous keyword"):
+        with pytest.raises(
+            ValueError, match="disallowed token|disallowed keyword|invalid identifier"
+        ):
             validate_where_clause("INSERT INTO users VALUES (1)")
 
     def test_rejects_update(self):
-        with pytest.raises(ValueError, match="dangerous keyword"):
+        with pytest.raises(
+            ValueError, match="disallowed token|disallowed keyword|invalid identifier"
+        ):
             validate_where_clause("UPDATE users SET admin=1")
 
     def test_rejects_alter(self):
-        with pytest.raises(ValueError, match="dangerous keyword"):
+        with pytest.raises(
+            ValueError, match="disallowed token|disallowed keyword|invalid identifier"
+        ):
             validate_where_clause("1=1 ALTER TABLE users ADD col INT")
 
     def test_rejects_create(self):
-        with pytest.raises(ValueError, match="dangerous keyword"):
+        with pytest.raises(
+            ValueError, match="disallowed token|disallowed keyword|invalid identifier"
+        ):
             validate_where_clause("1=1 CREATE TABLE evil (id INT)")
 
     def test_rejects_exec(self):
-        with pytest.raises(ValueError, match="dangerous keyword"):
+        with pytest.raises(
+            ValueError, match="disallowed token|disallowed keyword|invalid identifier"
+        ):
             validate_where_clause("EXEC xp_cmdshell('whoami')")
 
     def test_rejects_execute(self):
-        with pytest.raises(ValueError, match="dangerous keyword"):
+        with pytest.raises(
+            ValueError, match="disallowed token|disallowed keyword|invalid identifier"
+        ):
             validate_where_clause("EXECUTE sp_configure")
 
     def test_rejects_truncate(self):
-        with pytest.raises(ValueError, match="dangerous keyword"):
+        with pytest.raises(
+            ValueError, match="disallowed token|disallowed keyword|invalid identifier"
+        ):
             validate_where_clause("TRUNCATE TABLE users")
 
     def test_rejects_grant(self):
-        with pytest.raises(ValueError, match="dangerous keyword"):
+        with pytest.raises(
+            ValueError, match="disallowed token|disallowed keyword|invalid identifier"
+        ):
             validate_where_clause("GRANT ALL ON users TO public")
 
     def test_rejects_revoke(self):
-        with pytest.raises(ValueError, match="dangerous keyword"):
+        with pytest.raises(
+            ValueError, match="disallowed token|disallowed keyword|invalid identifier"
+        ):
             validate_where_clause("REVOKE ALL ON users FROM public")
 
     def test_rejects_case_insensitive(self):
-        with pytest.raises(ValueError, match="dangerous keyword"):
+        with pytest.raises(
+            ValueError, match="disallowed token|disallowed keyword|invalid identifier"
+        ):
             validate_where_clause("union select 1")
 
     # --- Dangerous patterns ---
 
     def test_rejects_semicolon(self):
-        with pytest.raises(ValueError, match="dangerous pattern"):
+        with pytest.raises(ValueError, match="disallowed token"):
             validate_where_clause("1=1; SELECT 1")
 
     def test_rejects_line_comment(self):
-        with pytest.raises(ValueError, match="dangerous pattern"):
+        with pytest.raises(ValueError, match="disallowed token"):
             validate_where_clause("1=1 -- comment")
 
     def test_rejects_block_comment_open(self):
-        with pytest.raises(ValueError, match="dangerous pattern"):
+        with pytest.raises(ValueError, match="disallowed token"):
             validate_where_clause("1=1 /* comment")
 
     def test_rejects_block_comment_close(self):
-        with pytest.raises(ValueError, match="dangerous pattern"):
+        with pytest.raises(ValueError, match="disallowed token"):
             validate_where_clause("comment */ 1=1")
 
     # --- Edge cases ---

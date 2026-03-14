@@ -11,7 +11,9 @@ variables:
   node_type_id: "Standard_DS3_v2"
   num_workers: 1
 
-  # Storage paths (dev uses separate containers)
+  # Storage account — override via HEALTH_STORAGE_ACCOUNT env var in deployments
+  storage_account: "healthdatalake"
+  # Storage paths (dev uses separate containers) — use storage_account variable above
   landing_zone: "abfss://landing-dev@healthdatalake.dfs.core.windows.net"
   checkpoint_root: "abfss://checkpoints-dev@healthdatalake.dfs.core.windows.net/bronze"
   schema_root: "abfss://checkpoints-dev@healthdatalake.dfs.core.windows.net/bronze/schemas"

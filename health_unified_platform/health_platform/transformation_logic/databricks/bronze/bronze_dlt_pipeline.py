@@ -15,23 +15,27 @@
 
 # COMMAND ----------
 
+# Landing zone base path — override via pipeline settings if needed
+import os as _os  # noqa: E402 — needed for env var fallback
+
 import dlt
 from pyspark.sql.functions import current_timestamp, input_file_name, lit
 
-# Landing zone base path — override via pipeline settings if needed
+_STORAGE_ACCOUNT = _os.environ.get("HEALTH_STORAGE_ACCOUNT", "healthdatalake")
+
 LANDING_ZONE = spark.conf.get(  # noqa: F821 — spark is a Databricks runtime global
     "health.landing_zone",
-    "abfss://landing@healthdatalake.dfs.core.windows.net",
+    f"abfss://landing@{_STORAGE_ACCOUNT}.dfs.core.windows.net",
 )
 
 CHECKPOINT_ROOT = spark.conf.get(  # noqa: F821
     "health.checkpoint_root",
-    "abfss://checkpoints@healthdatalake.dfs.core.windows.net/bronze",
+    f"abfss://checkpoints@{_STORAGE_ACCOUNT}.dfs.core.windows.net/bronze",
 )
 
 SCHEMA_ROOT = spark.conf.get(  # noqa: F821
     "health.schema_root",
-    "abfss://checkpoints@healthdatalake.dfs.core.windows.net/bronze/schemas",
+    f"abfss://checkpoints@{_STORAGE_ACCOUNT}.dfs.core.windows.net/bronze/schemas",
 )
 
 

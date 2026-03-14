@@ -10,16 +10,85 @@ import re
 
 _SAFE_IDENTIFIER = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*\Z")
 
-# Dangerous SQL keywords that should never appear in a WHERE clause
-# sourced from config files.
-_DANGEROUS_KEYWORDS = re.compile(
-    r"\b(UNION|DROP|DELETE|INSERT|UPDATE|ALTER|CREATE|EXEC|EXECUTE|TRUNCATE|GRANT|REVOKE|LOAD|INSTALL|COPY|ATTACH)\b",
-    re.IGNORECASE,
+# Whitelist of SQL keywords allowed in WHERE clauses
+_ALLOWED_WHERE_KEYWORDS = frozenset(
+    {
+        "AND",
+        "OR",
+        "NOT",
+        "IS",
+        "NULL",
+        "LIKE",
+        "IN",
+        "BETWEEN",
+        "TRUE",
+        "FALSE",
+        "CASE",
+        "WHEN",
+        "THEN",
+        "ELSE",
+        "END",
+        "CAST",
+        "AS",
+        "DATE",
+        "TIMESTAMP",
+        "INTEGER",
+        "VARCHAR",
+        "FLOAT",
+        "DOUBLE",
+        "BOOLEAN",
+    }
 )
 
-# Patterns that indicate injection attempts
-_DANGEROUS_PATTERNS = re.compile(
-    r"(--|/\*|\*/|;)",
+# Explicitly denied SQL keywords — blocked even though they look like identifiers
+_DENIED_WHERE_KEYWORDS = frozenset(
+    {
+        "SELECT",
+        "UNION",
+        "DROP",
+        "DELETE",
+        "INSERT",
+        "UPDATE",
+        "ALTER",
+        "CREATE",
+        "EXEC",
+        "EXECUTE",
+        "TRUNCATE",
+        "GRANT",
+        "REVOKE",
+        "LOAD",
+        "INSTALL",
+        "COPY",
+        "ATTACH",
+        "SLEEP",
+        "BENCHMARK",
+        "WAITFOR",
+        "PRAGMA",
+        "CALL",
+        "FROM",
+        "INTO",
+        "TABLE",
+        "SET",
+        "ON",
+        "TO",
+        "ALL",
+        "ADD",
+    }
+)
+
+# Tokenizer for whitelist-based WHERE clause validation
+_WHERE_TOKEN = re.compile(
+    r"""
+    \s+                             |  # whitespace
+    '(?:[^'\\]|\\.)*'               |  # single-quoted string literal
+    -?[0-9]+(?:\.[0-9]+)?           |  # numeric literal
+    [a-zA-Z_][a-zA-Z0-9_]*         |  # identifier or keyword
+    \.                              |  # dot (table.column separator)
+    [<>!=]{1,2}                     |  # comparison operators
+    [(),]                           |  # parentheses, comma
+    %                                  # LIKE wildcard
+    """,
+    re.VERBOSE,
 )
 
 
@@ -36,11 +105,11 @@ def validate_sql_identifier(name: str) -> str:
 
 
 def validate_where_clause(clause: str) -> str:
-    """Validate that a WHERE clause fragment contains only safe SQL components.
+    """Validate a WHERE clause using whitelist-based token grammar.
 
-    Intended for defense-in-depth on config-sourced WHERE clauses (e.g. from
-    quality_rules.yaml). Rejects clauses containing dangerous keywords or
-    injection patterns.
+    Only allows safe SQL constructs: identifiers, comparison operators,
+    logical operators, literals, and a curated set of SQL keywords.
+    Blocks all other keywords (UNION, DROP, SELECT, SLEEP, etc.).
 
     Parameters
     ----------
@@ -55,20 +124,30 @@ def validate_where_clause(clause: str) -> str:
     Raises
     ------
     ValueError
-        If the clause contains dangerous keywords or patterns.
+        If the clause contains disallowed tokens or keywords.
     """
     if not clause or not clause.strip():
         raise ValueError("WHERE clause must not be empty")
 
-    if _DANGEROUS_PATTERNS.search(clause):
-        raise ValueError(
-            f"WHERE clause contains dangerous pattern (;, --, or block comment): {clause!r}"
-        )
-
-    match = _DANGEROUS_KEYWORDS.search(clause)
-    if match:
-        raise ValueError(
-            f"WHERE clause contains dangerous keyword '{match.group()}': {clause!r}"
-        )
+    pos = 0
+    text = clause.strip()
+    while pos < len(text):
+        match = _WHERE_TOKEN.match(text, pos)
+        if not match:
+            raise ValueError(
+                f"WHERE clause contains disallowed token at position {pos}: "
+                f"{text[pos : pos + 20]!r}"
+            )
+        token = match.group().strip()
+        if token and re.match(r"^[a-zA-Z_]", token):
+            upper = token.upper()
+            if upper in _DENIED_WHERE_KEYWORDS:
+                raise ValueError(f"WHERE clause contains disallowed keyword: {token!r}")
+            if upper not in _ALLOWED_WHERE_KEYWORDS:
+                if not _SAFE_IDENTIFIER.match(token):
+                    raise ValueError(
+                        f"WHERE clause contains invalid identifier: {token!r}"
+                    )
+        pos = match.end()
 
     return clause
