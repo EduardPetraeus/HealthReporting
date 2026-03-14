@@ -43,6 +43,102 @@ HEALTH_ENV=dev python health_unified_platform/health_platform/source_connectors/
 
 ---
 
+## Strava: Fetch from API → Parquet
+
+First-time: opens a browser for OAuth login (requires `STRAVA_CLIENT_ID` and `STRAVA_CLIENT_SECRET` in claude.keychain-db). Subsequent runs: tokens auto-refresh, only new data fetched. Fetches activities (incremental) and athlete stats (always refreshed).
+
+```bash
+HEALTH_ENV=dev python health_unified_platform/health_platform/source_connectors/strava/run_strava.py
+```
+
+---
+
+## Withings: Fetch from API → Parquet
+
+First-time: opens a browser for OAuth login (requires `WITHINGS_CLIENT_ID` and `WITHINGS_API_KEY` in claude.keychain-db). Full load from 2020-01-01 on first run. Subsequent runs: incremental with 30-day overlap window for dedup safety.
+
+```bash
+HEALTH_ENV=dev python health_unified_platform/health_platform/source_connectors/withings/run_withings.py
+```
+
+---
+
+## Weather (Open-Meteo): Fetch from API → Parquet
+
+Fetches daily weather data from Open-Meteo (free, no API key required). Default: last 90 days. Override with `WEATHER_PAST_DAYS` env var.
+
+```bash
+HEALTH_ENV=dev python health_unified_platform/health_platform/source_connectors/weather/run_weather.py
+
+# Custom range (e.g. 365 days)
+WEATHER_PAST_DAYS=365 HEALTH_ENV=dev python health_unified_platform/health_platform/source_connectors/weather/run_weather.py
+```
+
+---
+
+## sundhed.dk: Web Scrape → Parquet
+
+Scrapes clinical data from sundhed.dk via MitID-authenticated browser session (Playwright). Full load only — no incremental sync (data changes quarterly at most). Supports 5 sections: lab_results, medications, vaccinations, ejournal, appointments.
+
+Requires MitID authentication — a browser window opens for interactive login.
+
+```bash
+# All sections
+HEALTH_ENV=dev python health_unified_platform/health_platform/source_connectors/sundhed_dk/run_sundhed_dk.py
+
+# Specific sections only
+HEALTH_ENV=dev python health_unified_platform/health_platform/source_connectors/sundhed_dk/run_sundhed_dk.py \
+  --sections lab_results,medications
+```
+
+---
+
+## Lab Results: PDF → Parquet
+
+Scans a directory for blood test PDFs (GetTested, sundhed.dk, etc.), parses markers, computes business keys, and writes a single parquet file. Supports multiple lab formats with auto-detection.
+
+```bash
+python -c "
+from pathlib import Path
+from health_platform.source_connectors.lab.lab_ingestion import ingest_lab_pdfs
+
+ingest_lab_pdfs(
+    pdf_dir=Path('/Users/Shared/data_lake/lab_results/downloads'),
+    output_dir=Path('/Users/Shared/data_lake/lab_results/parquet'),
+)
+"
+```
+
+---
+
+## 23andMe Genetics: PDF/CSV/JSON → Parquet
+
+Scans a directory for 23andMe exports (PDF health reports, ancestry CSV, family tree JSON). Routes each file to the appropriate parser and writes 5 bronze parquet streams: health_findings, ancestry_segments, family_tree, ancestry_composition, genetic_traits.
+
+```bash
+python -c "
+from pathlib import Path
+from health_platform.source_connectors.genetics.genetics_ingestion import ingest_genetics_data
+
+ingest_genetics_data(
+    input_dir=Path('/Users/Shared/data_lake/genetics/23andme/downloads'),
+    output_dir=Path('/Users/Shared/data_lake/genetics/23andme/parquet'),
+)
+"
+```
+
+---
+
+## Lifesum PDF: Download Nutrition Report
+
+Queries the latest data date from silver.daily_meal, then downloads a 7-day PDF from Lifesum covering the gap.
+
+```bash
+python -m health_platform.source_connectors.lifesum.run_lifesum_pdf
+```
+
+---
+
 ## Bronze Ingestion: Parquet → DuckDB
 
 Reads `sources_config.yaml`, loads all configured parquet sources into `bronze.stg_*` tables.
@@ -93,6 +189,32 @@ done
 for f in silver/merge_apple_health_*.sql; do
   HEALTH_ENV=dev python run_merge.py "$f"
 done
+
+# Strava
+HEALTH_ENV=dev python run_merge.py silver/merge_strava_activities.sql
+
+# Weather
+HEALTH_ENV=dev python run_merge.py silver/merge_weather_daily.sql
+
+# Lab results
+HEALTH_ENV=dev python run_merge.py silver/merge_lab_pdf_results.sql
+
+# 23andMe Genetics (3 tables)
+for f in silver/merge_23andme_ancestry.sql \
+          silver/merge_23andme_family_tree.sql \
+          silver/merge_23andme_health_findings.sql; do
+  HEALTH_ENV=dev python run_merge.py "$f"
+done
+
+# Withings (all endpoints)
+for f in silver/merge_withings_*.sql; do
+  HEALTH_ENV=dev python run_merge.py "$f"
+done
+
+# Lifesum (food, bodyfat, exercise, weighins)
+for f in silver/merge_lifesum_*.sql; do
+  HEALTH_ENV=dev python run_merge.py "$f"
+done
 ```
 
 ---
@@ -111,6 +233,32 @@ HEALTH_ENV=dev python health_unified_platform/health_platform/transformation_log
 # 3. Merge into silver
 cd health_unified_platform/health_platform/transformation_logic/dbt/merge
 for f in silver/merge_oura_*.sql; do HEALTH_ENV=dev python run_merge.py "$f"; done
+```
+
+---
+
+## Typical End-to-End Run (All API Sources)
+
+```bash
+source .venv/bin/activate
+
+# 1. Fetch new data from all API sources
+HEALTH_ENV=dev python health_unified_platform/health_platform/source_connectors/oura/run_oura.py
+HEALTH_ENV=dev python health_unified_platform/health_platform/source_connectors/strava/run_strava.py
+HEALTH_ENV=dev python health_unified_platform/health_platform/source_connectors/withings/run_withings.py
+HEALTH_ENV=dev python health_unified_platform/health_platform/source_connectors/weather/run_weather.py
+
+# 2. Load all parquet into bronze
+HEALTH_ENV=dev python health_unified_platform/health_platform/transformation_logic/ingestion_engine.py
+
+# 3. Merge all sources into silver
+cd health_unified_platform/health_platform/transformation_logic/dbt/merge
+for f in silver/merge_oura_*.sql silver/merge_apple_health_*.sql \
+         silver/merge_strava_*.sql silver/merge_weather_*.sql \
+         silver/merge_withings_*.sql silver/merge_lifesum_*.sql \
+         silver/merge_lab_*.sql silver/merge_23andme_*.sql; do
+  HEALTH_ENV=dev python run_merge.py "$f"
+done
 ```
 
 ---
