@@ -1,7 +1,7 @@
 # Data Lineage — HealthReporting
 
 > Complete data flow from source systems to silver layer and agent layer.
-> Last updated: 2026-03-08
+> Last updated: 2026-03-14
 
 ---
 
@@ -17,41 +17,73 @@ graph LR
         WI[Withings API]
         ST[Strava API]
         WX[Open-Meteo API]
+        DNA[23andMe Export]
+        LAB[Lab PDFs]
         MAN[Manual YAML]
     end
 
-    subgraph Bronze["Bronze (stg_* tables)"]
+    subgraph Bronze["Bronze (~94 stg_* tables)"]
         B_AH["stg_apple_health_*<br/>38 tables"]
         B_OURA["stg_oura_*<br/>18 tables"]
         B_OCSV["stg_oura_csv_*<br/>7 tables"]
         B_WI["stg_withings_*<br/>10 tables"]
         B_ST["stg_strava_*<br/>2 tables"]
-        B_LS["stg_lifesum_*<br/>1 table"]
+        B_LS["stg_lifesum_*<br/>4 tables"]
         B_WX["stg_weather_*<br/>1 table"]
+        B_DNA["stg_23andme_*<br/>3 tables"]
+        B_LAB["stg_lab_*<br/>1 table"]
     end
 
-    subgraph Silver["Silver (21+ deduplicated tables)"]
-        S_SLEEP[daily_sleep]
-        S_READ[daily_readiness]
-        S_ACT[daily_activity]
-        S_STRESS[daily_stress]
-        S_SPO2[daily_spo2]
-        S_HR[heart_rate]
-        S_WORK[workout]
-        S_PI[personal_info]
-        S_MEAL[daily_meal]
-        S_WATER[water_intake]
-        S_TEMP[body_temperature]
-        S_RESP[respiratory_rate]
-        S_STEP[step_count]
-        S_TOOTH[toothbrushing]
-        S_MIND[mindful_session]
-        S_GAIT[daily_walking_gait]
-        S_ENERGY[daily_energy_by_source]
+    subgraph Silver["Silver (49 deduplicated tables)"]
+        S_AUDIO[audio_exposure]
+        S_BO2[blood_oxygen]
+        S_BPV2[blood_pressure_v2]
         S_BP[blood_pressure]
-        S_WEIGHT[weight]
-        S_WEATHER[daily_weather]
+        S_BFAT[body_fat]
+        S_BMEAS[body_measurement]
+        S_BMRS[body_measures]
+        S_TEMP[body_temperature]
+        S_CVAGE[cardiovascular_age]
+        S_ACT[daily_activity]
+        S_ANNOT[daily_annotations]
+        S_ENERGY[daily_energy_by_source]
+        S_MEAL[daily_meal]
+        S_READ[daily_readiness]
+        S_RESIL[daily_resilience]
+        S_SLEEP[daily_sleep]
+        S_SPO2[daily_spo2]
+        S_STRESS[daily_stress]
+        S_GAIT[daily_walking_gait]
+        S_DSTRESS[daytime_stress]
+        S_DIST[distance]
+        S_ECG[ecg_session]
+        S_ETAG[enhanced_tag]
+        S_EXTIME[exercise_time]
+        S_FLIGHT[flights_climbed]
+        S_HANDW[hand_washing]
+        S_HR[heart_rate]
+        S_HRR[hr_recovery]
+        S_HRV[hrv]
         S_LAB[lab_results]
+        S_MIND[mindful_session]
+        S_PI[personal_info]
+        S_PHYS[physical_effort]
+        S_PWV[pulse_wave_velocity]
+        S_RESP[respiratory_rate]
+        S_RHR[resting_heart_rate]
+        S_RSPD[running_speed]
+        S_6MW[six_min_walk]
+        S_SKIN[skin_temperature]
+        S_SLREC[sleep_recommendation]
+        S_SLSES[sleep_session]
+        S_STAND[stand_time]
+        S_STEP[step_count]
+        S_SUPP[supplement_log]
+        S_TOOTH[toothbrushing]
+        S_VO2[vo2_max]
+        S_WATER[water_intake]
+        S_WEIGHT[weight]
+        S_WORK[workout]
     end
 
     subgraph Agent["Agent Layer"]
@@ -62,7 +94,7 @@ graph LR
     end
 
     subgraph MCP["MCP Server"]
-        TOOLS["10 MCP Tools"]
+        TOOLS["17 MCP Tools"]
     end
 
     AH --> B_AH
@@ -72,28 +104,71 @@ graph LR
     WI --> B_WI
     ST --> B_ST
     WX --> B_WX
+    DNA --> B_DNA
+    LAB --> B_LAB
 
-    B_OURA -->|merge SQL| S_SLEEP
-    B_OURA -->|merge SQL| S_READ
-    B_OURA -->|merge SQL| S_ACT
-    B_OURA -->|merge SQL| S_STRESS
-    B_OURA -->|merge SQL| S_SPO2
-    B_OURA & B_AH -->|merge SQL| S_HR
-    B_OURA & B_ST -->|merge SQL| S_WORK
-    B_OURA -->|merge SQL| S_PI
-    B_LS -->|merge SQL| S_MEAL
-    B_AH -->|merge SQL| S_WATER
+    B_AH -->|merge SQL| S_AUDIO
+    B_AH -->|merge SQL| S_BPV2
+    B_AH -->|merge SQL| S_BMEAS
     B_AH -->|merge SQL| S_TEMP
+    B_AH -->|merge SQL| S_ENERGY
+    B_AH -->|merge SQL| S_DIST
+    B_AH -->|merge SQL| S_EXTIME
+    B_AH -->|merge SQL| S_FLIGHT
+    B_AH -->|merge SQL| S_HANDW
+    B_AH -->|merge SQL| S_HR
+    B_AH -->|merge SQL| S_HRR
+    B_AH -->|merge SQL| S_HRV
+    B_AH -->|merge SQL| S_MIND
+    B_AH -->|merge SQL| S_PHYS
     B_AH -->|merge SQL| S_RESP
+    B_AH -->|merge SQL| S_RHR
+    B_AH -->|merge SQL| S_RSPD
+    B_AH -->|merge SQL| S_6MW
+    B_AH -->|merge SQL| S_STAND
     B_AH -->|merge SQL| S_STEP
     B_AH -->|merge SQL| S_TOOTH
-    B_AH -->|merge SQL| S_MIND
+    B_AH -->|merge SQL| S_VO2
     B_AH -->|merge SQL| S_GAIT
-    B_AH -->|merge SQL| S_ENERGY
-    B_WI & B_AH -->|merge SQL| S_BP
+    B_AH -->|merge SQL| S_WATER
+
+    B_OURA -->|merge SQL| S_BO2
+    B_OURA -->|merge SQL| S_CVAGE
+    B_OURA -->|merge SQL| S_ACT
+    B_OURA -->|merge SQL| S_READ
+    B_OURA -->|merge SQL| S_RESIL
+    B_OURA -->|merge SQL| S_SLEEP
+    B_OURA -->|merge SQL| S_SPO2
+    B_OURA -->|merge SQL| S_STRESS
+    B_OURA -->|merge SQL| S_ETAG
+    B_OURA -->|merge SQL| S_HR
+    B_OURA -->|merge SQL| S_PI
+    B_OURA -->|merge SQL| S_SLSES
+    B_OURA -->|merge SQL| S_VO2
+    B_OURA -->|merge SQL| S_WORK
+
+    B_OCSV -->|merge SQL| S_SKIN
+    B_OCSV -->|merge SQL| S_DSTRESS
+    B_OCSV -->|merge SQL| S_SLREC
+
+    B_WI -->|merge SQL| S_BP
+    B_WI -->|merge SQL| S_TEMP
+    B_WI -->|merge SQL| S_ECG
+    B_WI -->|merge SQL| S_PWV
+    B_WI -->|merge SQL| S_SLSES
     B_WI -->|merge SQL| S_WEIGHT
-    B_WX -->|merge SQL| S_WEATHER
-    MAN -->|import| S_LAB
+    B_WI -->|merge SQL| S_WORK
+
+    B_LS -->|merge SQL| S_MEAL
+    B_LS -->|merge SQL| S_BFAT
+    B_LS -->|merge SQL| S_WORK
+    B_LS -->|merge SQL| S_WEIGHT
+
+    B_ST -->|merge SQL| S_WORK
+    B_WX -->|merge SQL| S_ANNOT
+    B_DNA -->|merge SQL| S_PI
+    B_LAB -->|merge SQL| S_LAB
+    MAN -->|import| S_SUPP
 
     S_SLEEP & S_READ & S_ACT & S_HR --> PP
     S_SLEEP & S_READ & S_ACT & S_STRESS & S_HR --> DS
@@ -106,7 +181,7 @@ graph LR
 
 ## A. Source to Bronze Mapping
 
-79 sources defined in `sources_config.yaml`. All load via `ingestion_engine.py`.
+~94 sources defined in `sources_config.yaml`. All load via `ingestion_engine.py`.
 
 ### Apple Health Sources (38 entries)
 
@@ -221,83 +296,111 @@ graph LR
 
 ## B. Bronze to Silver Mapping
 
-51 merge SQL scripts in `transformation_logic/dbt/merge/silver/`. Each runs as a MERGE (upsert) or INSERT with deduplication.
+62 merge SQL scripts in `transformation_logic/dbt/merge/silver/`. Each runs as a MERGE (upsert) or INSERT with deduplication.
 
 ### Apple Health Merge Scripts (24)
 
 | Merge Script | Bronze Source(s) | Silver Table |
 |-------------|------------------|-------------|
+| merge_apple_health_audio_exposure.sql | stg_apple_health_*_audio_exposure | audio_exposure |
+| merge_apple_health_blood_pressure_v2.sql | stg_apple_health_bp_systolic, stg_apple_health_bp_diastolic | blood_pressure_v2 |
+| merge_apple_health_body_measurement.sql | stg_apple_health_body_mass, stg_apple_health_bmi, etc. | body_measurement |
+| merge_apple_health_body_temperature.sql | stg_apple_health_body_temperature | body_temperature |
+| merge_apple_health_distance.sql | stg_apple_health_distance_* | distance |
+| merge_apple_health_energy.sql | stg_apple_health_*_energy_burned | daily_energy_by_source |
+| merge_apple_health_exercise_time.sql | stg_apple_health_exercise_time | exercise_time |
+| merge_apple_health_flights_climbed.sql | stg_apple_health_flights_climbed | flights_climbed |
+| merge_apple_health_hand_washing.sql | stg_apple_health_hand_washing | hand_washing |
 | merge_apple_health_heart_rate.sql | stg_apple_health_heart_rate | heart_rate |
+| merge_apple_health_hr_recovery.sql | stg_apple_health_hr_recovery | hr_recovery |
+| merge_apple_health_hrv.sql | stg_apple_health_hrv | hrv |
+| merge_apple_health_mindful_session.sql | stg_apple_health_mindful_session | mindful_session |
+| merge_apple_health_physical_effort.sql | stg_apple_health_physical_effort | physical_effort |
+| merge_apple_health_respiratory_rate.sql | stg_apple_health_respiratory_rate | respiratory_rate |
+| merge_apple_health_resting_heart_rate.sql | stg_apple_health_resting_heart_rate | resting_heart_rate |
+| merge_apple_health_running_speed.sql | stg_apple_health_running_speed | running_speed |
+| merge_apple_health_six_min_walk.sql | stg_apple_health_six_min_walk | six_min_walk |
+| merge_apple_health_stand_time.sql | stg_apple_health_stand_time | stand_time |
 | merge_apple_health_step_count.sql | stg_apple_health_step_count | step_count |
 | merge_apple_health_toothbrushing.sql | stg_apple_health_toothbrushing | toothbrushing |
-| merge_apple_health_body_temperature.sql | stg_apple_health_body_temperature | body_temperature |
-| merge_apple_health_respiratory_rate.sql | stg_apple_health_respiratory_rate | respiratory_rate |
-| merge_apple_health_water.sql | stg_apple_health_water | water_intake |
-| merge_apple_health_mindful_session.sql | stg_apple_health_mindful_session | mindful_session |
+| merge_apple_health_vo2_max.sql | stg_apple_health_vo2_max | vo2_max |
 | merge_apple_health_walking_gait.sql | stg_apple_health_walking_gait_* | daily_walking_gait |
-| merge_apple_health_energy.sql | stg_apple_health_*_energy_burned | daily_energy_by_source |
-| merge_apple_health_hrv.sql | stg_apple_health_hrv | heart_rate (HRV column) |
-| merge_apple_health_resting_heart_rate.sql | stg_apple_health_resting_heart_rate | heart_rate |
-| merge_apple_health_hr_recovery.sql | stg_apple_health_hr_recovery | heart_rate |
-| merge_apple_health_vo2_max.sql | stg_apple_health_vo2_max | (vo2_max metrics) |
-| merge_apple_health_blood_pressure_v2.sql | stg_apple_health_bp_systolic, stg_apple_health_bp_diastolic | blood_pressure |
-| merge_apple_health_body_measurement.sql | stg_apple_health_body_mass, stg_apple_health_bmi, etc. | (body measurement metrics) |
-| merge_apple_health_distance.sql | stg_apple_health_distance_* | (distance metrics) |
-| merge_apple_health_exercise_time.sql | stg_apple_health_exercise_time | (exercise time metrics) |
-| merge_apple_health_flights_climbed.sql | stg_apple_health_flights_climbed | (flights climbed metrics) |
-| merge_apple_health_hand_washing.sql | stg_apple_health_hand_washing | (hand washing metrics) |
-| merge_apple_health_physical_effort.sql | stg_apple_health_physical_effort | (physical effort metrics) |
-| merge_apple_health_running_speed.sql | stg_apple_health_running_speed | (running speed metrics) |
-| merge_apple_health_six_min_walk.sql | stg_apple_health_six_min_walk | (six min walk metrics) |
-| merge_apple_health_stand_time.sql | stg_apple_health_stand_time | (stand time metrics) |
-| merge_apple_health_audio_exposure.sql | stg_apple_health_*_audio_exposure | (audio exposure metrics) |
+| merge_apple_health_water.sql | stg_apple_health_water | water_intake |
 
-### Oura API Merge Scripts (8)
+### Oura Merge Scripts (20)
+
+Includes both Oura API and Oura CSV sources.
 
 | Merge Script | Bronze Source(s) | Silver Table |
 |-------------|------------------|-------------|
-| merge_oura_daily_sleep.sql | stg_oura_daily_sleep | daily_sleep |
+| merge_oura_blood_oxygen.sql | stg_oura_daily_spo2 | blood_oxygen |
+| merge_oura_cardiovascular_age.sql | stg_oura_daily_cardiovascular_age | cardiovascular_age |
+| merge_oura_csv_skin_temperature.sql | stg_oura_csv_temperature | skin_temperature |
 | merge_oura_daily_activity.sql | stg_oura_daily_activity | daily_activity |
 | merge_oura_daily_readiness.sql | stg_oura_daily_readiness | daily_readiness |
-| merge_oura_heartrate.sql | stg_oura_heartrate | heart_rate |
-| merge_oura_workout.sql | stg_oura_workout | workout |
+| merge_oura_daily_resilience.sql | stg_oura_daily_resilience | daily_resilience |
+| merge_oura_daily_sleep.sql | stg_oura_daily_sleep | daily_sleep |
 | merge_oura_daily_spo2.sql | stg_oura_daily_spo2 | daily_spo2 |
 | merge_oura_daily_stress.sql | stg_oura_daily_stress | daily_stress |
+| merge_oura_enhanced_tag.sql | stg_oura_enhanced_tag | enhanced_tag |
+| merge_oura_heartrate.sql | stg_oura_heartrate | heart_rate |
 | merge_oura_personal_info.sql | stg_oura_personal_info | personal_info |
-| merge_oura_blood_oxygen.sql | stg_oura_daily_spo2 | (blood oxygen detail) |
+| merge_oura_rest_mode_period.sql | stg_oura_rest_mode_period | daily_annotations |
+| merge_oura_ring_configuration.sql | stg_oura_ring_configuration | personal_info |
+| merge_oura_sleep_session.sql | stg_oura_sleep | sleep_session |
+| merge_oura_sleep_time.sql | stg_oura_sleep_time | sleep_recommendation |
+| merge_oura_sleep.sql | stg_oura_sleep | daily_sleep |
+| merge_oura_tag.sql | stg_oura_tag | enhanced_tag |
+| merge_oura_vo2_max.sql | stg_oura_vo2_max | vo2_max |
+| merge_oura_workout.sql | stg_oura_workout | workout |
 
-### Oura CSV Merge Scripts (7)
-
-| Merge Script | Bronze Source(s) | Silver Table |
-|-------------|------------------|-------------|
-| merge_oura_csv_cardiovascular_age.sql | stg_oura_csv_dailycardiovascularage | (cardiovascular age) |
-| merge_oura_csv_daily_resilience.sql | stg_oura_csv_dailyresilience | (daily resilience) |
-| merge_oura_csv_daytime_stress.sql | stg_oura_csv_daytimestress | (daytime stress detail) |
-| merge_oura_csv_enhanced_tag.sql | stg_oura_csv_enhancedtag | (enhanced tags) |
-| merge_oura_csv_skin_temperature.sql | stg_oura_csv_temperature | (skin temperature) |
-| merge_oura_csv_sleep_recommendation.sql | stg_oura_csv_sleeptime | (sleep recommendation) |
-| merge_oura_csv_sleep_session.sql | stg_oura_csv_sleepmodel | (sleep session detail) |
-
-### Withings Merge Scripts (8)
+### Withings Merge Scripts (9)
 
 | Merge Script | Bronze Source(s) | Silver Table |
 |-------------|------------------|-------------|
-| merge_withings_weight.sql | stg_withings_weight | weight |
+| merge_withings_activity.sql | stg_withings_* | daily_activity |
 | merge_withings_blood_pressure.sql | stg_withings_blood_pressure | blood_pressure |
-| merge_withings_blood_pressure_v2.sql | stg_withings_blood_pressure | blood_pressure (v2 schema) |
-| merge_withings_body_measurement.sql | stg_withings_weight | (body composition detail) |
 | merge_withings_body_temperature.sql | stg_withings_body_temperature | body_temperature |
-| merge_withings_ecg_session.sql | stg_withings_signal | (ECG session data) |
-| merge_withings_pulse_wave_velocity.sql | stg_withings_pwv | (pulse wave velocity) |
-| merge_withings_sleep_session.sql | stg_withings_sleep | (Withings sleep data) |
+| merge_withings_ecg_session.sql | stg_withings_signal | ecg_session |
+| merge_withings_pulse_wave_velocity.sql | stg_withings_pwv | pulse_wave_velocity |
+| merge_withings_sleep_session.sql | stg_withings_sleep | sleep_session |
+| merge_withings_weight.sql | stg_withings_weight | weight |
+| merge_withings_workouts.sql | stg_withings_* | workout |
 
-### Other Merge Scripts (3)
+### Lifesum Merge Scripts (4)
+
+| Merge Script | Bronze Source(s) | Silver Table |
+|-------------|------------------|-------------|
+| merge_lifesum_bodyfat.sql | stg_lifesum_bodyfat | body_fat |
+| merge_lifesum_exercise.sql | stg_lifesum_exercise | workout |
+| merge_lifesum_food.sql | stg_lifesum_food | daily_meal |
+| merge_lifesum_weighins.sql | stg_lifesum_weighins | weight |
+
+### 23andMe / Genetics Merge Scripts (3)
+
+| Merge Script | Bronze Source(s) | Silver Table |
+|-------------|------------------|-------------|
+| merge_23andme_ancestry.sql | stg_23andme_ancestry | personal_info |
+| merge_23andme_family_tree.sql | stg_23andme_family_tree | personal_info |
+| merge_23andme_health_findings.sql | stg_23andme_health_findings | personal_info |
+
+### Strava Merge Scripts (1)
 
 | Merge Script | Bronze Source(s) | Silver Table |
 |-------------|------------------|-------------|
 | merge_strava_activities.sql | stg_strava_activities | workout |
-| merge_weather_daily.sql | stg_weather_open_meteo | daily_weather |
-| merge_lifesum_food.sql | stg_lifesum_food | daily_meal |
+
+### Weather Merge Scripts (1)
+
+| Merge Script | Bronze Source(s) | Silver Table |
+|-------------|------------------|-------------|
+| merge_weather_daily.sql | stg_weather_open_meteo | daily_annotations |
+
+### Lab Merge Scripts (1)
+
+| Merge Script | Bronze Source(s) | Silver Table |
+|-------------|------------------|-------------|
+| merge_lab_pdf_results.sql | stg_lab_pdf_results | lab_results |
 
 ### Cross-Source Tables
 
@@ -307,8 +410,16 @@ Some silver tables merge data from multiple sources:
 |-------------|---------|----------------------|
 | heart_rate | Oura API + Apple Health | source_system column, timestamp-based dedup |
 | blood_pressure | Withings API + Apple Health | source_system column, datetime-based dedup |
-| workout | Oura API + Strava API + Lifesum | source_system column, cross-source duplicate detection |
+| workout | Oura API + Strava API + Withings + Lifesum | source_system column, cross-source duplicate detection |
 | body_temperature | Apple Health + Withings | source_system column |
+| weight | Withings + Lifesum | source_system column, datetime-based dedup |
+| daily_activity | Oura API + Withings | source_system column |
+| sleep_session | Oura API + Withings | source_system column |
+| vo2_max | Oura API + Apple Health | source_system column |
+| personal_info | Oura API + 23andMe | source_system column |
+| enhanced_tag | Oura API (tags + enhanced_tags) | source_system column |
+| daily_sleep | Oura API (daily_sleep + sleep) | source_system column |
+| daily_annotations | Oura rest_mode + Weather | source_system column |
 
 ---
 
@@ -369,7 +480,7 @@ The `daily_sync.sh` pipeline runs 7 steps daily at 06:00 via launchd.
 |------|------|-----------|-----------------|
 | 1 | Fetch from API sources (Oura, Withings, Strava, Weather) | Daily 06:00 | source_connectors/*/run_*.py |
 | 2 | Bronze ingestion (parquet to DuckDB) | Daily 06:00 | ingestion_engine.py |
-| 3 | Silver merge (51 merge SQL scripts) | Daily 06:00 | run_merge.py + merge_*.sql |
+| 3 | Silver merge (62 merge SQL scripts) | Daily 06:00 | run_merge.py + merge_*.sql |
 | 4 | Data quality checks (YAML-driven) | Daily 06:00 | scripts/run_quality_checks.py |
 | 5 | Daily summary + embedding generation | Daily 06:00 | ai/text_generator.py + ai/embedding_engine.py |
 | 6 | Correlation computation | Daily 06:00 | ai/correlation_engine.py |
@@ -385,7 +496,8 @@ The `daily_sync.sh` pipeline runs 7 steps daily at 06:00 via launchd.
 | Withings | API (OAuth2) | Daily via daily_sync.sh | Weight, BP, temperature, sleep, signal, PWV |
 | Strava | API (OAuth2) | Daily via daily_sync.sh | Activities and athlete stats |
 | Open-Meteo | REST API (no auth) | Daily via daily_sync.sh | Weather data for local area |
-| Lab results | Manual YAML | Per lab test | Imported via import_manual_data.py |
+| Lab results | PDF parsing + manual YAML | Per lab test | PDFs parsed via pdf_parser.py, YAML via import_manual_data.py |
+| 23andMe | One-time export | Manual (once) | Ancestry, family tree, health findings |
 | Supplements | Manual YAML | When protocol changes | Single YAML file |
 
 ---
@@ -402,10 +514,10 @@ graph TD
         M1["sleep_score.yml"]
         M2["readiness_score.yml"]
         M3["activity_score.yml"]
-        MN["... 19 more metric YAMLs"]
+        MN["... 25 more metric YAMLs"]
     end
 
-    subgraph MCP["MCP Server (10 tools)"]
+    subgraph MCP["MCP Server (17 tools)"]
         QH[query_health]
         SM[search_memory]
         GP[get_profile]
@@ -416,6 +528,7 @@ graph TD
         RCQ[run_custom_query]
         DA[detect_anomalies]
         FM[forecast_metric]
+        TN["+ 7 more tools"]
     end
 
     subgraph Consumers

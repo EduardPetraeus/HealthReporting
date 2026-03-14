@@ -75,16 +75,16 @@ graph LR
     end
 
     subgraph Storage
-        PQ[Parquet Files<br/>Hive-partitioned<br/>~59 bronze sources]
+        PQ[Parquet Files<br/>Hive-partitioned<br/>~94 bronze sources]
     end
 
     subgraph Engine
-        IE[ingestion_engine.py<br/>YAML-driven, ~59 configs]
+        IE[ingestion_engine.py<br/>YAML-driven, ~94 configs]
     end
 
     subgraph Shared["Shared Layers"]
-        B[Bronze<br/>~59 staging tables]
-        S[Silver<br/>51 dbt models + 59 merge scripts<br/>+ COMMENT ON + metric_relationships]
+        B[Bronze<br/>~94 staging tables]
+        S[Silver<br/>49 dbt models + 62 merge scripts<br/>+ COMMENT ON + metric_relationships]
     end
 
     subgraph LocalGold["Local Gold (DuckDB)"]
@@ -93,7 +93,7 @@ graph LR
 
     subgraph LocalAI["Local AI-Native (DuckDB)"]
         AM[Agent Memory<br/>9 tables: patient_profile,<br/>daily_summaries, health_graph,<br/>knowledge_base, genetic_profile,<br/>evidence_cache + vector indexes]
-        SC[Semantic Contracts<br/>26 YAML files<br/>24 metrics + index + business rules]
+        SC[Semantic Contracts<br/>28 YAML files<br/>26 metrics + index + business rules]
         MCP[MCP Server<br/>17 typed tools]
     end
 
@@ -156,9 +156,9 @@ graph TD
     end
 
     subgraph "Built — Data Pipeline"
-        IE[Ingestion Engine<br/>sources_config.yaml<br/>~59 sources configured]
-        B[Bronze: ~59 staging tables<br/>Apple Health 35+ / Oura 25 / Lifesum 5<br/>Withings 7 / Strava 2 / sundhed.dk 5<br/>Lab + Genetics + Weather config]
-        S[Silver: 51 dbt models + 59 merge scripts<br/>45+ entities populated locally]
+        IE[Ingestion Engine<br/>sources_config.yaml<br/>~94 sources configured]
+        B[Bronze: ~94 staging tables<br/>Apple Health 35+ / Oura 25 / Lifesum 5<br/>Withings 7 / Strava 2 / sundhed.dk 5<br/>Lab + Genetics + Weather]
+        S[Silver: 49 dbt models + 62 merge scripts<br/>all entities populated locally]
         GL[Gold Local: Kimball star schema<br/>10 dim + 8 fact = 18 SQL files]
         GC[Gold Cloud: 10 dim + 7 fact + 3 views<br/>21 SQL files deployed to Databricks]
     end
@@ -166,7 +166,7 @@ graph TD
     subgraph "Built — AI Layer"
         AM[Agent Memory: 9 tables<br/>patient_profile, daily_summaries,<br/>health_graph, knowledge_base,<br/>genetic_profile, evidence_cache]
         MCPS[MCP Server: 17 tools<br/>query_health, search_memory,<br/>get_profile, discover_correlations,<br/>and 13 more]
-        SC[Semantic Contracts<br/>26 YAML files]
+        SC[Semantic Contracts<br/>28 YAML files]
         AI_MOD[AI Modules: 8 engines<br/>text, embedding, baseline, correlation,<br/>anomaly, recommendation, forecast, notification]
     end
 
@@ -180,13 +180,11 @@ graph TD
         AUD[Audit: job_runs + table_runs<br/>AuditLogger context manager<br/>Delta tables in health-platform-dev]
         DAB[Databricks Asset Bundle<br/>bronze/silver/gold jobs<br/>deployed to dev]
         CICD[GitHub Actions CI/CD<br/>4 workflows: ci, deploy,<br/>ai-review, claude]
-        TESTS[56 test files, 1334 tests<br/>0 failures, ~65% coverage]
+        TESTS[1731 tests<br/>0 failures, ~65% coverage]
     end
 
     subgraph "Configured / Partial"
-        WX[Weather connector<br/>YAML configured, not ingesting]
         DBX_LIVE[Databricks live data flow<br/>Autoloader not yet running]
-        SD_S[sundhed.dk silver transforms<br/>Bronze exists, silver missing]
     end
 
     AH_C --> IE --> B
@@ -214,23 +212,23 @@ graph TD
 
 ### Bronze (Raw Ingestion)
 
-~59 staging tables from 9 source systems. Key tables listed below.
+~94 staging tables from 9 source systems. Key tables listed below.
 
 | Source | Tables | Status | Notes |
 |--------|--------|--------|-------|
-| Apple Health | 35+ tables (stg_apple_health_*) | Done | heart_rate, step_count, toothbrushing, body_temperature, respiratory_rate, water_intake, mindful_session, walking_gait, energy, vo2_max, hrv, resting_hr, distance, flights_climbed, exercise_time, stand_time, running_speed, six_min_walk, audio_exposure, physical_effort, blood_pressure, hand_washing, hr_recovery, body_measurement, and more |
-| Oura | 25 tables (stg_oura_*) | Done | 18 API endpoints (daily_sleep, daily_activity, daily_readiness, heartrate, workout, daily_spo2, daily_stress, personal_info, blood_oxygen, etc.) + 7 CSV types (cardiovascular_age, daily_resilience, daytime_stress, enhanced_tag, skin_temperature, sleep_recommendation, sleep_session) |
-| Lifesum | 5 tables (stg_lifesum_*) | Done | food, bodyfat, bodymeasures, exercise, weighins |
-| Withings | 7 tables (stg_withings_*) | Done | blood_pressure, weight, body_temperature, body_measurement, ecg_session, pulse_wave_velocity, sleep_session |
-| Strava | 2 tables (stg_strava_*) | Done | activities, athlete_stats |
-| sundhed.dk | 5 tables (stg_sundhed_dk_*) | Done | lab_results, medications, vaccinations, ejournal, appointments |
-| Lab Results | Variable (stg_lab_*) | Done | PDF-parsed lab results (GetTested + manual) |
-| 23andMe Genetics | Variable (stg_genetics_*) | Done | 3 parsers: ancestry, family_tree, health_findings |
-| Weather | 0 (configured) | Configured | YAML ready, connector built, not yet ingesting |
+| Apple Health | 35+ tables (stg_apple_health_*) | Active | heart_rate, step_count, toothbrushing, body_temperature, respiratory_rate, water_intake, mindful_session, walking_gait, energy, vo2_max, hrv, resting_hr, distance, flights_climbed, exercise_time, stand_time, running_speed, six_min_walk, audio_exposure, physical_effort, blood_pressure, hand_washing, hr_recovery, body_measurement, and more |
+| Oura | 25 tables (stg_oura_*) | Active | 18 API endpoints (daily_sleep, daily_activity, daily_readiness, heartrate, workout, daily_spo2, daily_stress, personal_info, blood_oxygen, etc.) + 7 CSV types (cardiovascular_age, daily_resilience, daytime_stress, enhanced_tag, skin_temperature, sleep_recommendation, sleep_session) |
+| Lifesum | 5 tables (stg_lifesum_*) | Active | food, bodyfat, bodymeasures, exercise, weighins |
+| Withings | 7 tables (stg_withings_*) | Active | blood_pressure, weight, body_temperature, body_measurement, ecg_session, pulse_wave_velocity, sleep_session |
+| Strava | 2 tables (stg_strava_*) | Active | activities, athlete_stats |
+| sundhed.dk | 5 tables (stg_sundhed_dk_*) | Active | lab_results, medications, vaccinations, ejournal, appointments |
+| Lab Results | Variable (stg_lab_*) | Active | PDF-parsed lab results (GetTested + manual) |
+| 23andMe Genetics | Variable (stg_genetics_*) | Active | 3 parsers: ancestry, family_tree, health_findings |
+| Weather | 1 table (stg_weather_*) | Active | Open-Meteo daily weather data |
 
 ### Silver (Cleaned and Transformed)
 
-51 dbt schema models + 59 merge SQL scripts + 1 merge runner (`run_merge.py`). All run locally via DuckDB. 28 SQL files deployed to Databricks (27 transforms + 1 template).
+49 dbt schema models + 62 merge SQL scripts + 1 merge runner (`run_merge.py`). All run locally via DuckDB. 28 SQL files deployed to Databricks (27 transforms + 1 template).
 
 | Entity | Sources | Local | Databricks | Merge Script |
 |--------|---------|-------|------------|--------------|
@@ -326,7 +324,7 @@ Replaces traditional BI locally with a 2+2 architecture. See ADR-005 for full ra
 | `agent.evidence_cache` | PubMed evidence cache — GRADE-scored articles | 90-day TTL |
 | `agent.vector_indexes` | HNSW indexes for embeddings (cosine similarity) | Auto-maintained |
 
-### Semantic Contracts (`contracts/metrics/`) — 26 YAML files
+### Semantic Contracts (`contracts/metrics/`) — 28 YAML files
 
 | File | Purpose |
 |------|---------|
@@ -342,7 +340,9 @@ Replaces traditional BI locally with a 2+2 architecture. See ADR-005 for full ra
 | `gold_views.yml` | Gold layer view definitions |
 | `lab_biomarkers.yml` | Lab test biomarkers |
 | `lab_results.yml` | Lab result definitions |
+| `microbiome.yml` | Microbiome analysis markers |
 | `mindful_session.yml` | Mindfulness/meditation sessions |
+| `patient_demographics.yml` | Patient demographic data |
 | `protein.yml` | Protein intake |
 | `readiness_score.yml` | Oura readiness score |
 | `respiratory_rate.yml` | Respiratory rate |
@@ -469,7 +469,7 @@ HealthReporting/
     ├── health_environment/
     │   ├── config/
     │   │   ├── environment_config.yaml
-    │   │   └── sources_config.yaml            # ~59 sources configured
+    │   │   └── sources_config.yaml            # ~94 sources configured
     │   ├── connectors/
     │   │   └── oura/                          # OAuth 2.0 connector (auth, client, writer, state)
     │   └── deployment/

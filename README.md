@@ -1,8 +1,8 @@
 # HealthReporting
 
-Personal health intelligence platform. Ingests data from wearables, nutrition apps, lab results, and genetics — transforms it through a medallion architecture — and surfaces insights via an AI agent with 16 MCP tools, anomaly detection, and evidence-backed recommendations.
+Personal health intelligence platform. Ingests data from wearables, nutrition apps, lab results, and genetics — transforms it through a medallion architecture — and surfaces insights via an AI agent with 17 MCP tools, anomaly detection, and evidence-backed recommendations.
 
-**1300+ tests · 68 bronze sources · 45 silver tables · 16 MCP tools · fully automated daily sync**
+**1700+ tests · 94 bronze sources · 49 silver tables · 17 MCP tools · fully automated daily sync**
 
 ## Architecture
 
@@ -14,10 +14,10 @@ Dual-stack with shared Silver layer ([ADR-005](docs/adr/ADR-005-ai-native-data-m
 │                                                                     │
 │  Source APIs/files → parquet (hive-partitioned)                     │
 │    → Bronze (stg_* tables via ingestion_engine.py)                  │
-│    → Silver (45 tables, dbt-duckdb + MERGE, COMMENT ON columns)    │
+│    → Silver (49 tables, dbt-duckdb + MERGE, COMMENT ON columns)    │
 │    → Agent Memory (patient profile, daily summaries + embeddings,  │
 │                    knowledge graph, insight archive)                │
-│    → Semantic Contracts (26 YAML metrics) → MCP Server (16 tools)  │
+│    → Semantic Contracts (28 YAML metrics) → MCP Server (17 tools)  │
 │                                                                     │
 │  Gold replaced by AI-native layer — Claude queries via typed MCP   │
 │  tools backed by YAML contracts. Never raw SQL.                    │
@@ -40,16 +40,16 @@ Dual-stack with shared Silver layer ([ADR-005](docs/adr/ADR-005-ai-native-data-m
 | Lifesum | **Active** | Food/nutrition logs, body measurements, exercise, weighins |
 | 23andMe | **Active** | Genetic variants — SNP parsing, trait reports, ancestry |
 | Lab/GetTested | **Active** | Blood test PDF parsing — automated biomarker extraction |
-| sundhed.dk | Scaffold | Danish national health portal (Playwright-based) |
-| Strava | Scaffold | Workouts, GPS activities |
-| Weather | Scaffold | Environmental context |
+| sundhed.dk | **Active** | Danish national health portal (Playwright-based) |
+| Strava | **Active** | Workouts, GPS activities |
+| Weather | **Active** | Environmental context |
 
 ## Intelligence Layer
 
 | Component | Description |
 |---|---|
 | **Claude Chat Engine** | Multi-turn health conversations with tool-use (function calling) and SSE streaming |
-| **16 MCP Tools** | `query_health`, `search_memory`, `get_profile`, `discover_correlations`, `get_metric_definition`, `record_insight`, `get_schema_context`, `run_custom_query`, `detect_anomalies`, `forecast_metric`, `get_cross_source_insights`, `get_recommendations`, `explain_recommendation`, and more |
+| **17 MCP Tools** | `query_health`, `search_memory`, `get_profile`, `discover_correlations`, `get_metric_definition`, `record_insight`, `get_schema_context`, `run_custom_query`, `check_data_quality`, `search_evidence`, `detect_anomalies`, `forecast_metric`, `get_cross_source_insights`, `get_recommendations`, `explain_recommendation`, `query_lab_results`, `query_genetics` |
 | **Anomaly Detection** | Multi-stream z-score analysis, constellation patterns, temporal degradation tracking |
 | **Correlation Engine** | 30+ metric pairs, cross-domain delayed effects, Pearson with lag analysis |
 | **Trend Forecaster** | Linear regression-based metric forecasting |
@@ -65,7 +65,7 @@ Dual-stack with shared Silver layer ([ADR-005](docs/adr/ADR-005-ai-native-data-m
 | `agent.daily_summaries` | Daily narratives with 384-dim embeddings (sentence-transformers) |
 | `agent.health_graph` | Semantic knowledge graph — biomarkers, supplements, conditions, edges |
 | `agent.knowledge_base` | Accumulated insights — vector-searchable via DuckDB VSS (HNSW) |
-| `contracts/metrics/` | 26 YAML semantic contracts + business rules + index |
+| `contracts/metrics/` | 28 YAML semantic contracts + business rules + index |
 
 ## Genetics Integration
 
@@ -108,7 +108,7 @@ See `docs/runbook.md` for the full runbook, `docs/architecture.md` for design de
 - **AI**: Claude (chat + tool-use), sentence-transformers (all-MiniLM-L6-v2), DuckDB VSS (HNSW)
 - **CI/CD**: GitHub Actions — bundle validation, AI PR review, governance checks, auto-deploy
 - **Storage**: Parquet (hive-partitioned) locally; ADLS/S3 on cloud
-- **Testing**: 1300+ tests — pytest, smoke tests, data quality checks
+- **Testing**: 1700+ tests — pytest, smoke tests, data quality checks
 
 ## Gold Layer (Cloud)
 
@@ -125,7 +125,7 @@ Built in 25 sessions over 3 days. See `docs/PROJECT_PLAN.md` for phase details a
 |---|---|
 | A: Foundation (bronze + silver) | Complete |
 | B: Intelligence (chat + MCP + anomaly) | Complete |
-| C: Clinical (lab + genetics + recommendations) | In progress — gene-health mapping next |
+| C: Clinical (lab + genetics + recommendations) | Complete |
 | D: Apps (desktop + mobile + notifications) | In progress — PDF reports next |
 | E: Cloud (Databricks gold) | Partial — star schema done |
 | F: Tech debt + docs | In progress |
