@@ -14,7 +14,7 @@
           <mxGeometry x="30" y="15" width="380" height="30" as="geometry"/>
         </mxCell>
 
-        <mxCell id="3" value="OAuth 2.0 API (v2) + CSV Export · 20 bronze tables · 20 merge scripts · feeds 10+ silver tables" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;fontFamily=Helvetica;fontColor=#666666;" vertex="1" parent="1">
+        <mxCell id="3" value="OAuth 2.0 API (v2) + CSV Export · 25 bronze tables · 20 merge scripts · feeds 10+ silver tables" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;fontFamily=Helvetica;fontColor=#666666;" vertex="1" parent="1">
           <mxGeometry x="30" y="42" width="520" height="25" as="geometry"/>
         </mxCell>
 
@@ -26,7 +26,7 @@
           <mxGeometry x="40" y="160" width="160" height="70" as="geometry"/>
         </mxCell>
 
-        <mxCell id="11" value="&lt;b&gt;OAuth 2.0 API (v2)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;Daily automatic fetch&lt;br&gt;13 endpoints&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
+        <mxCell id="11" value="&lt;b&gt;OAuth 2.0 API (v2)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;Daily automatic fetch&lt;br&gt;18 endpoints&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
           <mxGeometry x="40" y="280" width="160" height="65" as="geometry"/>
         </mxCell>
 
@@ -97,15 +97,15 @@
         </mxCell>
 
         <!-- Badge: total 20 -->
-        <mxCell id="41" value="20" style="ellipse;whiteSpace=wrap;html=1;fillColor=#1F6FEB;strokeColor=#1F6FEB;fontColor=#FFFFFF;fontSize=14;fontStyle=1;aspect=fixed;fontFamily=Helvetica;" vertex="1" parent="1">
+        <mxCell id="41" value="25" style="ellipse;whiteSpace=wrap;html=1;fillColor=#1F6FEB;strokeColor=#1F6FEB;fontColor=#FFFFFF;fontSize=14;fontStyle=1;aspect=fixed;fontFamily=Helvetica;" vertex="1" parent="1">
           <mxGeometry x="750" y="90" width="30" height="30" as="geometry"/>
         </mxCell>
 
         <!-- Sleep [4] -->
-        <mxCell id="42" value="&lt;b&gt;Sleep&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot;&gt;daily_sleep · sleep&lt;br&gt;sleep_time · csv_sleeptime&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=10;fontFamily=Helvetica;verticalAlign=top;spacingTop=4;spacingLeft=6;align=left;" vertex="1" parent="1">
+        <mxCell id="42" value="&lt;b&gt;Sleep&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot;&gt;daily_sleep · sleep · sleep_time&lt;br&gt;csv_sleeptime · csv_sleepmodel&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=10;fontFamily=Helvetica;verticalAlign=top;spacingTop=4;spacingLeft=6;align=left;" vertex="1" parent="1">
           <mxGeometry x="510" y="125" width="220" height="70" as="geometry"/>
         </mxCell>
-        <mxCell id="43" value="4" style="ellipse;whiteSpace=wrap;html=1;fillColor=#1F6FEB;strokeColor=#1F6FEB;fontColor=#FFFFFF;fontSize=10;fontStyle=1;aspect=fixed;fontFamily=Helvetica;" vertex="1" parent="1">
+        <mxCell id="43" value="5" style="ellipse;whiteSpace=wrap;html=1;fillColor=#1F6FEB;strokeColor=#1F6FEB;fontColor=#FFFFFF;fontSize=10;fontStyle=1;aspect=fixed;fontFamily=Helvetica;" vertex="1" parent="1">
           <mxGeometry x="740" y="130" width="24" height="24" as="geometry"/>
         </mxCell>
 
@@ -118,18 +118,18 @@
         </mxCell>
 
         <!-- Readiness [3] -->
-        <mxCell id="46" value="&lt;b&gt;Readiness&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot;&gt;daily_readiness · daily_resilience&lt;br&gt;rest_mode_period&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=10;fontFamily=Helvetica;verticalAlign=top;spacingTop=4;spacingLeft=6;align=left;" vertex="1" parent="1">
+        <mxCell id="46" value="&lt;b&gt;Readiness&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot;&gt;daily_readiness · daily_resilience&lt;br&gt;rest_mode_period · csv_dailyresilience&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=10;fontFamily=Helvetica;verticalAlign=top;spacingTop=4;spacingLeft=6;align=left;" vertex="1" parent="1">
           <mxGeometry x="510" y="285" width="220" height="70" as="geometry"/>
         </mxCell>
-        <mxCell id="47" value="3" style="ellipse;whiteSpace=wrap;html=1;fillColor=#1F6FEB;strokeColor=#1F6FEB;fontColor=#FFFFFF;fontSize=10;fontStyle=1;aspect=fixed;fontFamily=Helvetica;" vertex="1" parent="1">
+        <mxCell id="47" value="4" style="ellipse;whiteSpace=wrap;html=1;fillColor=#1F6FEB;strokeColor=#1F6FEB;fontColor=#FFFFFF;fontSize=10;fontStyle=1;aspect=fixed;fontFamily=Helvetica;" vertex="1" parent="1">
           <mxGeometry x="740" y="290" width="24" height="24" as="geometry"/>
         </mxCell>
 
         <!-- Vitals [4] -->
-        <mxCell id="48" value="&lt;b&gt;Vitals&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot;&gt;heartrate · daily_spo2&lt;br&gt;vo2_max · daily_cardiovascular_age&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=10;fontFamily=Helvetica;verticalAlign=top;spacingTop=4;spacingLeft=6;align=left;" vertex="1" parent="1">
+        <mxCell id="48" value="&lt;b&gt;Vitals&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot;&gt;heartrate · daily_spo2 · vo2_max&lt;br&gt;daily_cardiovascular_age · csv_cardiovascularage&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=10;fontFamily=Helvetica;verticalAlign=top;spacingTop=4;spacingLeft=6;align=left;" vertex="1" parent="1">
           <mxGeometry x="510" y="370" width="220" height="70" as="geometry"/>
         </mxCell>
-        <mxCell id="49" value="4" style="ellipse;whiteSpace=wrap;html=1;fillColor=#1F6FEB;strokeColor=#1F6FEB;fontColor=#FFFFFF;fontSize=10;fontStyle=1;aspect=fixed;fontFamily=Helvetica;" vertex="1" parent="1">
+        <mxCell id="49" value="5" style="ellipse;whiteSpace=wrap;html=1;fillColor=#1F6FEB;strokeColor=#1F6FEB;fontColor=#FFFFFF;fontSize=10;fontStyle=1;aspect=fixed;fontFamily=Helvetica;" vertex="1" parent="1">
           <mxGeometry x="740" y="375" width="24" height="24" as="geometry"/>
         </mxCell>
 
@@ -456,11 +456,11 @@
           <mxGeometry x="1440" y="150" width="210" height="65" as="geometry"/>
         </mxCell>
 
-        <mxCell id="122" value="&lt;b&gt;Semantic Contracts&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;24 YAML metric definitions&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#7E57C2;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
+        <mxCell id="122" value="&lt;b&gt;Semantic Contracts&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;28 YAML metric definitions&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#7E57C2;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
           <mxGeometry x="1440" y="240" width="210" height="50" as="geometry"/>
         </mxCell>
 
-        <mxCell id="123" value="&lt;b&gt;MCP Server&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;FastMCP · 10 tools&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
+        <mxCell id="123" value="&lt;b&gt;MCP Server&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;FastMCP · 17 tools&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
           <mxGeometry x="1440" y="315" width="210" height="50" as="geometry"/>
         </mxCell>
 

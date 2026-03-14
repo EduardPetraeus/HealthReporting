@@ -14,7 +14,7 @@
           <mxGeometry x="30" y="15" width="480" height="30" as="geometry"/>
         </mxCell>
 
-        <mxCell id="title2" value="PDF Upload + YAML Manual Entry · 3 bronze/silver entries · 1 merge script" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;fontFamily=Helvetica;fontColor=#666666;" vertex="1" parent="1">
+        <mxCell id="title2" value="PDF Upload + YAML Manual Entry · 1 bronze table · 1 merge script" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;fontFamily=Helvetica;fontColor=#666666;" vertex="1" parent="1">
           <mxGeometry x="30" y="42" width="440" height="25" as="geometry"/>
         </mxCell>
 

@@ -14,7 +14,7 @@
           <mxGeometry x="30" y="15" width="420" height="30" as="geometry"/>
         </mxCell>
 
-        <mxCell id="3" value="PDF + CSV + JSON · 0 bronze tables (planned) · 3 merge scripts · genetic data source" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;fontFamily=Helvetica;fontColor=#666666;" vertex="1" parent="1">
+        <mxCell id="3" value="PDF + CSV + JSON · 0 bronze tables (bypassed) · 3 merge scripts · Non-standard: direct to silver" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;fontFamily=Helvetica;fontColor=#666666;" vertex="1" parent="1">
           <mxGeometry x="30" y="42" width="500" height="25" as="geometry"/>
         </mxCell>
 
@@ -69,7 +69,7 @@
           <mxGeometry x="240" y="400" width="170" height="50" as="geometry"/>
         </mxCell>
 
-        <mxCell id="24" value="&lt;b&gt;Parquet Data Lake&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;genetics/raw/ (planned)&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=10;fontFamily=Helvetica;dashed=1;opacity=50;" vertex="1" parent="1">
+        <mxCell id="24" value="&lt;b&gt;Parquet Data Lake&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;genetics/raw/&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
           <mxGeometry x="255" y="500" width="140" height="70" as="geometry"/>
         </mxCell>
 
@@ -108,7 +108,7 @@
         <!-- ======================== -->
 
         <!-- Bronze boundary -->
-        <mxCell id="40" value="&lt;b&gt;Bronze (Planned)&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;dashPattern=5 5;fillColor=#FFF3E0;strokeColor=#EF6C00;verticalAlign=top;fontStyle=1;fontSize=11;fontFamily=Helvetica;opacity=50;" vertex="1" parent="1">
+        <mxCell id="40" value="&lt;b&gt;Bronze (Bypassed)&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;dashPattern=5 5;fillColor=#FFF3E0;strokeColor=#EF6C00;verticalAlign=top;fontStyle=1;fontSize=11;fontFamily=Helvetica;" vertex="1" parent="1">
           <mxGeometry x="460" y="100" width="200" height="390" as="geometry"/>
         </mxCell>
 
@@ -117,17 +117,17 @@
           <mxGeometry x="605" y="100" width="30" height="30" as="geometry"/>
         </mxCell>
 
-        <mxCell id="42" value="planned" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=9;fontFamily=Helvetica;fontColor=#666666;" vertex="1" parent="1">
+        <mxCell id="42" value="bypassed" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=9;fontFamily=Helvetica;fontColor=#666666;" vertex="1" parent="1">
           <mxGeometry x="638" y="100" width="50" height="25" as="geometry"/>
         </mxCell>
 
         <!-- Bronze placeholder content -->
-        <mxCell id="43" value="&lt;font style=&quot;font-size:10px; color:#999;&quot;&gt;No sources_config.yaml entries yet&lt;br&gt;&lt;br&gt;Bronze tables planned&lt;br&gt;but not configured&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=10;fontFamily=Helvetica;dashed=1;opacity=50;" vertex="1" parent="1">
+        <mxCell id="43" value="&lt;font style=&quot;font-size:10px; color:#999;&quot;&gt;Genetics data bypasses bronze&lt;br&gt;&lt;br&gt;Parsed files go directly&lt;br&gt;to silver via merge scripts&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
           <mxGeometry x="475" y="200" width="170" height="100" as="geometry"/>
         </mxCell>
 
         <!-- Data Lake → Bronze (dashed) -->
-        <mxCell id="44" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#666666;strokeWidth=1;dashed=1;dashPattern=3 3;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="24" target="40" parent="1">
+        <mxCell id="44" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#666666;strokeWidth=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="24" target="40" parent="1">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
 
@@ -140,7 +140,7 @@
         </mxCell>
 
         <!-- Bronze → Merge edge (dashed — planned connection) -->
-        <mxCell id="51" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#666666;strokeWidth=1.5;dashed=1;dashPattern=4 4;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="40" target="50" parent="1">
+        <mxCell id="51" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#666666;strokeWidth=1.5;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="40" target="50" parent="1">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
 
@@ -172,7 +172,7 @@
         </mxCell>
 
         <!-- Merge → Silver edges (dashed — planned connection) -->
-        <mxCell id="65" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#666666;strokeWidth=1.5;dashed=1;dashPattern=4 4;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="50" target="61" parent="1">
+        <mxCell id="65" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#666666;strokeWidth=1.5;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="50" target="61" parent="1">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="900" y="293"/>
@@ -181,7 +181,7 @@
           </mxGeometry>
         </mxCell>
 
-        <mxCell id="66" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#666666;strokeWidth=1.5;dashed=1;dashPattern=4 4;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="50" target="62" parent="1">
+        <mxCell id="66" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#666666;strokeWidth=1.5;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="50" target="62" parent="1">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="895" y="293"/>
@@ -190,11 +190,11 @@
           </mxGeometry>
         </mxCell>
 
-        <mxCell id="67" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#666666;strokeWidth=1.5;dashed=1;dashPattern=4 4;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="50" target="63" parent="1">
+        <mxCell id="67" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#666666;strokeWidth=1.5;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="50" target="63" parent="1">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
 
-        <mxCell id="68" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#1E3A5F;strokeWidth=1.5;dashed=1;dashPattern=4 4;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="50" target="64" parent="1">
+        <mxCell id="68" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#1E3A5F;strokeWidth=1.5;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="50" target="64" parent="1">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="905" y="293"/>
@@ -216,11 +216,11 @@
           <mxGeometry x="1173" y="135" width="195" height="55" as="geometry"/>
         </mxCell>
 
-        <mxCell id="72" value="&lt;b&gt;Semantic Contracts&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;24 YAML metric definitions&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#7E57C2;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
+        <mxCell id="72" value="&lt;b&gt;Semantic Contracts&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;28 YAML metric definitions&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#7E57C2;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
           <mxGeometry x="1173" y="210" width="195" height="45" as="geometry"/>
         </mxCell>
 
-        <mxCell id="73" value="&lt;b&gt;MCP Server&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;FastMCP · 10 tools&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
+        <mxCell id="73" value="&lt;b&gt;MCP Server&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;FastMCP · 17 tools&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
           <mxGeometry x="1173" y="275" width="195" height="45" as="geometry"/>
         </mxCell>
 
