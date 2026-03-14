@@ -37,6 +37,39 @@ CREATE TABLE IF NOT EXISTS silver.ancestry_segments (
     update_datetime     TIMESTAMP
 );
 
+-- Ancestry composition summary from 23andMe (population-level percentages)
+CREATE TABLE IF NOT EXISTS silver.genetic_ancestry (
+    source              VARCHAR NOT NULL DEFAULT '23andme',
+    population          VARCHAR NOT NULL,
+    region              VARCHAR NOT NULL,
+    percentage          DOUBLE NOT NULL,
+    confidence_level    VARCHAR DEFAULT 'standard',
+    report_date         DATE,
+    business_key_hash   VARCHAR NOT NULL,
+    row_hash            VARCHAR NOT NULL,
+    load_datetime       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_datetime     TIMESTAMP
+);
+
+-- Wellness traits, haplogroups, and neanderthal ancestry from 23andMe
+CREATE TABLE IF NOT EXISTS silver.genetic_traits (
+    source              VARCHAR NOT NULL DEFAULT '23andme',
+    category            VARCHAR NOT NULL,
+    trait_name          VARCHAR NOT NULL,
+    result_value        VARCHAR NOT NULL,
+    result_numeric      DOUBLE,
+    gene                VARCHAR,
+    snp_id              VARCHAR,
+    genotype            VARCHAR,
+    clinical_relevance  VARCHAR NOT NULL DEFAULT 'informational',
+    related_metrics     VARCHAR,
+    report_date         DATE,
+    business_key_hash   VARCHAR NOT NULL,
+    row_hash            VARCHAR NOT NULL,
+    load_datetime       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_datetime     TIMESTAMP
+);
+
 -- Family tree members from 23andMe JSON export
 CREATE TABLE IF NOT EXISTS silver.family_tree (
     person_id               VARCHAR NOT NULL,

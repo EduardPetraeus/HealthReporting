@@ -6,7 +6,17 @@
 
 ## [Unreleased] — 2026-03-14
 
+### Added
+- 4 new silver tables: `dim_marker_catalog` (97 markers), `dim_reference_range` (96 ranges), `genetic_ancestry`, `genetic_traits` (PR #183)
+- Genetics silver schema: `genetic_health_findings`, `ancestry_segments`, `family_tree` (PR #183)
+- Gold views: `fct_lab_result`, `vw_genetic_summary` (PR #183)
+- YAML semantic contracts for genetics and microbiome metrics (PR #183)
+- Zero-loss validation script with 324 field-by-field checks (PR #183)
+- Lab PDF parser extended with microbiome format: scientific notation, below-detection limits, 9 categories (PR #183)
+- Genetics parser: ancestry composition, neanderthal ancestry, wellness traits extraction from 23andMe PDFs/CSV/JSON (PR #183)
+
 ### Fixed
+- **Governance:** validate_lab_data.py hardcoded path replaced with paths utility (PR #183)
 - **Security:** SQL injection in ingestion_engine.py cold-start path — escape single quotes in glob (PR #179)
 - **Security:** run_custom_query schema allowlist now catches comma-joined tables (PR #179)
 - **Security:** body_temperature dedup now prioritizes API over CSV source (PR #179)

@@ -59,6 +59,41 @@ metric:
         WHERE variant_detected = true
         ORDER BY clinical_relevance
 
+    health_risk_findings:
+      sql: >
+        SELECT report_name, condition, risk_level, result_summary, variant_detected
+        FROM silver.genetic_health_findings
+        ORDER BY
+          CASE risk_level
+            WHEN 'high' THEN 1
+            WHEN 'medium' THEN 2
+            WHEN 'low' THEN 3
+            ELSE 4
+          END
+      description: "Health predisposition findings with risk levels"
+
+    ancestry_composition:
+      sql: >
+        SELECT population, region, percentage
+        FROM silver.genetic_ancestry
+        ORDER BY percentage DESC
+      description: "Population-level ancestry composition percentages"
+
+    genetic_traits:
+      sql: >
+        SELECT category, trait_name, result_value, result_numeric
+        FROM silver.genetic_traits
+        ORDER BY category, trait_name
+      description: "Wellness traits, haplogroups, and neanderthal ancestry"
+
+    carrier_status:
+      sql: >
+        SELECT report_name, condition, result_summary, variant_detected
+        FROM silver.genetic_health_findings
+        WHERE category = 'carrier_status'
+        ORDER BY report_name
+      description: "Carrier status findings for genetic conditions"
+
     ancestry_overview:
       sql: >
         SELECT ancestry_category,
@@ -116,3 +151,7 @@ metric:
       tool: "query_genetics(query_type='ancestry', category='Scandinavian')"
     - question: "Who are my DNA relatives?"
       tool: "query_genetics(query_type='family')"
+    - question: "What health risks have been identified?"
+      tool: "query_health(metric='genetics', computation='health_risk_findings')"
+    - question: "What traits does my DNA show?"
+      tool: "query_health(metric='genetics', computation='genetic_traits')"

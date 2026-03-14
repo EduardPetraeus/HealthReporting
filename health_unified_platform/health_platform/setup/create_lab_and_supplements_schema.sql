@@ -54,6 +54,45 @@ CREATE TABLE IF NOT EXISTS silver.supplement_log (
 );
 
 -- =============================================================================
+-- SILVER: Marker Catalog — canonical marker definitions
+-- One row per biomarker. Defines canonical unit, domain, and display metadata.
+-- Supports cross-lab normalization via synonyms column.
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS silver.dim_marker_catalog (
+    marker_key          VARCHAR NOT NULL PRIMARY KEY,
+    display_name        VARCHAR NOT NULL,
+    marker_domain       VARCHAR NOT NULL,
+    body_system         VARCHAR NOT NULL,
+    canonical_unit      VARCHAR,                        -- NULL = dimensionless (e.g. pH, qualitative)
+    description         VARCHAR,
+    data_type           VARCHAR NOT NULL DEFAULT 'numeric',
+    is_log_scale        BOOLEAN NOT NULL DEFAULT false,
+    detection_limit     DOUBLE,
+    synonyms            VARCHAR,
+    load_datetime       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =============================================================================
+-- SILVER: Reference Range — cross-lab reference ranges with temporal validity
+-- Multiple rows per marker: one per lab source and optional age/sex strata.
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS silver.dim_reference_range (
+    marker_key          VARCHAR NOT NULL,
+    source              VARCHAR NOT NULL,
+    reference_type      VARCHAR NOT NULL,
+    reference_min       DOUBLE,
+    reference_max       DOUBLE,
+    unit                VARCHAR,                        -- NULL = dimensionless (e.g. pH, qualitative)
+    age_group           VARCHAR NOT NULL DEFAULT 'adult',
+    sex                 VARCHAR NOT NULL DEFAULT 'all',
+    notes               VARCHAR,
+    effective_from      DATE,
+    effective_to        DATE,
+    load_datetime       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (marker_key, source, age_group, sex)
+);
+
+-- =============================================================================
 -- AGENT: Genetic Profile — static genetic findings
 -- One row per genetic report/finding. Loaded once, referenced permanently.
 -- =============================================================================
