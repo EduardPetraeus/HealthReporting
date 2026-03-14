@@ -32,6 +32,7 @@ MANUAL_DIR = get_manual_dir()
 LAB_DIR = get_lab_dir()
 GENETIC_FILE = MANUAL_DIR / "genetic_profile.yaml"
 SUPPLEMENT_FILE = MANUAL_DIR / "supplement_protocol.yaml"
+DEMOGRAPHICS_FILE = MANUAL_DIR / "patient_demographics.yaml"
 
 
 def md5_hash(*parts: str) -> str:
@@ -51,20 +52,23 @@ def ensure_tables(con: duckdb.DuckDBPyConnection) -> None:
     from health_platform.utils.path_resolver import get_project_root
 
     setup_dir = get_project_root() / "health_platform" / "setup"
-    schema_file = setup_dir / "create_lab_and_supplements_schema.sql"
-    if schema_file.exists():
-        sql = schema_file.read_text()
-        for stmt in sql.split(";"):
-            # Strip comment-only lines, keep SQL
-            lines = [
-                line
-                for line in stmt.strip().splitlines()
-                if not line.strip().startswith("--")
-            ]
-            cleaned = "\n".join(lines).strip()
-            if cleaned:
-                con.execute(stmt.strip())
-        logger.info("Schema tables ensured.")
+    for schema_filename in [
+        "create_lab_and_supplements_schema.sql",
+        "create_patient_demographics_schema.sql",
+    ]:
+        schema_file = setup_dir / schema_filename
+        if schema_file.exists():
+            sql = schema_file.read_text()
+            for stmt in sql.split(";"):
+                lines = [
+                    line
+                    for line in stmt.strip().splitlines()
+                    if not line.strip().startswith("--")
+                ]
+                cleaned = "\n".join(lines).strip()
+                if cleaned:
+                    con.execute(stmt.strip())
+    logger.info("Schema tables ensured.")
 
 
 # =============================================================================
@@ -377,6 +381,267 @@ def import_genetic_profile(con: duckdb.DuckDBPyConnection, audit: AuditLogger) -
 
 
 # =============================================================================
+# Patient Demographics Import
+# =============================================================================
+
+
+_ALLOWED_MERGE_TARGETS = frozenset(
+    {
+        "silver.patient_demographics",
+        "silver.medical_history",
+        "silver.vaccinations",
+        "silver.family_history",
+        "silver.device_registry",
+    }
+)
+
+
+def _merge_via_staging(
+    con: duckdb.DuckDBPyConnection,
+    target_table: str,
+    columns: list[str],
+    rows: list[tuple],
+    cast_map: dict[str, str] | None = None,
+) -> None:
+    """Generic staging-table MERGE for small static tables."""
+    if target_table not in _ALLOWED_MERGE_TARGETS:
+        raise ValueError(
+            f"Merge target '{target_table}' is not in the allowed table list"
+        )
+    staging = f"{target_table}__staging"
+    con.execute(f"DROP TABLE IF EXISTS {staging}")
+    con.execute(f"CREATE TABLE {staging} AS SELECT * FROM {target_table} WHERE false")
+
+    cast_map = cast_map or {}
+    placeholders = ", ".join(f"?{cast_map.get(c, '')}" for c in columns)
+    col_list = ", ".join(columns)
+    con.executemany(
+        f"INSERT INTO {staging} ({col_list}, load_datetime, update_datetime) "
+        f"VALUES ({placeholders}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
+        rows,
+    )
+
+    data_cols = [c for c in columns if c not in ("business_key_hash", "row_hash")]
+    set_clause = ", ".join(f"{c} = src.{c}" for c in data_cols)
+    set_clause += ", row_hash = src.row_hash, update_datetime = CURRENT_TIMESTAMP"
+    src_vals = ", ".join(f"src.{c}" for c in columns)
+
+    con.execute(
+        f"""
+        MERGE INTO {target_table} AS target
+        USING {staging} AS src
+        ON target.business_key_hash = src.business_key_hash
+        WHEN MATCHED AND target.row_hash <> src.row_hash THEN UPDATE SET
+            {set_clause}
+        WHEN NOT MATCHED THEN INSERT
+            ({col_list}, load_datetime, update_datetime)
+        VALUES ({src_vals}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    """
+    )
+    con.execute(f"DROP TABLE IF EXISTS {staging}")
+
+
+def import_patient_demographics(
+    con: duckdb.DuckDBPyConnection, audit: AuditLogger
+) -> int:
+    """Import patient demographics YAML into 5 silver tables."""
+    if not DEMOGRAPHICS_FILE.exists():
+        logger.warning(f"Demographics file not found: {DEMOGRAPHICS_FILE}")
+        return 0
+
+    with open(DEMOGRAPHICS_FILE) as f:
+        data = yaml.safe_load(f)
+
+    total = 0
+
+    # --- 1. silver.patient_demographics (singleton) ---
+    demo = data.get("demographics", {})
+    lifestyle = data.get("lifestyle", {})
+    smoking = lifestyle.get("smoking", {})
+    alcohol = lifestyle.get("alcohol", {})
+
+    bk = md5_hash("patient_001")
+    rh = md5_hash(
+        str(demo.get("date_of_birth", "")),
+        demo.get("sex", ""),
+        str(demo.get("height_cm", "")),
+        str(smoking.get("current", "")),
+        smoking.get("history", ""),
+        alcohol.get("current_level", ""),
+        alcohol.get("frequency", ""),
+        alcohol.get("notes", ""),
+    )
+    _merge_via_staging(
+        con,
+        "silver.patient_demographics",
+        [
+            "patient_id",
+            "date_of_birth",
+            "sex",
+            "height_cm",
+            "smoking_current",
+            "smoking_history",
+            "alcohol_level",
+            "alcohol_frequency",
+            "alcohol_notes",
+            "business_key_hash",
+            "row_hash",
+        ],
+        [
+            (
+                "patient_001",
+                demo.get("date_of_birth"),
+                demo.get("sex"),
+                demo.get("height_cm"),
+                smoking.get("current", False),
+                smoking.get("history"),
+                alcohol.get("current_level"),
+                alcohol.get("frequency"),
+                alcohol.get("notes"),
+                bk,
+                rh,
+            )
+        ],
+        cast_map={"date_of_birth": "::DATE"},
+    )
+    total += 1
+    audit.log_table("silver.patient_demographics", "MERGE", rows_after=1)
+
+    # --- 2. silver.medical_history ---
+    med_rows = []
+    for item in data.get("medical_history", []):
+        condition = item["condition"]
+        bk = md5_hash(condition)
+        rh = md5_hash(item.get("status", ""), item.get("notes", ""))
+        med_rows.append((condition, item.get("status", ""), item.get("notes"), bk, rh))
+
+    if med_rows:
+        _merge_via_staging(
+            con,
+            "silver.medical_history",
+            ["condition", "status", "notes", "business_key_hash", "row_hash"],
+            med_rows,
+        )
+        total += len(med_rows)
+        audit.log_table("silver.medical_history", "MERGE", rows_after=len(med_rows))
+
+    # --- 3. silver.vaccinations ---
+    vax_rows = []
+    for item in data.get("vaccinations", []):
+        vaccine = item["vaccine"]
+        bk = md5_hash(vaccine)
+        rh = md5_hash(
+            item.get("coverage", ""), str(item.get("year", "")), item.get("notes", "")
+        )
+        vax_rows.append(
+            (
+                vaccine,
+                item.get("coverage"),
+                item.get("year"),
+                item.get("notes"),
+                bk,
+                rh,
+            )
+        )
+
+    if vax_rows:
+        _merge_via_staging(
+            con,
+            "silver.vaccinations",
+            [
+                "vaccine",
+                "coverage",
+                "year_administered",
+                "notes",
+                "business_key_hash",
+                "row_hash",
+            ],
+            vax_rows,
+        )
+        total += len(vax_rows)
+        audit.log_table("silver.vaccinations", "MERGE", rows_after=len(vax_rows))
+
+    # --- 4. silver.family_history ---
+    fam_rows = []
+    for item in data.get("family_history", []):
+        relation = item["relation"]
+        condition = item["condition"]
+        bk = md5_hash(relation, condition)
+        rh = md5_hash(
+            item.get("status", ""),
+            item.get("age_at_death_approx", ""),
+            item.get("notes", ""),
+        )
+        fam_rows.append(
+            (
+                relation,
+                condition,
+                item.get("status"),
+                item.get("age_at_death_approx"),
+                item.get("notes"),
+                bk,
+                rh,
+            )
+        )
+
+    if fam_rows:
+        _merge_via_staging(
+            con,
+            "silver.family_history",
+            [
+                "relation",
+                "condition",
+                "status",
+                "age_at_death_approx",
+                "notes",
+                "business_key_hash",
+                "row_hash",
+            ],
+            fam_rows,
+        )
+        total += len(fam_rows)
+        audit.log_table("silver.family_history", "MERGE", rows_after=len(fam_rows))
+
+    # --- 5. silver.device_registry ---
+    dev_rows = []
+    for item in data.get("device_stack", []):
+        device = item["device"]
+        bk = md5_hash(device)
+        data_types_str = ", ".join(item.get("data_types", []))
+        rh = md5_hash(item.get("category", ""), data_types_str, item.get("notes", ""))
+        dev_rows.append(
+            (
+                device,
+                item.get("category", ""),
+                data_types_str,
+                item.get("notes"),
+                bk,
+                rh,
+            )
+        )
+
+    if dev_rows:
+        _merge_via_staging(
+            con,
+            "silver.device_registry",
+            [
+                "device",
+                "category",
+                "data_types",
+                "notes",
+                "business_key_hash",
+                "row_hash",
+            ],
+            dev_rows,
+        )
+        total += len(dev_rows)
+        audit.log_table("silver.device_registry", "MERGE", rows_after=len(dev_rows))
+
+    logger.info(f"Imported patient demographics: {total} total rows across 5 tables.")
+    return total
+
+
+# =============================================================================
 # Patient Profile Updates
 # =============================================================================
 
@@ -468,6 +733,97 @@ def update_patient_profile(con: duckdb.DuckDBPyConnection) -> None:
             count += 1
     except Exception as exc:
         logger.warning("Could not read lab results for patient_profile: %s", exc)
+
+    # --- Demographics → profile entries ---
+    try:
+        demo_rows = con.execute(
+            """
+            SELECT date_of_birth, sex, height_cm,
+                   smoking_current, smoking_history,
+                   alcohol_level, alcohol_frequency
+            FROM silver.patient_demographics LIMIT 1
+        """
+        ).fetchall()
+        for dob, sex, height, smoking, smoking_hist, alc_level, alc_freq in demo_rows:
+            _upsert_profile(
+                con,
+                "demo_dob",
+                str(dob),
+                None,
+                "demographics",
+                "Date of birth",
+                "patient_demographics",
+                "static",
+            )
+            _upsert_profile(
+                con,
+                "demo_sex",
+                sex,
+                None,
+                "demographics",
+                "Biological sex",
+                "patient_demographics",
+                "static",
+            )
+            if height:
+                _upsert_profile(
+                    con,
+                    "demo_height_cm",
+                    f"{height} cm",
+                    float(height),
+                    "demographics",
+                    "Height",
+                    "patient_demographics",
+                    "static",
+                )
+            _upsert_profile(
+                con,
+                "lifestyle_smoking",
+                "non-smoker" if not smoking else "smoker",
+                None,
+                "lifestyle",
+                smoking_hist or "Smoking status",
+                "patient_demographics",
+                "static",
+            )
+            if alc_level:
+                _upsert_profile(
+                    con,
+                    "lifestyle_alcohol",
+                    f"{alc_level} ({alc_freq})",
+                    None,
+                    "lifestyle",
+                    "Alcohol consumption level",
+                    "patient_demographics",
+                    "static",
+                )
+            count += 5
+    except Exception as exc:
+        logger.warning("Could not read demographics for patient_profile: %s", exc)
+
+    # --- Family history → profile entries ---
+    try:
+        fh_rows = con.execute(
+            "SELECT relation, condition, status, notes FROM silver.family_history"
+        ).fetchall()
+        for relation, condition, fh_status, notes in fh_rows:
+            key = f"family_{relation}_{condition}".replace(" ", "_")[:50]
+            value = f"{relation}: {condition}"
+            if fh_status:
+                value += f" ({fh_status})"
+            _upsert_profile(
+                con,
+                key,
+                value,
+                None,
+                "family_history",
+                notes or f"Family history: {relation}",
+                "patient_demographics",
+                "static",
+            )
+            count += 1
+    except Exception as exc:
+        logger.warning("Could not read family history for patient_profile: %s", exc)
 
     logger.info("Updated %d patient profile entries from imported data.", count)
 
@@ -630,6 +986,23 @@ def update_health_graph(con: duckdb.DuckDBPyConnection) -> None:
             )
     except Exception as exc:
         logger.warning("Could not read supplements for health graph: %s", exc)
+
+    # --- Family history nodes from database ---
+    try:
+        fam_rows = con.execute(
+            "SELECT relation, condition, status, notes FROM silver.family_history"
+        ).fetchall()
+        for relation, condition, fh_status, notes in fam_rows:
+            node_id = f"family:{relation}_{condition}".replace(" ", "_")
+            label = f"{relation} — {condition}"
+            desc = notes or f"Family history: {relation} with {condition}"
+            if fh_status:
+                desc += f" ({fh_status})"
+            nodes.append(
+                (node_id, "family_history", label, desc, "family_history", "relation")
+            )
+    except Exception as exc:
+        logger.warning("Could not read family history for health graph: %s", exc)
 
     for node in nodes:
         con.execute(
@@ -840,17 +1213,20 @@ def main() -> None:
             lab_count = import_lab_results(con, audit)
             supp_count = import_supplements(con, audit)
             gen_count = import_genetic_profile(con, audit)
+            demo_count = import_patient_demographics(con, audit)
             update_patient_profile(con)
             update_health_graph(con)
 
+            total = lab_count + supp_count + gen_count + demo_count
             audit.finish(
-                rows_processed=lab_count + supp_count + gen_count,
-                rows_inserted=lab_count + supp_count + gen_count,
+                rows_processed=total,
+                rows_inserted=total,
             )
 
         logger.info(
             f"Import complete: {lab_count} lab markers, "
-            f"{supp_count} supplements, {gen_count} genetic findings."
+            f"{supp_count} supplements, {gen_count} genetic findings, "
+            f"{demo_count} demographics rows."
         )
     finally:
         con.close()
