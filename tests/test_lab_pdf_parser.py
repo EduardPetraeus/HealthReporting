@@ -366,11 +366,14 @@ class TestIngestionPipeline:
 
     def test_categorize_marker_inflammation(self):
         assert _categorize_marker("CRP") == "inflammation"
-        assert _categorize_marker("Calprotectin") == "inflammation"
+        # Calprotectin now maps to gut_inflammation (more specific microbiome category)
+        assert _categorize_marker("Calprotectin") == "gut_inflammation"
 
     def test_categorize_marker_gut_health(self):
-        assert _categorize_marker("Pancreatic Elastase") == "gut_health"
-        assert _categorize_marker("Secretory IgA") == "gut_health"
+        # Pancreatic Elastase maps to digestive_function (microbiome-specific category)
+        assert _categorize_marker("Pancreatic Elastase") == "digestive_function"
+        # Secretory IgA maps to immune_markers (microbiome-specific category)
+        assert _categorize_marker("Secretory IgA") == "immune_markers"
 
     def test_categorize_marker_hba1c(self):
         """HbA1c is a glucose marker, not blood_count (H1 fix)."""

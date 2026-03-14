@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS silver.dim_marker_catalog (
     display_name        VARCHAR NOT NULL,
     marker_domain       VARCHAR NOT NULL,
     body_system         VARCHAR NOT NULL,
-    canonical_unit      VARCHAR NOT NULL,
+    canonical_unit      VARCHAR,                        -- NULL = dimensionless (e.g. pH, qualitative)
     description         VARCHAR,
     data_type           VARCHAR NOT NULL DEFAULT 'numeric',
     is_log_scale        BOOLEAN NOT NULL DEFAULT false,
@@ -82,14 +82,14 @@ CREATE TABLE IF NOT EXISTS silver.dim_reference_range (
     reference_type      VARCHAR NOT NULL,
     reference_min       DOUBLE,
     reference_max       DOUBLE,
-    unit                VARCHAR NOT NULL,
+    unit                VARCHAR,                        -- NULL = dimensionless (e.g. pH, qualitative)
     age_group           VARCHAR DEFAULT 'adult',
     sex                 VARCHAR DEFAULT 'male',
     notes               VARCHAR,
     effective_from      DATE,
     effective_to        DATE,
     load_datetime       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (marker_key, source, unit)
+    PRIMARY KEY (marker_key, source)
 );
 
 -- =============================================================================
