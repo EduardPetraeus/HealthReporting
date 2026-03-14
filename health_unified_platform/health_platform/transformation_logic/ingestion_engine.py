@@ -90,6 +90,8 @@ def run_ingestion():
 
     # setup_environment_and_database_paths
     active_env = os.getenv("HEALTH_ENV", env_cfg["defaults"]["environment"])
+    if not _IDENTIFIER_RE.match(active_env):
+        raise ValueError(f"Invalid HEALTH_ENV value: {active_env!r}")
     db_name = env_cfg["defaults"]["database_name"]
 
     db_file = Path(env_cfg["paths"]["db_root"]) / f"{db_name}_{active_env}.db"
@@ -157,7 +159,11 @@ def run_ingestion():
                 > 0
             )
 
-            hive = str(source.get("hive_partitioning", True)).lower()
+            hive_raw = source.get("hive_partitioning", True)
+            if hive_raw not in (True, False, "true", "false"):
+                logger.error(f"Invalid hive_partitioning for {name}: {hive_raw!r}")
+                continue
+            hive = str(hive_raw).lower()
 
             if not table_exists:
                 # cold start: full load to create the table
@@ -218,7 +224,13 @@ def run_ingestion():
             )
 
             # build file list for read_parquet
-            file_list = "[" + ", ".join(f"'{f}'" for f in new_files) + "]"
+            file_list = (
+                "["
+                + ", ".join(
+                    f"'{f.replace(chr(39), chr(39)+chr(39))}'" for f in new_files
+                )
+                + "]"
+            )
 
             # INSERT BY NAME handles schema evolution: matches columns by name,
             # missing columns in source get NULL. Works when HAE parquet has
