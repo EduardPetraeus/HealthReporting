@@ -271,6 +271,11 @@ tables:
     unique: [business_key_hash]
     row_count: { min_rows: 1 }
 
+  sleep_time:
+    not_null: [business_key_hash, sk_date, id]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
   # =====================================================================
   # Withings
   # =====================================================================

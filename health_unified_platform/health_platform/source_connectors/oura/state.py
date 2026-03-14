@@ -44,5 +44,18 @@ def get_start_date(endpoint: str, state: dict) -> date:
 
 
 def update_state(endpoint: str, fetched_through: date, state: dict) -> None:
-    """Updates the in-memory state for an endpoint. Call save_state() to persist."""
+    """Updates the in-memory state for an endpoint and persists immediately."""
     state[endpoint] = fetched_through.isoformat()
+    save_state(state)
+    logger.info("State updated: %s -> %s", endpoint, fetched_through.isoformat())
+
+
+def clean_state(valid_endpoints: list[str], state: dict) -> dict:
+    """Removes ghost entries from state that no longer match active endpoints."""
+    ghost_keys = [k for k in state if k not in valid_endpoints]
+    for key in ghost_keys:
+        logger.info("Removing ghost state entry: %s", key)
+        del state[key]
+    if ghost_keys:
+        save_state(state)
+    return state
