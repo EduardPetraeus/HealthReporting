@@ -1,0 +1,57 @@
+metric:
+  name: patient_demographics
+  display_name: "Patient Demographics & Medical History"
+  description: "Static patient data: demographics, medical history, vaccinations, family history, lifestyle, device stack"
+  category: demographics
+  source_table: silver.patient_demographics
+  source_column: patient_id
+  grain: static
+  business_key: patient_id
+
+  computations:
+    demographics:
+      sql: "SELECT date_of_birth, sex, height_cm, smoking_current, smoking_history, alcohol_level, alcohol_frequency FROM silver.patient_demographics LIMIT 1"
+      description: "Core demographics and lifestyle"
+
+    medical_history:
+      sql: "SELECT condition, status, notes FROM silver.medical_history ORDER BY condition"
+      description: "All medical conditions with status"
+
+    vaccinations:
+      sql: "SELECT vaccine, coverage, year_administered, notes FROM silver.vaccinations ORDER BY vaccine"
+      description: "Vaccination records"
+
+    family_history:
+      sql: "SELECT relation, condition, status, age_at_death_approx, notes FROM silver.family_history ORDER BY relation"
+      description: "Family medical history"
+
+    device_stack:
+      sql: "SELECT device, category, data_types, notes FROM silver.device_registry ORDER BY category, device"
+      description: "Connected health devices"
+
+    risk_factors:
+      sql: >
+        SELECT 'family_history' AS source, relation || ': ' || condition AS risk_factor, notes
+        FROM silver.family_history
+        UNION ALL
+        SELECT 'lifestyle' AS source, 'smoking: ' || CASE WHEN smoking_current THEN 'active' ELSE 'former/never' END AS risk_factor, smoking_history AS notes
+        FROM silver.patient_demographics
+      description: "Combined risk factors from family history and lifestyle"
+
+  thresholds:
+    data_completeness:
+      full:
+        label: "All demographics sections populated"
+
+  related_metrics:
+    - { metric: genetics, relationship: "Family history contextualizes genetic findings", lag: 0 }
+    - { metric: lab_biomarkers, relationship: "Demographics inform reference range interpretation", lag: 0 }
+    - { metric: supplements, relationship: "Medical history contextualizes supplement protocol", lag: 0 }
+
+  examples:
+    - question: "What is my family medical history?"
+      tool: "query_health(metric='patient_demographics', computation='family_history')"
+    - question: "What devices do I have connected?"
+      tool: "query_health(metric='patient_demographics', computation='device_stack')"
+    - question: "What are my risk factors?"
+      tool: "query_health(metric='patient_demographics', computation='risk_factors')"
