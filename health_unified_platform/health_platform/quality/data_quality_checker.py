@@ -140,6 +140,7 @@ class DataQualityChecker:
             "row_count": self._check_row_count,
             "value_range": self._check_value_range,
             "schema_drift": self._check_schema_drift,
+            "completeness": self._check_completeness,
         }
         handler = handlers.get(check_type)
         if not handler:
@@ -351,6 +352,143 @@ class DataQualityChecker:
                 ),
                 value=float(len(missing)),
                 threshold=0.0,
+            )
+        ]
+
+    def _check_completeness(self, table_name: str, config: dict) -> list[CheckResult]:
+        """Check for gaps in a time series.
+
+        Config format: { column: <date_col>, grain: "daily"|"hourly", max_gaps: <int> }
+        Returns a CheckResult with metadata containing gap periods and reload recommendations.
+        """
+        column = _validate_id(config.get("column", "day"))
+        grain = config.get("grain", "daily")
+        max_gaps = config.get("max_gaps", 0)
+        tbl = _validate_id(table_name)
+
+        # Defense-in-depth: validate grain even though rule_loader already checks
+        if grain not in ("daily", "hourly"):
+            raise ValueError(f"Invalid grain: {grain!r}")
+        if grain == "hourly":
+            raise NotImplementedError(
+                "Hourly completeness checks are not yet supported — "
+                "island detection requires DATE-level granularity"
+            )
+
+        # Check for empty table
+        row_count = self._query_scalar(f"SELECT COUNT(*) FROM silver.{tbl}")
+        if not row_count:
+            return [
+                CheckResult(
+                    table_name=table_name,
+                    check_type="completeness",
+                    column=column,
+                    passed=False,
+                    message=f"No data in silver.{tbl} (table empty)",
+                )
+            ]
+
+        interval = "INTERVAL '1' DAY"
+
+        # Count gaps
+        gap_count_sql = f"""
+            WITH bounds AS (
+                SELECT MIN({column}) AS min_date, MAX({column}) AS max_date
+                FROM silver.{tbl}
+            ),
+            expected AS (
+                SELECT CAST(UNNEST(generate_series(
+                    (SELECT min_date FROM bounds),
+                    (SELECT max_date FROM bounds),
+                    {interval})) AS DATE) AS expected_date
+            ),
+            actual AS (
+                SELECT DISTINCT CAST({column} AS DATE) AS actual_date
+                FROM silver.{tbl}
+            )
+            SELECT COUNT(*) FROM expected e
+            LEFT JOIN actual a ON e.expected_date = a.actual_date
+            WHERE a.actual_date IS NULL
+        """
+        gap_count = self._query_scalar(gap_count_sql) or 0
+
+        # Get date range for metadata
+        bounds_sql = f"""
+            SELECT MIN({column}), MAX({column}) FROM silver.{tbl}
+        """
+        bounds_row = self.con.execute(bounds_sql).fetchone()
+        min_date = str(bounds_row[0]) if bounds_row and bounds_row[0] else None
+        max_date = str(bounds_row[1]) if bounds_row and bounds_row[1] else None
+
+        metadata: dict = {
+            "date_range": {"min": min_date, "max": max_date},
+            "grain": grain,
+            "gap_periods": [],
+            "reload_recommendations": [],
+        }
+
+        # If gaps exist, find the gap periods via island detection
+        if gap_count > 0:
+            gap_periods_sql = f"""
+                WITH bounds AS (
+                    SELECT MIN({column}) AS min_date, MAX({column}) AS max_date
+                    FROM silver.{tbl}
+                ),
+                expected AS (
+                    SELECT CAST(UNNEST(generate_series(
+                        (SELECT min_date FROM bounds),
+                        (SELECT max_date FROM bounds),
+                        {interval})) AS DATE) AS expected_date
+                ),
+                actual AS (
+                    SELECT DISTINCT CAST({column} AS DATE) AS actual_date
+                    FROM silver.{tbl}
+                ),
+                missing AS (
+                    SELECT e.expected_date AS gap_date FROM expected e
+                    LEFT JOIN actual a ON e.expected_date = a.actual_date
+                    WHERE a.actual_date IS NULL
+                ),
+                islands AS (
+                    SELECT gap_date,
+                           gap_date - CAST(ROW_NUMBER() OVER (ORDER BY gap_date) AS INTEGER) AS grp
+                    FROM missing
+                )
+                SELECT MIN(gap_date) AS gap_start, MAX(gap_date) AS gap_end
+                FROM islands GROUP BY grp ORDER BY gap_start
+            """
+            rows = self.con.execute(gap_periods_sql).fetchall()
+            for row in rows:
+                gap_start = str(row[0])
+                gap_end = str(row[1])
+                metadata["gap_periods"].append(
+                    {"gap_start": gap_start, "gap_end": gap_end}
+                )
+                metadata["reload_recommendations"].append(
+                    {
+                        "table_name": table_name,
+                        "gap_start": gap_start,
+                        "gap_end": gap_end,
+                        "suggested_action": "reload",
+                    }
+                )
+
+        passed = gap_count <= max_gaps
+        return [
+            CheckResult(
+                table_name=table_name,
+                check_type="completeness",
+                column=column,
+                passed=passed,
+                message=(
+                    f"{column}: complete ({grain}, 0 gaps)"
+                    if gap_count == 0
+                    else f"{column}: {int(gap_count)} gap(s) detected ({grain}, "
+                    f"threshold: {max_gaps})"
+                ),
+                value=float(gap_count),
+                threshold=float(max_gaps),
+                metadata=metadata,
             )
         ]
 

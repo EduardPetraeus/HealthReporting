@@ -22,6 +22,7 @@ tables:
     row_count: { min_rows: 1 }
     value_range:
       sleep_score: { min: 0, max: 100 }
+    completeness: { column: day, grain: daily, max_gaps: 0 }
 
   daily_readiness:
     not_null: [business_key_hash, sk_date, day, readiness_score]
@@ -30,6 +31,7 @@ tables:
     row_count: { min_rows: 1 }
     value_range:
       readiness_score: { min: 0, max: 100 }
+    completeness: { column: day, grain: daily, max_gaps: 0 }
 
   daily_activity:
     not_null: [business_key_hash, sk_date, day]
@@ -39,12 +41,14 @@ tables:
     value_range:
       activity_score: { min: 0, max: 100 }
       steps: { min: 0, max: 100000 }
+    completeness: { column: day, grain: daily, max_gaps: 0 }
 
   daily_stress:
     not_null: [business_key_hash, sk_date, day]
     unique: [business_key_hash]
     freshness: { column: day, max_hours: 49 }
     row_count: { min_rows: 1 }
+    completeness: { column: day, grain: daily, max_gaps: 0 }
 
   daily_spo2:
     not_null: [business_key_hash, sk_date, day]
@@ -53,6 +57,7 @@ tables:
     row_count: { min_rows: 1 }
     value_range:
       spo2_avg_pct: { min: 50, max: 100 }
+    completeness: { column: day, grain: daily, max_gaps: 0 }
 
   workout:
     not_null: [business_key_hash, sk_date]
@@ -89,12 +94,14 @@ tables:
     unique: [business_key_hash]
     freshness: { column: day, max_hours: 49 }
     row_count: { min_rows: 1 }
+    completeness: { column: day, grain: daily, max_gaps: 0 }
 
   daily_walking_gait:
     not_null: [business_key_hash, sk_date, day]
     unique: [business_key_hash]
     freshness: { column: day, max_hours: 49 }
     row_count: { min_rows: 1 }
+    completeness: { column: day, grain: daily, max_gaps: 0 }
 
   # =====================================================================
   # Apple Health — Event-level
@@ -314,6 +321,7 @@ tables:
     unique: [business_key_hash]
     freshness: { column: day, max_hours: 49 }
     row_count: { min_rows: 1 }
+    completeness: { column: day, grain: daily, max_gaps: 0 }
 
   body_fat:
     not_null: [business_key_hash, sk_date]
@@ -364,3 +372,4 @@ tables:
     value_range:
       temperature_max: { min: -50, max: 60 }
       temperature_min: { min: -60, max: 50 }
+    completeness: { column: day, grain: daily, max_gaps: 0 }

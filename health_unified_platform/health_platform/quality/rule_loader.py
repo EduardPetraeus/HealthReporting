@@ -18,6 +18,7 @@ _VALID_CHECK_TYPES = {
     "row_count",
     "value_range",
     "schema_drift",
+    "completeness",
 }
 
 _DEFAULT_RULES_PATH = (
@@ -164,6 +165,30 @@ def _validate_check_schema(table_name: str, check_type: str, check_value: Any) -
         for col in cols:
             if not is_safe_identifier(col):
                 raise ValueError(f"Invalid column '{col}' in {table_name}.schema_drift")
+
+    elif check_type == "completeness":
+        if not isinstance(check_value, dict):
+            raise ValueError(
+                f"Table '{table_name}'.completeness must be a dict with 'column', 'grain', 'max_gaps'"
+            )
+        if "column" not in check_value:
+            raise ValueError(f"Table '{table_name}'.completeness requires 'column' key")
+        if not is_safe_identifier(check_value["column"]):
+            raise ValueError(
+                f"Invalid column '{check_value['column']}' in {table_name}.completeness"
+            )
+        grain = check_value.get("grain", "daily")
+        if grain not in ("daily", "hourly"):
+            raise ValueError(
+                f"Table '{table_name}'.completeness.grain must be 'daily' or 'hourly', "
+                f"got '{grain}'"
+            )
+        max_gaps = check_value.get("max_gaps", 0)
+        if not isinstance(max_gaps, (int, float)) or max_gaps < 0:
+            raise ValueError(
+                f"Table '{table_name}'.completeness.max_gaps must be a non-negative number, "
+                f"got {max_gaps!r}"
+            )
 
 
 def list_tables(rules_path: Path | None = None) -> list[str]:

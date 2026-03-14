@@ -220,6 +220,250 @@ class TestSchemaDrift:
         assert len(failed) >= 1
 
 
+class TestCompleteness:
+    """Tests for the completeness check type."""
+
+    @pytest.fixture
+    def completeness_rules(self, tmp_path):
+        rules = {
+            "tables": {
+                "dq_complete": {
+                    "completeness": {"column": "day", "grain": "daily", "max_gaps": 0},
+                },
+                "dq_gaps": {
+                    "completeness": {"column": "day", "grain": "daily", "max_gaps": 0},
+                },
+                "dq_empty": {
+                    "completeness": {"column": "day", "grain": "daily", "max_gaps": 0},
+                },
+            }
+        }
+        path = tmp_path / "completeness_rules.yaml"
+        with open(path, "w") as f:
+            yaml.dump(rules, f)
+        return path
+
+    @pytest.fixture
+    def threshold_rules(self, tmp_path):
+        rules = {
+            "tables": {
+                "dq_gaps": {
+                    "completeness": {"column": "day", "grain": "daily", "max_gaps": 5},
+                },
+            }
+        }
+        path = tmp_path / "threshold_rules.yaml"
+        with open(path, "w") as f:
+            yaml.dump(rules, f)
+        return path
+
+    @pytest.fixture
+    def single_row_rules(self, tmp_path):
+        rules = {
+            "tables": {
+                "dq_single": {
+                    "completeness": {"column": "day", "grain": "daily", "max_gaps": 0},
+                },
+            }
+        }
+        path = tmp_path / "single_row_rules.yaml"
+        with open(path, "w") as f:
+            yaml.dump(rules, f)
+        return path
+
+    def test_passes_no_gaps(self, quality_db, completeness_rules):
+        checker = DataQualityChecker(quality_db, completeness_rules)
+        results = checker.run_table_checks("dq_complete")
+        comp_results = [r for r in results if r.check_type == "completeness"]
+        assert len(comp_results) == 1
+        assert comp_results[0].passed
+        assert comp_results[0].value == 0
+
+    def test_fails_with_gaps(self, quality_db, completeness_rules):
+        checker = DataQualityChecker(quality_db, completeness_rules)
+        results = checker.run_table_checks("dq_gaps")
+        comp_results = [r for r in results if r.check_type == "completeness"]
+        assert len(comp_results) == 1
+        assert not comp_results[0].passed
+        assert comp_results[0].value == 3
+
+    def test_gap_periods_reported(self, quality_db, completeness_rules):
+        checker = DataQualityChecker(quality_db, completeness_rules)
+        results = checker.run_table_checks("dq_gaps")
+        comp = [r for r in results if r.check_type == "completeness"][0]
+        assert comp.metadata is not None
+        gaps = comp.metadata["gap_periods"]
+        assert len(gaps) == 2
+        assert gaps[0]["gap_start"] == "2026-03-03"
+        assert gaps[0]["gap_end"] == "2026-03-03"
+        assert gaps[1]["gap_start"] == "2026-03-06"
+        assert gaps[1]["gap_end"] == "2026-03-07"
+
+    def test_reload_recommendations(self, quality_db, completeness_rules):
+        checker = DataQualityChecker(quality_db, completeness_rules)
+        results = checker.run_table_checks("dq_gaps")
+        comp = [r for r in results if r.check_type == "completeness"][0]
+        recs = comp.metadata["reload_recommendations"]
+        assert len(recs) == 2
+        assert all(r["table_name"] == "dq_gaps" for r in recs)
+        assert all(r["suggested_action"] == "reload" for r in recs)
+        assert recs[0]["gap_start"] == "2026-03-03"
+        assert recs[1]["gap_start"] == "2026-03-06"
+
+    def test_max_gaps_threshold_pass(self, quality_db, threshold_rules):
+        checker = DataQualityChecker(quality_db, threshold_rules)
+        results = checker.run_table_checks("dq_gaps")
+        comp_results = [r for r in results if r.check_type == "completeness"]
+        assert len(comp_results) == 1
+        assert comp_results[0].passed
+        assert comp_results[0].value == 3
+        assert comp_results[0].threshold == 5.0
+
+    def test_empty_table(self, quality_db, completeness_rules):
+        checker = DataQualityChecker(quality_db, completeness_rules)
+        results = checker.run_table_checks("dq_empty")
+        comp_results = [r for r in results if r.check_type == "completeness"]
+        assert len(comp_results) == 1
+        assert not comp_results[0].passed
+        assert "empty" in comp_results[0].message.lower()
+
+    def test_single_row_table(self, quality_db, single_row_rules):
+        quality_db.execute(
+            """
+            CREATE TABLE silver.dq_single (
+                business_key_hash VARCHAR NOT NULL,
+                sk_date INTEGER NOT NULL,
+                day DATE NOT NULL,
+                load_datetime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """
+        )
+        quality_db.execute(
+            """
+            INSERT INTO silver.dq_single VALUES
+                ('hash_1', 20260301, '2026-03-01', CURRENT_TIMESTAMP)
+        """
+        )
+        checker = DataQualityChecker(quality_db, single_row_rules)
+        results = checker.run_table_checks("dq_single")
+        comp_results = [r for r in results if r.check_type == "completeness"]
+        assert len(comp_results) == 1
+        assert comp_results[0].passed
+        assert comp_results[0].value == 0
+
+
+class TestQualityReportReloadRecommendations:
+    """Tests for the QualityReport.reload_recommendations property."""
+
+    @pytest.fixture
+    def gap_rules(self, tmp_path):
+        rules = {
+            "tables": {
+                "dq_gaps": {
+                    "completeness": {"column": "day", "grain": "daily", "max_gaps": 0},
+                },
+            }
+        }
+        path = tmp_path / "gap_rules.yaml"
+        with open(path, "w") as f:
+            yaml.dump(rules, f)
+        return path
+
+    @pytest.fixture
+    def clean_rules(self, tmp_path):
+        rules = {
+            "tables": {
+                "dq_complete": {
+                    "completeness": {"column": "day", "grain": "daily", "max_gaps": 0},
+                },
+            }
+        }
+        path = tmp_path / "clean_rules.yaml"
+        with open(path, "w") as f:
+            yaml.dump(rules, f)
+        return path
+
+    def test_report_aggregates_recommendations(self, quality_db, gap_rules):
+        checker = DataQualityChecker(quality_db, gap_rules)
+        report = checker.run_all_checks()
+        recs = report.reload_recommendations
+        assert len(recs) == 2
+        assert all(r["table_name"] == "dq_gaps" for r in recs)
+
+    def test_report_empty_when_no_gaps(self, quality_db, clean_rules):
+        checker = DataQualityChecker(quality_db, clean_rules)
+        report = checker.run_all_checks()
+        assert report.reload_recommendations == []
+
+
+class TestCompletenessRuleValidation:
+    """Tests for completeness rule validation in rule_loader."""
+
+    def test_valid_rule(self, tmp_path):
+        from health_platform.quality.rule_loader import load_rules
+
+        rules = {
+            "tables": {
+                "test_table": {
+                    "completeness": {"column": "day", "grain": "daily", "max_gaps": 0},
+                },
+            }
+        }
+        path = tmp_path / "valid_rules.yaml"
+        with open(path, "w") as f:
+            yaml.dump(rules, f)
+        loaded = load_rules(path)
+        assert "test_table" in loaded
+
+    def test_invalid_grain(self, tmp_path):
+        from health_platform.quality.rule_loader import load_rules
+
+        rules = {
+            "tables": {
+                "test_table": {
+                    "completeness": {"column": "day", "grain": "weekly", "max_gaps": 0},
+                },
+            }
+        }
+        path = tmp_path / "invalid_grain.yaml"
+        with open(path, "w") as f:
+            yaml.dump(rules, f)
+        with pytest.raises(ValueError, match="grain"):
+            load_rules(path)
+
+    def test_missing_column(self, tmp_path):
+        from health_platform.quality.rule_loader import load_rules
+
+        rules = {
+            "tables": {
+                "test_table": {
+                    "completeness": {"grain": "daily", "max_gaps": 0},
+                },
+            }
+        }
+        path = tmp_path / "missing_col.yaml"
+        with open(path, "w") as f:
+            yaml.dump(rules, f)
+        with pytest.raises(ValueError, match="column"):
+            load_rules(path)
+
+    def test_negative_max_gaps(self, tmp_path):
+        from health_platform.quality.rule_loader import load_rules
+
+        rules = {
+            "tables": {
+                "test_table": {
+                    "completeness": {"column": "day", "grain": "daily", "max_gaps": -1},
+                },
+            }
+        }
+        path = tmp_path / "neg_gaps.yaml"
+        with open(path, "w") as f:
+            yaml.dump(rules, f)
+        with pytest.raises(ValueError, match="max_gaps"):
+            load_rules(path)
+
+
 class TestNonexistentTable:
     def test_handled(self, quality_db, rules_path):
         checker = DataQualityChecker(quality_db, rules_path)

@@ -150,6 +150,59 @@ def quality_db(memory_db):
     """
     )
 
+    # Table with complete daily series (7 days, no gaps)
+    con.execute(
+        """
+        CREATE TABLE silver.dq_complete (
+            business_key_hash VARCHAR NOT NULL,
+            sk_date INTEGER NOT NULL,
+            day DATE NOT NULL,
+            score INTEGER,
+            load_datetime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """
+    )
+    con.execute(
+        """
+        INSERT INTO silver.dq_complete VALUES
+            ('hash_1', 20260301, '2026-03-01', 80, CURRENT_TIMESTAMP),
+            ('hash_2', 20260302, '2026-03-02', 82, CURRENT_TIMESTAMP),
+            ('hash_3', 20260303, '2026-03-03', 78, CURRENT_TIMESTAMP),
+            ('hash_4', 20260304, '2026-03-04', 85, CURRENT_TIMESTAMP),
+            ('hash_5', 20260305, '2026-03-05', 79, CURRENT_TIMESTAMP),
+            ('hash_6', 20260306, '2026-03-06', 81, CURRENT_TIMESTAMP),
+            ('hash_7', 20260307, '2026-03-07', 83, CURRENT_TIMESTAMP)
+    """
+    )
+
+    # Table with gaps: 8 dates present, 3 missing → 2 gap periods
+    # Present: 03-01, 03-02, 03-04, 03-05, 03-08, 03-09, 03-10, 03-11
+    # Missing: 03-03, 03-06, 03-07 → gaps: [03-03] and [03-06 to 03-07]
+    con.execute(
+        """
+        CREATE TABLE silver.dq_gaps (
+            business_key_hash VARCHAR NOT NULL,
+            sk_date INTEGER NOT NULL,
+            day DATE NOT NULL,
+            score INTEGER,
+            load_datetime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """
+    )
+    con.execute(
+        """
+        INSERT INTO silver.dq_gaps VALUES
+            ('hash_1', 20260301, '2026-03-01', 80, CURRENT_TIMESTAMP),
+            ('hash_2', 20260302, '2026-03-02', 82, CURRENT_TIMESTAMP),
+            ('hash_4', 20260304, '2026-03-04', 85, CURRENT_TIMESTAMP),
+            ('hash_5', 20260305, '2026-03-05', 79, CURRENT_TIMESTAMP),
+            ('hash_8', 20260308, '2026-03-08', 77, CURRENT_TIMESTAMP),
+            ('hash_9', 20260309, '2026-03-09', 84, CURRENT_TIMESTAMP),
+            ('hash_10', 20260310, '2026-03-10', 86, CURRENT_TIMESTAMP),
+            ('hash_11', 20260311, '2026-03-11', 81, CURRENT_TIMESTAMP)
+    """
+    )
+
     yield con
 
 
