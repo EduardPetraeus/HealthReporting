@@ -4,6 +4,25 @@
 
 ---
 
+## [Unreleased] — 2026-03-14
+
+### Fixed
+- **Security:** SQL injection in ingestion_engine.py cold-start path — escape single quotes in glob (PR #179)
+- **Security:** run_custom_query schema allowlist now catches comma-joined tables (PR #179)
+- **Security:** body_temperature dedup now prioritizes API over CSV source (PR #179)
+- **Security:** oura/state.py missing chmod(0o600) after write (PR #180)
+- **Security:** Non-streaming chat path missing `<user_question>` prompt injection tags (PR #180)
+- **Security:** Removed misleading `question.replace("---", "")` sanitization (PR #180)
+- **Security:** OAuth auth_code moved from class-level to server instance variable in all 3 connectors (PR #180)
+- **Security:** check_data_quality no longer leaks str(exc) to MCP callers (PR #180)
+- **Tests:** Fixed test_lifesum_pipeline parquet filename — food uses pdf_*.parquet from PDF pipeline (PR #179)
+
+### Added
+- 3-agent review pipeline: security-reviewer + code-reviewer + Gemini external review of PR #175-178
+- Audit reports in ~/build-logs/HealthReporting/audits/
+
+---
+
 ## [Unreleased] — 2026-03-13
 
 ### Fixed
