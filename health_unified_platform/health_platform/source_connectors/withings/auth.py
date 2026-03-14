@@ -44,8 +44,7 @@ def _load_credentials() -> tuple[str, str, str]:
     client_id = get_secret("WITHINGS_CLIENT_ID", fallback_env=False)
     client_secret = get_secret("WITHINGS_CLIENT_SECRET", fallback_env=False)
     redirect_uri = (
-        os.environ.get("WITHINGS_REDIRECT_URI")
-        or f"http://localhost:{CALLBACK_PORT}/callback"
+        os.environ.get("WITHINGS_REDIRECT_URI") or f"http://localhost:{CALLBACK_PORT}/callback"
     )
     if not client_id or not client_secret:
         raise ValueError(

@@ -81,8 +81,7 @@ def main() -> None:
         for endpoint_name, method_name, date_field in ENDPOINTS:
             if endpoint_name in state:
                 start_date = max(
-                    date.fromisoformat(state[endpoint_name])
-                    - timedelta(days=DELTA_DAYS),
+                    date.fromisoformat(state[endpoint_name]) - timedelta(days=DELTA_DAYS),
                     FULL_LOAD_START,
                 )
             else:
