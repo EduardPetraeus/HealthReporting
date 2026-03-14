@@ -31,8 +31,9 @@ from source_connectors.sundhed_dk.validator import (  # noqa: E402
     generate_validation_report,
     validate_parse_completeness,
 )
+from utils.paths import get_data_lake_root  # noqa: E402
 
-ARCHIVE_ROOT = "/Users/Shared/data_lake/min sundhed"
+ARCHIVE_ROOT = str(get_data_lake_root() / "min sundhed")
 DEBUG_DIR = Path(ARCHIVE_ROOT) / "debug"
 
 SECTIONS = [

@@ -13,7 +13,6 @@ Privacy rules:
 from __future__ import annotations
 
 import re
-from pathlib import Path
 
 import pytest
 from health_platform.source_connectors.sundhed_dk.pdf_parser import (
@@ -22,12 +21,13 @@ from health_platform.source_connectors.sundhed_dk.pdf_parser import (
     parse_medications_pdf,
     parse_vaccinations_pdf,
 )
+from health_platform.utils.paths import get_data_lake_root
 
 # ---------------------------------------------------------------------------
 # PDF file paths
 # ---------------------------------------------------------------------------
 
-_DOWNLOADS = Path("/Users/Shared/data_lake/min sundhed/downloads")
+_DOWNLOADS = get_data_lake_root() / "min sundhed" / "downloads"
 
 _MEDICATIONS_PDF = _DOWNLOADS / "medications" / "Medicin - sundhed.dk.pdf"
 _VACCINATIONS_PDF = _DOWNLOADS / "vaccinations" / "Vaccinationer - sundhed.dk.pdf"

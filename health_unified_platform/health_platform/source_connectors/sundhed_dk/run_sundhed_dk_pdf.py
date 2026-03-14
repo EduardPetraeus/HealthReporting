@@ -1,7 +1,7 @@
 """Ingest sundhed.dk PDF downloads into the data lake.
 
-Reads PDFs from /Users/Shared/data_lake/min sundhed/downloads/
-and writes Parquet files to /Users/Shared/data_lake/min sundhed/raw/
+Reads PDFs from <data_lake_root>/min sundhed/downloads/
+and writes Parquet files to <data_lake_root>/min sundhed/raw/
 
 Usage:
     HEALTH_ENV=dev python run_sundhed_dk_pdf.py
@@ -82,8 +82,10 @@ def _resolve_downloads_root() -> Path:
         fallback = os.getenv("SUNDHED_DK_DOWNLOADS_ROOT")
         if fallback:
             return Path(fallback)
-        # Default path
-        return Path("/Users/Shared/data_lake/min sundhed/downloads")
+        # Default path via utility
+        from health_platform.utils.paths import get_data_lake_root
+
+        return get_data_lake_root() / "min sundhed" / "downloads"
 
 
 def _parse_args() -> argparse.Namespace:

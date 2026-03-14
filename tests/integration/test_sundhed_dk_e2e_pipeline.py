@@ -15,6 +15,7 @@ from pathlib import Path
 
 import duckdb
 import pytest
+from health_platform.utils.paths import get_data_lake_root
 
 pytestmark = pytest.mark.integration
 
@@ -385,7 +386,7 @@ class TestStagingTableCleanup:
 # Wave 3: Real PDF E2E tests (skippable)
 # ---------------------------------------------------------------------------
 
-_DOWNLOADS = Path("/Users/Shared/data_lake/min sundhed/downloads")
+_DOWNLOADS = get_data_lake_root() / "min sundhed" / "downloads"
 
 
 @pytest.mark.skipif(
