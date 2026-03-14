@@ -17,7 +17,7 @@ from auth import get_access_token
 from client import OuraClient
 from health_platform.utils.audit_logger import AuditLogger
 from health_platform.utils.logging_config import get_logger
-from state import get_start_date, load_state, save_state, update_state
+from state import clean_state, get_start_date, load_state, update_state
 from writer import write_records
 
 logger = get_logger("run_oura")
@@ -70,6 +70,10 @@ def main() -> None:
         client = OuraClient(access_token)
         state = load_state()
 
+        # Remove ghost entries from state that no longer match active endpoints
+        valid_names = [ep[0] for ep in ENDPOINTS] + ["personal_info"]
+        state = clean_state(valid_names, state)
+
         # Fetch all dated endpoints
         for endpoint_name, method_name, date_field in ENDPOINTS:
             start_date = get_start_date(endpoint_name, state)
@@ -101,8 +105,6 @@ def main() -> None:
         audit.log_table(
             "oura.personal_info", "WRITE_PARQUET", rows_after=1, status="success"
         )
-
-        save_state(state)
 
     logger.info("Oura pipeline complete")
 

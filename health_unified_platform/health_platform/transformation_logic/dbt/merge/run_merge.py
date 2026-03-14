@@ -6,8 +6,11 @@ Usage:
     HEALTH_ENV=prd python run_merge.py silver/merge_apple_health_heart_rate.sql
 """
 
+from __future__ import annotations
+
 import argparse
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -18,6 +21,8 @@ from health_platform.utils.logging_config import get_logger
 from health_platform.utils.path_resolver import get_project_root
 
 logger = get_logger("run_merge")
+
+_BRONZE_TABLE_RE = re.compile(r"\bFROM\s+(bronze\.stg_\w+)", re.IGNORECASE)
 
 
 def load_config() -> dict:
@@ -47,6 +52,12 @@ def split_statements(sql: str) -> list[str]:
         if stmt:
             statements.append(stmt)
     return statements
+
+
+def _extract_bronze_table(sql: str) -> str | None:
+    """Extract the bronze source table name from a merge SQL file."""
+    match = _BRONZE_TABLE_RE.search(sql)
+    return match.group(1) if match else None
 
 
 def _source_system_from_path(sql_file_name: str) -> str:
@@ -84,6 +95,28 @@ def main():
     with AuditLogger("run_merge", "silver", source_system) as audit:
         con = duckdb.connect(db_path)
         try:
+            # Guard: skip merge if the bronze source table does not exist
+            bronze_table = _extract_bronze_table(sql)
+            if bronze_table:
+                try:
+                    row_count = con.execute(
+                        f"SELECT count(*) FROM {bronze_table}"
+                    ).fetchone()[0]
+                except duckdb.CatalogException:
+                    logger.warning(
+                        f"Bronze table {bronze_table} does not exist — skipping merge."
+                    )
+                    audit.log_table(sql_path.stem, "MERGE", status="skipped_no_bronze")
+                    return
+                if row_count == 0:
+                    logger.warning(
+                        f"Bronze table {bronze_table} is empty — skipping merge."
+                    )
+                    audit.log_table(
+                        sql_path.stem, "MERGE", status="skipped_empty_bronze"
+                    )
+                    return
+
             for i, stmt in enumerate(statements, 1):
                 first_line = stmt.lstrip().split("\n")[0][:80]
                 logger.info(f"[{i}/{len(statements)}] {first_line}...")
