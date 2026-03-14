@@ -103,8 +103,6 @@ def _refresh_tokens(tokens: dict, client_id: str, client_secret: str) -> dict:
 class _CallbackHandler(BaseHTTPRequestHandler):
     """Minimal HTTP handler that captures the OAuth authorization code."""
 
-    auth_code: str | None = None
-
     def do_GET(self) -> None:
         params = parse_qs(urlparse(self.path).query)
         if "code" in params:
@@ -115,7 +113,7 @@ class _CallbackHandler(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(b"Invalid state parameter (CSRF check failed).")
                 return
-            _CallbackHandler.auth_code = params["code"][0]
+            self.server.auth_code = params["code"][0]
             self.send_response(200)
             self.end_headers()
             self.wfile.write(b"Authorization successful. You can close this tab.")
@@ -146,10 +144,10 @@ def _run_auth_flow(client_id: str, client_secret: str, redirect_uri: str) -> dic
     logger.info("Waiting for OAuth callback on port %d...", CALLBACK_PORT)
     server = HTTPServer(("localhost", CALLBACK_PORT), _CallbackHandler)
     server.expected_state = state
+    server.auth_code = None
     server.handle_request()
 
-    code = _CallbackHandler.auth_code
-    _CallbackHandler.auth_code = None  # Clear after capture to prevent reuse
+    code = server.auth_code
     if not code:
         raise RuntimeError("No authorization code received in callback.")
 

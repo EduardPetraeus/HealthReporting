@@ -28,6 +28,7 @@ def save_state(state: dict) -> None:
     """Persists fetch state to disk."""
     STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
     STATE_FILE.write_text(json.dumps(state, indent=2))
+    STATE_FILE.chmod(0o600)
     logger.info("State saved to %s", STATE_FILE)
 
 
