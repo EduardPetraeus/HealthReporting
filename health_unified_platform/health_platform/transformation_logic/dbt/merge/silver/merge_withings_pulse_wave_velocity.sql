@@ -19,14 +19,14 @@ WITH deduped AS (
 SELECT
     (year(date::TIMESTAMP::DATE) * 10000 + month(date::TIMESTAMP::DATE) * 100 + day(date::TIMESTAMP::DATE))::INTEGER AS sk_date,
     date::TIMESTAMP AS timestamp,
-    ROUND(TRY_CAST("PWV (m/s)" AS DOUBLE), 2) AS pwv_m_per_s,
+    ROUND(TRY_CAST(value AS DOUBLE), 2) AS pwv_m_per_s,
     'withings' AS source_name,
     md5(
         coalesce(cast(date AS VARCHAR), '') || '||' || 'withings'
     ) AS business_key_hash,
     md5(
         coalesce(cast(date AS VARCHAR), '') || '||' ||
-        coalesce(cast("PWV (m/s)" AS VARCHAR), '')
+        coalesce(cast(value AS VARCHAR), '')
     ) AS row_hash,
     current_timestamp AS load_datetime
 FROM deduped

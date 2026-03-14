@@ -17,22 +17,17 @@ PYTHON="${REPO_ROOT}/.venv/bin/python"
 SOURCE_DIR="/Users/Shared/data_lake/withings/csv"
 TARGET_BASE="/Users/Shared/data_lake/withings/raw"
 
-# Map: csv_filename -> endpoint_name (writes to {endpoint}_csv/ directories)
-declare -A CSV_MAP
-CSV_MAP["weight.csv"]="weight_csv"
-CSV_MAP["bp.csv"]="blood_pressure_csv"
-CSV_MAP["sleep.csv"]="sleep_csv"
-CSV_MAP["body_temperature.csv"]="body_temperature_csv"
-CSV_MAP["signal.csv"]="signal"
-CSV_MAP["pwv.csv"]="pwv"
-CSV_MAP["activities.csv"]="activities_csv"
+# Parallel arrays (bash 3.2 compatible) — csv_filename:endpoint_name
+CSV_FILES="weight.csv bp.csv sleep.csv body_temperature.csv signal.csv pwv.csv activities.csv"
+ENDPOINTS="weight_csv blood_pressure_csv sleep_csv body_temperature_csv signal pwv activities_csv"
 
 echo "=== Withings CSV to Parquet Conversion ==="
 echo "Source: ${SOURCE_DIR}"
 echo ""
 
-for csv_file in "${!CSV_MAP[@]}"; do
-    endpoint="${CSV_MAP[$csv_file]}"
+set -- ${ENDPOINTS}
+for csv_file in ${CSV_FILES}; do
+    endpoint="$1"; shift
     input_path="${SOURCE_DIR}/${csv_file}"
     output_dir="${TARGET_BASE}/${endpoint}"
 

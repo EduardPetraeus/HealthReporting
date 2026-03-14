@@ -369,17 +369,21 @@ sources:
   # Withings endpoints (OAuth2 API, fetched via source_connectors/withings/run_withings.py)
   - name: "withings_weight"
     # Weight and body composition (fat%, muscle%, bone%, hydration%)
+    # hive_partitioning false: directory has both flat CSV and Hive-partitioned API files
     relative_path: "withings/raw/weight/**/*.parquet"
     source_type: "parquet"
     target_schema: "bronze"
     target_table: "stg_withings_weight"
+    hive_partitioning: false
 
   - name: "withings_blood_pressure"
     # Blood pressure readings (systolic, diastolic, pulse)
+    # hive_partitioning false: directory has both flat CSV and Hive-partitioned API files
     relative_path: "withings/raw/blood_pressure/**/*.parquet"
     source_type: "parquet"
     target_schema: "bronze"
     target_table: "stg_withings_blood_pressure"
+    hive_partitioning: false
 
   - name: "withings_temperature"
     # Body temperature measurements
@@ -412,6 +416,64 @@ sources:
     source_type: "parquet"
     target_schema: "bronze"
     target_table: "stg_withings_body_temperature"
+
+  # Withings API expansion — activity, workouts (no previous config)
+  - name: "withings_activity"
+    # Daily aggregated activity (steps, distance, calories, HR zones)
+    relative_path: "withings/raw/activity/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_withings_activity"
+
+  - name: "withings_intraday_activity"
+    # Minute-level activity data (steps, HR, calories)
+    relative_path: "withings/raw/intraday_activity/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_withings_intraday_activity"
+
+  - name: "withings_workouts"
+    # Workout sessions with intensity, HR, calories
+    relative_path: "withings/raw/workouts/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_withings_workouts"
+
+  # Withings CSV exports (historical data, separate from API to avoid column conflicts)
+  - name: "withings_weight_csv"
+    # Historical weight CSV with columns: Date, Weight (kg), Fat mass (kg), etc.
+    relative_path: "withings/raw/weight_csv/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_withings_weight_csv"
+
+  - name: "withings_blood_pressure_csv"
+    # Historical BP CSV with columns: Date, Systolic, Diastolic, Heart rate
+    relative_path: "withings/raw/blood_pressure_csv/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_withings_blood_pressure_csv"
+
+  - name: "withings_sleep_csv"
+    # Historical sleep CSV with columns: from, to, Light sleep (s), Deep sleep (s), etc.
+    relative_path: "withings/raw/sleep_csv/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_withings_sleep_csv"
+
+  - name: "withings_body_temperature_csv"
+    # Historical body temperature CSV with columns: date, value (°C)
+    relative_path: "withings/raw/body_temperature_csv/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_withings_body_temperature_csv"
+
+  - name: "withings_activities_csv"
+    # Historical daily activity CSV
+    relative_path: "withings/raw/activities_csv/**/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_withings_activities_csv"
 
   # Strava endpoints (OAuth2 API, fetched via source_connectors/strava/run_strava.py)
   - name: "strava_activities"
@@ -537,12 +599,6 @@ sources:
     target_table: "stg_withings_heart_list"
 
   # Lifesum CSV expansion (A8)
-  - name: "lifesum_bodymeasures"
-    relative_path: "lifesum/parquet/bodymeasures/*.parquet"
-    source_type: "parquet"
-    target_schema: "bronze"
-    target_table: "stg_lifesum_bodymeasures"
-
   - name: "lifesum_exercise"
     relative_path: "lifesum/parquet/exercise/*.parquet"
     source_type: "parquet"

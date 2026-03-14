@@ -157,6 +157,8 @@ def run_ingestion():
                 > 0
             )
 
+            hive = str(source.get("hive_partitioning", True)).lower()
+
             if not table_exists:
                 # cold start: full load to create the table
                 logger.info(
@@ -168,7 +170,7 @@ def run_ingestion():
                         *,
                         current_timestamp as _ingested_at,
                         '{active_env}' as _source_env
-                    FROM read_parquet('{input_glob}', hive_partitioning=True, union_by_name=True)
+                    FROM read_parquet('{input_glob}', hive_partitioning={hive}, union_by_name=True)
                 """
                 try:
                     con.execute(query)
@@ -230,7 +232,7 @@ def run_ingestion():
                     columns(c -> c NOT IN ('_ingested_at', '_source_env')),
                     current_timestamp as _ingested_at,
                     '{active_env}' as _source_env
-                FROM read_parquet({file_list}, hive_partitioning=True, union_by_name=True)
+                FROM read_parquet({file_list}, hive_partitioning={hive}, union_by_name=True)
             """
 
             try:
