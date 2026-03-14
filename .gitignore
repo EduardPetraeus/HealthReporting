@@ -19,6 +19,7 @@ export_cda.xml
 *.parquet
 *.delta
 *.csv
+!health_unified_platform/health_environment/config/*.csv
 *.xml
 
 # dbt artifacts
