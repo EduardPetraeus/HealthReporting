@@ -85,6 +85,11 @@ def ingest_lab_pdfs(pdf_dir: Path, output_dir: Path) -> Path:
 
         # Use format already detected during parse_pdf (avoids opening PDF twice)
         lab_name = _format_to_lab_name(parser.last_detected_format)
+        test_type = (
+            "microbiome"
+            if parser.last_detected_format == "gettested_microbiome"
+            else "blood_panel"
+        )
 
         for marker in markers:
             business_key = _compute_hash(
@@ -104,7 +109,7 @@ def ingest_lab_pdfs(pdf_dir: Path, output_dir: Path) -> Path:
                 {
                     "test_id": test_id,
                     "test_date": test_date,
-                    "test_type": "blood_panel",
+                    "test_type": test_type,
                     "test_name": pdf_path.stem,
                     "lab_name": lab_name,
                     "lab_accreditation": None,
@@ -171,6 +176,7 @@ def _format_to_lab_name(fmt: str) -> str:
     """Map format identifier to human-readable lab name."""
     mapping = {
         "gettested": "GetTested",
+        "gettested_microbiome": "GetTested",
         "sundhed_dk": "sundhed.dk",
         "unknown": "Unknown Lab",
     }
@@ -183,9 +189,58 @@ def _format_to_lab_name(fmt: str) -> str:
 # blood_count's "hemoglobin", and "microalbumin" must match kidney before
 # liver's "albumin".
 _CATEGORY_PATTERNS: list[tuple[str, list[str]]] = [
+    # Microbiome-specific categories (more specific, checked first)
+    (
+        "aerobic_bacteria",
+        [
+            "e. coli",
+            "e.coli",
+            "escherichia",
+            "enterococcus",
+            "klebsiella",
+            "proteus",
+            "pseudomonas",
+            "staphylococcus",
+            "streptococcus",
+            "citrobacter",
+            "enterobacter",
+        ],
+    ),
+    (
+        "anaerobic_bacteria",
+        ["bifidobacterium", "lactobacillus", "bacteroides", "clostridium"],
+    ),
+    ("mycological", ["candida", "geotrichum", "yeast", "gær", "svamp"]),
+    (
+        "digestive_residues",
+        [
+            "fat content",
+            "fedt",
+            "nitrogen",
+            "sugar",
+            "sukker",
+            "water content",
+            "vand",
+            "stool ph",
+            "ph-værdi",
+            "consistency",
+        ],
+    ),
+    (
+        "gut_inflammation",
+        ["calprotectin", "alpha-1 antitrypsin", "a1-antitrypsin"],
+    ),
+    ("gut_permeability", ["zonulin"]),
+    ("immune_markers", ["secretory iga", "s-iga", "siga"]),
+    ("stress_intolerance", ["histamin"]),
+    (
+        "digestive_function",
+        ["pancreatic elastase", "elastase", "bile acid", "galdesyre"],
+    ),
+    # Blood panel categories
     ("lipids", ["cholesterol", "ldl", "hdl", "triglycerid", "apolipoprotein"]),
     ("glucose", ["glucose", "hba1c", "hemoglobin a1c", "blodsukker"]),
-    ("gut_health", ["elastase", "zonulin", "iga", "microbiome", "flora"]),
+    ("gut_health", ["microbiome", "flora"]),
     (
         "kidney",
         [

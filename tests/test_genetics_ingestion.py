@@ -1,10 +1,10 @@
 """Tests for 23andMe genetics ingestion pipeline.
 
 Covers:
-- GeneticsPdfParser: format detection, health/haplogroup parsing
+- GeneticsPdfParser: format detection, health/haplogroup/ancestry/neanderthal parsing
 - parse_ancestry_csv: CSV parsing, segment_length computation
 - parse_family_tree_json: JSON flattening, side detection
-- ingest_genetics_data: orchestration, parquet output
+- ingest_genetics_data: orchestration, parquet output (incl. ancestry_composition, genetic_traits)
 - query_genetics: MCP tool with in-memory DuckDB
 """
 
@@ -67,9 +67,13 @@ class TestGeneticsPdfParser:
         text = "Paternal Haplogroup Y-DNA 23andMe"
         assert self.parser.detect_format(text) == "23andme_haplogroup"
 
-    def test_detect_format_skip_neanderthal(self):
+    def test_detect_format_neanderthal(self):
         text = "Neanderthal Ancestry 23andMe"
-        assert self.parser.detect_format(text) == "skip"
+        assert self.parser.detect_format(text) == "23andme_neanderthal"
+
+    def test_detect_format_ancestry_composition(self):
+        text = "Ancestry Composition 23andMe European"
+        assert self.parser.detect_format(text) == "23andme_ancestry"
 
     def test_detect_format_skip_reports_summary(self):
         text = "Reports Summary 23andMe overview"
@@ -226,9 +230,13 @@ class TestGeneticsPdfParser:
         assert r["variant_detected"] is False
 
     @patch("health_platform.source_connectors.genetics.pdf_parser.pdfplumber")
-    def test_parse_pdf_skip_neanderthal(self, mock_pdfplumber):
+    def test_parse_pdf_neanderthal(self, mock_pdfplumber):
         mock_page = MagicMock()
-        mock_page.extract_text.return_value = "Neanderthal Ancestry 23andMe"
+        mock_page.extract_text.return_value = (
+            "Your Neanderthal Ancestry\n"
+            "You have 312 Neanderthal variants.\n"
+            "You have more variants than 96% of customers.\n"
+        )
         mock_pdf = MagicMock()
         mock_pdf.pages = [mock_page]
         mock_pdf.__enter__ = MagicMock(return_value=mock_pdf)
@@ -236,7 +244,37 @@ class TestGeneticsPdfParser:
         mock_pdfplumber.open.return_value = mock_pdf
 
         results = self.parser.parse_pdf(Path("Neanderthal - 23andMe.pdf"))
-        assert len(results) == 0
+        assert len(results) == 1
+        r = results[0]
+        assert r["category"] == "neanderthal"
+        assert r["trait_name"] == "neanderthal_ancestry"
+        assert r["result_numeric"] == 312.0
+        assert "312" in r["result_value"]
+
+    @patch("health_platform.source_connectors.genetics.pdf_parser.pdfplumber")
+    def test_parse_pdf_ancestry_composition(self, mock_pdfplumber):
+        mock_page = MagicMock()
+        mock_page.extract_text.return_value = (
+            "Ancestry Composition\n"
+            "Your ancestry at 50% confidence\n"
+            "Scandinavian  84.4%\n"
+            "Finnish  3.2%\n"
+            "British & Irish  2.1%\n"
+        )
+        mock_pdf = MagicMock()
+        mock_pdf.pages = [mock_page]
+        mock_pdf.__enter__ = MagicMock(return_value=mock_pdf)
+        mock_pdf.__exit__ = MagicMock(return_value=False)
+        mock_pdfplumber.open.return_value = mock_pdf
+
+        results = self.parser.parse_pdf(Path("Ancestry Composition - 23andMe.pdf"))
+        assert len(results) == 3
+        populations = {r["population"] for r in results}
+        assert "Scandinavian" in populations
+        assert "Finnish" in populations
+        assert results[0]["category"] == "ancestry"
+        assert results[0]["percentage"] == 84.4
+        assert results[0]["confidence_level"] == "50%"
 
 
 # ====================================================================
@@ -468,6 +506,8 @@ class TestGeneticsIngestion:
                 "variant_detected": False,
             }
         ]
+        # Default format routes to health_findings
+        mock_parser.last_detected_format = "23andme_health_risk"
         mock_parser_class.return_value = mock_parser
 
         with (
@@ -536,6 +576,123 @@ class TestGeneticsIngestion:
             assert outputs["stg_23andme_health_reports"].exists()
             assert outputs["stg_23andme_ancestry"].exists()
             assert outputs["stg_23andme_family_tree"].exists()
+
+    @patch(
+        "health_platform.source_connectors.genetics.genetics_ingestion.GeneticsPdfParser"
+    )
+    def test_ingestion_ancestry_composition_parquet(self, mock_parser_class):
+        """Test that ancestry PDF findings produce ancestry_composition parquet."""
+        mock_parser = MagicMock()
+        mock_parser.parse_pdf.return_value = [
+            {
+                "report_name": "Ancestry Composition",
+                "category": "ancestry",
+                "population": "Scandinavian",
+                "region": "Northwestern European",
+                "percentage": 84.4,
+                "confidence_level": "50%",
+            }
+        ]
+        mock_parser.last_detected_format = "23andme_ancestry"
+        mock_parser_class.return_value = mock_parser
+
+        with (
+            tempfile.TemporaryDirectory() as input_dir,
+            tempfile.TemporaryDirectory() as output_dir,
+        ):
+            input_path = Path(input_dir)
+            output_path = Path(output_dir)
+            (input_path / "Ancestry Composition - 23andMe.pdf").touch()
+
+            from health_platform.source_connectors.genetics.genetics_ingestion import (
+                ingest_genetics_data,
+            )
+
+            outputs = ingest_genetics_data(input_path, output_path)
+
+            assert "stg_23andme_ancestry_composition" in outputs
+            assert outputs["stg_23andme_ancestry_composition"].exists()
+            # Should NOT appear in health reports
+            assert "stg_23andme_health_reports" not in outputs
+
+    @patch(
+        "health_platform.source_connectors.genetics.genetics_ingestion.GeneticsPdfParser"
+    )
+    def test_ingestion_neanderthal_traits_parquet(self, mock_parser_class):
+        """Test that neanderthal PDF findings produce genetic_traits parquet."""
+        mock_parser = MagicMock()
+        mock_parser.parse_pdf.return_value = [
+            {
+                "report_name": "Neanderthal",
+                "category": "neanderthal",
+                "trait_name": "neanderthal_ancestry",
+                "result_value": "312 Neanderthal variants",
+                "result_numeric": 312.0,
+                "gene": None,
+                "snp_id": None,
+                "genotype": None,
+            }
+        ]
+        mock_parser.last_detected_format = "23andme_neanderthal"
+        mock_parser_class.return_value = mock_parser
+
+        with (
+            tempfile.TemporaryDirectory() as input_dir,
+            tempfile.TemporaryDirectory() as output_dir,
+        ):
+            input_path = Path(input_dir)
+            output_path = Path(output_dir)
+            (input_path / "Neanderthal - 23andMe.pdf").touch()
+
+            from health_platform.source_connectors.genetics.genetics_ingestion import (
+                ingest_genetics_data,
+            )
+
+            outputs = ingest_genetics_data(input_path, output_path)
+
+            assert "stg_23andme_genetic_traits" in outputs
+            assert outputs["stg_23andme_genetic_traits"].exists()
+            assert "stg_23andme_health_reports" not in outputs
+
+    @patch(
+        "health_platform.source_connectors.genetics.genetics_ingestion.GeneticsPdfParser"
+    )
+    def test_ingestion_wellness_dual_output(self, mock_parser_class):
+        """Test that wellness PDFs produce BOTH health_findings AND genetic_traits."""
+        mock_parser = MagicMock()
+        mock_parser.parse_pdf.return_value = [
+            {
+                "report_name": "Muscle Composition",
+                "category": "wellness",
+                "condition": "Muscle Composition",
+                "gene": "ACTN3",
+                "snp_id": "rs1815739",
+                "genotype": "CT",
+                "risk_level": "informational",
+                "result_summary": "Common in elite power athletes",
+                "variant_detected": True,
+            }
+        ]
+        mock_parser.last_detected_format = "23andme_wellness"
+        mock_parser_class.return_value = mock_parser
+
+        with (
+            tempfile.TemporaryDirectory() as input_dir,
+            tempfile.TemporaryDirectory() as output_dir,
+        ):
+            input_path = Path(input_dir)
+            output_path = Path(output_dir)
+            (input_path / "Muscle Composition - 23andMe.pdf").touch()
+
+            from health_platform.source_connectors.genetics.genetics_ingestion import (
+                ingest_genetics_data,
+            )
+
+            outputs = ingest_genetics_data(input_path, output_path)
+
+            # Wellness goes to BOTH streams
+            assert "stg_23andme_health_reports" in outputs
+            assert "stg_23andme_genetic_traits" in outputs
 
 
 # ====================================================================

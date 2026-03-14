@@ -1,0 +1,97 @@
+metric:
+  name: microbiome
+  display_name: "Microbiome Panel"
+  description: >
+    Microbiome stool test markers from GetTested Gut Microbiome XL panel.
+    Covers aerobic and anaerobic bacteria counts, gut inflammation markers,
+    intestinal permeability, and digestive function indicators.
+  category: lab_results
+  source_table: silver.lab_results
+  source_column: value_numeric
+  grain: per_marker
+  business_key: "test_id + marker_name"
+  unit: "varies by marker"
+  filter: "test_type = 'microbiome'"
+
+  computations:
+    aerobic_bacteria:
+      sql: >
+        SELECT marker_name, value_numeric, unit, status
+        FROM silver.lab_results
+        WHERE test_type = 'microbiome'
+          AND marker_category = 'aerobic_bacteria'
+        ORDER BY marker_name
+      description: "Total aerobic bacterial colony counts"
+      unit: "CFU/g"
+      data_type: numeric
+      is_log_scale: true
+
+    anaerobic_bacteria:
+      sql: >
+        SELECT marker_name, value_numeric, unit, status
+        FROM silver.lab_results
+        WHERE test_type = 'microbiome'
+          AND marker_category = 'anaerobic_bacteria'
+        ORDER BY marker_name
+      description: "Total anaerobic bacterial colony counts"
+      unit: "CFU/g"
+      data_type: numeric
+      is_log_scale: true
+
+    gut_inflammation:
+      sql: >
+        SELECT marker_name, value_numeric, unit, status
+        FROM silver.lab_results
+        WHERE test_type = 'microbiome'
+          AND marker_category = 'gut_inflammation'
+        ORDER BY marker_name
+      description: "Calprotectin and Alpha-1 antitrypsin levels"
+
+    gut_permeability:
+      sql: >
+        SELECT value_numeric, unit, status
+        FROM silver.lab_results
+        WHERE test_type = 'microbiome'
+          AND marker_category = 'gut_permeability'
+      description: "Zonulin level indicating intestinal permeability"
+
+    digestive_function:
+      sql: >
+        SELECT marker_name, value_numeric, unit, status
+        FROM silver.lab_results
+        WHERE test_type = 'microbiome'
+          AND marker_category = 'digestive_function'
+        ORDER BY marker_name
+      description: "Pancreatic elastase and bile acid levels"
+
+    all_markers:
+      sql: >
+        SELECT test_date, marker_name, marker_category, value_numeric,
+               unit, reference_min, reference_max, status
+        FROM silver.lab_results
+        WHERE test_type = 'microbiome'
+        ORDER BY marker_category, marker_name
+
+    out_of_range:
+      sql: >
+        SELECT test_date, marker_name, marker_category, value_numeric,
+               unit, reference_min, reference_max, status
+        FROM silver.lab_results
+        WHERE test_type = 'microbiome'
+          AND status != 'normal'
+        ORDER BY marker_category, marker_name
+
+  related_metrics:
+    - { metric: lab_results, relationship: "Microbiome is a subset of lab results", lag: 0 }
+    - { metric: supplements, relationship: "Probiotic and prebiotic supplementation affects microbiome", lag: 14 }
+    - { metric: sleep_score, relationship: "Gut health correlates with sleep quality via gut-brain axis", lag: 0 }
+
+  examples:
+    - question: "What do my gut bacteria levels look like?"
+      tool: "query_health(metric='microbiome', computation='all_markers')"
+    - question: "Are any microbiome markers out of range?"
+      tool: "query_health(metric='microbiome', computation='out_of_range')"
+    - question: "What is my calprotectin level?"
+      tool: "query_health(metric='microbiome', computation='gut_inflammation')"
+    - question: "How is my gut permeability?"
+      tool: "query_health(metric='microbiome', computation='gut_permeability')"

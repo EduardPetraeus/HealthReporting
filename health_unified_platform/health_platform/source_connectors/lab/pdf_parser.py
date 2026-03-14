@@ -1,7 +1,8 @@
-"""PDF parser for blood test lab results.
+"""PDF parser for lab results (blood tests and microbiome stool tests).
 
-Supports two formats:
-  - GetTested (gettested.dk / gettested.se): tabular blood panel PDFs
+Supports three formats:
+  - GetTested blood panel (gettested.dk / gettested.se): tabular blood panel PDFs
+  - GetTested microbiome (gettested.dk): stool test PDFs with bacterial counts
   - sundhed.dk: Danish national health portal lab result PDFs
 
 Extracts per-marker rows with value, unit, reference range, and status.
@@ -22,6 +23,25 @@ logger = get_logger("lab_pdf_parser")
 # Regex for Danish number format: "4,5" or "1.234,5"
 _DANISH_NUMBER_RE = re.compile(r"^-?\d[\d.]*,\d+$")
 
+# Regex for scientific notation: "2.0 × 10⁶", "2.0 x 10^6", "2,0 × 10⁶"
+# Supports unicode superscripts (⁰¹²³⁴⁵⁶⁷⁸⁹) and caret notation (^6)
+_SCIENTIFIC_NOTATION_RE = re.compile(
+    r"(?P<coeff>[\d]+[.,]?\d*)"  # coefficient: 2.0 or 2,0
+    r"\s*[×xX]\s*"  # multiplication sign: × or x
+    r"10"  # base 10
+    r"(?:"
+    r"\^(?P<exp_caret>\d+)"  # caret exponent: ^6
+    r"|"
+    r"(?P<exp_super>[⁰¹²³⁴⁵⁶⁷⁸⁹]+)"  # unicode superscript exponent: ⁶
+    r")"
+)
+
+# Map unicode superscript digits to normal digits
+_SUPERSCRIPT_MAP = str.maketrans("⁰¹²³⁴⁵⁶⁷⁸⁹", "0123456789")
+
+# Regex for below-detection-limit values: "< 1.0 x 10^4", "< 10000"
+_BELOW_DETECTION_RE = re.compile(r"^<\s*(.+)$")
+
 # Regex for reference range patterns: "3.5-5.0", "3,5 - 5,0", "< 50", "> 200"
 _RANGE_DASH_RE = re.compile(r"(?P<min>[\d.,]+)\s*[-–—]\s*(?P<max>[\d.,]+)")
 _RANGE_LT_RE = re.compile(r"<\s*(?P<max>[\d.,]+)")
@@ -41,6 +61,7 @@ def _parse_danish_number(text: str) -> Optional[float]:
         return None
 
     text = text.strip()
+    original = text  # preserve for scientific notation fallback
 
     # Danish format: dots as thousands separator, comma as decimal
     if _DANISH_NUMBER_RE.match(text):
@@ -53,7 +74,46 @@ def _parse_danish_number(text: str) -> Optional[float]:
     try:
         return float(text)
     except ValueError:
+        # Fallback: try scientific notation (e.g. "2.0 × 10⁶")
+        return _parse_scientific_notation(original)
+
+
+def _parse_scientific_notation(text: str) -> Optional[float]:
+    """Parse scientific notation commonly found in microbiome PDFs.
+
+    Handles formats like:
+        "2.0 × 10⁶"  -> 2000000.0  (unicode superscript)
+        "2.0 x 10^6"  -> 2000000.0  (caret notation)
+        "2,0 × 10⁶"  -> 2000000.0  (Danish decimal comma)
+
+    Returns None if the text does not match scientific notation.
+    """
+    if not text or not text.strip():
         return None
+
+    match = _SCIENTIFIC_NOTATION_RE.search(text.strip())
+    if not match:
+        return None
+
+    # Parse coefficient (handle Danish comma decimal)
+    coeff_str = match.group("coeff").replace(",", ".")
+    try:
+        coeff = float(coeff_str)
+    except ValueError:
+        return None
+
+    # Parse exponent from either caret or unicode superscript
+    exp_caret = match.group("exp_caret")
+    exp_super = match.group("exp_super")
+
+    if exp_caret is not None:
+        exponent = int(exp_caret)
+    elif exp_super is not None:
+        exponent = int(exp_super.translate(_SUPERSCRIPT_MAP))
+    else:
+        return None
+
+    return coeff * (10**exponent)
 
 
 def _parse_reference_range(
@@ -147,8 +207,16 @@ class LabPdfParser:
     """
 
     # Known format detection keywords
-    # sundhed.dk checked first — more specific than GetTested generic terms
+    # Order: sundhed.dk → microbiome → gettested (most specific first)
     _SUNDHED_DK_KEYWORDS = ["sundhed.dk", "sundhed dk", "min sundhed", "e-journal"]
+    _MICROBIOME_KEYWORDS = [
+        "mikrobiom",
+        "microbiome",
+        "afføringsprøve",
+        "stool test",
+        "fæces",
+        "feces",
+    ]
     _GETTESTED_KEYWORDS = ["gettested", "bodypanel", "analysesvar"]
 
     def __init__(self) -> None:
@@ -157,19 +225,25 @@ class LabPdfParser:
     def detect_format(self, text: str) -> str:
         """Detect the lab PDF format from extracted text.
 
-        Checks sundhed.dk first (more specific), then GetTested.
+        Check order: sundhed.dk → microbiome → gettested (most specific first).
+        Microbiome PDFs also contain "gettested" keywords, so microbiome
+        must be checked before the generic gettested match.
 
         Args:
             text: Full text extracted from the PDF.
 
         Returns:
-            'gettested', 'sundhed_dk', or 'unknown'.
+            'gettested', 'gettested_microbiome', 'sundhed_dk', or 'unknown'.
         """
         lower = text.lower()
 
         for keyword in self._SUNDHED_DK_KEYWORDS:
             if keyword in lower:
                 return "sundhed_dk"
+
+        for keyword in self._MICROBIOME_KEYWORDS:
+            if keyword in lower:
+                return "gettested_microbiome"
 
         for keyword in self._GETTESTED_KEYWORDS:
             if keyword in lower:
@@ -208,6 +282,8 @@ class LabPdfParser:
         logger.info("Detected format '%s' for %s", fmt, path.name)
 
         if fmt == "gettested":
+            return self._parse_gettested(tables, full_text)
+        elif fmt == "gettested_microbiome":
             return self._parse_gettested(tables, full_text)
         elif fmt == "sundhed_dk":
             return self._parse_sundhed_dk(tables, full_text)
@@ -430,7 +506,14 @@ class LabPdfParser:
             return None
 
         value_text = _cell(col_map["value"])
-        value_numeric = _parse_danish_number(value_text) if value_text else None
+
+        # Handle below-detection-limit values: "< 1.0 x 10^4", "< 10000"
+        below_match = _BELOW_DETECTION_RE.match(value_text) if value_text else None
+        if below_match:
+            # Keep value_text as-is (e.g. "< 1.0 x 10^4"), set numeric to None
+            value_numeric = None
+        else:
+            value_numeric = _parse_danish_number(value_text) if value_text else None
 
         unit = _cell(col_map["unit"])
         reference_text = _cell(col_map["reference"])

@@ -1,10 +1,12 @@
 """Parse 23andMe health report PDFs into structured findings.
 
-Handles three PDF report types:
+Handles PDF report types:
 - Health risk reports (Alzheimer's, Parkinson's, T2D, etc.)
 - Carrier status reports (Hemochromatosis, Thrombophilia, etc.)
 - Wellness/trait reports (Muscle Composition, Genetic Weight)
 - Haplogroup reports (Maternal, Paternal)
+- Ancestry composition reports (population percentages)
+- Neanderthal ancestry reports (variant count, percentile)
 
 These are browser-printed PDFs — text extraction via pdfplumber,
 not structured table parsing.
@@ -44,10 +46,15 @@ _HAPLOGROUP_KEYWORDS = [
     "maternal haplogroup",
     "paternal haplogroup",
 ]
-_SKIP_KEYWORDS = [
-    "neanderthal",
-    "reports summary",
+_ANCESTRY_KEYWORDS = [
     "ancestry composition",
+    "ancestry report",
+]
+_NEANDERTHAL_KEYWORDS = [
+    "neanderthal",
+]
+_SKIP_KEYWORDS = [
+    "reports summary",
 ]
 
 
@@ -62,9 +69,20 @@ class GeneticsPdfParser:
 
         Returns one of:
             '23andme_health_risk', '23andme_carrier_status',
-            '23andme_wellness', '23andme_haplogroup', 'skip', 'unknown'
+            '23andme_wellness', '23andme_haplogroup',
+            '23andme_ancestry', '23andme_neanderthal',
+            'skip', 'unknown'
         """
         text_lower = text.lower()
+
+        # Check ancestry and neanderthal BEFORE skip keywords
+        for kw in _ANCESTRY_KEYWORDS:
+            if kw in text_lower:
+                return "23andme_ancestry"
+
+        for kw in _NEANDERTHAL_KEYWORDS:
+            if kw in text_lower:
+                return "23andme_neanderthal"
 
         for kw in _SKIP_KEYWORDS:
             if kw in text_lower:
@@ -125,6 +143,12 @@ class GeneticsPdfParser:
             logger.warning("Unknown PDF format: %s", path.name)
             return []
 
+        if fmt == "23andme_ancestry":
+            return self._parse_ancestry(full_text, path)
+
+        if fmt == "23andme_neanderthal":
+            return self._parse_neanderthal(full_text, path)
+
         if fmt == "23andme_haplogroup":
             return self._parse_haplogroup(full_text, path)
 
@@ -183,6 +207,200 @@ class GeneticsPdfParser:
                 "variant_detected": False,
             }
         ]
+
+    def _parse_ancestry(self, text: str, path: Path) -> list[dict]:
+        """Parse an ancestry composition report.
+
+        Extracts population-level ancestry percentages from lines like
+        "Scandinavian 84.4%" or tabular percentage layouts.
+
+        Returns list of dicts with: population, region, percentage,
+        confidence_level, report_name, category.
+        """
+        report_name = self._extract_report_name(path)
+        rows: list[dict] = []
+
+        # Region hierarchy mapping — known 23andMe regions
+        _region_map: dict[str, str] = {
+            "scandinavian": "Northwestern European",
+            "finnish": "Northwestern European",
+            "british & irish": "Northwestern European",
+            "french & german": "Northwestern European",
+            "northwestern european": "European",
+            "southern european": "European",
+            "italian": "Southern European",
+            "spanish & portuguese": "Southern European",
+            "greek & balkan": "Southern European",
+            "sardinian": "Southern European",
+            "eastern european": "European",
+            "ashkenazi jewish": "European",
+            "european": "Broadly",
+            "sub-saharan african": "African",
+            "west african": "African",
+            "east african": "African",
+            "north african & arabian": "Western Asian & North African",
+            "western asian & north african": "Broadly",
+            "east asian & native american": "Broadly",
+            "east asian": "East Asian & Native American",
+            "native american": "East Asian & Native American",
+            "south asian": "Broadly",
+            "melanesian": "Broadly",
+            "unassigned": "Unassigned",
+        }
+
+        # Pattern: "Population Name  XX.X%" — flexible whitespace and optional %
+        pattern = re.compile(
+            r"^(.+?)\s{2,}(\d{1,3}(?:\.\d{1,2})?)\s*%",
+            re.MULTILINE,
+        )
+
+        for match in pattern.finditer(text):
+            population = match.group(1).strip()
+            percentage = float(match.group(2))
+
+            # Skip noise lines (headers, footers, page artifacts)
+            if len(population) > 60 or percentage > 100:
+                continue
+            # Skip lines that are clearly not population names
+            if any(
+                skip in population.lower()
+                for skip in ["page", "23andme", "learn more", "confidence"]
+            ):
+                continue
+
+            pop_lower = population.lower()
+            region = _region_map.get(pop_lower, "Other")
+
+            rows.append(
+                {
+                    "report_name": report_name,
+                    "category": "ancestry",
+                    "population": population,
+                    "region": region,
+                    "percentage": percentage,
+                    "confidence_level": self._extract_confidence_level(text),
+                }
+            )
+
+        if not rows:
+            logger.warning("No ancestry populations parsed from %s", path.name)
+
+        return rows
+
+    def _parse_neanderthal(self, text: str, path: Path) -> list[dict]:
+        """Parse a neanderthal ancestry report.
+
+        Extracts variant count and percentile ranking.
+
+        Returns a single-item list with: category, trait_name,
+        result_value, result_numeric, gene, snp_id, genotype,
+        report_name.
+        """
+        report_name = self._extract_report_name(path)
+
+        # Extract variant count: "You have X Neanderthal variants"
+        variant_count: Optional[float] = None
+        match = re.search(
+            r"(\d+)\s+(?:neanderthal\s+)?variants?",
+            text,
+            re.IGNORECASE,
+        )
+        if match:
+            variant_count = float(match.group(1))
+
+        # Extract percentile: "more variants than X% of customers"
+        # or "Xth percentile"
+        percentile: Optional[float] = None
+        match = re.search(
+            r"(?:more\s+.*?than\s+|top\s+)(\d{1,3})(?:\.\d+)?\s*%",
+            text,
+            re.IGNORECASE,
+        )
+        if match:
+            percentile = float(match.group(1))
+
+        if percentile is None:
+            match = re.search(
+                r"(\d{1,3})(?:st|nd|rd|th)\s+percentile", text, re.IGNORECASE
+            )
+            if match:
+                percentile = float(match.group(1))
+
+        # Build description
+        parts = []
+        if variant_count is not None:
+            parts.append(f"{int(variant_count)} Neanderthal variants")
+        if percentile is not None:
+            parts.append(f"more than {percentile}% of customers")
+        result_value = "; ".join(parts) if parts else "Neanderthal ancestry data found"
+
+        # Use variant count as primary numeric, percentile as fallback
+        result_numeric = variant_count if variant_count is not None else percentile
+
+        return [
+            {
+                "report_name": report_name,
+                "category": "neanderthal",
+                "trait_name": "neanderthal_ancestry",
+                "result_value": result_value,
+                "result_numeric": result_numeric,
+                "gene": None,
+                "snp_id": None,
+                "genotype": None,
+            }
+        ]
+
+    def _parse_wellness_traits(self, text: str, path: Path) -> list[dict]:
+        """Parse detailed wellness/trait info from a report.
+
+        Extracts structured trait data including gene, SNP, and genotype
+        for traits like muscle composition, genetic weight, saturated fat,
+        lactose intolerance, etc.
+
+        Returns list of dicts with: category, trait_name, result_value,
+        result_numeric, gene, snp_id, genotype, report_name.
+        """
+        report_name = self._extract_report_name(path)
+        condition = self._extract_condition(text, report_name)
+        result_summary = self._extract_result_summary(text)
+        gene = self._extract_gene(text)
+        snp_id = self._extract_snp_id(text)
+        genotype = self._extract_genotype(text)
+
+        # Try to extract a numeric value from the result summary
+        result_numeric: Optional[float] = None
+        match = re.search(r"(\d+(?:\.\d+)?)\s*%", result_summary)
+        if match:
+            result_numeric = float(match.group(1))
+
+        return [
+            {
+                "report_name": report_name,
+                "category": "wellness",
+                "trait_name": condition,
+                "result_value": result_summary,
+                "result_numeric": result_numeric,
+                "gene": gene,
+                "snp_id": snp_id,
+                "genotype": genotype,
+            }
+        ]
+
+    @staticmethod
+    def _extract_confidence_level(text: str) -> str:
+        """Extract the confidence level from ancestry report text.
+
+        23andMe uses 50%, 70%, 80%, 90% confidence thresholds.
+        """
+        # Look for "at X% confidence" or "confidence level: X%"
+        match = re.search(
+            r"(?:at\s+|confidence\s*(?:level)?[:\s]+)(\d{2,3})\s*%",
+            text,
+            re.IGNORECASE,
+        )
+        if match:
+            return f"{match.group(1)}%"
+        return "standard"
 
     # ------------------------------------------------------------------
     # Extraction helpers
@@ -344,6 +562,8 @@ class GeneticsPdfParser:
             "23andme_carrier_status": "carrier_status",
             "23andme_wellness": "wellness",
             "23andme_haplogroup": "haplogroup",
+            "23andme_ancestry": "ancestry",
+            "23andme_neanderthal": "neanderthal",
         }
         return mapping.get(fmt, "other")
 

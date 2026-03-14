@@ -2,6 +2,13 @@
 
 Scans a directory for PDF, CSV, and JSON files, routes each to the
 appropriate parser, computes hashes, and writes bronze parquet files.
+
+Output streams:
+- health_findings: health risk, carrier status reports
+- ancestry_segments: chromosome-level ancestry CSV data
+- family_members: family tree JSON data
+- ancestry_composition: population-level ancestry percentages (from PDF)
+- genetic_traits: neanderthal, haplogroup, wellness traits (from PDF)
 """
 
 from __future__ import annotations
@@ -47,28 +54,113 @@ def ingest_genetics_data(input_dir: Path, output_dir: Path) -> dict[str, Path]:
     health_findings: list[dict] = []
     ancestry_segments: list[dict] = []
     family_members: list[dict] = []
+    ancestry_composition: list[dict] = []
+    genetic_traits: list[dict] = []
+
+    # Format-to-stream routing
+    _ANCESTRY_FORMATS = {"23andme_ancestry"}
+    _TRAIT_FORMATS = {"23andme_neanderthal", "23andme_haplogroup"}
+    _WELLNESS_FORMAT = "23andme_wellness"
 
     # Scan for PDF files
     pdf_files = sorted(input_dir.glob("*.pdf"))
     for pdf_path in pdf_files:
         logger.info("Parsing PDF: %s", pdf_path.name)
         findings = pdf_parser.parse_pdf(pdf_path)
+        detected_fmt = pdf_parser.last_detected_format
+
         for finding in findings:
             finding["source_file"] = pdf_path.name
-            finding["business_key_hash"] = _compute_hash(
-                finding.get("category", ""),
-                finding.get("report_name", ""),
-            )
-            finding["row_hash"] = _compute_hash(
-                finding.get("result_summary", ""),
-                finding.get("gene", "") or "",
-                finding.get("snp_id", "") or "",
-                finding.get("genotype", "") or "",
-                str(finding.get("variant_detected", "")),
-            )
             finding["load_datetime"] = now_str
             finding["update_datetime"] = now_str
-            health_findings.append(finding)
+
+            if detected_fmt in _ANCESTRY_FORMATS:
+                # Ancestry composition → genetic_ancestry table
+                finding["business_key_hash"] = _compute_hash(
+                    finding.get("population", ""),
+                    finding.get("source_file", ""),
+                )
+                finding["row_hash"] = _compute_hash(
+                    str(finding.get("percentage", "")),
+                    finding.get("region", ""),
+                    finding.get("confidence_level", ""),
+                )
+                ancestry_composition.append(finding)
+
+            elif detected_fmt in _TRAIT_FORMATS:
+                # Neanderthal and haplogroup → genetic_traits table
+                finding["business_key_hash"] = _compute_hash(
+                    finding.get("category", ""),
+                    finding.get("trait_name", finding.get("condition", "")),
+                    finding.get("source_file", ""),
+                )
+                finding["row_hash"] = _compute_hash(
+                    finding.get("result_value", finding.get("result_summary", "")),
+                    str(finding.get("result_numeric", "")),
+                    finding.get("gene", "") or "",
+                    finding.get("snp_id", "") or "",
+                )
+                genetic_traits.append(finding)
+
+            elif detected_fmt == _WELLNESS_FORMAT:
+                # Wellness → both health_findings AND genetic_traits
+                # Health findings hash (existing behavior)
+                finding["business_key_hash"] = _compute_hash(
+                    finding.get("category", ""),
+                    finding.get("report_name", ""),
+                )
+                finding["row_hash"] = _compute_hash(
+                    finding.get("result_summary", ""),
+                    finding.get("gene", "") or "",
+                    finding.get("snp_id", "") or "",
+                    finding.get("genotype", "") or "",
+                    str(finding.get("variant_detected", "")),
+                )
+                health_findings.append(finding)
+
+                # Also produce a trait record
+                trait_record = {
+                    "report_name": finding.get("report_name", ""),
+                    "category": "wellness",
+                    "trait_name": finding.get(
+                        "condition", finding.get("report_name", "")
+                    ),
+                    "result_value": finding.get("result_summary", ""),
+                    "result_numeric": None,
+                    "gene": finding.get("gene"),
+                    "snp_id": finding.get("snp_id"),
+                    "genotype": finding.get("genotype"),
+                    "source_file": pdf_path.name,
+                    "load_datetime": now_str,
+                    "update_datetime": now_str,
+                    "business_key_hash": _compute_hash(
+                        "wellness",
+                        finding.get("condition", finding.get("report_name", "")),
+                        pdf_path.name,
+                    ),
+                    "row_hash": _compute_hash(
+                        finding.get("result_summary", ""),
+                        str(None),
+                        finding.get("gene", "") or "",
+                        finding.get("snp_id", "") or "",
+                    ),
+                }
+                genetic_traits.append(trait_record)
+
+            else:
+                # Default: health risk, carrier status → health_findings
+                finding["business_key_hash"] = _compute_hash(
+                    finding.get("category", ""),
+                    finding.get("report_name", ""),
+                )
+                finding["row_hash"] = _compute_hash(
+                    finding.get("result_summary", ""),
+                    finding.get("gene", "") or "",
+                    finding.get("snp_id", "") or "",
+                    finding.get("genotype", "") or "",
+                    str(finding.get("variant_detected", "")),
+                )
+                health_findings.append(finding)
 
     # Scan for ancestry CSV files
     csv_files = sorted(input_dir.glob("*.csv"))
@@ -141,10 +233,33 @@ def ingest_genetics_data(input_dir: Path, output_dir: Path) -> dict[str, Path]:
         outputs["stg_23andme_family_tree"] = path
         logger.info("Wrote %d family members to %s", len(family_members), path.name)
 
+    # Write ancestry composition parquet
+    if ancestry_composition:
+        path = output_dir / f"stg_23andme_ancestry_composition_{timestamp}.parquet"
+        df = pd.DataFrame(ancestry_composition)
+        df.to_parquet(path, index=False)
+        outputs["stg_23andme_ancestry_composition"] = path
+        logger.info(
+            "Wrote %d ancestry composition rows to %s",
+            len(ancestry_composition),
+            path.name,
+        )
+
+    # Write genetic traits parquet
+    if genetic_traits:
+        path = output_dir / f"stg_23andme_genetic_traits_{timestamp}.parquet"
+        df = pd.DataFrame(genetic_traits)
+        df.to_parquet(path, index=False)
+        outputs["stg_23andme_genetic_traits"] = path
+        logger.info("Wrote %d genetic traits to %s", len(genetic_traits), path.name)
+
     logger.info(
-        "Genetics ingestion complete: %d findings, %d ancestry segments, %d family members",
+        "Genetics ingestion complete: %d findings, %d ancestry segments, "
+        "%d family members, %d ancestry composition, %d genetic traits",
         len(health_findings),
         len(ancestry_segments),
         len(family_members),
+        len(ancestry_composition),
+        len(genetic_traits),
     )
     return outputs
