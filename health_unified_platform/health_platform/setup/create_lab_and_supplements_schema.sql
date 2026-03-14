@@ -83,13 +83,13 @@ CREATE TABLE IF NOT EXISTS silver.dim_reference_range (
     reference_min       DOUBLE,
     reference_max       DOUBLE,
     unit                VARCHAR,                        -- NULL = dimensionless (e.g. pH, qualitative)
-    age_group           VARCHAR DEFAULT 'adult',
-    sex                 VARCHAR DEFAULT 'male',
+    age_group           VARCHAR NOT NULL DEFAULT 'adult',
+    sex                 VARCHAR NOT NULL DEFAULT 'all',
     notes               VARCHAR,
     effective_from      DATE,
     effective_to        DATE,
     load_datetime       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (marker_key, source)
+    PRIMARY KEY (marker_key, source, age_group, sex)
 );
 
 -- =============================================================================

@@ -140,7 +140,7 @@ def ingest_genetics_data(input_dir: Path, output_dir: Path) -> dict[str, Path]:
                     ),
                     "row_hash": _compute_hash(
                         finding.get("result_summary", ""),
-                        str(None),
+                        finding.get("result_numeric") or "",
                         finding.get("gene", "") or "",
                         finding.get("snp_id", "") or "",
                     ),

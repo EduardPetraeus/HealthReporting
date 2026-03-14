@@ -9,6 +9,7 @@ Usage:
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 from typing import Optional
@@ -20,12 +21,16 @@ from health_platform.utils.logging_config import get_logger
 logger = get_logger("validate_lab_data")
 
 
-# Paths
-DATA_LAKE = Path("/Users/Shared/data_lake")
-DB_PATH = DATA_LAKE / "database" / "health_dw_dev.db"
-BLOOD_YAML = DATA_LAKE / "manual" / "lab_results" / "blood_panel_2026-02-24.yaml"
-MICROBIOME_YAML = DATA_LAKE / "manual" / "lab_results" / "microbiome_2026-02-23.yaml"
+# Paths — environment-driven, no hardcoded user paths
+DATA_LAKE = Path(os.environ.get("HEALTH_DATA_LAKE", "/Users/Shared/data_lake"))
+DB_PATH = DATA_LAKE / "database" / f"health_dw_{os.environ.get('HEALTH_ENV', 'dev')}.db"
 GENETICS_YAML = DATA_LAKE / "manual" / "genetic_profile.yaml"
+
+
+def _find_latest_yaml(directory: Path, prefix: str) -> Path | None:
+    """Find the most recent YAML file matching a prefix."""
+    matches = sorted(directory.glob(f"{prefix}*.yaml"))
+    return matches[-1] if matches else None
 
 
 class ValidationResult:
@@ -117,12 +122,13 @@ def validate_blood_panel(con: duckdb.DuckDBPyConnection) -> ValidationResult:
     """
     result = ValidationResult("Blood Panel")
 
-    # Load source YAML
-    if not BLOOD_YAML.exists():
-        result.add("source_file", "FAIL", str(BLOOD_YAML), "NOT FOUND")
+    # Load source YAML — find latest blood_panel file
+    blood_yaml = _find_latest_yaml(DATA_LAKE / "manual" / "lab_results", "blood_panel_")
+    if blood_yaml is None or not blood_yaml.exists():
+        result.add("source_file", "FAIL", "blood_panel_*.yaml", "NOT FOUND")
         return result
 
-    with open(BLOOD_YAML, errors="ignore") as f:
+    with open(blood_yaml, errors="ignore") as f:
         source = yaml.safe_load(f)
 
     # Extract markers from flat list
@@ -265,11 +271,15 @@ def validate_microbiome(con: duckdb.DuckDBPyConnection) -> ValidationResult:
     """
     result = ValidationResult("Microbiome")
 
-    if not MICROBIOME_YAML.exists():
-        result.add("source_file", "FAIL", str(MICROBIOME_YAML), "NOT FOUND")
+    # Load source YAML — find latest microbiome file
+    microbiome_yaml = _find_latest_yaml(
+        DATA_LAKE / "manual" / "lab_results", "microbiome_"
+    )
+    if microbiome_yaml is None or not microbiome_yaml.exists():
+        result.add("source_file", "FAIL", "microbiome_*.yaml", "NOT FOUND")
         return result
 
-    with open(MICROBIOME_YAML, errors="ignore") as f:
+    with open(microbiome_yaml, errors="ignore") as f:
         source = yaml.safe_load(f)
 
     yaml_markers = source.get("markers", [])
