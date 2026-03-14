@@ -421,7 +421,7 @@ def validate_genetics(con: duckdb.DuckDBPyConnection) -> ValidationResult:
         health_rows = con.execute(
             """
             SELECT report_name, category, result_summary, variant_detected,
-                   gene, snp_id, genotype, clinical_relevance
+                   gene, snp_id, genotype, risk_level
             FROM silver.genetic_health_findings
             ORDER BY report_name
         """
@@ -558,10 +558,10 @@ def validate_genetics(con: duckdb.DuckDBPyConnection) -> ValidationResult:
     try:
         traits_rows = con.execute(
             """
-            SELECT report_name, result_summary, variant_detected,
+            SELECT trait_name, result_value,
                    gene, clinical_relevance
             FROM silver.genetic_traits
-            ORDER BY report_name
+            ORDER BY trait_name
         """
         ).fetchall()
     except duckdb.CatalogException:
