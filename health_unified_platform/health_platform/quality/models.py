@@ -18,6 +18,7 @@ class CheckResult:
     message: str
     value: Optional[float] = None
     threshold: Optional[float] = None
+    metadata: Optional[dict] = None
     checked_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
@@ -46,6 +47,15 @@ class QualityReport:
         if self.total == 0:
             return 0.0
         return round(self.passed / self.total * 100, 1)
+
+    @property
+    def reload_recommendations(self) -> list[dict]:
+        """Aggregate reload recommendations from all completeness check results."""
+        recs: list[dict] = []
+        for r in self.results:
+            if r.metadata and "reload_recommendations" in r.metadata:
+                recs.extend(r.metadata["reload_recommendations"])
+        return recs
 
     def finish(self) -> None:
         self.finished_at = datetime.now(timezone.utc)
