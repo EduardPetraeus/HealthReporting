@@ -37,6 +37,17 @@ SEL_SHOW_MORE = "button.show-more, a.vis-mere, [data-action='show-more']"
 # sundhed.dk uses AngularJS with custom directives
 SEL_CONTENT_AREA = ".main-content .content, #content, .main-content, main"
 
+# Section-specific selectors that indicate data has actually rendered.
+# Angular apps render the directive shell immediately but populate content
+# asynchronously — we must wait for inner elements to appear.
+SECTION_WAIT_SELECTORS: dict[str, str] = {
+    "lab_results": "sdk-app-laboratoriesvar-directive *",
+    "medications": "sdk-app-fmk-directive *, table.sdk-table",
+    "vaccinations": "sdk-app-vaccinationer-directive *, table.sdk-table",
+    "ejournal": "table#forloebsoversigt-table, sdk-app-ejournal-directive table",
+    "appointments": "sdk-app-dnhf-directive *, ngx-datatable",
+}
+
 # Session expiry indicators
 SEL_LOGIN_PAGE = "input[name='username'], .mitid-login, #mitid-container"
 
@@ -108,8 +119,8 @@ class SundhedDkScraper:
         self._page.goto(url, wait_until="domcontentloaded", timeout=30_000)
         self._check_session()
 
-        # Wait for content to load
-        self._wait_for_content()
+        # Wait for content to load (section-specific selectors for Angular apps)
+        self._wait_for_content(section)
 
         # Collect HTML from all pages
         all_html_parts: list[str] = []
@@ -176,14 +187,41 @@ class SundhedDkScraper:
                 f"Session expired — current URL suggests login: {self._page.url}"
             )
 
-    def _wait_for_content(self) -> None:
-        """Wait for the main content area to appear."""
+    def _wait_for_content(self, section: str | None = None) -> None:
+        """Wait for section-specific content to render inside Angular directives.
+
+        Args:
+            section: Section name (e.g. 'lab_results'). When provided, the
+                     method first waits for the generic content area, then waits
+                     for a section-specific selector that proves the Angular app
+                     has actually populated the directive with data.
+        """
+        # Step 1: wait for the generic content container
         try:
             self._page.wait_for_selector(
                 SEL_CONTENT_AREA, state="attached", timeout=10_000
             )
         except PlaywrightTimeout:
             logger.warning("Content area not found within timeout, proceeding anyway")
+
+        # Step 2: wait for section-specific selector (Angular rendering)
+        if section and section in SECTION_WAIT_SELECTORS:
+            specific_selector = SECTION_WAIT_SELECTORS[section]
+            try:
+                self._page.wait_for_selector(
+                    specific_selector, state="attached", timeout=15_000
+                )
+                logger.info(
+                    "Section '%s': data selector found (%s)", section, specific_selector
+                )
+            except PlaywrightTimeout:
+                logger.warning(
+                    "Section '%s': specific selector '%s' not found within 15s — "
+                    "falling back to 3s sleep for Angular render",
+                    section,
+                    specific_selector,
+                )
+                time.sleep(3)
 
     def _extract_content_html(self) -> str:
         """Extract HTML from the main content area."""

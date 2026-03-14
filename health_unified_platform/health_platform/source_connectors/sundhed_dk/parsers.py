@@ -54,14 +54,14 @@ SEL_VAC_TABLE = "table.sdk-table.effectuated-vaccinations, table.sdk-table"
 SEL_VAC_ROW = "tbody tr.sdk-table-row"
 SEL_VAC_CELL_VALUE = "span.ng-binding"
 
-# E-journal: needs URL /min-sundhedsjournal/journal-fra-sygehus/
-# Structure TBD — requires separate HTML dump from the correct URL
-SEL_JOURNAL_ENTRY = ".journal-entry, .ejournal-item, article.note"
-SEL_JOURNAL_DATE = ".note-date, .entry-date, time"
-SEL_JOURNAL_DEPT = ".department, .afdeling"
-SEL_JOURNAL_HOSPITAL = ".hospital, .sygehus"
-SEL_JOURNAL_TYPE = ".note-type, .entry-type"
-SEL_JOURNAL_TEXT = ".note-text, .entry-content, .journal-text"
+# E-journal: jQuery DataTables at /min-sundhedsjournal/journal-fra-sygehus/
+# Columns: Senest opdateret | Forløb startdato | Afsluttet forløb |
+#           Behandlingssted | Lokation | Diagnose | Epikrise | Notat
+SEL_JOURNAL_TABLE = "table#forloebsoversigt-table"
+SEL_JOURNAL_ROW = "table#forloebsoversigt-table tbody tr"
+
+# Text that indicates the table is empty (no data for the selected period)
+_JOURNAL_EMPTY_MSG = "Der blev ikke fundet nogen journaler"
 
 # Appointments: ngx-datatable (Angular 6 component)
 SEL_APPT_SECTION = "front-page > div.app-dnhf-front, div.app-dnhf-front"
@@ -398,10 +398,18 @@ def parse_vaccinations(html: str) -> list[dict]:
 
 
 def parse_ejournal(html: str) -> list[dict]:
-    """Parse e-journal HTML into structured dicts.
+    """Parse e-journal HTML from jQuery DataTables on sundhed.dk.
 
-    NOTE: Requires HTML from /min-sundhedsjournal/journal-fra-sygehus/
-    (not the dashboard page). Structure TBD — needs live HTML dump.
+    The Forløbsoversigt tab uses ``table#forloebsoversigt-table`` with columns:
+
+        0: Senest opdateret  (date)
+        1: Forløb startdato  (date)
+        2: Afsluttet forløb  (date, empty for open cases)
+        3: Behandlingssted   (hospital)
+        4: Lokation           (department)
+        5: Diagnose           (note_type)
+        6: Epikrise           (text)
+        7: Notat              (text)
 
     Returns list of dicts with keys:
         note_date, department, hospital, note_type, note_text
@@ -409,17 +417,42 @@ def parse_ejournal(html: str) -> list[dict]:
     soup = BeautifulSoup(html, "lxml")
     results: list[dict] = []
 
-    for entry in soup.select(SEL_JOURNAL_ENTRY):
-        note_text = _text(entry, SEL_JOURNAL_TEXT)
-        if not note_text:
+    table = soup.select_one(SEL_JOURNAL_TABLE)
+    if not table:
+        logger.warning("No ejournal table found (table#forloebsoversigt-table)")
+        return results
+
+    for row in table.select("tbody tr"):
+        cells = row.select("td")
+
+        # Skip DataTables control rows (fewer than 6 real data cells)
+        if len(cells) < 6:
             continue
+
+        # Skip the "no data" placeholder row
+        row_text = row.get_text(strip=True)
+        if _JOURNAL_EMPTY_MSG in row_text:
+            continue
+
+        # Extract cell text by column index
+        col_0 = cells[0].get_text(strip=True)  # Senest opdateret
+        col_3 = (
+            cells[3].get_text(strip=True) if len(cells) > 3 else ""
+        )  # Behandlingssted
+        col_4 = cells[4].get_text(strip=True) if len(cells) > 4 else ""  # Lokation
+        col_5 = cells[5].get_text(strip=True) if len(cells) > 5 else ""  # Diagnose
+        col_6 = cells[6].get_text(strip=True) if len(cells) > 6 else ""  # Epikrise
+        col_7 = cells[7].get_text(strip=True) if len(cells) > 7 else ""  # Notat
+
+        # Combine Epikrise + Notat into note_text
+        note_text = f"{col_6} {col_7}".strip() or None
 
         results.append(
             {
-                "note_date": _parse_danish_date(_text(entry, SEL_JOURNAL_DATE)),
-                "department": _text(entry, SEL_JOURNAL_DEPT) or None,
-                "hospital": _text(entry, SEL_JOURNAL_HOSPITAL) or None,
-                "note_type": _text(entry, SEL_JOURNAL_TYPE) or None,
+                "note_date": _parse_danish_date(col_0),
+                "department": col_4 or None,
+                "hospital": col_3 or None,
+                "note_type": col_5 or None,
                 "note_text": note_text,
             }
         )
