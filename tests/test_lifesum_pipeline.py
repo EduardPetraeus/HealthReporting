@@ -32,11 +32,20 @@ def con():
 class TestLifesumParquet:
     """Verify parquet files exist for all active Lifesum sources."""
 
-    @pytest.mark.parametrize("source", ["food", "exercise", "weighins", "bodyfat"])
+    @pytest.mark.parametrize("source", ["exercise", "weighins", "bodyfat"])
     def test_parquet_exists(self, source: str):
         parquet_path = PARQUET_BASE / source / "data.parquet"
         assert parquet_path.exists(), f"Missing parquet: {parquet_path}"
         assert parquet_path.stat().st_size > 0, f"Empty parquet: {parquet_path}"
+
+    def test_food_parquet_exists(self):
+        """Food comes from PDF pipeline — filename is pdf_{stem}.parquet."""
+        food_dir = PARQUET_BASE / "food"
+        assert food_dir.exists(), f"Missing directory: {food_dir}"
+        parquet_files = list(food_dir.glob("pdf_*.parquet"))
+        assert len(parquet_files) > 0, f"No pdf_*.parquet files in {food_dir}"
+        for pf in parquet_files:
+            assert pf.stat().st_size > 0, f"Empty parquet: {pf}"
 
     def test_bodymeasures_parquet_not_created(self):
         """bodymeasures was dropped from pipeline — parquet should not exist."""

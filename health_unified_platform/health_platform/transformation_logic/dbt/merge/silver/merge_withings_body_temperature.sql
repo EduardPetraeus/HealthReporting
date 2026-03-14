@@ -53,7 +53,7 @@ combined AS (
 ),
 final_dedup AS (
     SELECT *,
-        ROW_NUMBER() OVER (PARTITION BY timestamp ORDER BY temperature_degc DESC NULLS LAST) AS rn
+        ROW_NUMBER() OVER (PARTITION BY timestamp ORDER BY source_name ASC, temperature_degc DESC NULLS LAST) AS rn
     FROM combined
     WHERE timestamp IS NOT NULL
 )

@@ -170,13 +170,14 @@ def run_ingestion():
                 logger.info(
                     f"  Cold start: creating {schema}.{table} from {len(found_files)} files"
                 )
+                safe_glob = input_glob.replace("'", "''")
                 query = f"""
                     CREATE TABLE {schema}.{table} AS
                     SELECT
                         *,
                         current_timestamp as _ingested_at,
                         '{active_env}' as _source_env
-                    FROM read_parquet('{input_glob}', hive_partitioning={hive}, union_by_name=True)
+                    FROM read_parquet('{safe_glob}', hive_partitioning={hive}, union_by_name=True)
                 """
                 try:
                     con.execute(query)
@@ -227,7 +228,7 @@ def run_ingestion():
             file_list = (
                 "["
                 + ", ".join(
-                    f"'{f.replace(chr(39), chr(39)+chr(39))}'" for f in new_files
+                    f"'{f.replace(chr(39), chr(39) + chr(39))}'" for f in new_files
                 )
                 + "]"
             )

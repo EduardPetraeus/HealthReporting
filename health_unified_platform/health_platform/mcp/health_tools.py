@@ -547,8 +547,9 @@ class HealthTools:
                 )
 
         # Validate table references are in allowed schemas
-        table_refs = re.findall(r"\bFROM\s+(\w+)\.(\w+)", sql_upper)
-        table_refs += re.findall(r"\bJOIN\s+(\w+)\.(\w+)", sql_upper)
+        # Catches FROM/JOIN and comma-joined tables (e.g. FROM silver.x, bronze.y)
+        table_refs = re.findall(r"(?:FROM|JOIN)\s+(\w+)\.(\w+)", sql_upper)
+        table_refs += re.findall(r",\s*(\w+)\.(\w+)", sql_upper)
         for schema, _table in table_refs:
             if schema.lower() not in self._ALLOWED_SCHEMAS:
                 return format_error(
