@@ -8,6 +8,7 @@ login if automated login fails (e.g. CAPTCHA, changed form).
 
 from __future__ import annotations
 
+import os
 import subprocess
 import time
 from pathlib import Path
@@ -100,7 +101,7 @@ def _get_credentials() -> tuple[str, str] | None:
                 break
 
         if account and password:
-            logger.info("Credentials loaded from keychain for %s", account)
+            logger.info("Credentials loaded from keychain")
             return (account, password)
 
         logger.warning(
@@ -380,4 +381,14 @@ class LifesumBrowser:
         self._context = None
         self._browser = None
         self._playwright = None
+
+        # Lock down browser data files (cookies, session storage)
+        if BROWSER_DATA_DIR.exists():
+            for root, _dirs, files in os.walk(BROWSER_DATA_DIR):
+                for f in files:
+                    try:
+                        os.chmod(os.path.join(root, f), 0o600)
+                    except OSError:
+                        pass
+
         logger.info("Browser closed")
