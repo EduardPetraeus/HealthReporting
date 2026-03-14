@@ -16,7 +16,7 @@ WITH deduped AS (
                 coalesce(cast(test_date AS VARCHAR), '') || '||' ||
                 coalesce(marker_name, '')
             )
-            ORDER BY load_datetime DESC
+            ORDER BY _ingested_at DESC
         ) AS rn
     FROM bronze.stg_sundhed_dk_lab_results
     WHERE marker_name IS NOT NULL

@@ -34,9 +34,9 @@ _VACCINATIONS_PDF = _DOWNLOADS / "vaccinations" / "Vaccinationer - sundhed.dk.pd
 _EJOURNAL_OVERVIEW_PDF = _DOWNLOADS / "ejournal" / "Journaler - sundhed.dk (2).pdf"
 _EJOURNAL_NOTES_1_PDF = _DOWNLOADS / "ejournal" / "Journaler - sundhed.dk (1).pdf"
 _EJOURNAL_NOTES_2_PDF = _DOWNLOADS / "ejournal" / "Journaler - sundhed.dk.pdf"
-_LAB_RESULTS_PDF = (
-    _DOWNLOADS / "lab_results" / "Laboratoriesvar_Claus_Eduard_Petræus.pdf"
-)
+_LAB_RESULTS_DIR = _DOWNLOADS / "lab_results"
+_lab_pdfs = sorted(_LAB_RESULTS_DIR.glob("*.pdf")) if _LAB_RESULTS_DIR.exists() else []
+_LAB_RESULTS_PDF = _lab_pdfs[0] if _lab_pdfs else _LAB_RESULTS_DIR / "lab_results.pdf"
 
 # Regex patterns for validation
 _ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")

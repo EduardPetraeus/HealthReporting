@@ -20,7 +20,7 @@ WITH deduped AS (
                 coalesce(department, '')                 || '||' ||
                 coalesce(left(note_text, 200), '')
             )
-            ORDER BY load_datetime DESC
+            ORDER BY _ingested_at DESC
         ) AS rn
     FROM bronze.stg_sundhed_dk_ejournal
     WHERE note_text IS NOT NULL

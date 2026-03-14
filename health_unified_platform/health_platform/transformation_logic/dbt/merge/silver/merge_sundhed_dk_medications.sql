@@ -16,7 +16,7 @@ WITH deduped AS (
                 coalesce(medication_name, '') || '||' ||
                 coalesce(cast(start_date AS VARCHAR), '')
             )
-            ORDER BY load_datetime DESC
+            ORDER BY _ingested_at DESC
         ) AS rn
     FROM bronze.stg_sundhed_dk_medications
     WHERE medication_name IS NOT NULL

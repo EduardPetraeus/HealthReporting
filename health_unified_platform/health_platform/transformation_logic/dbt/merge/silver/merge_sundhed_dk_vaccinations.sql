@@ -16,7 +16,7 @@ WITH deduped AS (
                 coalesce(vaccine_name, '') || '||' ||
                 coalesce(cast(vaccine_date AS VARCHAR), '')
             )
-            ORDER BY load_datetime DESC
+            ORDER BY _ingested_at DESC
         ) AS rn
     FROM bronze.stg_sundhed_dk_vaccinations
     WHERE vaccine_name IS NOT NULL

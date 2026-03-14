@@ -18,7 +18,7 @@ WITH deduped AS (
                 coalesce(receiving_clinic, '')               || '||' ||
                 coalesce(specialty, '')
             )
-            ORDER BY load_datetime DESC
+            ORDER BY _ingested_at DESC
         ) AS rn
     FROM bronze.stg_sundhed_dk_appointments
     WHERE referral_date IS NOT NULL
