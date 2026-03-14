@@ -1,6 +1,6 @@
 -- merge_lifesum_exercise.sql
 -- Per-source merge: Lifesum exercise CSV export -> silver.workout
--- Business key: date || exercise_name || 'lifesum' (unique per exercise per day per source)
+-- Business key: date || title || 'lifesum' (unique per exercise per day per source)
 --
 -- Usage: python run_merge.py silver/merge_lifesum_exercise.sql
 
@@ -10,12 +10,12 @@ WITH deduped AS (
     SELECT
         *,
         ROW_NUMBER() OVER (
-            PARTITION BY date, exercise_name
+            PARTITION BY date, title
             ORDER BY _ingested_at DESC
         ) AS rn
     FROM bronze.stg_lifesum_exercise
     WHERE date IS NOT NULL
-      AND exercise_name IS NOT NULL
+      AND title IS NOT NULL
 )
 SELECT
     -- Surrogate date key
@@ -23,27 +23,26 @@ SELECT
 
     -- Business columns
     date::DATE                                          AS day,
-    md5(coalesce(date, '') || '||' || coalesce(exercise_name, '')) AS workout_id,
-    exercise_name::VARCHAR                              AS activity,
+    md5(coalesce(date, '') || '||' || coalesce(title, '')) AS workout_id,
+    title::VARCHAR                                      AS activity,
     NULL::VARCHAR                                       AS intensity,
     calories_burned::DOUBLE                             AS calories,
     NULL::DOUBLE                                        AS distance_meters,
     date::TIMESTAMP                                     AS start_datetime,
-    (date::TIMESTAMP + INTERVAL (duration_minutes::INTEGER) MINUTE) AS end_datetime,
-    (duration_minutes::DOUBLE * 60)                     AS duration_seconds,
-    exercise_name::VARCHAR                              AS label,
+    (date::TIMESTAMP + INTERVAL (duration_min::INTEGER) MINUTE) AS end_datetime,
+    (duration_min::DOUBLE * 60)                         AS duration_seconds,
+    title::VARCHAR                                      AS label,
     'lifesum'                                           AS source,
-    'lifesum'                                           AS source_system,
 
     -- Deterministic business key hash (includes source to avoid cross-source collisions)
-    md5(coalesce(date, '') || '||' || coalesce(exercise_name, '') || '||lifesum') AS business_key_hash,
+    md5(coalesce(date, '') || '||' || coalesce(title, '') || '||lifesum') AS business_key_hash,
 
     -- Row hash (change detection)
     md5(
-        coalesce(exercise_name, '')                             || '||' ||
-        coalesce(cast(duration_minutes AS VARCHAR), '')         || '||' ||
-        coalesce(cast(calories_burned AS VARCHAR), '')          || '||' ||
-        coalesce(category, '')
+        coalesce(title, '')                                       || '||' ||
+        coalesce(cast(duration_min AS VARCHAR), '')                || '||' ||
+        coalesce(cast(calories_burned AS VARCHAR), '')             || '||' ||
+        coalesce(source, '')
     ) AS row_hash,
 
     current_timestamp AS load_datetime
@@ -70,19 +69,18 @@ WHEN MATCHED AND target.row_hash <> src.row_hash THEN
     duration_seconds = src.duration_seconds,
     label            = src.label,
     source           = src.source,
-    source_system    = src.source_system,
     row_hash         = src.row_hash,
     update_datetime  = current_timestamp
 
 WHEN NOT MATCHED THEN
   INSERT (
     sk_date, day, workout_id, activity, intensity, calories, distance_meters,
-    start_datetime, end_datetime, duration_seconds, label, source, source_system,
+    start_datetime, end_datetime, duration_seconds, label, source,
     business_key_hash, row_hash, load_datetime, update_datetime
   )
   VALUES (
     src.sk_date, src.day, src.workout_id, src.activity, src.intensity, src.calories, src.distance_meters,
-    src.start_datetime, src.end_datetime, src.duration_seconds, src.label, src.source, src.source_system,
+    src.start_datetime, src.end_datetime, src.duration_seconds, src.label, src.source,
     src.business_key_hash, src.row_hash, current_timestamp, current_timestamp
   );
 
