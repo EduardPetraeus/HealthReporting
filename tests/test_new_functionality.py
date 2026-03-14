@@ -503,7 +503,7 @@ class TestNeanderthalParsing:
 
 
 class TestWellnessTraitsParsing:
-    """Tests for _parse_wellness_traits — new in diff."""
+    """Tests for wellness report parsing via _parse_health_report."""
 
     def setup_method(self):
         self.parser = GeneticsPdfParser()

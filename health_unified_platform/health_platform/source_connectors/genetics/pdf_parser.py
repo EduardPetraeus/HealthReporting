@@ -350,42 +350,6 @@ class GeneticsPdfParser:
             }
         ]
 
-    def _parse_wellness_traits(self, text: str, path: Path) -> list[dict]:
-        """Parse detailed wellness/trait info from a report.
-
-        Extracts structured trait data including gene, SNP, and genotype
-        for traits like muscle composition, genetic weight, saturated fat,
-        lactose intolerance, etc.
-
-        Returns list of dicts with: category, trait_name, result_value,
-        result_numeric, gene, snp_id, genotype, report_name.
-        """
-        report_name = self._extract_report_name(path)
-        condition = self._extract_condition(text, report_name)
-        result_summary = self._extract_result_summary(text)
-        gene = self._extract_gene(text)
-        snp_id = self._extract_snp_id(text)
-        genotype = self._extract_genotype(text)
-
-        # Try to extract a numeric value from the result summary
-        result_numeric: Optional[float] = None
-        match = re.search(r"(\d+(?:\.\d+)?)\s*%", result_summary)
-        if match:
-            result_numeric = float(match.group(1))
-
-        return [
-            {
-                "report_name": report_name,
-                "category": "wellness",
-                "trait_name": condition,
-                "result_value": result_summary,
-                "result_numeric": result_numeric,
-                "gene": gene,
-                "snp_id": snp_id,
-                "genotype": genotype,
-            }
-        ]
-
     @staticmethod
     def _extract_confidence_level(text: str) -> str:
         """Extract the confidence level from ancestry report text.
