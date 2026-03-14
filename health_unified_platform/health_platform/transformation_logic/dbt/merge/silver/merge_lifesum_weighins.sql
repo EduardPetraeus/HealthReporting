@@ -25,19 +25,18 @@ SELECT
 
     -- Business columns
     date::TIMESTAMP           AS datetime,
-    weight::DOUBLE            AS weight_kg,
+    weight_kg::DOUBLE         AS weight_kg,
     NULL::DOUBLE              AS fat_mass_kg,
     NULL::DOUBLE              AS bone_mass_kg,
     NULL::DOUBLE              AS muscle_mass_kg,
     NULL::DOUBLE              AS hydration_kg,
-    'lifesum'                 AS source_system,
 
     -- Deterministic business key hash (includes source to avoid collisions with Withings)
     md5(coalesce(date, '') || '||lifesum') AS business_key_hash,
 
     -- Row hash (change detection)
     md5(
-        coalesce(cast(weight AS VARCHAR), '')
+        coalesce(cast(weight_kg AS VARCHAR), '')
     ) AS row_hash,
 
     current_timestamp AS load_datetime
@@ -60,19 +59,18 @@ WHEN MATCHED AND target.row_hash <> src.row_hash THEN
     bone_mass_kg    = src.bone_mass_kg,
     muscle_mass_kg  = src.muscle_mass_kg,
     hydration_kg    = src.hydration_kg,
-    source_system   = src.source_system,
     row_hash        = src.row_hash,
     update_datetime = current_timestamp
 
 WHEN NOT MATCHED THEN
   INSERT (
     sk_date, sk_time, datetime, weight_kg, fat_mass_kg, bone_mass_kg,
-    muscle_mass_kg, hydration_kg, source_system,
+    muscle_mass_kg, hydration_kg,
     business_key_hash, row_hash, load_datetime, update_datetime
   )
   VALUES (
     src.sk_date, src.sk_time, src.datetime, src.weight_kg, src.fat_mass_kg, src.bone_mass_kg,
-    src.muscle_mass_kg, src.hydration_kg, src.source_system,
+    src.muscle_mass_kg, src.hydration_kg,
     src.business_key_hash, src.row_hash, current_timestamp, current_timestamp
   );
 
