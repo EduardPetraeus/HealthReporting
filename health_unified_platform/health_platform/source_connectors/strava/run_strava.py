@@ -15,13 +15,13 @@ from datetime import date
 
 from auth import get_access_token
 from client import StravaClient
-from health_platform.source_connectors.oura.state import (
+from health_platform.source_connectors.strava.state import (
     get_start_date,
     load_state,
     save_state,
     update_state,
 )
-from health_platform.source_connectors.oura.writer import write_records
+from health_platform.source_connectors.strava.writer import write_records
 from health_platform.utils.audit_logger import AuditLogger
 from health_platform.utils.logging_config import get_logger
 
@@ -55,6 +55,13 @@ def main() -> None:
             logger.info(f"{endpoint_name}: fetching {start_date} -> {END_DATE}...")
             records = getattr(client, method_name)(start_date, END_DATE)
             logger.info(f"  Fetched {len(records):,} records.")
+
+            if not records:
+                logger.info(
+                    f"  No new data for {endpoint_name}, skipping write and state update."
+                )
+                continue
+
             write_records(records, endpoint_name, date_field, source_env=SOURCE_ENV)
             update_state(endpoint_name, END_DATE, state)
 
