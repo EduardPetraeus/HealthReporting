@@ -312,11 +312,11 @@
           <mxGeometry x="1440" y="150" width="210" height="65" as="geometry"/>
         </mxCell>
 
-        <mxCell id="97" value="&lt;b&gt;Semantic Contracts&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;24 YAML metric definitions&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#7E57C2;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
+        <mxCell id="97" value="&lt;b&gt;Semantic Contracts&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;28 YAML metric definitions&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#7E57C2;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
           <mxGeometry x="1440" y="240" width="210" height="50" as="geometry"/>
         </mxCell>
 
-        <mxCell id="98" value="&lt;b&gt;MCP Server&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;FastMCP · 10 tools&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
+        <mxCell id="98" value="&lt;b&gt;MCP Server&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;FastMCP · 17 tools&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
           <mxGeometry x="1440" y="315" width="210" height="50" as="geometry"/>
         </mxCell>
 

@@ -25,18 +25,18 @@ Each diagram shows the complete flow: Source → Ingestion → Bronze → Merge 
 
 | Diagram | File | Bronze | Merge | Canvas |
 |---------|------|--------|-------|--------|
-| **Source Overview** | [`source-overview.drawio`](architecture/source-overview.drawio) | 91 total | 62 total | 2200×1400 |
+| **Source Overview** | [`source-overview.drawio`](architecture/source-overview.drawio) | 94 total | 67 total | 2200×1400 |
 | Apple Health | [`apple-health.drawio`](architecture/apple-health.drawio) | 38 | 24 | 1800×1200 |
-| Oura Ring | [`oura-ring.drawio`](architecture/oura-ring.drawio) | 20 | 20 | 1800×1400 |
+| Oura Ring | [`oura-ring.drawio`](architecture/oura-ring.drawio) | 25 | 20 | 1800×1400 |
 | Withings | [`withings.drawio`](architecture/withings.drawio) | 18 | 8 | 1800×1400 |
-| sundhed.dk | [`sundhed-dk.drawio`](architecture/sundhed-dk.drawio) | 5 | 0* | 1600×1000 |
+| sundhed.dk | [`sundhed-dk.drawio`](architecture/sundhed-dk.drawio) | 5 | 5 | 1600×1000 |
 | Lifesum | [`lifesum.drawio`](architecture/lifesum.drawio) | 4 | 4 | 1400×900 |
-| Lab Results | [`lab-results.drawio`](architecture/lab-results.drawio) | 3 | 1 | 1400×800 |
+| Lab Results | [`lab-results.drawio`](architecture/lab-results.drawio) | 1 | 1 | 1400×800 |
 | Strava | [`strava.drawio`](architecture/strava.drawio) | 2 | 1 | 1400×800 |
 | Weather | [`weather.drawio`](architecture/weather.drawio) | 1 | 1 | 1200×700 |
-| 23andMe Genetics | [`23andme-genetics.drawio`](architecture/23andme-genetics.drawio) | 0* | 3 | 1400×900 |
+| 23andMe Genetics | [`23andme-genetics.drawio`](architecture/23andme-genetics.drawio) | 0 | 3 | 1400×900 |
 
-\* = planned/partial
+23andMe bypasses standard bronze ingestion (direct to silver via merge scripts).
 
 ---
 
