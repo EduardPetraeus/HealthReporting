@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # convert_withings_csv.sh
-# Converts 6 Withings CSV exports (comma-delimited) to parquet files.
+# Converts Withings CSV exports (comma-delimited) to parquet files.
+# CSV data goes to _csv/ subdirectories to avoid column conflicts with API parquet.
 # Source: /Users/Shared/data_lake/withings/csv/
-# Target: /Users/Shared/data_lake/withings/raw/{endpoint}/
+# Target: /Users/Shared/data_lake/withings/raw/{endpoint}_csv/
 #
 # Usage: bash scripts/convert_withings_csv.sh
 
@@ -16,14 +17,15 @@ PYTHON="${REPO_ROOT}/.venv/bin/python"
 SOURCE_DIR="/Users/Shared/data_lake/withings/csv"
 TARGET_BASE="/Users/Shared/data_lake/withings/raw"
 
-# Map: csv_filename -> endpoint_name
+# Map: csv_filename -> endpoint_name (writes to {endpoint}_csv/ directories)
 declare -A CSV_MAP
-CSV_MAP["raw_tracker_sleep.csv"]="sleep"
-CSV_MAP["raw_tracker_blood-pressure.csv"]="blood_pressure"
-CSV_MAP["raw_tracker_weight.csv"]="weight"
-CSV_MAP["raw_tracker_body-temperature.csv"]="body_temperature"
-CSV_MAP["raw_tracker_signal.csv"]="signal"
-CSV_MAP["raw_tracker_pwv.csv"]="pwv"
+CSV_MAP["weight.csv"]="weight_csv"
+CSV_MAP["bp.csv"]="blood_pressure_csv"
+CSV_MAP["sleep.csv"]="sleep_csv"
+CSV_MAP["body_temperature.csv"]="body_temperature_csv"
+CSV_MAP["signal.csv"]="signal"
+CSV_MAP["pwv.csv"]="pwv"
+CSV_MAP["activities.csv"]="activities_csv"
 
 echo "=== Withings CSV to Parquet Conversion ==="
 echo "Source: ${SOURCE_DIR}"
