@@ -6,6 +6,8 @@ Usage:
     HEALTH_ENV=prd python run_merge.py silver/merge_apple_health_heart_rate.sql
 """
 
+from __future__ import annotations
+
 import argparse
 import os
 import re
