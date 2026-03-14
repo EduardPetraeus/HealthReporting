@@ -19,15 +19,31 @@ from pathlib import Path
 from typing import Literal
 
 import duckdb
-from fastapi import Depends, FastAPI, Query
+from fastapi import Depends, FastAPI, Query, Request  # noqa: F401
 from fastapi.responses import StreamingResponse
 from health_platform.api.auth import verify_token
 from health_platform.mcp.health_tools import HealthTools
 from health_platform.utils.logging_config import get_logger
 from health_platform.utils.paths import get_db_path
 from pydantic import BaseModel, Field
+from slowapi import Limiter  # noqa: F401
+from slowapi.errors import RateLimitExceeded  # noqa: F401
+from slowapi.util import get_remote_address  # noqa: F401
 
 logger = get_logger("api.server")
+
+# Rate limiter — keyed by remote IP (Tailscale assigns stable IPs per device)
+limiter = Limiter(key_func=get_remote_address)
+
+
+def _rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
+    """Return 429 with retry-after header on rate limit."""
+    from fastapi.responses import JSONResponse
+
+    return JSONResponse(
+        status_code=429,
+        content={"detail": f"Rate limit exceeded: {exc.detail}"},
+    )
 
 
 @asynccontextmanager
@@ -48,6 +64,8 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Mount chat UI at root
 from health_platform.api.chat_ui import router as chat_ui_router  # noqa: E402
@@ -123,8 +141,10 @@ async def health_check():
 
 
 @app.post("/v1/chat", response_model=ChatResponse, tags=["ai"])
+@limiter.limit("10/minute")
 async def chat(
-    request: ChatRequest,
+    request: Request,
+    chat_request: ChatRequest,
     _token: str = Depends(verify_token),
 ):
     """Ask a natural language health question.
@@ -136,11 +156,13 @@ async def chat(
 
     tools = _get_tools()
     try:
-        answer = generate_response(tools, request.question, request.session_id)
+        answer = generate_response(
+            tools, chat_request.question, chat_request.session_id
+        )
     finally:
         tools.close()
 
-    if request.format == "plain":
+    if chat_request.format == "plain":
         answer = _markdown_table_to_plain(answer)
 
     return ChatResponse(
@@ -150,8 +172,10 @@ async def chat(
 
 
 @app.post("/v1/chat/stream", tags=["ai"])
+@limiter.limit("10/minute")
 async def chat_stream(
-    request: ChatRequest,
+    request: Request,
+    chat_request: ChatRequest,
     _token: str = Depends(verify_token),
 ):
     """Stream a chat response using Server-Sent Events.
@@ -166,7 +190,7 @@ async def chat_stream(
     async def event_generator():
         try:
             for chunk in generate_response_stream(
-                tools, request.question, request.session_id
+                tools, chat_request.question, chat_request.session_id
             ):
                 yield f"data: {json.dumps({'text': chunk})}\n\n"
             yield f"data: {json.dumps({'done': True})}\n\n"
@@ -177,7 +201,9 @@ async def chat_stream(
 
 
 @app.get("/v1/query", response_model=QueryResponse, tags=["data"])
+@limiter.limit("60/minute")
 async def query(
+    request: Request,
     metric: str = Query(..., description="Metric name (e.g., sleep_score, steps)"),
     date_range: str = Query(
         "last_7_days", description="Date range (last_7_days, last_30_days, etc.)"

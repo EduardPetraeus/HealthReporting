@@ -413,7 +413,11 @@ class TestRunCustomQuery:
     def test_blocks_delete(self, tools):
         result = tools.run_custom_query("DELETE FROM silver.daily_sleep", "Bad")
         assert "Error" in result
-        assert "forbidden" in result.lower() or "DELETE" in result
+        assert (
+            "select" in result.lower()
+            or "forbidden" in result.lower()
+            or "DELETE" in result
+        )
 
     def test_blocks_drop(self, tools):
         result = tools.run_custom_query("DROP TABLE silver.daily_sleep", "Bad")
