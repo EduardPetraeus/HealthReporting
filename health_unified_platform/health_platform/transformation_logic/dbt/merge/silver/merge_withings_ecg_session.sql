@@ -20,8 +20,8 @@ SELECT
     (year(date::TIMESTAMP::DATE) * 10000 + month(date::TIMESTAMP::DATE) * 100 + day(date::TIMESTAMP::DATE))::INTEGER AS sk_date,
     date::TIMESTAMP AS timestamp,
     type AS ecg_type,
-    TRY_CAST("Frequency (Hz)" AS INTEGER) AS frequency_hz,
-    TRY_CAST("Duration (s)" AS INTEGER) AS duration_s,
+    TRY_CAST(frequency AS INTEGER) AS frequency_hz,
+    TRY_CAST(duration AS INTEGER) AS duration_s,
     wearposition,
     'withings' AS source_name,
     md5(
@@ -30,9 +30,9 @@ SELECT
     md5(
         coalesce(cast(date AS VARCHAR), '') || '||' ||
         coalesce(type, '') || '||' ||
-        coalesce(cast("Frequency (Hz)" AS VARCHAR), '') || '||' ||
-        coalesce(cast("Duration (s)" AS VARCHAR), '') || '||' ||
-        coalesce(wearposition, '')
+        coalesce(cast(frequency AS VARCHAR), '') || '||' ||
+        coalesce(cast(duration AS VARCHAR), '') || '||' ||
+        coalesce(cast(wearposition AS VARCHAR), '')
     ) AS row_hash,
     current_timestamp AS load_datetime
 FROM deduped

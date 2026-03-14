@@ -22,10 +22,10 @@ SELECT
     "from"::TIMESTAMP::DATE AS date,
     "from"::TIMESTAMP AS bedtime_start,
     "to"::TIMESTAMP AS bedtime_end,
-    ROUND((TRY_CAST("Light sleep (s)" AS DOUBLE) + TRY_CAST("Deep sleep (s)" AS DOUBLE) + TRY_CAST("REM sleep (s)" AS DOUBLE)) / 60.0, 1) AS total_sleep_min,
-    ROUND(TRY_CAST("Deep sleep (s)" AS DOUBLE) / 60.0, 1) AS deep_sleep_min,
-    ROUND(TRY_CAST("REM sleep (s)" AS DOUBLE) / 60.0, 1) AS rem_sleep_min,
-    ROUND(TRY_CAST("Light sleep (s)" AS DOUBLE) / 60.0, 1) AS light_sleep_min,
+    ROUND((TRY_CAST("light (s)" AS DOUBLE) + TRY_CAST("deep (s)" AS DOUBLE) + TRY_CAST("rem (s)" AS DOUBLE)) / 60.0, 1) AS total_sleep_min,
+    ROUND(TRY_CAST("deep (s)" AS DOUBLE) / 60.0, 1) AS deep_sleep_min,
+    ROUND(TRY_CAST("rem (s)" AS DOUBLE) / 60.0, 1) AS rem_sleep_min,
+    ROUND(TRY_CAST("light (s)" AS DOUBLE) / 60.0, 1) AS light_sleep_min,
     ROUND(TRY_CAST("Duration to wake up (s)" AS DOUBLE) / 60.0, 1) AS awake_min,
     NULL::INTEGER AS efficiency,
     ROUND(TRY_CAST("Duration to sleep (s)" AS DOUBLE) / 60.0, 1) AS latency_min,
@@ -44,9 +44,9 @@ SELECT
     md5(
         coalesce(cast("from" AS VARCHAR), '') || '||' ||
         coalesce(cast("to" AS VARCHAR), '') || '||' ||
-        coalesce(cast("Light sleep (s)" AS VARCHAR), '') || '||' ||
-        coalesce(cast("Deep sleep (s)" AS VARCHAR), '') || '||' ||
-        coalesce(cast("REM sleep (s)" AS VARCHAR), '') || '||' ||
+        coalesce(cast("light (s)" AS VARCHAR), '') || '||' ||
+        coalesce(cast("deep (s)" AS VARCHAR), '') || '||' ||
+        coalesce(cast("rem (s)" AS VARCHAR), '') || '||' ||
         coalesce(cast("Average heart rate" AS VARCHAR), '') || '||' ||
         coalesce(cast("Snoring (s)" AS VARCHAR), '')
     ) AS row_hash,

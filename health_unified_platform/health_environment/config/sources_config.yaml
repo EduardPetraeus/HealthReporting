@@ -369,17 +369,21 @@ sources:
   # Withings endpoints (OAuth2 API, fetched via source_connectors/withings/run_withings.py)
   - name: "withings_weight"
     # Weight and body composition (fat%, muscle%, bone%, hydration%)
+    # hive_partitioning false: directory has both flat CSV and Hive-partitioned API files
     relative_path: "withings/raw/weight/**/*.parquet"
     source_type: "parquet"
     target_schema: "bronze"
     target_table: "stg_withings_weight"
+    hive_partitioning: false
 
   - name: "withings_blood_pressure"
     # Blood pressure readings (systolic, diastolic, pulse)
+    # hive_partitioning false: directory has both flat CSV and Hive-partitioned API files
     relative_path: "withings/raw/blood_pressure/**/*.parquet"
     source_type: "parquet"
     target_schema: "bronze"
     target_table: "stg_withings_blood_pressure"
+    hive_partitioning: false
 
   - name: "withings_temperature"
     # Body temperature measurements
@@ -438,35 +442,35 @@ sources:
   # Withings CSV exports (historical data, separate from API to avoid column conflicts)
   - name: "withings_weight_csv"
     # Historical weight CSV with columns: Date, Weight (kg), Fat mass (kg), etc.
-    relative_path: "withings/raw/weight_csv/*.parquet"
+    relative_path: "withings/raw/weight_csv/**/*.parquet"
     source_type: "parquet"
     target_schema: "bronze"
     target_table: "stg_withings_weight_csv"
 
   - name: "withings_blood_pressure_csv"
     # Historical BP CSV with columns: Date, Systolic, Diastolic, Heart rate
-    relative_path: "withings/raw/blood_pressure_csv/*.parquet"
+    relative_path: "withings/raw/blood_pressure_csv/**/*.parquet"
     source_type: "parquet"
     target_schema: "bronze"
     target_table: "stg_withings_blood_pressure_csv"
 
   - name: "withings_sleep_csv"
     # Historical sleep CSV with columns: from, to, Light sleep (s), Deep sleep (s), etc.
-    relative_path: "withings/raw/sleep_csv/*.parquet"
+    relative_path: "withings/raw/sleep_csv/**/*.parquet"
     source_type: "parquet"
     target_schema: "bronze"
     target_table: "stg_withings_sleep_csv"
 
   - name: "withings_body_temperature_csv"
     # Historical body temperature CSV with columns: date, value (°C)
-    relative_path: "withings/raw/body_temperature_csv/*.parquet"
+    relative_path: "withings/raw/body_temperature_csv/**/*.parquet"
     source_type: "parquet"
     target_schema: "bronze"
     target_table: "stg_withings_body_temperature_csv"
 
   - name: "withings_activities_csv"
     # Historical daily activity CSV
-    relative_path: "withings/raw/activities_csv/*.parquet"
+    relative_path: "withings/raw/activities_csv/**/*.parquet"
     source_type: "parquet"
     target_schema: "bronze"
     target_table: "stg_withings_activities_csv"

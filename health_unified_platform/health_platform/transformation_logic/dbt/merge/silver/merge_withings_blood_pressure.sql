@@ -1,35 +1,36 @@
 -- merge_withings_blood_pressure.sql
--- Per-source merge: Withings -> silver.blood_pressure
--- Business key: datetime + systolic + diastolic (one reading per timestamp)
+-- Per-source merge: Withings CSV -> silver.blood_pressure
+-- Bronze columns use Withings CSV export names (quoted).
+-- Business key: Date + Systolic + Diastolic (one reading per timestamp)
 --
 -- Usage: python run_merge.py silver/merge_withings_blood_pressure.sql
 
 CREATE OR REPLACE TABLE silver.blood_pressure__staging AS
 WITH deduped AS (
     SELECT *,
-        ROW_NUMBER() OVER (PARTITION BY datetime ORDER BY _ingested_at DESC) AS rn
+        ROW_NUMBER() OVER (PARTITION BY "Date" ORDER BY _ingested_at DESC) AS rn
     FROM bronze.stg_withings_blood_pressure
-    WHERE datetime IS NOT NULL
+    WHERE "Date" IS NOT NULL
 )
 SELECT
-    (year(datetime::TIMESTAMP) * 10000 + month(datetime::TIMESTAMP) * 100 + day(datetime::TIMESTAMP))::INTEGER AS sk_date,
-    lpad(hour(datetime::TIMESTAMP)::VARCHAR, 2, '0') || lpad(minute(datetime::TIMESTAMP)::VARCHAR, 2, '0')      AS sk_time,
-    datetime::TIMESTAMP               AS datetime,
-    systolic::INTEGER                 AS systolic,
-    diastolic::INTEGER                AS diastolic,
-    pulse::INTEGER                    AS pulse,
+    (year("Date"::TIMESTAMP) * 10000 + month("Date"::TIMESTAMP) * 100 + day("Date"::TIMESTAMP))::INTEGER AS sk_date,
+    lpad(hour("Date"::TIMESTAMP)::VARCHAR, 2, '0') || lpad(minute("Date"::TIMESTAMP)::VARCHAR, 2, '0')   AS sk_time,
+    "Date"::TIMESTAMP                  AS datetime,
+    TRY_CAST("Systolic" AS INTEGER)    AS systolic,
+    TRY_CAST("Diastolic" AS INTEGER)   AS diastolic,
+    TRY_CAST("Heart rate" AS INTEGER)  AS pulse,
     md5(
-        coalesce(datetime, '')                             || '||' ||
-        coalesce(cast(systolic AS VARCHAR), '')            || '||' ||
-        coalesce(cast(diastolic AS VARCHAR), '')
-    )                                 AS business_key_hash,
+        coalesce(cast("Date" AS VARCHAR), '')              || '||' ||
+        coalesce(cast("Systolic" AS VARCHAR), '')          || '||' ||
+        coalesce(cast("Diastolic" AS VARCHAR), '')
+    )                                  AS business_key_hash,
     md5(
-        coalesce(datetime, '')                             || '||' ||
-        coalesce(cast(systolic AS VARCHAR), '')            || '||' ||
-        coalesce(cast(diastolic AS VARCHAR), '')           || '||' ||
-        coalesce(cast(pulse AS VARCHAR), '')
-    )                                 AS row_hash,
-    current_timestamp                 AS load_datetime
+        coalesce(cast("Date" AS VARCHAR), '')              || '||' ||
+        coalesce(cast("Systolic" AS VARCHAR), '')          || '||' ||
+        coalesce(cast("Diastolic" AS VARCHAR), '')         || '||' ||
+        coalesce(cast("Heart rate" AS VARCHAR), '')
+    )                                  AS row_hash,
+    current_timestamp                  AS load_datetime
 FROM deduped WHERE rn = 1;
 
 MERGE INTO silver.blood_pressure AS target

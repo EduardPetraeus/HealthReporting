@@ -1,35 +1,76 @@
 -- merge_withings_body_temperature.sql
--- Per-source merge: Withings CSV -> silver.body_temperature (shared table)
+-- Per-source merge: Withings API + CSV -> silver.body_temperature (shared table)
+-- UNION ALL from API (stg_withings_temperature) and CSV (stg_withings_body_temperature, stg_withings_body_temperature_csv)
 -- Source-qualified staging table to avoid collisions with Apple Health merge.
 --
 -- Usage: python run_merge.py silver/merge_withings_body_temperature.sql
 
--- Step 1: Create staging table with deduplication
+-- Step 1: Create staging table with UNION ALL from all sources
 CREATE OR REPLACE TABLE silver.body_temperature__withings_staging AS
-WITH deduped AS (
-    SELECT
-        *,
-        ROW_NUMBER() OVER (
-            PARTITION BY date
-            ORDER BY _ingested_at DESC
-        ) AS rn
+WITH api_source AS (
+    SELECT *,
+        ROW_NUMBER() OVER (PARTITION BY datetime ORDER BY _ingested_at DESC) AS rn
+    FROM bronze.stg_withings_temperature
+    WHERE datetime IS NOT NULL
+),
+csv_source_legacy AS (
+    SELECT *,
+        ROW_NUMBER() OVER (PARTITION BY date ORDER BY _ingested_at DESC) AS rn
     FROM bronze.stg_withings_body_temperature
     WHERE date IS NOT NULL
+),
+csv_source_new AS (
+    SELECT *,
+        ROW_NUMBER() OVER (PARTITION BY date ORDER BY _ingested_at DESC) AS rn
+    FROM bronze.stg_withings_body_temperature_csv
+    WHERE date IS NOT NULL
+),
+combined AS (
+    -- API temperature data
+    SELECT
+        datetime::TIMESTAMP AS timestamp,
+        ROUND(temperature_c::DOUBLE, 1) AS temperature_degc,
+        'withings' AS source_name
+    FROM api_source WHERE rn = 1
+
+    UNION ALL
+
+    -- Legacy CSV path (stg_withings_body_temperature)
+    SELECT
+        date::TIMESTAMP AS timestamp,
+        ROUND(TRY_CAST("value (°C)" AS DOUBLE), 1) AS temperature_degc,
+        'withings' AS source_name
+    FROM csv_source_legacy WHERE rn = 1
+
+    UNION ALL
+
+    -- New CSV path (stg_withings_body_temperature_csv)
+    SELECT
+        date::TIMESTAMP AS timestamp,
+        ROUND(TRY_CAST("value (°C)" AS DOUBLE), 1) AS temperature_degc,
+        'withings' AS source_name
+    FROM csv_source_new WHERE rn = 1
+),
+final_dedup AS (
+    SELECT *,
+        ROW_NUMBER() OVER (PARTITION BY timestamp ORDER BY temperature_degc DESC NULLS LAST) AS rn
+    FROM combined
+    WHERE timestamp IS NOT NULL
 )
 SELECT
-    (year(date::TIMESTAMP::DATE) * 10000 + month(date::TIMESTAMP::DATE) * 100 + day(date::TIMESTAMP::DATE))::INTEGER AS sk_date,
-    date::TIMESTAMP AS timestamp,
-    ROUND("value (°C)"::DOUBLE, 1) AS temperature_degc,
-    'withings' AS source_name,
+    (year(timestamp::DATE) * 10000 + month(timestamp::DATE) * 100 + day(timestamp::DATE))::INTEGER AS sk_date,
+    timestamp,
+    temperature_degc,
+    source_name,
     md5(
-        coalesce(cast(date AS VARCHAR), '') || '||' || 'withings'
+        coalesce(cast(timestamp AS VARCHAR), '') || '||' || 'withings'
     ) AS business_key_hash,
     md5(
-        coalesce(cast(date AS VARCHAR), '') || '||' ||
-        coalesce(cast("value (°C)" AS VARCHAR), '')
+        coalesce(cast(timestamp AS VARCHAR), '') || '||' ||
+        coalesce(cast(temperature_degc AS VARCHAR), '')
     ) AS row_hash,
     current_timestamp AS load_datetime
-FROM deduped
+FROM final_dedup
 WHERE rn = 1;
 
 -- Step 2: Merge staging into silver.body_temperature

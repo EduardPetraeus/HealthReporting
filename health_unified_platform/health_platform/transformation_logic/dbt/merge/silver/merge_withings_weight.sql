@@ -1,42 +1,43 @@
 -- merge_withings_weight.sql
--- Per-source merge: Withings -> silver.weight
--- Business key: datetime + weight_kg + all mass fields (composite uniqueness)
+-- Per-source merge: Withings CSV -> silver.weight
+-- Bronze columns use Withings CSV export names (quoted, with units).
+-- Business key: Date + Weight (kg) (composite uniqueness)
 --
 -- Usage: python run_merge.py silver/merge_withings_weight.sql
 
 CREATE OR REPLACE TABLE silver.weight__staging AS
 WITH deduped AS (
     SELECT *,
-        ROW_NUMBER() OVER (PARTITION BY datetime, weight_kg ORDER BY _ingested_at DESC) AS rn
+        ROW_NUMBER() OVER (PARTITION BY "Date", "Weight (kg)" ORDER BY _ingested_at DESC) AS rn
     FROM bronze.stg_withings_weight
-    WHERE datetime IS NOT NULL
+    WHERE "Date" IS NOT NULL
 )
 SELECT
-    (year(datetime::TIMESTAMP) * 10000 + month(datetime::TIMESTAMP) * 100 + day(datetime::TIMESTAMP))::INTEGER AS sk_date,
-    lpad(hour(datetime::TIMESTAMP)::VARCHAR, 2, '0') || lpad(minute(datetime::TIMESTAMP)::VARCHAR, 2, '0')      AS sk_time,
-    datetime::TIMESTAMP               AS datetime,
-    weight_kg::DOUBLE                 AS weight_kg,
-    fat_mass_kg::DOUBLE               AS fat_mass_kg,
-    bone_mass_kg::DOUBLE              AS bone_mass_kg,
-    muscle_mass_kg::DOUBLE            AS muscle_mass_kg,
-    hydration_kg::DOUBLE              AS hydration_kg,
+    (year("Date"::TIMESTAMP) * 10000 + month("Date"::TIMESTAMP) * 100 + day("Date"::TIMESTAMP))::INTEGER AS sk_date,
+    lpad(hour("Date"::TIMESTAMP)::VARCHAR, 2, '0') || lpad(minute("Date"::TIMESTAMP)::VARCHAR, 2, '0')   AS sk_time,
+    "Date"::TIMESTAMP                  AS datetime,
+    TRY_CAST("Weight (kg)" AS DOUBLE)  AS weight_kg,
+    TRY_CAST("Fat mass (kg)" AS DOUBLE) AS fat_mass_kg,
+    TRY_CAST("Bone mass (kg)" AS DOUBLE) AS bone_mass_kg,
+    TRY_CAST("Muscle mass (kg)" AS DOUBLE) AS muscle_mass_kg,
+    TRY_CAST("Hydration (kg)" AS DOUBLE) AS hydration_kg,
     md5(
-        coalesce(datetime, '')                                  || '||' ||
-        coalesce(cast(weight_kg AS VARCHAR), '')                || '||' ||
-        coalesce(cast(fat_mass_kg AS VARCHAR), '')              || '||' ||
-        coalesce(cast(bone_mass_kg AS VARCHAR), '')             || '||' ||
-        coalesce(cast(muscle_mass_kg AS VARCHAR), '')           || '||' ||
-        coalesce(cast(hydration_kg AS VARCHAR), '')
-    )                                 AS business_key_hash,
+        coalesce(cast("Date" AS VARCHAR), '')              || '||' ||
+        coalesce(cast("Weight (kg)" AS VARCHAR), '')       || '||' ||
+        coalesce(cast("Fat mass (kg)" AS VARCHAR), '')     || '||' ||
+        coalesce(cast("Bone mass (kg)" AS VARCHAR), '')    || '||' ||
+        coalesce(cast("Muscle mass (kg)" AS VARCHAR), '')  || '||' ||
+        coalesce(cast("Hydration (kg)" AS VARCHAR), '')
+    )                                  AS business_key_hash,
     md5(
-        coalesce(datetime, '')                                  || '||' ||
-        coalesce(cast(weight_kg AS VARCHAR), '')                || '||' ||
-        coalesce(cast(fat_mass_kg AS VARCHAR), '')              || '||' ||
-        coalesce(cast(bone_mass_kg AS VARCHAR), '')             || '||' ||
-        coalesce(cast(muscle_mass_kg AS VARCHAR), '')           || '||' ||
-        coalesce(cast(hydration_kg AS VARCHAR), '')
-    )                                 AS row_hash,
-    current_timestamp                 AS load_datetime
+        coalesce(cast("Date" AS VARCHAR), '')              || '||' ||
+        coalesce(cast("Weight (kg)" AS VARCHAR), '')       || '||' ||
+        coalesce(cast("Fat mass (kg)" AS VARCHAR), '')     || '||' ||
+        coalesce(cast("Bone mass (kg)" AS VARCHAR), '')    || '||' ||
+        coalesce(cast("Muscle mass (kg)" AS VARCHAR), '')  || '||' ||
+        coalesce(cast("Hydration (kg)" AS VARCHAR), '')
+    )                                  AS row_hash,
+    current_timestamp                  AS load_datetime
 FROM deduped WHERE rn = 1;
 
 MERGE INTO silver.weight AS target
