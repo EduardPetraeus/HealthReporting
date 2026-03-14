@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-03-14T00:00:00.000Z" agent="Claude" version="24.0.0" type="device">
+  <diagram id="lab-results-flow" name="Lab Results + Supplements — Source to Silver">
+    <mxGraphModel dx="1422" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="800" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- ======================== -->
+        <!-- TITLE                    -->
+        <!-- ======================== -->
+
+        <mxCell id="title1" value="Lab Results + Supplements — Data Source Lineage" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=18;fontFamily=Helvetica;fontStyle=1;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="30" y="15" width="480" height="30" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="title2" value="PDF Upload + YAML Manual Entry · 3 bronze/silver entries · 1 merge script" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;fontFamily=Helvetica;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="30" y="42" width="440" height="25" as="geometry"/>
+        </mxCell>
+
+        <!-- ======================== -->
+        <!-- COL 1: SOURCE            -->
+        <!-- ======================== -->
+
+        <mxCell id="src1" value="&lt;b style=&quot;font-size:14px;&quot;&gt;GetTested&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px; color:#666;&quot;&gt;Lab Test Provider&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=12;fontFamily=Helvetica;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="40" y="140" width="160" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="src1_sub" value="&lt;b&gt;PDF Upload&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;Lab result PDF reports&lt;br&gt;Blood panels, biomarkers&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="40" y="250" width="160" height="65" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="src2" value="&lt;b style=&quot;font-size:14px;&quot;&gt;Manual Entry&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px; color:#666;&quot;&gt;YAML Configuration&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=12;fontFamily=Helvetica;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="40" y="400" width="160" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="src2_sub" value="&lt;b&gt;YAML Files&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;Lab results + supplement protocol&lt;br&gt;Structured manual data entry&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="40" y="510" width="160" height="65" as="geometry"/>
+        </mxCell>
+
+        <!-- Source → sub-box arrows -->
+        <mxCell id="e_src1_sub" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#82B366;strokeWidth=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="src1" target="src1_sub" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e_src2_sub" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#82B366;strokeWidth=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="src2" target="src2_sub" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ======================== -->
+        <!-- COL 2: INGESTION         -->
+        <!-- ======================== -->
+
+        <mxCell id="ing1" value="&lt;b&gt;lab_ingestion.py&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;PDF processing orchestrator&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="260" y="170" width="170" height="55" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="ing2" value="&lt;b&gt;pdf_parser.py&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;PDF → structured biomarker data&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="260" y="260" width="170" height="55" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="parquet" value="&lt;b&gt;Parquet Data Lake&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;lab_results/pdf_parsed/&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="260" y="350" width="170" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="ing3" value="&lt;b&gt;import_manual_data.py&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;YAML → DuckDB silver (direct)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="260" y="440" width="170" height="55" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="ing4" value="&lt;b&gt;ingestion_engine.py&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;YAML-driven loader&lt;br&gt;Parquet → DuckDB bronze&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="260" y="520" width="170" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Ingestion edges -->
+        <!-- PDF Upload → lab_ingestion.py -->
+        <mxCell id="e_pdf_ing1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#666666;strokeWidth=1.5;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="src1_sub" target="ing1" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- lab_ingestion.py → pdf_parser.py -->
+        <mxCell id="e_ing1_ing2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#666666;strokeWidth=1.5;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="ing1" target="ing2" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- pdf_parser.py → Parquet -->
+        <mxCell id="e_ing2_parquet" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#666666;strokeWidth=1.5;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" source="ing2" target="parquet" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Parquet → ingestion_engine.py -->
+        <mxCell id="e_parquet_ing4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#666666;strokeWidth=1.5;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="parquet" target="ing4" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- YAML Files → import_manual_data.py -->
+        <mxCell id="e_yaml_ing3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#666666;strokeWidth=1.5;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="src2_sub" target="ing3" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ======================== -->
+        <!-- COL 3: BRONZE            -->
+        <!-- ======================== -->
+
+        <!-- Bronze boundary -->
+        <mxCell id="bronze_boundary" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#E6A817;strokeWidth=2;dashed=0;opacity=60;" vertex="1" parent="1">
+          <mxGeometry x="490" y="100" width="180" height="510" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="bronze_title" value="Bronze" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontFamily=Helvetica;fontStyle=1;fontColor=#E6A817;" vertex="1" parent="1">
+          <mxGeometry x="550" y="108" width="60" height="25" as="geometry"/>
+        </mxCell>
+
+        <!-- Bronze badge -->
+        <mxCell id="bronze_badge" value="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#6C8EBF;strokeColor=#5A7AAD;fontColor=#FFFFFF;fontSize=11;fontStyle=1;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="610" y="105" width="28" height="28" as="geometry"/>
+        </mxCell>
+
+        <!-- Bronze table -->
+        <mxCell id="brz_lab_pdf" value="&lt;b&gt;stg_lab_pdf_results&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;Parsed PDF biomarker results&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="505" y="260" width="150" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- Annotation: YAML bypass -->
+        <mxCell id="bypass_note" value="&lt;font style=&quot;font-size:9px; color:#999;&quot;&gt;YAML sources load&lt;br&gt;directly to silver&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=9;fontFamily=Helvetica;fontColor=#999999;" vertex="1" parent="1">
+          <mxGeometry x="515" y="440" width="120" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- ingestion_engine → bronze -->
+        <mxCell id="e_ing4_brz" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#666666;strokeWidth=1.5;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=1;entryDx=0;entryDy=0;" edge="1" source="ing4" target="brz_lab_pdf" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="470" y="550"/>
+              <mxPoint x="470" y="315"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ======================== -->
+        <!-- COL 4: MERGE             -->
+        <!-- ======================== -->
+
+        <mxCell id="merge1" value="&lt;b&gt;1 Merge SQL Script&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;merge_lab_pdf_results.sql&lt;br&gt;MERGE INTO · source_system = 'lab'&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="730" y="250" width="170" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- Bronze → Merge -->
+        <mxCell id="e_brz_merge" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#666666;strokeWidth=1.5;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="brz_lab_pdf" target="merge1" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ======================== -->
+        <!-- COL 5: SILVER            -->
+        <!-- ======================== -->
+
+        <!-- Silver boundary -->
+        <mxCell id="silver_boundary" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#6C8EBF;strokeWidth=2;dashed=1;opacity=60;" vertex="1" parent="1">
+          <mxGeometry x="950" y="100" width="180" height="510" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="silver_title" value="Silver Tables" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontFamily=Helvetica;fontStyle=1;fontColor=#6C8EBF;" vertex="1" parent="1">
+          <mxGeometry x="990" y="108" width="100" height="25" as="geometry"/>
+        </mxCell>
+
+        <!-- Silver table: lab_results -->
+        <mxCell id="slv_lab" value="&lt;b&gt;lab_results&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;Blood panels, biomarkers&lt;br&gt;From PDF + YAML&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="965" y="220" width="150" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Silver table: supplement_log -->
+        <mxCell id="slv_supp" value="&lt;b&gt;supplement_log&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;Supplement protocol&lt;br&gt;From YAML direct&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="965" y="340" width="150" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Merge → lab_results (normal flow) -->
+        <mxCell id="e_merge_slv" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#666666;strokeWidth=1.5;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="merge1" target="slv_lab" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- import_manual_data.py → lab_results (direct, dashed) -->
+        <mxCell id="e_manual_slv_lab" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#6C8EBF;strokeWidth=1.5;dashed=1;dashPattern=8 4;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=1;entryDx=0;entryDy=0;" edge="1" source="ing3" target="slv_lab" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="940" y="454"/>
+              <mxPoint x="940" y="280"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- import_manual_data.py → supplement_log (direct, dashed) -->
+        <mxCell id="e_manual_slv_supp" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#6C8EBF;strokeWidth=1.5;dashed=1;dashPattern=8 4;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="ing3" target="slv_supp" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="940" y="481"/>
+              <mxPoint x="940" y="370"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ======================== -->
+        <!-- COL 6: DOWNSTREAM        -->
+        <!-- ======================== -->
+
+        <!-- Local Stack boundary -->
+        <mxCell id="local_boundary" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEEFB;strokeColor=#1F6FEB;strokeWidth=1.5;dashed=1;opacity=40;" vertex="1" parent="1">
+          <mxGeometry x="1180" y="120" width="180" height="260" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="local_title" value="&lt;b&gt;Local Stack&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;fontFamily=Helvetica;fontColor=#1F6FEB;" vertex="1" parent="1">
+          <mxGeometry x="1225" y="128" width="85" height="22" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="local_memory" value="&lt;font style=&quot;font-size:10px;&quot;&gt;Agent Memory&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEEFB;strokeColor=#1F6FEB;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="160" width="140" height="35" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="local_contracts" value="&lt;font style=&quot;font-size:10px;&quot;&gt;Semantic Contracts&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEEFB;strokeColor=#1F6FEB;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="205" width="140" height="35" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="local_mcp" value="&lt;font style=&quot;font-size:10px;&quot;&gt;MCP Server&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEEFB;strokeColor=#1F6FEB;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="250" width="140" height="35" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="local_person" value="Claude Code" style="shape=mxgraph.basic.smiley;whiteSpace=wrap;html=1;fillColor=#DCEEFB;strokeColor=#1F6FEB;fontSize=9;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="1245" y="300" width="45" height="45" as="geometry"/>
+        </mxCell>
+
+        <!-- Cloud Stack boundary -->
+        <mxCell id="cloud_boundary" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D29922;strokeWidth=1.5;dashed=1;opacity=40;" vertex="1" parent="1">
+          <mxGeometry x="1180" y="400" width="180" height="210" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="cloud_title" value="&lt;b&gt;Cloud Stack&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;fontFamily=Helvetica;fontColor=#D29922;" vertex="1" parent="1">
+          <mxGeometry x="1222" y="408" width="90" height="22" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="cloud_uc" value="&lt;font style=&quot;font-size:10px;&quot;&gt;Unity Catalog&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D29922;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="440" width="140" height="35" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="cloud_dash" value="&lt;font style=&quot;font-size:10px;&quot;&gt;Dashboards&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D29922;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="485" width="140" height="35" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="cloud_person" value="Claus" style="shape=mxgraph.basic.smiley;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D29922;fontSize=9;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="1245" y="540" width="45" height="45" as="geometry"/>
+        </mxCell>
+
+        <!-- Silver → Local Stack -->
+        <mxCell id="e_slv_local" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#1F6FEB;strokeWidth=1.5;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="slv_lab" target="local_memory" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Silver → Cloud Stack -->
+        <mxCell id="e_slv_cloud" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#D29922;strokeWidth=1.5;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="slv_supp" target="cloud_uc" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1160" y="370"/>
+              <mxPoint x="1160" y="457"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ======================== -->
+        <!-- LEGEND                   -->
+        <!-- ======================== -->
+
+        <mxCell id="legend_boundary" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#CCCCCC;strokeWidth=1;dashed=0;" vertex="1" parent="1">
+          <mxGeometry x="30" y="650" width="620" height="100" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="legend_title" value="&lt;b&gt;Legend&lt;/b&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;fontFamily=Helvetica;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="40" y="655" width="55" height="22" as="geometry"/>
+        </mxCell>
+
+        <!-- Legend: Green = External Source -->
+        <mxCell id="leg_green" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="45" y="685" width="20" height="14" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg_green_label" value="External Source" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=10;fontFamily=Helvetica;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="70" y="680" width="100" height="22" as="geometry"/>
+        </mxCell>
+
+        <!-- Legend: Orange = Bronze/Storage -->
+        <mxCell id="leg_orange" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="185" y="685" width="20" height="14" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg_orange_label" value="Bronze / Storage" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=10;fontFamily=Helvetica;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="210" y="680" width="110" height="22" as="geometry"/>
+        </mxCell>
+
+        <!-- Legend: Blue = Silver/Process -->
+        <mxCell id="leg_blue" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=10;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="335" y="685" width="20" height="14" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg_blue_label" value="Silver / Process" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=10;fontFamily=Helvetica;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="360" y="680" width="100" height="22" as="geometry"/>
+        </mxCell>
+
+        <!-- Legend: Blue circle = Table count -->
+        <mxCell id="leg_circle" value="N" style="ellipse;whiteSpace=wrap;html=1;fillColor=#6C8EBF;strokeColor=#5A7AAD;fontColor=#FFFFFF;fontSize=9;fontStyle=1;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="45" y="712" width="20" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg_circle_label" value="Table count" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=10;fontFamily=Helvetica;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="70" y="712" width="80" height="22" as="geometry"/>
+        </mxCell>
+
+        <!-- Legend: Dashed arrow = Direct load -->
+        <mxCell id="leg_dashed_src" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="185" y="718" width="5" height="5" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg_dashed_tgt" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="225" y="718" width="5" height="5" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg_dashed_edge" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#6C8EBF;strokeWidth=1.5;dashed=1;dashPattern=8 4;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="leg_dashed_src" target="leg_dashed_tgt" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg_dashed_label" value="Direct load (bypasses bronze)" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=10;fontFamily=Helvetica;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="235" y="712" width="190" height="22" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
