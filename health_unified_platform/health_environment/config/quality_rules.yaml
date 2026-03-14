@@ -373,3 +373,32 @@ tables:
       temperature_max: { min: -50, max: 60 }
       temperature_min: { min: -60, max: 50 }
     completeness: { column: day, grain: daily, max_gaps: 0 }
+
+  # =====================================================================
+  # sundhed.dk (clinical data from sundhed.dk portal)
+  # =====================================================================
+
+  sundhed_dk_lab_results:
+    not_null: [business_key_hash, test_date, marker_name]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  sundhed_dk_medications:
+    not_null: [business_key_hash, medication_name, start_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  sundhed_dk_vaccinations:
+    not_null: [business_key_hash, vaccine_name]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  sundhed_dk_ejournal:
+    not_null: [business_key_hash, note_text]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  sundhed_dk_appointments:
+    not_null: [business_key_hash, referral_date, receiving_clinic]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }

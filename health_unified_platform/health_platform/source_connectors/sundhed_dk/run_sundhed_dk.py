@@ -2,6 +2,8 @@
 
 Full load only — no incremental sync (data changes quarterly at most).
 
+Pipeline: authenticate -> scrape HTML -> archive HTML -> parse -> validate -> write Parquet.
+
 Usage:
     HEALTH_ENV=dev python run_sundhed_dk.py
     HEALTH_ENV=dev python run_sundhed_dk.py --sections lab_results,medications
@@ -10,22 +12,32 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import datetime
 import os
 import sys
 from pathlib import Path
 
-from browser import SundhedDkBrowser
 from health_platform.source_connectors.oura.writer import write_records
-from health_platform.utils.audit_logger import AuditLogger
-from health_platform.utils.logging_config import get_logger
-from parsers import (
+from health_platform.source_connectors.sundhed_dk.browser import SundhedDkBrowser
+from health_platform.source_connectors.sundhed_dk.parsers import (
     parse_appointments,
     parse_ejournal,
     parse_lab_results,
     parse_medications,
     parse_vaccinations,
 )
-from scraper import SessionExpiredError, SundhedDkScraper
+from health_platform.source_connectors.sundhed_dk.scraper import (
+    SessionExpiredError,
+    SundhedDkScraper,
+    save_html,
+)
+from health_platform.source_connectors.sundhed_dk.validator import (
+    ValidationReport,
+    generate_validation_report,
+    validate_parse_completeness,
+)
+from health_platform.utils.audit_logger import AuditLogger
+from health_platform.utils.logging_config import get_logger
 
 logger = get_logger("run_sundhed_dk")
 
@@ -82,6 +94,18 @@ def _parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def _save_validation_report(reports: list[ValidationReport], data_root: Path) -> None:
+    """Save validation report to the validation directory."""
+    report_text = generate_validation_report(reports)
+    validation_dir = data_root.parent / "validation"
+    validation_dir.mkdir(parents=True, exist_ok=True)
+
+    timestamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d_%H%M%S")
+    report_path = validation_dir / f"validation_{timestamp}.txt"
+    report_path.write_text(report_text, encoding="utf-8")
+    logger.info("Validation report saved: %s", report_path)
+
+
 def main() -> None:
     args = _parse_args()
 
@@ -103,7 +127,12 @@ def main() -> None:
         [s[0] for s in sections],
     )
 
+    # Ensure data lake directories exist
+    SUNDHED_DK_DATA_ROOT.mkdir(parents=True, exist_ok=True)
+    archive_root = str(SUNDHED_DK_DATA_ROOT.parent)  # "min sundhed/" level
+
     browser = SundhedDkBrowser()
+    validation_reports: list[ValidationReport] = []
 
     try:
         page = browser.launch_and_authenticate()
@@ -138,9 +167,27 @@ def main() -> None:
                     )
                     continue
 
+                # Archive raw HTML before parsing (forensic audit trail)
+                save_html(html, section_name, archive_root)
+
+                # Parse HTML to records
                 records = parser_fn(html)
                 logger.info("  Parsed %d records from '%s'", len(records), section_name)
 
+                # Validate parse completeness (zero data loss check)
+                report = validate_parse_completeness(html, records, section_name)
+                validation_reports.append(report)
+
+                if not report.match:
+                    logger.error(
+                        "VALIDATION MISMATCH for '%s': HTML=%d rows, parsed=%d. "
+                        "HTML archived for inspection.",
+                        section_name,
+                        report.html_rows,
+                        report.parsed_rows,
+                    )
+
+                # Write Parquet regardless of validation (data is still useful)
                 write_records(
                     records,
                     section_name,
@@ -153,11 +200,17 @@ def main() -> None:
                     f"sundhed_dk.{section_name}",
                     "WRITE_PARQUET",
                     rows_after=len(records),
-                    status="success",
+                    status="success" if report.match else "mismatch",
                 )
 
     finally:
         browser.close()
+
+    # Print and save validation report
+    if validation_reports:
+        report_text = generate_validation_report(validation_reports)
+        logger.info("Validation report:\n%s", report_text)
+        _save_validation_report(validation_reports, SUNDHED_DK_DATA_ROOT)
 
     logger.info("sundhed.dk pipeline complete")
 
