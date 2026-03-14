@@ -9,7 +9,6 @@ Usage:
 
 from __future__ import annotations
 
-import os
 import sys
 from pathlib import Path
 from typing import Optional
@@ -17,13 +16,14 @@ from typing import Optional
 import duckdb
 import yaml
 from health_platform.utils.logging_config import get_logger
+from health_platform.utils.paths import get_data_lake_root, get_db_path
 
 logger = get_logger("validate_lab_data")
 
 
-# Paths — environment-driven, no hardcoded user paths
-DATA_LAKE = Path(os.environ.get("HEALTH_DATA_LAKE", "/Users/Shared/data_lake"))
-DB_PATH = DATA_LAKE / "database" / f"health_dw_{os.environ.get('HEALTH_ENV', 'dev')}.db"
+# Paths — resolved via platform-aware paths utility
+DATA_LAKE = get_data_lake_root()
+DB_PATH = get_db_path()
 GENETICS_YAML = DATA_LAKE / "manual" / "genetic_profile.yaml"
 
 
