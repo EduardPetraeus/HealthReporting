@@ -1,8 +1,42 @@
 # ARCHITECTURE.md — HealthReporting
 
-> Last updated: 2026-03-11
+> Last updated: 2026-03-14
 > For technical implementation details (silver pattern, merge scripts, hive partitioning), see `docs/architecture.md`.
 > For C4 architecture diagrams (Context → Container → Component) and solution architecture narrative, see [`c4-architecture.md`](./c4-architecture.md).
+
+---
+
+## Architecture Diagrams (Draw.io)
+
+All diagrams in `docs/architecture/`. Open with Draw.io desktop or app.diagrams.net.
+
+### System-Level Diagrams
+
+| Diagram | File | Description |
+|---------|------|-------------|
+| C4 Level 1 — Context | [`c4-level1-context.drawio`](architecture/c4-level1-context.drawio) | System context — users, external systems |
+| C4 Level 2 — Containers | [`c4-level2-containers.drawio`](architecture/c4-level2-containers.drawio) | Container decomposition — services, stores |
+| C4 Level 3 — Components | [`c4-level3-components.drawio`](architecture/c4-level3-components.drawio) | Component detail — modules within containers |
+| Solution Architecture | [`solution-architecture.drawio`](architecture/solution-architecture.drawio) | End-to-end solution narrative |
+
+### Source Lineage Diagrams (per-source, 6-column layout)
+
+Each diagram shows the complete flow: Source → Ingestion → Bronze → Merge → Silver → Downstream.
+
+| Diagram | File | Bronze | Merge | Canvas |
+|---------|------|--------|-------|--------|
+| **Source Overview** | [`source-overview.drawio`](architecture/source-overview.drawio) | 91 total | 62 total | 2200×1400 |
+| Apple Health | [`apple-health.drawio`](architecture/apple-health.drawio) | 38 | 24 | 1800×1200 |
+| Oura Ring | [`oura-ring.drawio`](architecture/oura-ring.drawio) | 20 | 20 | 1800×1400 |
+| Withings | [`withings.drawio`](architecture/withings.drawio) | 18 | 8 | 1800×1400 |
+| sundhed.dk | [`sundhed-dk.drawio`](architecture/sundhed-dk.drawio) | 5 | 0* | 1600×1000 |
+| Lifesum | [`lifesum.drawio`](architecture/lifesum.drawio) | 4 | 4 | 1400×900 |
+| Lab Results | [`lab-results.drawio`](architecture/lab-results.drawio) | 3 | 1 | 1400×800 |
+| Strava | [`strava.drawio`](architecture/strava.drawio) | 2 | 1 | 1400×800 |
+| Weather | [`weather.drawio`](architecture/weather.drawio) | 1 | 1 | 1200×700 |
+| 23andMe Genetics | [`23andme-genetics.drawio`](architecture/23andme-genetics.drawio) | 0* | 3 | 1400×900 |
+
+\* = planned/partial
 
 ---
 
