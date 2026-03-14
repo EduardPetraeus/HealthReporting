@@ -6,6 +6,7 @@ handle pagination, and extract raw HTML for the parsers.
 
 from __future__ import annotations
 
+import pathlib
 import random
 import time
 
@@ -42,6 +43,27 @@ SEL_LOGIN_PAGE = "input[name='username'], .mitid-login, #mitid-container"
 # Delays between page loads (seconds) — polite scraping
 MIN_DELAY_S = 1.0
 MAX_DELAY_S = 3.0
+
+
+def save_html(html: str, section: str, archive_root: str) -> str:
+    """Save raw HTML to archive for forensic audit trail.
+
+    Directory structure:
+        {archive_root}/html_archive/{section}/{YYYYMMDD_HHMMSS}.html
+
+    Returns the path to the saved file as string.
+    """
+    import datetime
+
+    root = pathlib.Path(archive_root)
+    timestamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d_%H%M%S")
+    archive_dir = root / "html_archive" / section
+    archive_dir.mkdir(parents=True, exist_ok=True)
+
+    filepath = archive_dir / f"{timestamp}.html"
+    filepath.write_text(html, encoding="utf-8")
+    logger.info("Archived HTML for '%s': %s (%d bytes)", section, filepath, len(html))
+    return str(filepath)
 
 
 class SessionExpiredError(Exception):
