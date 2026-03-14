@@ -483,9 +483,23 @@ class HealthTools:
     # Tool 8: run_custom_query
     # ------------------------------------------------------------------
 
+    # Allowed schemas for custom queries — restrict to health data only
+    _ALLOWED_SCHEMAS = {"silver", "agent", "gold"}
+
     def run_custom_query(self, sql: str, explanation: str) -> str:
-        """Execute a custom read-only SQL query with audit logging."""
-        # Validate read-only
+        """Execute a custom read-only SQL query with audit logging.
+
+        Security: Only SELECT queries against allowed schemas (silver, agent, gold).
+        System tables (information_schema, pg_catalog, duckdb_*) are blocked.
+        """
+        # Must start with SELECT
+        sql_upper = sql.upper().strip()
+        if not sql_upper.startswith("SELECT"):
+            return format_error(
+                "Only SELECT queries are allowed. Use the dedicated tools for data modification."
+            )
+
+        # Block write/DDL keywords
         forbidden_keywords = [
             "INSERT",
             "UPDATE",
@@ -507,15 +521,44 @@ class HealthTools:
             "LOAD",
             "INSTALL",
         ]
-        sql_upper = sql.upper().strip()
         for keyword in forbidden_keywords:
-            # Match keyword as a whole word to avoid false positives
-            pattern = rf"\b{keyword}\b"
-            if re.search(pattern, sql_upper):
+            if re.search(rf"\b{keyword}\b", sql_upper):
                 return format_error(
                     f"Query contains forbidden keyword '{keyword}'. "
                     "Only read-only (SELECT) queries are allowed."
                 )
+
+        # Block schema/system exploration
+        blocked_patterns = [
+            r"\bINFORMATION_SCHEMA\b",
+            r"\bDUCKDB_\w+\(",
+            r"\bPG_CATALOG\b",
+            r"\bSQLITE_MASTER\b",
+            r"\bGLOB\s*\(",
+            r"\bREAD_CSV\b",
+            r"\bREAD_PARQUET\b",
+            r"\bREAD_JSON\b",
+        ]
+        for pattern in blocked_patterns:
+            if re.search(pattern, sql_upper):
+                return format_error(
+                    "Query accesses system tables or file functions. "
+                    "Use get_schema_context() for schema information."
+                )
+
+        # Validate table references are in allowed schemas
+        table_refs = re.findall(r"\bFROM\s+(\w+)\.(\w+)", sql_upper)
+        table_refs += re.findall(r"\bJOIN\s+(\w+)\.(\w+)", sql_upper)
+        for schema, _table in table_refs:
+            if schema.lower() not in self._ALLOWED_SCHEMAS:
+                return format_error(
+                    f"Schema '{schema}' is not allowed. "
+                    f"Allowed schemas: {', '.join(sorted(self._ALLOWED_SCHEMAS))}."
+                )
+
+        # Limit result size to prevent DoS
+        if "LIMIT" not in sql_upper:
+            sql = sql.rstrip().rstrip(";") + " LIMIT 1000"
 
         logger.info("Custom query executed (reason length=%d)", len(explanation))
 
