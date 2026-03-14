@@ -325,8 +325,7 @@ def generate_response(
         except Exception:
             logger.debug("Could not load chat history", exc_info=True)
 
-    # Sanitize question
-    safe_question = question.replace("---", "").strip()
+    safe_question = f"<user_question>{question.strip()}</user_question>"
     messages.append({"role": "user", "content": safe_question})
 
     try:

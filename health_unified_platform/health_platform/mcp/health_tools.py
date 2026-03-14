@@ -721,7 +721,9 @@ class HealthTools:
             checker = DataQualityChecker(self.con)
         except Exception as exc:
             logger.error("Failed to initialize DQ checker: %s", exc)
-            return format_error(f"Failed to load quality rules: {exc}")
+            return format_error(
+                "Failed to load quality rules. Check server logs for details."
+            )
 
         try:
             if table:
@@ -736,7 +738,7 @@ class HealthTools:
                 report = checker.run_all_checks()
         except Exception as exc:
             logger.error("DQ check failed: %s", exc)
-            return format_error(f"Quality check failed: {exc}")
+            return format_error("Quality check failed. Check server logs for details.")
 
         return format_for_mcp(report)
 
