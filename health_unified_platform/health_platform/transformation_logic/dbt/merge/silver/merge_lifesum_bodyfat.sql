@@ -22,15 +22,14 @@ SELECT
 
     -- Business columns
     date::DATE                      AS day,
-    body_fat_percentage::DOUBLE     AS body_fat_pct,
-    'lifesum'                       AS source_system,
+    bodyfat_pct::DOUBLE             AS body_fat_pct,
 
     -- Deterministic business key hash (includes source for future multi-source support)
     md5(coalesce(date, '') || '||lifesum') AS business_key_hash,
 
     -- Row hash (change detection)
     md5(
-        coalesce(cast(body_fat_percentage AS VARCHAR), '')
+        coalesce(cast(bodyfat_pct AS VARCHAR), '')
     ) AS row_hash,
 
     current_timestamp AS load_datetime
@@ -48,17 +47,16 @@ WHEN MATCHED AND target.row_hash <> src.row_hash THEN
     sk_date         = src.sk_date,
     day             = src.day,
     body_fat_pct    = src.body_fat_pct,
-    source_system   = src.source_system,
     row_hash        = src.row_hash,
     update_datetime = current_timestamp
 
 WHEN NOT MATCHED THEN
   INSERT (
-    sk_date, day, body_fat_pct, source_system,
+    sk_date, day, body_fat_pct,
     business_key_hash, row_hash, load_datetime, update_datetime
   )
   VALUES (
-    src.sk_date, src.day, src.body_fat_pct, src.source_system,
+    src.sk_date, src.day, src.body_fat_pct,
     src.business_key_hash, src.row_hash, current_timestamp, current_timestamp
   );
 
