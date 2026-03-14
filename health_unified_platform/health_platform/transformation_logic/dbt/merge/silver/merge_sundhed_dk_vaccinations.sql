@@ -28,8 +28,8 @@ SELECT
     duration,
     batch_number,
     CASE
-        WHEN vaccine_name LIKE '%mod %'
-            THEN TRIM(SUBSTRING(vaccine_name FROM POSITION('mod ' IN vaccine_name) + 4))
+        WHEN LOWER(vaccine_name) LIKE '%mod %'
+            THEN TRIM(SUBSTRING(vaccine_name FROM POSITION('mod ' IN LOWER(vaccine_name)) + 4))
         ELSE NULL
     END                                        AS disease_target,
     business_key_hash,

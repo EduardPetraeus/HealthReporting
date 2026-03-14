@@ -23,7 +23,7 @@ WITH deduped AS (
             ORDER BY _ingested_at DESC
         ) AS rn
     FROM bronze.stg_sundhed_dk_ejournal
-    WHERE note_text IS NOT NULL
+    WHERE note_text IS NOT NULL AND note_text != ''
 )
 SELECT
     CAST(note_date AS DATE)                    AS note_date,

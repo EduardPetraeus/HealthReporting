@@ -10,13 +10,15 @@ WITH deduped AS (
         md5(
             coalesce(cast(referral_date AS VARCHAR), '') || '||' ||
             coalesce(receiving_clinic, '')               || '||' ||
-            coalesce(specialty, '')
+            coalesce(specialty, '')                      || '||' ||
+            coalesce(section, '')
         )                                       AS business_key_hash,
         ROW_NUMBER() OVER (
             PARTITION BY md5(
                 coalesce(cast(referral_date AS VARCHAR), '') || '||' ||
                 coalesce(receiving_clinic, '')               || '||' ||
-                coalesce(specialty, '')
+                coalesce(specialty, '')                      || '||' ||
+                coalesce(section, '')
             )
             ORDER BY _ingested_at DESC
         ) AS rn

@@ -384,7 +384,7 @@ tables:
     row_count: { min_rows: 1 }
 
   sundhed_dk_medications:
-    not_null: [business_key_hash, medication_name]
+    not_null: [business_key_hash, medication_name, start_date]
     unique: [business_key_hash]
     row_count: { min_rows: 1 }
 
