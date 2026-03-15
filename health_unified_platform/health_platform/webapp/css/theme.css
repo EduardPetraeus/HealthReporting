@@ -1,0 +1,170 @@
+/* ===== Health App — Design System =====
+ * Palette inspired by daily-stack: warm dark with amber accent.
+ * Typography: system font for body, monospace for data values.
+ */
+
+:root {
+  /* Backgrounds — warm dark (not true black) */
+  --bg-primary: #0f0f0f;
+  --bg-card: #1a1a1a;
+  --bg-input: #252525;
+  --bg-elevated: #1a1a1a;
+
+  /* Text */
+  --text-primary: #d4d0c8;
+  --text-muted: #7a7568;
+  --text-inverse: #0f0f0f;
+
+  /* Accent — amber */
+  --accent: #c8a45c;
+  --accent-muted: #8a7340;
+
+  /* Status */
+  --status-green: #5c8a5c;
+  --status-red: #c85c5c;
+  --status-yellow: #c8a45c;
+
+  /* Borders & fills */
+  --border: #333;
+  --fill-subtle: rgba(120, 120, 128, 0.24);
+  --separator: rgba(84, 84, 88, 0.65);
+
+  /* Chat-specific (kept from chat_ui.py for PWA-02) */
+  --user-bubble: #0a84ff;
+  --bot-bubble: #1a1a1a;
+
+  /* Spatial tokens */
+  --container-max: 480px;
+  --pad-section: 24px;
+  --pad-card: 14px 16px;
+  --pad-page: 24px 16px;
+  --radius-card: 8px;
+  --radius-input: 8px;
+  --radius-btn: 14px;
+  --gap-grid: 3px;
+  --gap-card: 12px;
+  --gap-section: 24px;
+
+  /* Transitions */
+  --transition-tap: 0.15s;
+  --transition-input: 0.2s;
+  --transition-bar: 0.3s;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', system-ui, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ===== Monospace labels (data, stats) ===== */
+.mono {
+  font-family: 'SF Mono', Menlo, Consolas, 'Courier New', monospace;
+}
+
+.label {
+  font-family: 'SF Mono', Menlo, Consolas, 'Courier New', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.stat-value {
+  font-family: 'SF Mono', Menlo, Consolas, 'Courier New', monospace;
+  font-size: 1.5rem;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ===== Cards ===== */
+.card {
+  background: var(--bg-card);
+  padding: var(--pad-card);
+  border-radius: var(--radius-card);
+  border: 0.5px solid var(--border);
+}
+
+/* ===== Buttons ===== */
+.btn-primary {
+  width: 100%;
+  max-width: 300px;
+  padding: 16px;
+  border-radius: var(--radius-btn);
+  border: none;
+  background: var(--accent);
+  color: var(--text-inverse);
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: -0.2px;
+  transition: all var(--transition-tap);
+}
+
+.btn-primary:active {
+  transform: scale(0.97);
+  opacity: 0.85;
+}
+
+/* ===== Inputs ===== */
+.input {
+  width: 100%;
+  max-width: 300px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 0.5px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 16px;
+  text-align: center;
+  font-family: inherit;
+  outline: none;
+  transition: border-color var(--transition-input);
+}
+
+.input:focus {
+  border-color: var(--accent);
+}
+
+.input::placeholder {
+  color: var(--text-muted);
+}
+
+/* ===== Status indicators ===== */
+.dot-green {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--status-green);
+  box-shadow: 0 0 6px rgba(92, 138, 92, 0.5);
+}
+
+.dot-red {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--status-red);
+  box-shadow: 0 0 6px rgba(200, 92, 92, 0.5);
+}
+
+/* ===== Score colors (for tables) ===== */
+.score-good { color: var(--status-green); font-weight: 600; }
+.score-ok { color: var(--status-yellow); font-weight: 600; }
+.score-low { color: var(--status-red); font-weight: 600; }
+
+/* ===== Error message ===== */
+.error-msg {
+  color: var(--status-red);
+  font-size: 14px;
+  min-height: 20px;
+  font-weight: 500;
+}

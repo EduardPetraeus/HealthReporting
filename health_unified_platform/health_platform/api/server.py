@@ -21,7 +21,8 @@ from typing import Literal
 
 import duckdb
 from fastapi import Depends, FastAPI, Query, Request  # noqa: F401
-from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from health_platform.api.auth import verify_token
 from health_platform.mcp.health_tools import HealthTools
 from health_platform.utils.logging_config import get_logger
@@ -30,11 +31,34 @@ from pydantic import BaseModel, Field
 from slowapi import Limiter  # noqa: F401
 from slowapi.errors import RateLimitExceeded  # noqa: F401
 from slowapi.util import get_remote_address  # noqa: F401
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.types import ASGIApp
 
 logger = get_logger("api.server")
 
 # Rate limiter — keyed by remote IP (Tailscale assigns stable IPs per device)
 limiter = Limiter(key_func=get_remote_address)
+
+# Webapp static files directory
+_WEBAPP_DIR = Path(__file__).resolve().parent.parent / "webapp"
+
+
+class CSPMiddleware(BaseHTTPMiddleware):
+    """Add Content-Security-Policy headers to HTML responses."""
+
+    def __init__(self, app: ASGIApp) -> None:
+        super().__init__(app)
+
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        content_type = response.headers.get("content-type", "")
+        if "text/html" in content_type:
+            response.headers["Content-Security-Policy"] = (
+                "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:;"
+            )
+            response.headers["X-Content-Type-Options"] = "nosniff"
+            response.headers["X-Frame-Options"] = "DENY"
+        return response
 
 
 def _rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
@@ -67,12 +91,13 @@ app = FastAPI(
 )
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(CSPMiddleware)
 
-# Mount chat UI at root
+# Serve webapp at root
 from health_platform.api.chat_ui import router as chat_ui_router  # noqa: E402
 from health_platform.api.routes.ingest import router as ingest_router  # noqa: E402
 
-app.include_router(chat_ui_router)
+app.include_router(chat_ui_router, prefix="/chat-legacy")
 app.include_router(ingest_router)
 
 # Mount mobile endpoints (bulk sync, thresholds)
@@ -84,6 +109,18 @@ app.include_router(mobile_router)
 from health_platform.export.routes import router as export_router  # noqa: E402
 
 app.include_router(export_router)
+
+# Static files for webapp (must be after API routes to not shadow them)
+app.mount("/static", StaticFiles(directory=str(_WEBAPP_DIR)), name="static")
+
+
+@app.get("/", tags=["ui"])
+async def webapp_root():
+    """Serve the PWA app shell."""
+    return FileResponse(
+        _WEBAPP_DIR / "index.html",
+        media_type="text/html",
+    )
 
 
 def _get_tools(read_only: bool = True) -> HealthTools:
@@ -97,11 +134,15 @@ def _get_tools(read_only: bool = True) -> HealthTools:
 
 
 class ChatRequest(BaseModel):
-    question: str = Field(..., description="Natural language health question", max_length=2000)
+    question: str = Field(
+        ..., description="Natural language health question", max_length=2000
+    )
     format: Literal["markdown", "plain"] = Field(
         "markdown", description="Output format: markdown or plain"
     )
-    session_id: str | None = Field(None, description="Session ID for multi-turn conversations")
+    session_id: str | None = Field(
+        None, description="Session ID for multi-turn conversations"
+    )
 
 
 class ChatResponse(BaseModel):
@@ -196,7 +237,9 @@ async def chat_stream(
 
     async def event_generator():
         try:
-            for chunk in generate_response_stream(tools, chat_request.question, bound_session_id):
+            for chunk in generate_response_stream(
+                tools, chat_request.question, bound_session_id
+            ):
                 yield f"data: {json.dumps({'text': chunk})}\n\n"
             yield f"data: {json.dumps({'done': True})}\n\n"
         finally:
@@ -243,7 +286,11 @@ async def profile(
     """Load patient profile (core memory)."""
     tools = _get_tools()
     try:
-        cat_list = [c.strip() for c in categories.split(",") if c.strip()] if categories else None
+        cat_list = (
+            [c.strip() for c in categories.split(",") if c.strip()]
+            if categories
+            else None
+        )
         result = tools.get_profile(cat_list)
     finally:
         tools.close()
