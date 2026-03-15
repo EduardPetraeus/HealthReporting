@@ -15,9 +15,10 @@ source .venv/bin/activate
 ## Apple Health: XML → Parquet
 
 ```bash
+# Output path resolved via get_data_lake_root() — override with HEALTH_DATA_LAKE env var
 python health_unified_platform/health_platform/source_connectors/apple_health/process_health_data.py \
   --input /path/to/eksport.xml \
-  --output /Users/Shared/data_lake/apple_health_data
+  --output "$(python -c 'from health_platform.utils.paths import get_data_lake_root; print(get_data_lake_root() / "apple_health_data")')"
 ```
 
 ---
@@ -27,7 +28,7 @@ python health_unified_platform/health_platform/source_connectors/apple_health/pr
 ```bash
 python health_unified_platform/health_platform/source_connectors/csv_to_parquet.py \
   --input /path/to/file.csv \
-  --output /Users/Shared/data_lake/lifesum/parquet/food \
+  --output "$(python -c 'from health_platform.utils.paths import get_data_lake_root; print(get_data_lake_root() / "lifesum/parquet/food")')" \
   --source-name lifesum_food
 ```
 
@@ -102,9 +103,11 @@ python -c "
 from pathlib import Path
 from health_platform.source_connectors.lab.lab_ingestion import ingest_lab_pdfs
 
+from health_platform.utils.paths import get_data_lake_root
+root = get_data_lake_root()
 ingest_lab_pdfs(
-    pdf_dir=Path('/Users/Shared/data_lake/lab_results/downloads'),
-    output_dir=Path('/Users/Shared/data_lake/lab_results/parquet'),
+    pdf_dir=root / 'lab_results' / 'downloads',
+    output_dir=root / 'lab_results' / 'parquet',
 )
 "
 ```
@@ -120,9 +123,11 @@ python -c "
 from pathlib import Path
 from health_platform.source_connectors.genetics.genetics_ingestion import ingest_genetics_data
 
+from health_platform.utils.paths import get_data_lake_root
+root = get_data_lake_root()
 ingest_genetics_data(
-    input_dir=Path('/Users/Shared/data_lake/genetics/23andme/downloads'),
-    output_dir=Path('/Users/Shared/data_lake/genetics/23andme/parquet'),
+    input_dir=root / 'genetics' / '23andme' / 'downloads',
+    output_dir=root / 'genetics' / '23andme' / 'parquet',
 )
 "
 ```
@@ -342,7 +347,8 @@ source .venv-ai/bin/activate
 python -c "
 import sys; sys.path.insert(0, 'health_unified_platform')
 import duckdb
-con = duckdb.connect('/Users/Shared/data_lake/database/health_dw_dev.db')
+from health_platform.utils.paths import get_db_path
+con = duckdb.connect(str(get_db_path()))
 
 from health_platform.ai.text_generator import backfill_summaries
 from health_platform.ai.baseline_computer import compute_all_baselines, compute_demographics

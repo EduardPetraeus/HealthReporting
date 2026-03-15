@@ -11,11 +11,12 @@ from datetime import date, timedelta
 from pathlib import Path
 
 from health_platform.utils.logging_config import get_logger
+from health_platform.utils.paths import get_data_lake_root
 from playwright.sync_api import Page
 
 logger = get_logger("lifesum.downloader")
 
-PDF_ARCHIVE_DIR = Path("/Users/Shared/data_lake/lifesum/pdf_archive")
+PDF_ARCHIVE_DIR = get_data_lake_root() / "lifesum" / "pdf_archive"
 ACCOUNT_EXPORT_URL = "https://lifesum.com/account/export-data"
 
 

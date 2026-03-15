@@ -26,10 +26,11 @@ from pathlib import Path
 
 import requests
 from health_platform.utils.logging_config import get_logger
+from health_platform.utils.paths import get_data_lake_root
 
 logger = get_logger("lifesum.api_downloader")
 
-PDF_ARCHIVE_DIR = Path("/Users/Shared/data_lake/lifesum/pdf_archive")
+PDF_ARCHIVE_DIR = get_data_lake_root() / "lifesum" / "pdf_archive"
 API_BASE = "https://api.lifesum.com/food-tracker/v1"
 EXPORT_ENDPOINT = f"{API_BASE}/export/week"
 

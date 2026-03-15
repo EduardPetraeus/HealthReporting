@@ -3,9 +3,9 @@ health_dw:
   outputs:
     dev:
       type: duckdb
-      path: /Users/Shared/data_lake/database/health_dw_dev.db
+      path: "{{ env_var('HEALTH_DB_PATH_DEV', '/Users/Shared/data_lake/database/health_dw_dev.db') }}"
       schema: main
     prd:
       type: duckdb
-      path: /Users/Shared/data_lake/database/health_dw_prd.db
+      path: "{{ env_var('HEALTH_DB_PATH_PRD', '/Users/Shared/data_lake/database/health_dw_prd.db') }}"
       schema: main
