@@ -78,10 +78,17 @@ def count_expected_rows(html: str, section: str) -> int:
     selectors = ROW_SELECTORS.get(section, [])
     group_selectors = GROUP_HEADER_SELECTORS.get(section, [])
 
+    seen = set()
     total = 0
     for selector in selectors:
         rows = soup.select(selector)
         for row in rows:
+            # Deduplicate across selectors
+            row_id = id(row)
+            if row_id in seen:
+                continue
+            seen.add(row_id)
+
             # Skip group header rows
             is_group = False
             for gs in group_selectors:

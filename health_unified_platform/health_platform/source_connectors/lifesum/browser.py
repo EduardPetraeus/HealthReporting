@@ -140,57 +140,67 @@ class LifesumBrowser:
         BROWSER_DATA_DIR.mkdir(parents=True, exist_ok=True, mode=0o700)
         BROWSER_DATA_DIR.chmod(0o700)
 
-        self._playwright = sync_playwright().start()
-        self._browser = self._playwright.chromium.launch_persistent_context(
-            user_data_dir=str(BROWSER_DATA_DIR),
-            headless=self._headless,
-            locale="da-DK",
-            viewport={"width": 1280, "height": 900},
-            args=[],
-        )
-        self._context = self._browser
-        self._page = self._context.new_page()
+        try:
+            self._playwright = sync_playwright().start()
+            self._browser = self._playwright.chromium.launch_persistent_context(
+                user_data_dir=str(BROWSER_DATA_DIR),
+                headless=self._headless,
+                locale="da-DK",
+                viewport={"width": 1280, "height": 900},
+                args=[],
+            )
+            self._context = self._browser
+            self._page = self._context.new_page()
+        except Exception:
+            self.close()
+            raise
 
         # Intercept API requests to capture the JWT Bearer token
         self._page.on("request", self._intercept_token)
 
-        # Strategy 1: Check existing session by navigating to a protected page.
-        # Auth is stored in localStorage, not cookies — so we must load the SPA
-        # to check. /account redirects to login if not authenticated.
-        logger.info("Checking existing session via /account...")
-        self._page.goto("https://lifesum.com/account", wait_until="domcontentloaded")
-        self._page.wait_for_timeout(3000)
+        try:
+            # Strategy 1: Check existing session by navigating to a protected page.
+            # Auth is stored in localStorage, not cookies — so we must load the SPA
+            # to check. /account redirects to login if not authenticated.
+            logger.info("Checking existing session via /account...")
+            self._page.goto(
+                "https://lifesum.com/account", wait_until="domcontentloaded"
+            )
+            self._page.wait_for_timeout(3000)
 
-        if self._is_logged_in():
-            logger.info("Already logged in (session reuse via localStorage)")
+            if self._is_logged_in():
+                logger.info("Already logged in (session reuse via localStorage)")
+                return self._page
+
+            # Not logged in — go to landing page for login flow
+            logger.info("Not authenticated — navigating to %s", LOGIN_URL)
+            self._page.goto(LOGIN_URL, wait_until="domcontentloaded")
+            self._page.wait_for_timeout(3000)
+
+            # Strategy 2: Automated login with keychain credentials
+            logger.info("Not logged in — attempting automated login...")
+            if self._try_automated_login():
+                logger.info("Automated login successful")
+                return self._page
+
+            # Strategy 3: Manual login fallback
+            logger.info(
+                "Automated login failed — waiting for manual login (timeout: %ds)...",
+                AUTH_TIMEOUT_S,
+            )
+            print(
+                "\n========================================\n"
+                "  Automated login failed.\n"
+                "  Please log in manually in the browser.\n"
+                "  Waiting up to 3 minutes...\n"
+                "========================================"
+            )
+            self._wait_for_auth()
+            logger.info("Authentication successful")
             return self._page
-
-        # Not logged in — go to landing page for login flow
-        logger.info("Not authenticated — navigating to %s", LOGIN_URL)
-        self._page.goto(LOGIN_URL, wait_until="domcontentloaded")
-        self._page.wait_for_timeout(3000)
-
-        # Strategy 2: Automated login with keychain credentials
-        logger.info("Not logged in — attempting automated login...")
-        if self._try_automated_login():
-            logger.info("Automated login successful")
-            return self._page
-
-        # Strategy 3: Manual login fallback
-        logger.info(
-            "Automated login failed — waiting for manual login (timeout: %ds)...",
-            AUTH_TIMEOUT_S,
-        )
-        print(
-            "\n========================================\n"
-            "  Automated login failed.\n"
-            "  Please log in manually in the browser.\n"
-            "  Waiting up to 3 minutes...\n"
-            "========================================"
-        )
-        self._wait_for_auth()
-        logger.info("Authentication successful")
-        return self._page
+        except Exception:
+            self.close()
+            raise
 
     def _dismiss_cookie_consent(self) -> None:
         """Dismiss the Cookiebot consent dialog if present."""
@@ -505,7 +515,7 @@ class LifesumBrowser:
             token = auth[7:]
             if self._captured_token != token:
                 self._captured_token = token
-                logger.info("Captured new JWT from API request to %s", request.url[:60])
+                logger.debug("Captured new JWT from API request")
 
     @property
     def captured_token(self) -> str | None:

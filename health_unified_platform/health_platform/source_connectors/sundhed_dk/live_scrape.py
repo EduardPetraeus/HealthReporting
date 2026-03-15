@@ -7,31 +7,25 @@ Browser should already be open and authenticated via MitID.
 If not, the script will open a browser and wait for login.
 """
 
-import sys  # noqa: E402
-from pathlib import Path  # noqa: E402
+from pathlib import Path
 
-# Add package paths — must happen before local imports
-_root = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(_root))
-sys.path.insert(0, str(_root.parent))
-
-from source_connectors.sundhed_dk.browser import SundhedDkBrowser  # noqa: E402
-from source_connectors.sundhed_dk.parsers import (  # noqa: E402
+from health_platform.source_connectors.sundhed_dk.browser import SundhedDkBrowser
+from health_platform.source_connectors.sundhed_dk.parsers import (
     parse_appointments,
     parse_ejournal,
     parse_lab_results,
     parse_medications,
     parse_vaccinations,
 )
-from source_connectors.sundhed_dk.scraper import (  # noqa: E402
+from health_platform.source_connectors.sundhed_dk.scraper import (
     SundhedDkScraper,
     save_html,
 )
-from source_connectors.sundhed_dk.validator import (  # noqa: E402
+from health_platform.source_connectors.sundhed_dk.validator import (
     generate_validation_report,
     validate_parse_completeness,
 )
-from utils.paths import get_data_lake_root  # noqa: E402
+from health_platform.utils.paths import get_data_lake_root
 
 ARCHIVE_ROOT = str(get_data_lake_root() / "min sundhed")
 DEBUG_DIR = Path(ARCHIVE_ROOT) / "debug"

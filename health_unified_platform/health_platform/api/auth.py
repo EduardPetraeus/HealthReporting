@@ -52,9 +52,8 @@ def get_api_token() -> str:
         )
 
     token = secrets.token_urlsafe(32)
-    logger.warning(
-        "DEV MODE: No API token configured. Generated ephemeral token: %s...",
-        token[:8],
+    logger.debug(
+        "DEV MODE: No API token configured. Generated ephemeral token (first 8 chars redacted).",
     )
     _cached_token = token
     return token
