@@ -7,7 +7,7 @@ PDF to the data lake archive.
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 from health_platform.utils.logging_config import get_logger
@@ -21,25 +21,34 @@ ACCOUNT_EXPORT_URL = "https://lifesum.com/account/export-data"
 
 def download_weekly_pdf(
     page: Page,
+    start_date: date | None = None,
     end_date: date | None = None,
 ) -> Path | None:
-    """Download a 7-day nutrition PDF from Lifesum export page.
+    """Download a nutrition PDF from Lifesum export page.
 
     Navigates to the export page, selects dates in the calendar,
     clicks DOWNLOAD FILE, and saves the real PDF.
 
     Args:
         page: Authenticated Playwright page.
+        start_date: First day of the range. Defaults to 6 days before end_date.
         end_date: Last day of the range. Defaults to today.
 
     Returns:
         Path to saved PDF, or None if download failed.
     """
     end_date = end_date or date.today()
+    if start_date is None:
+        start_date = end_date - timedelta(days=6)
     PDF_ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
 
     # Build filename from actual selected range
-    filename = f"lifesum_nutrition_{end_date.isoformat()}.pdf"
+    if start_date == end_date:
+        filename = f"lifesum_nutrition_{end_date.isoformat()}.pdf"
+    else:
+        filename = (
+            f"lifesum_nutrition_{start_date.isoformat()}_to_{end_date.isoformat()}.pdf"
+        )
     output_path = PDF_ARCHIVE_DIR / filename
 
     if output_path.exists():
@@ -52,9 +61,12 @@ def download_weekly_pdf(
     page.wait_for_timeout(3000)
 
     # Click DOWNLOAD FILE and catch the browser download
-    download_btn = page.query_selector("button:has-text('DOWNLOAD FILE')")
-    if not download_btn:
-        download_btn = page.query_selector("button:has-text('Download')")
+    download_btn = (
+        page.query_selector("button:has-text('DOWNLOAD FILE')")
+        or page.query_selector("a:has-text('DOWNLOAD FILE')")
+        or page.query_selector("button:has-text('Download')")
+        or page.query_selector("button:has-text('Hent')")
+    )
     if not download_btn:
         logger.error("Could not find DOWNLOAD FILE button")
         return None
