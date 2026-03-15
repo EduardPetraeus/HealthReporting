@@ -24,16 +24,16 @@
         <key>HEALTH_ENV</key>
         <string>dev</string>
         <key>HEALTH_DB_PATH</key>
-        <string>/Users/Shared/data_lake/database/health_dw_dev.db</string>
+        <string>${DATA_LAKE_ROOT}/database/health_dw_dev.db</string>
         <key>PATH</key>
         <string>/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin</string>
     </dict>
 
     <key>StandardOutPath</key>
-    <string>/Users/Shared/data_lake/logs/daily_sync/launchd-stdout.log</string>
+    <string>${DATA_LAKE_ROOT}/logs/daily_sync/launchd-stdout.log</string>
 
     <key>StandardErrorPath</key>
-    <string>/Users/Shared/data_lake/logs/daily_sync/launchd-stderr.log</string>
+    <string>${DATA_LAKE_ROOT}/logs/daily_sync/launchd-stderr.log</string>
 
     <key>RunAtLoad</key>
     <false/>

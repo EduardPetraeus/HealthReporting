@@ -146,10 +146,7 @@ class LifesumBrowser:
             headless=self._headless,
             locale="da-DK",
             viewport={"width": 1280, "height": 900},
-            args=[
-                "--disable-web-security",
-                "--disable-features=IsolateOrigins,site-per-process",
-            ],
+            args=[],
         )
         self._context = self._browser
         self._page = self._context.new_page()

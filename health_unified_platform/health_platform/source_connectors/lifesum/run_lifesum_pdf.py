@@ -15,6 +15,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 import sys
 from datetime import date, datetime, timedelta
@@ -37,7 +38,7 @@ logger = get_logger("lifesum.run_pdf")
 
 # Session older than this triggers a warning
 SESSION_MAX_AGE_DAYS = 25
-NTFY_TOPIC = "health-reporting"
+NTFY_TOPIC = os.environ.get("NTFY_TOPIC", "health-reporting")
 
 
 def get_latest_meal_date() -> date | None:

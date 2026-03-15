@@ -12,6 +12,7 @@ from pathlib import Path
 import pandas as pd
 import pdfplumber
 from health_platform.utils.logging_config import get_logger
+from health_platform.utils.paths import get_data_lake_root
 
 logger = get_logger("lifesum.pdf_parser")
 
@@ -157,7 +158,7 @@ def pdf_to_parquet(pdf_path: Path, output_dir: Path | None = None) -> Path | Non
     Returns:
         Path to the written parquet file, or None if parsing failed.
     """
-    output_dir = output_dir or Path("/Users/Shared/data_lake/lifesum/parquet/food")
+    output_dir = output_dir or (get_data_lake_root() / "lifesum" / "parquet" / "food")
     output_dir.mkdir(parents=True, exist_ok=True)
 
     df = parse_lifesum_pdf(pdf_path)
