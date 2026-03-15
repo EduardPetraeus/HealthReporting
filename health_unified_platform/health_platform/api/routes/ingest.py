@@ -4,6 +4,9 @@ Receives automated daily exports from the HAE iOS app and writes them
 to the same Parquet data lake used by process_health_data.py (XML).
 The downstream pipeline (ingestion_engine → Bronze → Silver) is unchanged.
 
+After a successful write, the downstream pipeline (bronze → silver → gold → AI)
+is triggered as a background task to minimize data latency.
+
 Route: POST /v1/ingest/apple-health
 Auth:  Bearer token (same as all other /v1 endpoints)
 """
@@ -12,12 +15,12 @@ from __future__ import annotations
 
 import csv
 import json as _json
-import os
 from datetime import datetime, timezone
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status
 from health_platform.api.auth import verify_token
+from health_platform.pipeline.post_ingest import run_downstream_pipeline
 from health_platform.source_connectors.apple_health.json_to_parquet_writer import (
     parse_hae_payload,
     write_hae_records,
@@ -26,13 +29,12 @@ from health_platform.utils.logging_config import get_logger
 
 logger = get_logger("api.ingest")
 
-_DEFAULT_DATA_LAKE = "/Users/Shared/data_lake"
-
 
 def _get_audit_log() -> Path:
-    """Resolve audit log path from DATA_LAKE_ROOT env var."""
-    lake = os.environ.get("DATA_LAKE_ROOT", _DEFAULT_DATA_LAKE)
-    return Path(lake) / "audit" / "hae_ingest_log.csv"
+    """Resolve audit log path via paths utility."""
+    from health_platform.utils.paths import get_data_lake_root
+
+    return get_data_lake_root() / "audit" / "hae_ingest_log.csv"
 
 
 _AUDIT_FIELDS = [
@@ -88,13 +90,15 @@ MAX_BODY_BYTES = 50 * 1024 * 1024
 
 def _get_apple_health_root() -> Path:
     """Resolve the apple_health_data output directory."""
-    lake = os.environ.get("DATA_LAKE_ROOT", _DEFAULT_DATA_LAKE)
-    return Path(lake) / "apple_health_data"
+    from health_platform.utils.paths import get_data_lake_root
+
+    return get_data_lake_root() / "apple_health_data"
 
 
 @router.post("/apple-health")
 async def ingest_apple_health(
     request: Request,
+    background_tasks: BackgroundTasks,
     _token: str = Depends(verify_token),
 ):
     """Receive and persist a Health Auto Export JSON payload.
@@ -184,6 +188,10 @@ async def ingest_apple_health(
         metrics_received=num_metrics,
         payload_bytes=body_len,
     )
+
+    # Trigger downstream pipeline as background task (bronze → silver → gold → AI).
+    # Throttled (max once per 10 min) and lock-guarded (skips if daily_sync running).
+    background_tasks.add_task(run_downstream_pipeline)
 
     return {
         "status": "ok",

@@ -4,6 +4,19 @@
 
 ---
 
+## [Unreleased] — 2026-03-15
+
+### Added
+- Post-ingest background pipeline (`post_ingest.py`): bronze→silver→gold→AI after HAE POST
+- 9-step daily sync: gold views added as step 5/9, mkdir-based lock, renumbered 1-9
+- `ingest.py`: BackgroundTasks trigger, returns 200 immediately
+
+### Fixed
+- `ingest.py`: replaced hardcoded `/Users/` path with `get_data_lake_root()` utility
+- `test_daily_sync.py`: updated step count assertion from 8 to 9
+
+---
+
 ## [Unreleased] — 2026-03-14
 
 ### Added

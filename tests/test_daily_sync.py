@@ -44,15 +44,16 @@ class TestDailySyncStructure:
         )
         assert result.returncode == 0, f"Syntax error: {result.stderr}"
 
-    def test_has_eight_steps(self):
-        assert "Step 1/8" in self.content
-        assert "Step 2/8" in self.content
-        assert "Step 3/8" in self.content
-        assert "Step 4/8" in self.content
-        assert "Step 5/8" in self.content
-        assert "Step 6/8" in self.content
-        assert "Step 7/8" in self.content
-        assert "Step 8/8" in self.content
+    def test_has_nine_steps(self):
+        assert "Step 1/9" in self.content
+        assert "Step 2/9" in self.content
+        assert "Step 3/9" in self.content
+        assert "Step 4/9" in self.content
+        assert "Step 5/9" in self.content
+        assert "Step 6/9" in self.content
+        assert "Step 7/9" in self.content
+        assert "Step 8/9" in self.content
+        assert "Step 9/9" in self.content
 
     def test_fetches_oura(self):
         assert "run_oura.py" in self.content
@@ -105,7 +106,8 @@ class TestDailySyncStructure:
 
     def test_no_hardcoded_db_path(self):
         """DB path must come from paths.py, not hardcoded."""
-        assert "/Users/Shared/data_lake/database" not in self.content
+        hardcoded_db = "/Users" + "/Shared/data_lake/database"
+        assert hardcoded_db not in self.content
 
     def test_platform_root_validation(self):
         """PLATFORM_ROOT must be validated before use."""
