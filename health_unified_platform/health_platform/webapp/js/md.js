@@ -73,6 +73,12 @@ function renderTables(html) {
   return result.join('\n');
 }
 
+function safeCell(val) {
+  const d = document.createElement('span');
+  d.textContent = val;
+  return d.innerHTML;
+}
+
 function buildTable(lines) {
   if (lines.length < 2) return lines.join('\n');
   const parseRow = line => line.split('|').filter((_, i, a) => i > 0 && i < a.length - 1).map(c => c.trim());
@@ -81,12 +87,12 @@ function buildTable(lines) {
   if (lines[1] && /^[\s|:-]+$/.test(lines[1].replace(/-/g, ''))) dataStart = 2;
 
   let t = '<table><thead><tr>';
-  for (const h of header) t += '<th>' + h + '</th>';
+  for (const h of header) t += '<th>' + safeCell(h) + '</th>';
   t += '</tr></thead><tbody>';
   for (let i = dataStart; i < lines.length; i++) {
     const cells = parseRow(lines[i]);
     t += '<tr>';
-    for (let j = 0; j < cells.length; j++) t += '<td>' + colorizeScore(cells[j], header[j]) + '</td>';
+    for (let j = 0; j < cells.length; j++) t += '<td>' + colorizeScore(safeCell(cells[j]), header[j]) + '</td>';
     t += '</tr>';
   }
   t += '</tbody></table>';

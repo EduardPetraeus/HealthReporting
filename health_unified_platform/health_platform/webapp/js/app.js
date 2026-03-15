@@ -32,6 +32,8 @@ function doLogin() {
       if (r && r.ok) {
         localStorage.setItem('health_token', token);
         document.getElementById('login').classList.add('hidden');
+        // Trigger dashboard load after login
+        if (typeof onDashboardVisible === 'function') onDashboardVisible();
       } else {
         document.getElementById('login-error').textContent = 'Ugyldigt token';
       }
@@ -65,6 +67,10 @@ function switchTab(tabId) {
   const page = document.getElementById('page-' + tabId);
   if (tab) tab.classList.add('active');
   if (page) page.classList.add('active');
+
+  // Notify page-specific loaders
+  if (tabId === 'dashboard' && typeof onDashboardVisible === 'function') onDashboardVisible();
+  if (tabId === 'trends' && typeof onTrendsVisible === 'function') onTrendsVisible();
 }
 
 // Bind tab clicks

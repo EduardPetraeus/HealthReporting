@@ -10,6 +10,9 @@
 <link rel="manifest" href="/static/manifest.json">
 <link rel="stylesheet" href="/static/css/theme.css">
 <link rel="stylesheet" href="/static/css/layout.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"
+  integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ"
+  crossorigin="anonymous"></script>
 <title>Health</title>
 </head>
 <body>
@@ -38,21 +41,35 @@
   <!-- Page: Dashboard -->
   <div class="page active" id="page-dashboard">
     <div class="page-content">
-      <div class="empty-state">
-        <div class="icon">&#x1F4CA;</div>
-        <h2>Dashboard</h2>
-        <p>Overblik over din sundhedsdata. Kommer i PWA-02.</p>
-      </div>
+      <div id="dashboard-grid" class="dashboard-grid"></div>
+      <div id="dashboard-alerts"></div>
+      <div id="dashboard-summary"></div>
     </div>
   </div>
 
   <!-- Page: Chat -->
   <div class="page" id="page-chat">
-    <div class="page-content">
-      <div class="empty-state">
-        <div class="icon">&#x1F4AC;</div>
-        <h2>Chat</h2>
-        <p>Stil spørgsmål om din sundhed. Kommer i PWA-02.</p>
+    <div class="chat-container">
+      <div id="chat-messages" class="chat-messages">
+        <div class="chat-msg bot" id="chat-welcome">
+          <div class="chat-bot-label">Health Assistant</div>
+          Hej! Jeg er din personlige sundhedsassistent. Stil mig et spørgsmål, eller vælg et emne nedenfor.
+          <div class="chat-chips" id="chat-welcome-chips">
+            <button onclick="ask('Hvordan har jeg sovet den seneste uge?')">Søvn</button>
+            <button onclick="ask('Hvad er min readiness og energi?')">Energi</button>
+            <button onclick="ask('Hvor mange skridt har jeg gået?')">Skridt</button>
+            <button onclick="ask('Giv mig et overblik over min sundhed')">Overblik</button>
+            <button onclick="ask('Hvordan er min stress og recovery?')">Stress</button>
+            <button onclick="ask('Vis mine træninger')">Træning</button>
+          </div>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <input id="chat-input" type="text" placeholder="Spørg om din sundhed..." enterkeyhint="send"
+          autocomplete="off" autocapitalize="sentences" autocorrect="on">
+        <button id="chat-send-btn" aria-label="Send">
+          <svg viewBox="0 0 24 24"><path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94l18.04-8.01a.75.75 0 000-1.36L3.478 2.405z"/></svg>
+        </button>
       </div>
     </div>
   </div>
@@ -60,10 +77,13 @@
   <!-- Page: Trends -->
   <div class="page" id="page-trends">
     <div class="page-content">
-      <div class="empty-state">
-        <div class="icon">&#x1F4C8;</div>
-        <h2>Trends</h2>
-        <p>Se hvordan dine data udvikler sig over tid. Kommer snart.</p>
+      <div class="trends-header">
+        <select id="trends-metric-select" class="trends-select">
+          <option value="">Vælg metric...</option>
+        </select>
+      </div>
+      <div id="trends-chart-wrap" class="trends-chart-wrap">
+        <canvas id="trends-chart"></canvas>
       </div>
     </div>
   </div>
@@ -74,7 +94,7 @@
       <div class="empty-state">
         <div class="icon">&#x1F464;</div>
         <h2>Profil</h2>
-        <p>Din sundhedsprofil og indstillinger. Kommer snart.</p>
+        <p>Din sundhedsprofil og indstillinger. Kommer i PWA-03.</p>
       </div>
     </div>
   </div>
@@ -103,5 +123,8 @@
 
 <script src="/static/js/md.js"></script>
 <script src="/static/js/app.js"></script>
+<script src="/static/js/dashboard.js"></script>
+<script src="/static/js/chat.js"></script>
+<script src="/static/js/trends.js"></script>
 </body>
 </html>
