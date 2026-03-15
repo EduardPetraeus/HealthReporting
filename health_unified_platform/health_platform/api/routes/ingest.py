@@ -15,7 +15,6 @@ from __future__ import annotations
 
 import csv
 import json as _json
-import os
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -30,13 +29,12 @@ from health_platform.utils.logging_config import get_logger
 
 logger = get_logger("api.ingest")
 
-_DEFAULT_DATA_LAKE = "/Users/Shared/data_lake"
-
 
 def _get_audit_log() -> Path:
-    """Resolve audit log path from DATA_LAKE_ROOT env var."""
-    lake = os.environ.get("DATA_LAKE_ROOT", _DEFAULT_DATA_LAKE)
-    return Path(lake) / "audit" / "hae_ingest_log.csv"
+    """Resolve audit log path via paths utility."""
+    from health_platform.utils.paths import get_data_lake_root
+
+    return get_data_lake_root() / "audit" / "hae_ingest_log.csv"
 
 
 _AUDIT_FIELDS = [
@@ -92,8 +90,9 @@ MAX_BODY_BYTES = 50 * 1024 * 1024
 
 def _get_apple_health_root() -> Path:
     """Resolve the apple_health_data output directory."""
-    lake = os.environ.get("DATA_LAKE_ROOT", _DEFAULT_DATA_LAKE)
-    return Path(lake) / "apple_health_data"
+    from health_platform.utils.paths import get_data_lake_root
+
+    return get_data_lake_root() / "apple_health_data"
 
 
 @router.post("/apple-health")
