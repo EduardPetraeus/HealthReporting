@@ -60,20 +60,19 @@ def tools_with_temp_yaml(tmp_path):
     con = duckdb.connect(":memory:")
     tools = HealthTools(con)
 
-    # Fake __file__ so Path(__file__).parents[1] / "contracts" points to tmp
-    fake_module = tmp_path / "mcp" / "health_tools.py"
-    fake_module.parent.mkdir(parents=True, exist_ok=True)
-    fake_module.touch()
+    # Patch _CONTRACTS_DIR so .parent / "food_context.yml" points to tmp
+    fake_metrics_dir = contracts_dir / "metrics"
+    fake_metrics_dir.mkdir(exist_ok=True)
 
-    return tools, food_file, str(fake_module)
+    return tools, food_file, fake_metrics_dir
 
 
-def _call(tools, fake_file, food_item=None, yaml_data=None, food_file=None):
-    """Call get_food_context with patched __file__."""
+def _call(tools, fake_metrics_dir, food_item=None, yaml_data=None, food_file=None):
+    """Call get_food_context with patched _CONTRACTS_DIR."""
     if yaml_data is not None and food_file is not None:
         with open(food_file, "w") as f:
             yaml.dump(yaml_data, f)
-    with patch.object(health_tools_mod, "__file__", fake_file):
+    with patch.object(health_tools_mod, "_CONTRACTS_DIR", fake_metrics_dir):
         return tools.get_food_context(food_item)
 
 
@@ -185,7 +184,7 @@ class TestGetFoodContext:
         tools, _, _ = tools_with_temp_yaml
         # Point to a non-existent directory
         with patch.object(
-            health_tools_mod, "__file__", "/nonexistent/mcp/health_tools.py"
+            health_tools_mod, "_CONTRACTS_DIR", Path("/nonexistent/metrics")
         ):
             result = tools.get_food_context(None)
         assert "not found" in result

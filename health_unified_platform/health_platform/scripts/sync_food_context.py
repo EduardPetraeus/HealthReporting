@@ -22,22 +22,16 @@ from pathlib import Path
 
 import duckdb
 import yaml
+from health_platform.utils.paths import get_db_path, get_manual_dir
 from numbers_parser import Document
 
-NUMBERS_PATH = Path("/Users/Shared/data_lake/manual/food_context.numbers")
-CSV_PATH = Path("/Users/Shared/data_lake/manual/food_context.csv")
+MANUAL_DIR = get_manual_dir()
+NUMBERS_PATH = MANUAL_DIR / "food_context.numbers"
+CSV_PATH = MANUAL_DIR / "food_context.csv"
 YAML_PATH = Path(__file__).resolve().parents[1] / "contracts" / "food_context.yml"
 MIN_OCCURRENCES = 5  # only add foods logged at least this many times
 
 COLUMNS = ["lifesum_name", "times_logged", "description", "ingredients", "notes"]
-
-
-def get_db_path() -> str:
-    """Resolve DuckDB path from environment."""
-    import os
-
-    env = os.environ.get("HEALTH_ENV", "dev")
-    return f"/Users/Shared/data_lake/database/health_dw_{env}.db"
 
 
 def read_numbers() -> list[dict]:
@@ -164,7 +158,7 @@ def generate_yaml(rows: list[dict]) -> None:
     header = (
         "# Food Context — maps Lifesum food item names to descriptions\n"
         "# AI loads this to understand what non-obvious foods actually contain\n"
-        "# AUTO-GENERATED from /Users/Shared/data_lake/manual/food_context.numbers\n"
+        f"# AUTO-GENERATED from {NUMBERS_PATH}\n"
         "# Do not edit manually — edit the Numbers file, then run sync_food_context.py\n"
     )
 
