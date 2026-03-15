@@ -1,0 +1,156 @@
+# Food Context — maps Lifesum food item names to descriptions
+# AI loads this to understand what non-obvious foods actually contain
+#
+# lifesum_name: exact match to food_item in silver.daily_meal
+# description: short explanation of what it is (REQUIRED — fill in)
+# ingredients: list of ingredients with amounts (optional)
+# notes: context like when/why/frequency (optional)
+#
+# Pre-populated from top 30 most logged foods. Fill in descriptions.
+version: "1.0"
+
+foods:
+  - lifesum_name: "Banan"
+    description: ""
+    ingredients: []
+    notes: ""
+
+  - lifesum_name: "Frost grøntsager lille portion"
+    description: ""
+    ingredients: []
+    notes: ""
+
+  - lifesum_name: "Nødder: mandel og hasselnødder"
+    description: ""
+    ingredients: []
+    notes: ""
+
+  - lifesum_name: "Mørk Chokolade 70 %"
+    description: ""
+    ingredients: []
+    notes: ""
+
+  - lifesum_name: "Spidskål"
+    description: ""
+    ingredients: []
+    notes: ""
+
+  - lifesum_name: "Rosiner"
+    description: ""
+    ingredients: []
+    notes: ""
+
+  - lifesum_name: "Smørbar, øko"
+    description: ""
+    ingredients: []
+    notes: ""
+
+  - lifesum_name: "Grovvalset havregryn"
+    description: ""
+    ingredients: []
+    notes: ""
+
+  - lifesum_name: "Arla øko harmonie"
+    description: ""
+    ingredients: []
+    notes: ""
+
+  - lifesum_name: "Gulerødder, rå"
+    description: ""
+    ingredients: []
+    notes: ""
+
+  - lifesum_name: "Fuldkornsbrød"
+    description: ""
+    ingredients: []
+    notes: ""
+
+  - lifesum_name: "Knäcke Brungräddat"
+    description: ""
+    ingredients: []
+    notes: ""
+
+  - lifesum_name: "Gulerod Rugbrød"
+    description: ""
+    ingredients: []
+    notes: ""
+
+  - lifesum_name: "Hummus"
+    description: ""
+    ingredients: []
+    notes: ""
+
+  - lifesum_name: "Æble"
+    description: ""
+    ingredients: []
+    notes: ""
+
+  - lifesum_name: "Laktosefri økologisk minimælk"
+    description: ""
+    ingredients: []
+    notes: ""
+
+  - lifesum_name: "Basilikums Pesto"
+    description: ""
+    ingredients: []
+    notes: ""
+
+  - lifesum_name: "Humus"
+    description: ""
+    ingredients: []
+    notes: ""
+
+  - lifesum_name: "LAKSE frikadeller"
+    description: ""
+    ingredients: []
+    notes: ""
+
+  - lifesum_name: "gulerod,rå*"
+    description: ""
+    ingredients: []
+    notes: ""
+
+  - lifesum_name: "Æg"
+    description: ""
+    ingredients: []
+    notes: ""
+
+  - lifesum_name: "Oat Barista Tasty Caramel"
+    description: ""
+    ingredients: []
+    notes: ""
+
+  - lifesum_name: "mysli deluxe (med rosiner, kokos og banan)"
+    description: ""
+    ingredients: []
+    notes: ""
+
+  - lifesum_name: "Sukker"
+    description: ""
+    ingredients: []
+    notes: ""
+
+  - lifesum_name: "Klovborg 45 /25%"
+    description: ""
+    ingredients: []
+    notes: ""
+
+  - lifesum_name: "Blåbær"
+    description: ""
+    ingredients: []
+    notes: ""
+
+  - lifesum_name: "Rugbrød med makrel"
+    description: ""
+    ingredients: []
+    notes: ""
+
+  - lifesum_name: "Hasselnødder"
+    description: ""
+    ingredients: []
+    notes: ""
+
+  - lifesum_name: "Rødløg"
+    description: ""
+    ingredients: []
+    notes: ""
