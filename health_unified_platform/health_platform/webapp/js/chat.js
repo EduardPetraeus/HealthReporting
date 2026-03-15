@@ -109,21 +109,25 @@ async function ask(question) {
     const decoder = new TextDecoder();
     let fullText = '';
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      const chunk = decoder.decode(value, { stream: true });
-      for (const line of chunk.split('\n')) {
-        if (line.startsWith('data: ')) {
-          try {
-            const data = JSON.parse(line.slice(6));
-            if (data.text) {
-              fullText += data.text;
-              updateBotMessage(msgDiv, fullText);
-            }
-          } catch (_) { /* incomplete JSON chunk */ }
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        for (const line of chunk.split(/\r?\n/)) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              if (data.text) {
+                fullText += data.text;
+                updateBotMessage(msgDiv, fullText);
+              }
+            } catch (_) { /* incomplete JSON chunk */ }
+          }
         }
       }
+    } finally {
+      reader.cancel().catch(() => {});
     }
 
     if (!fullText) {

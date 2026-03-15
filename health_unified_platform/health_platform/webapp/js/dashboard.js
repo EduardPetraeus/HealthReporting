@@ -106,14 +106,17 @@ async function loadDashboard() {
 
     renderAlerts(data.alerts);
     renderSummary(data.daily_summaries);
+    dashboardLoaded = true;
   } catch (_) {
     dashboardGrid.innerHTML = '<div class="empty-state"><p>Kunne ikke hente data. Tjek forbindelsen.</p></div>';
   }
 }
 
-// Load on tab switch (called from app.js)
+// Load on tab switch (called from app.js) — guard prevents redundant fetches
+let dashboardLoaded = false;
+
 function onDashboardVisible() {
-  loadDashboard();
+  if (!dashboardLoaded) loadDashboard();
 }
 
 // Initial load if dashboard is default tab
