@@ -92,3 +92,6 @@ docs/*.html
 
 # sundhed.dk debug HTML dumps (may contain real health data)
 _debug_html/
+
+# Food context (auto-generated from personal Numbers file, contains dietary data)
+health_unified_platform/health_platform/contracts/food_context.yml

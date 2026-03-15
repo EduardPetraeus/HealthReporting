@@ -1185,9 +1185,7 @@ class HealthTools:
         str
             Formatted markdown with food descriptions.
         """
-        food_context_path = (
-            Path(__file__).resolve().parents[1] / "contracts" / "food_context.yml"
-        )
+        food_context_path = _CONTRACTS_DIR.parent / "food_context.yml"
         if not food_context_path.exists():
             return format_error("food_context.yml not found in contracts/")
 
