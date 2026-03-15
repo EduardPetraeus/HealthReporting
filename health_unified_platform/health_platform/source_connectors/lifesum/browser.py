@@ -130,6 +130,7 @@ class LifesumBrowser:
         self._browser: Browser | None = None
         self._context: BrowserContext | None = None
         self._page: Page | None = None
+        self._captured_token: str | None = None
 
     def launch_and_authenticate(self) -> Page:
         """Launch browser, navigate to Lifesum, and authenticate.
@@ -152,6 +153,9 @@ class LifesumBrowser:
         )
         self._context = self._browser
         self._page = self._context.new_page()
+
+        # Intercept API requests to capture the JWT Bearer token
+        self._page.on("request", self._intercept_token)
 
         # Strategy 1: Check existing session by navigating to a protected page.
         # Auth is stored in localStorage, not cookies — so we must load the SPA
@@ -494,6 +498,22 @@ class LifesumBrowser:
         time.sleep(1.0)
         if self._page:
             self._page.wait_for_load_state("domcontentloaded")
+
+    def _intercept_token(self, request) -> None:
+        """Capture JWT Bearer token from Lifesum API requests."""
+        if "api.lifesum.com" not in request.url:
+            return
+        auth = request.headers.get("authorization", "")
+        if auth.startswith("Bearer ") and len(auth) > 20:
+            token = auth[7:]
+            if self._captured_token != token:
+                self._captured_token = token
+                logger.info("Captured new JWT from API request to %s", request.url[:60])
+
+    @property
+    def captured_token(self) -> str | None:
+        """Return the JWT captured from network interception, if any."""
+        return self._captured_token
 
     @property
     def page(self) -> Page | None:
