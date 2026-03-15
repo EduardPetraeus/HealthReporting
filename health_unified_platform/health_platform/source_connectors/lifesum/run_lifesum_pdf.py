@@ -1,8 +1,11 @@
 """Lifesum PDF download orchestrator.
 
 Queries silver.daily_meal for the latest data date, then downloads
-a PDF covering the gap period. Supports --login-only for manual
-session refresh (Apple ID requires Touch ID / 2FA).
+a PDF covering the gap period. Uses API-first strategy (Chrome cookies),
+falling back to Playwright browser if needed.
+
+Supports --login-only for manual session refresh (Apple ID requires
+Touch ID / 2FA).
 
 Usage:
     python -m health_platform.source_connectors.lifesum.run_lifesum_pdf
@@ -17,6 +20,10 @@ import sys
 from datetime import date, datetime, timedelta
 
 import duckdb
+from health_platform.source_connectors.lifesum.api_downloader import (
+    AuthError,
+    download_pdf_via_api,
+)
 from health_platform.source_connectors.lifesum.browser import (
     BROWSER_DATA_DIR,
     LifesumBrowser,
@@ -136,7 +143,7 @@ def login_only() -> int:
 
 
 def main() -> int:
-    """Launch browser, authenticate, download PDF, parse to parquet, close."""
+    """Download Lifesum PDF (API-first, browser fallback), parse to parquet."""
     parser = argparse.ArgumentParser(description="Lifesum PDF download pipeline")
     parser.add_argument(
         "--login-only",
@@ -174,30 +181,56 @@ def main() -> int:
             "No existing meal data — downloading last 7 days from %s", start_date
         )
 
-    browser = LifesumBrowser()
+    # Strategy 1: Try API download (no browser needed — uses Chrome cookies)
+    pdf_path = None
     try:
-        page = browser.launch_and_authenticate()
-
-        # Step 1: Download PDF covering start_date to today
-        pdf_path = download_weekly_pdf(page, start_date=start_date, end_date=today)
-        if not pdf_path:
-            logger.error("PDF download failed")
-            return 1
-
-        # Step 2: Parse PDF to parquet (lands in food parquet dir for bronze pickup)
-        parquet_path = pdf_to_parquet(pdf_path)
-        if parquet_path:
-            logger.info("Pipeline ready: %s → %s", pdf_path.name, parquet_path.name)
-            return 0
-        else:
-            logger.error("PDF parsing failed")
-            return 1
-
+        logger.info("Attempting API download (Chrome cookies)...")
+        pdf_path = download_pdf_via_api(start_date=start_date, end_date=today)
+        if pdf_path:
+            logger.info("API download succeeded: %s", pdf_path.name)
+    except AuthError as exc:
+        logger.warning("API download auth failed: %s", exc)
     except Exception as exc:
-        logger.error("Lifesum PDF pipeline error: %s", exc)
+        logger.warning("API download failed: %s", exc)
+
+    # Strategy 2: Fall back to Playwright browser
+    if not pdf_path:
+        logger.info("Falling back to Playwright browser download...")
+        browser = LifesumBrowser()
+        try:
+            page = browser.launch_and_authenticate()
+            # Capture JWT for future API-first downloads (avoids browser next time)
+            if browser.captured_token:
+                try:
+                    from health_platform.source_connectors.lifesum.api_downloader import (
+                        _save_token_to_keychain,
+                    )
+
+                    _save_token_to_keychain(browser.captured_token)
+                    logger.info(
+                        "Captured and saved JWT — next run will use API directly"
+                    )
+                except Exception as exc:
+                    logger.warning("Could not save captured token: %s", exc)
+            pdf_path = download_weekly_pdf(page, start_date=start_date, end_date=today)
+        except Exception as exc:
+            logger.error("Browser download failed: %s", exc)
+            return 1
+        finally:
+            browser.close()
+
+    if not pdf_path:
+        logger.error("PDF download failed (both API and browser)")
         return 1
-    finally:
-        browser.close()
+
+    # Parse PDF to parquet (lands in food parquet dir for bronze pickup)
+    parquet_path = pdf_to_parquet(pdf_path)
+    if parquet_path:
+        logger.info("Pipeline complete: %s → %s", pdf_path.name, parquet_path.name)
+        return 0
+    else:
+        logger.error("PDF parsing failed")
+        return 1
 
 
 if __name__ == "__main__":
