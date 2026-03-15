@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Health">
+<link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+<link rel="manifest" href="/static/manifest.json">
+<link rel="stylesheet" href="/static/css/theme.css">
+<link rel="stylesheet" href="/static/css/layout.css">
+<title>Health</title>
+</head>
+<body>
+
+<!-- ===== Login Screen ===== -->
+<div id="login">
+  <div class="login-icon">H</div>
+  <h2>Health</h2>
+  <p>Din personlige sundhedsassistent. Forbind via Tailscale.</p>
+  <input id="token-input" class="input" type="password" placeholder="Indsæt API token"
+    autocomplete="off" enterkeyhint="go" spellcheck="false" autocorrect="off">
+  <button id="login-btn" class="btn-primary">Forbind</button>
+  <div class="error-msg" id="login-error"></div>
+</div>
+
+<!-- ===== App Shell ===== -->
+<div id="app">
+
+  <!-- Header -->
+  <header>
+    <div class="status-dot" id="status-dot"></div>
+    <h1>Health</h1>
+    <span class="status-text" id="status-text">Forbundet</span>
+  </header>
+
+  <!-- Page: Dashboard -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-content">
+      <div class="empty-state">
+        <div class="icon">&#x1F4CA;</div>
+        <h2>Dashboard</h2>
+        <p>Overblik over din sundhedsdata. Kommer i PWA-02.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page: Chat -->
+  <div class="page" id="page-chat">
+    <div class="page-content">
+      <div class="empty-state">
+        <div class="icon">&#x1F4AC;</div>
+        <h2>Chat</h2>
+        <p>Stil spørgsmål om din sundhed. Kommer i PWA-02.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page: Trends -->
+  <div class="page" id="page-trends">
+    <div class="page-content">
+      <div class="empty-state">
+        <div class="icon">&#x1F4C8;</div>
+        <h2>Trends</h2>
+        <p>Se hvordan dine data udvikler sig over tid. Kommer snart.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page: Profile -->
+  <div class="page" id="page-profile">
+    <div class="page-content">
+      <div class="empty-state">
+        <div class="icon">&#x1F464;</div>
+        <h2>Profil</h2>
+        <p>Din sundhedsprofil og indstillinger. Kommer snart.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Tab Bar -->
+  <nav id="tab-bar">
+    <button class="tab active" data-tab="dashboard" aria-label="Dashboard">
+      <svg viewBox="0 0 24 24"><path d="M4 13h6c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1zm0 8h6c.55 0 1-.45 1-1v-4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v4c0 .55.45 1 1 1zm10 0h6c.55 0 1-.45 1-1v-8c0-.55-.45-1-1-1h-6c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1zm-1-17v4c0 .55.45 1 1 1h6c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1h-6c-.55 0-1 .45-1 1z"/></svg>
+      <span>Dashboard</span>
+    </button>
+    <button class="tab" data-tab="chat" aria-label="Chat">
+      <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
+      <span>Chat</span>
+    </button>
+    <button class="tab" data-tab="trends" aria-label="Trends">
+      <svg viewBox="0 0 24 24"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg>
+      <span>Trends</span>
+    </button>
+    <button class="tab" data-tab="profile" aria-label="Profil">
+      <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+      <span>Profil</span>
+    </button>
+  </nav>
+
+</div>
+
+<script src="/static/js/md.js"></script>
+<script src="/static/js/app.js"></script>
+</body>
+</html>

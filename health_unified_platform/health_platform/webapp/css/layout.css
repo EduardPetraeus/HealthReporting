@@ -1,0 +1,199 @@
+/* ===== Health App — Layout =====
+ * App shell: login screen, header, bottom tab bar, page containers.
+ * Safe-area-inset support for notched iPhones.
+ */
+
+/* ===== Full-height app shell ===== */
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* ===== Header — frosted glass ===== */
+header {
+  padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(26, 26, 26, 0.72);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 0.5px solid var(--border);
+  flex-shrink: 0;
+  z-index: 5;
+}
+
+header .status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--status-green);
+  box-shadow: 0 0 6px rgba(92, 138, 92, 0.5);
+  flex-shrink: 0;
+}
+
+header h1 {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.4px;
+  color: var(--text-primary);
+}
+
+header .status-text {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-left: auto;
+  font-weight: 400;
+}
+
+/* ===== Page containers ===== */
+.page {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: none;
+  padding: var(--pad-page);
+}
+
+.page.active {
+  display: block;
+}
+
+.page-content {
+  max-width: var(--container-max);
+  margin: 0 auto;
+}
+
+/* ===== Empty state (placeholder for PWA-02+) ===== */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.empty-state .icon {
+  font-size: 48px;
+  opacity: 0.4;
+}
+
+.empty-state h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.empty-state p {
+  font-size: 15px;
+  color: var(--text-muted);
+  max-width: 280px;
+  line-height: 1.45;
+}
+
+/* ===== Bottom tab bar — frosted glass, amber active ===== */
+nav#tab-bar {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 8px 0 calc(8px + env(safe-area-inset-bottom, 0px)) 0;
+  background: rgba(26, 26, 26, 0.72);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  border-top: 0.5px solid var(--border);
+  flex-shrink: 0;
+  z-index: 5;
+}
+
+nav#tab-bar .tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  transition: color var(--transition-tap);
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+}
+
+nav#tab-bar .tab svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+  transition: fill var(--transition-tap);
+}
+
+nav#tab-bar .tab.active {
+  color: var(--accent);
+}
+
+nav#tab-bar .tab.active::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+}
+
+/* ===== Login screen — centered, minimal ===== */
+#login {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-primary);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 32px;
+}
+
+#login.hidden {
+  display: none;
+}
+
+#login .login-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-muted));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 38px;
+  font-weight: 700;
+  color: var(--bg-primary);
+  box-shadow: 0 8px 32px rgba(200, 164, 92, 0.3);
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
+}
+
+#login h2 {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--text-primary);
+}
+
+#login p {
+  color: var(--text-muted);
+  font-size: 15px;
+  text-align: center;
+  max-width: 280px;
+  line-height: 1.45;
+}
