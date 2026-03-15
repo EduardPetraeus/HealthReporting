@@ -24,8 +24,9 @@ BROWSER_DATA_DIR = Path.home() / ".config" / "health_reporting" / "lifesum_brows
 # Lifesum URLs
 LOGIN_URL = "https://lifesum.com/da/"
 
-# Keychain service name for credentials
-KEYCHAIN_SERVICE = "Lifesum login"
+# Keychain service names for credentials
+KEYCHAIN_SERVICE_APPLE = "Apple id login"
+KEYCHAIN_SERVICE_EMAIL = "Lifesum login"
 KEYCHAIN_PATH = Path.home() / "Library" / "Keychains" / "claude.keychain-db"
 
 # URL fragments that indicate a logged-in state
@@ -38,14 +39,15 @@ LOGIN_URL_FRAGMENTS = ["/login", "/signup", "/register", "/auth", "/oauth"]
 AUTH_POLL_INTERVAL_S = 2.0
 AUTH_TIMEOUT_S = 180.0
 
-# Selectors that indicate a logged-in state
+# Selectors that indicate a logged-in state (verified from live site 2026-03-15)
 AUTH_LOGGED_IN_SELECTORS = [
+    "a:has-text('LOG AF')",
+    "a:has-text('MIN KONTO')",
     "button:has-text('Log af')",
     "a:has-text('Min konto')",
     "a[href*='/account']",
     ".user-avatar",
     "[data-testid='user-menu']",
-    ".dashboard-content",
 ]
 
 
@@ -67,7 +69,7 @@ def _get_credentials() -> tuple[str, str] | None:
                 "security",
                 "find-generic-password",
                 "-s",
-                KEYCHAIN_SERVICE,
+                KEYCHAIN_SERVICE_APPLE,
                 "-w",
                 str(KEYCHAIN_PATH),
             ],
@@ -87,7 +89,7 @@ def _get_credentials() -> tuple[str, str] | None:
                 "security",
                 "find-generic-password",
                 "-s",
-                KEYCHAIN_SERVICE,
+                KEYCHAIN_SERVICE_APPLE,
                 str(KEYCHAIN_PATH),
             ],
             capture_output=True,
@@ -143,20 +145,29 @@ class LifesumBrowser:
             headless=self._headless,
             locale="da-DK",
             viewport={"width": 1280, "height": 900},
+            args=[
+                "--disable-web-security",
+                "--disable-features=IsolateOrigins,site-per-process",
+            ],
         )
         self._context = self._browser
         self._page = self._context.new_page()
 
-        logger.info("Navigating to %s", LOGIN_URL)
-        self._page.goto(LOGIN_URL, wait_until="domcontentloaded")
-
-        # Wait for SPA to render
+        # Strategy 1: Check existing session by navigating to a protected page.
+        # Auth is stored in localStorage, not cookies — so we must load the SPA
+        # to check. /account redirects to login if not authenticated.
+        logger.info("Checking existing session via /account...")
+        self._page.goto("https://lifesum.com/account", wait_until="domcontentloaded")
         self._page.wait_for_timeout(3000)
 
-        # Strategy 1: Already logged in via cookies
         if self._is_logged_in():
-            logger.info("Already logged in (session reuse)")
+            logger.info("Already logged in (session reuse via localStorage)")
             return self._page
+
+        # Not logged in — go to landing page for login flow
+        logger.info("Not authenticated — navigating to %s", LOGIN_URL)
+        self._page.goto(LOGIN_URL, wait_until="domcontentloaded")
+        self._page.wait_for_timeout(3000)
 
         # Strategy 2: Automated login with keychain credentials
         logger.info("Not logged in — attempting automated login...")
@@ -180,8 +191,32 @@ class LifesumBrowser:
         logger.info("Authentication successful")
         return self._page
 
+    def _dismiss_cookie_consent(self) -> None:
+        """Dismiss the Cookiebot consent dialog if present."""
+        try:
+            deny_btn = self._page.query_selector('button:has-text("Deny")')
+            if not deny_btn:
+                deny_btn = self._page.query_selector(
+                    'button:has-text("Allow selection")'
+                )
+            if deny_btn:
+                deny_btn.click()
+                self._page.wait_for_timeout(1000)
+                logger.info("Cookie consent dismissed")
+        except Exception:
+            pass
+
     def _try_automated_login(self) -> bool:
-        """Attempt to log in using email/password from keychain."""
+        """Attempt to log in via Sign in with Apple (primary) or email (fallback).
+
+        Lifesum login flow (as of 2026-03):
+        1. Landing page has a "Log på" button (opens popover)
+        2. Popover has: Apple / Google / Facebook / email login options
+        3. "Log på med Apple" opens appleid.apple.com popup
+        4. Fill Apple ID credentials in popup → popup closes → authenticated
+
+        Keychain entry "Lifesum login" stores Apple ID email + password.
+        """
         if self._page is None:
             return False
 
@@ -193,102 +228,188 @@ class LifesumBrowser:
         email, password = credentials
 
         try:
-            # Click "Log på" button to open login form
-            login_btn = self._page.query_selector("a:has-text('Log på')")
-            if not login_btn:
-                login_btn = self._page.query_selector("a:has-text('Log in')")
-            if not login_btn:
-                login_btn = self._page.query_selector("[href*='login']")
+            # Dismiss cookie consent (blocks interaction otherwise)
+            self._dismiss_cookie_consent()
 
+            # Step 1: Open login popover — "Log på" is a <button>, not <a>
+            login_btn = (
+                self._page.query_selector("button:has-text('Log på')")
+                or self._page.query_selector("a:has-text('Log på')")
+                or self._page.query_selector("button:has-text('Log in')")
+                or self._page.query_selector("[href*='login']")
+            )
             if login_btn:
                 logger.info("Clicking login button...")
                 login_btn.click()
                 self._page.wait_for_timeout(2000)
 
-            # Look for email input field
-            email_input = (
-                self._page.query_selector("input[type='email']")
-                or self._page.query_selector("input[name='email']")
-                or self._page.query_selector("input[placeholder*='mail']")
-                or self._page.query_selector("input[placeholder*='Mail']")
+            # Step 2: Click "Log på med Apple" — opens Apple ID popup
+            apple_btn = self._page.query_selector(
+                "button:has-text('Log på med Apple')"
+            ) or self._page.query_selector("button:has-text('Sign in with Apple')")
+            if not apple_btn:
+                logger.warning("Apple login button not found — trying email fallback")
+                return self._try_email_login(email, password)
+
+            # Catch the Apple ID popup
+            logger.info("Clicking 'Log på med Apple'...")
+            with self._page.context.expect_page(timeout=10000) as popup_info:
+                apple_btn.click()
+
+            apple_page = popup_info.value
+            apple_page.wait_for_load_state("domcontentloaded")
+            logger.info("Apple ID popup opened: %s", apple_page.url[:60])
+
+            # Step 3: Fill Apple ID credentials in popup
+            # Apple shows account_name first, then password after submit
+            account_field = apple_page.wait_for_selector(
+                "#account_name_text_field", timeout=10000
             )
-
-            if not email_input:
-                # Try "Continue with email" button first
-                email_btn = (
-                    self._page.query_selector("button:has-text('mail')")
-                    or self._page.query_selector("a:has-text('mail')")
-                    or self._page.query_selector(
-                        "button:has-text('Fortsæt med mailadresse')"
-                    )
-                )
-                if email_btn:
-                    logger.info("Clicking 'Continue with email' button...")
-                    email_btn.click()
-                    self._page.wait_for_timeout(2000)
-                    email_input = self._page.query_selector(
-                        "input[type='email']"
-                    ) or self._page.query_selector("input[name='email']")
-
-            if not email_input:
-                logger.warning("Could not find email input field")
+            if not account_field:
+                logger.warning("Apple ID account field not found")
                 return False
 
-            # Fill email
-            logger.info("Filling email field...")
-            email_input.fill(email)
+            logger.info("Filling Apple ID email...")
+            account_field.fill(email)
 
-            # Look for password field (might appear after email submission)
-            password_input = self._page.query_selector(
-                "input[type='password']"
-            ) or self._page.query_selector("input[name='password']")
-
-            if not password_input:
-                # Submit email first, then look for password
-                submit_btn = (
-                    self._page.query_selector("button[type='submit']")
-                    or self._page.query_selector("button:has-text('Næste')")
-                    or self._page.query_selector("button:has-text('Next')")
-                    or self._page.query_selector("button:has-text('Fortsæt')")
-                    or self._page.query_selector("button:has-text('Continue')")
-                )
-                if submit_btn:
-                    submit_btn.click()
-                    self._page.wait_for_timeout(2000)
-                password_input = self._page.query_selector(
-                    "input[type='password']"
-                ) or self._page.query_selector("input[name='password']")
-
-            if not password_input:
-                logger.warning("Could not find password input field")
-                return False
-
-            # Fill password and submit
-            logger.info("Filling password field...")
-            password_input.fill(password)
-
-            submit_btn = (
-                self._page.query_selector("button[type='submit']")
-                or self._page.query_selector("button:has-text('Log')")
-                or self._page.query_selector("button:has-text('Sign in')")
-            )
-            if submit_btn:
-                submit_btn.click()
+            # Submit email to proceed to authentication options
+            continue_btn = apple_page.query_selector(
+                "#sign-in"
+            ) or apple_page.query_selector("button[type='submit']")
+            if continue_btn:
+                continue_btn.click()
             else:
-                password_input.press("Enter")
+                account_field.press("Enter")
+            apple_page.wait_for_timeout(3000)
 
-            # Wait for redirect after login
-            logger.info("Waiting for login redirect...")
-            self._page.wait_for_timeout(5000)
+            # Try password login first (passkey requires Touch ID — not automatable)
+            # Apple may show passkey prompt first — look for "Use password" link
+            use_pw_link = (
+                apple_page.query_selector("button:has-text('Use a Password')")
+                or apple_page.query_selector("button:has-text('Sign In with Password')")
+                or apple_page.query_selector("button:has-text('Brug en adgangskode')")
+                or apple_page.query_selector(
+                    "button:has-text('Log ind med adgangskode')"
+                )
+                or apple_page.query_selector("a:has-text('Use a Password')")
+                or apple_page.query_selector("a:has-text('Sign In with Password')")
+                or apple_page.query_selector("#password-login-link")
+            )
+            if use_pw_link:
+                logger.info("Clicking 'Use password' link to bypass passkey...")
+                use_pw_link.click()
+                apple_page.wait_for_timeout(2000)
 
+            # Now look for the password field
+            password_field = apple_page.query_selector("#password_text_field")
+            if not password_field:
+                password_field = apple_page.wait_for_selector(
+                    "#password_text_field", timeout=5000
+                )
+            if password_field:
+                logger.info("Filling Apple ID password...")
+                password_field.fill(password)
+                sign_in_btn = apple_page.query_selector(
+                    "#sign-in"
+                ) or apple_page.query_selector("button[type='submit']")
+                if sign_in_btn:
+                    sign_in_btn.click()
+                else:
+                    password_field.press("Enter")
+            else:
+                # Password field not available — fall back to passkey (needs Touch ID)
+                logger.warning(
+                    "Password field not found — falling back to passkey (requires Touch ID)"
+                )
+                passkey_btn = apple_page.query_selector("#swp")
+                if passkey_btn:
+                    logger.info("Clicking passkey button (Touch ID required)...")
+                    passkey_btn.click()
+                    apple_page.wait_for_timeout(5000)
+                else:
+                    logger.warning("Neither password field nor passkey button found")
+                    return False
+
+            # Wait for Apple to authenticate and popup to close
+            logger.info("Waiting for Apple authentication...")
+            try:
+                apple_page.wait_for_event("close", timeout=30000)
+                logger.info("Apple popup closed — authentication complete")
+            except Exception:
+                # Popup might still be open (2FA prompt, etc.)
+                if not apple_page.is_closed():
+                    logger.warning(
+                        "Apple popup still open — may need 2FA. URL: %s",
+                        apple_page.url[:80],
+                    )
+                    # Wait a bit more for manual 2FA if needed
+                    try:
+                        apple_page.wait_for_event("close", timeout=30000)
+                    except Exception:
+                        logger.warning("Apple popup did not close after 2FA wait")
+                        return False
+
+            # Back on main page — navigate to account page to confirm auth
+            self._page.wait_for_timeout(3000)
+            self._page.goto(
+                "https://lifesum.com/account", wait_until="domcontentloaded"
+            )
+            self._page.wait_for_timeout(3000)
             return self._is_logged_in()
 
         except Exception as exc:
             logger.warning("Automated login failed: %s", exc)
             return False
 
+    def _try_email_login(self, email: str, password: str) -> bool:
+        """Fallback: log in via email/password form."""
+        try:
+            email_login_btn = self._page.query_selector(
+                "button:has-text('Log på med mailadresse')"
+            ) or self._page.query_selector("button:has-text('Continue with email')")
+            if email_login_btn:
+                logger.info("Clicking 'Log på med mailadresse'...")
+                email_login_btn.click()
+                self._page.wait_for_timeout(2000)
+
+            email_input = self._page.query_selector(
+                "#emailInput"
+            ) or self._page.query_selector("input[type='email']")
+            if not email_input:
+                logger.warning("Email input not found")
+                return False
+
+            email_input.fill(email)
+
+            password_input = self._page.query_selector(
+                "#passwordInput"
+            ) or self._page.query_selector("input[type='password']")
+            if not password_input:
+                logger.warning("Password input not found")
+                return False
+
+            password_input.fill(password)
+
+            submit_btn = self._page.query_selector("button[type='submit']")
+            if submit_btn:
+                submit_btn.click()
+            else:
+                password_input.press("Enter")
+
+            self._page.wait_for_timeout(5000)
+            return self._is_logged_in()
+
+        except Exception as exc:
+            logger.warning("Email login failed: %s", exc)
+            return False
+
     def _is_logged_in(self) -> bool:
-        """Check if the current page indicates a logged-in state."""
+        """Check if the current page indicates a logged-in state.
+
+        Lifesum is a SPA that may show a login overlay on top of
+        authenticated routes like /account. We must check the DOM
+        for login buttons as a negative signal, not just the URL.
+        """
         if self._page is None:
             return False
 
@@ -297,6 +418,21 @@ class LifesumBrowser:
         # Negative: still on a login/auth page
         if any(frag in current_url for frag in LOGIN_URL_FRAGMENTS):
             return False
+
+        # Negative: SPA login overlay present (buttons like "Log på med Apple")
+        login_overlay_selectors = [
+            "button:has-text('Log på med Apple')",
+            "button:has-text('Log på med Facebook')",
+            "button:has-text('Log på med Google')",
+            "button:has-text('Sign in with Apple')",
+        ]
+        for sel in login_overlay_selectors:
+            try:
+                if self._page.query_selector(sel):
+                    logger.debug("Login overlay detected via: %s", sel)
+                    return False
+            except Exception:
+                continue
 
         # Positive: URL contains a known logged-in fragment
         if any(frag in current_url for frag in LOGGED_IN_URL_FRAGMENTS):

@@ -1,6 +1,6 @@
 """MCP server for health data access.
 
-Exposes 17 tools for AI agents to interact with health data through
+Exposes 18 tools for AI agents to interact with health data through
 semantic contracts instead of raw SQL.
 
 Usage:
@@ -400,6 +400,24 @@ def query_genetics(
             category=category or None,
             report_name=report_name or None,
         )
+    finally:
+        tools.close()
+
+
+@mcp.tool()
+def get_food_context(food_item: str = "") -> str:
+    """Get context about logged food items — what they actually contain.
+
+    Loads descriptions, ingredients, and notes from food_context.yml to help
+    understand non-obvious Lifesum food names (e.g., meal preps, smoothies).
+
+    Args:
+        food_item: Food name to look up (partial match, case-insensitive).
+            Empty = return all food context entries.
+    """
+    tools = get_tools()
+    try:
+        return tools.get_food_context(food_item=food_item or None)
     finally:
         tools.close()
 

@@ -1166,6 +1166,72 @@ class HealthTools:
         return "\n".join(parts) if len(parts) > 1 else "No genetics data available."
 
     # ------------------------------------------------------------------
+    # Tool 18: get_food_context
+    # ------------------------------------------------------------------
+
+    def get_food_context(self, food_item: Optional[str] = None) -> str:
+        """Return food context from contracts/food_context.yml.
+
+        If food_item is given, fuzzy-match against lifesum_name and return
+        that entry. Otherwise return all entries.
+
+        Parameters
+        ----------
+        food_item : str, optional
+            Food name to look up (case-insensitive substring match).
+
+        Returns
+        -------
+        str
+            Formatted markdown with food descriptions.
+        """
+        food_context_path = _CONTRACTS_DIR.parent / "food_context.yml"
+        if not food_context_path.exists():
+            return format_error("food_context.yml not found in contracts/")
+
+        import yaml
+
+        with open(food_context_path, "r", encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+
+        foods = data.get("foods", [])
+        if not foods:
+            return format_empty("food context", "No foods defined in food_context.yml")
+
+        if food_item:
+            query = food_item.strip().lower()
+            matches = [f for f in foods if query in f.get("lifesum_name", "").lower()]
+            if not matches:
+                available = [f.get("lifesum_name", "") for f in foods]
+                return (
+                    f"No food context found for '{food_item}'.\n\n"
+                    f"**Available foods ({len(available)}):** " + ", ".join(available)
+                )
+            foods = matches
+
+        parts: list[str] = [f"# Food Context ({len(foods)} items)\n"]
+        for f in foods:
+            name = f.get("lifesum_name", "Unknown")
+            desc = f.get("description", "")
+            ingredients = f.get("ingredients", [])
+            notes = f.get("notes", "")
+
+            parts.append(f"## {name}\n")
+            if desc:
+                parts.append(f"**Description:** {desc}\n")
+            else:
+                parts.append("**Description:** _(not yet filled in)_\n")
+            if ingredients:
+                parts.append("**Ingredients:**")
+                for ing in ingredients:
+                    parts.append(f"- {ing}")
+                parts.append("")
+            if notes:
+                parts.append(f"**Notes:** {notes}\n")
+
+        return "\n".join(parts)
+
+    # ------------------------------------------------------------------
     # Private helpers
     # ------------------------------------------------------------------
 
