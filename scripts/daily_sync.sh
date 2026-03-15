@@ -6,10 +6,11 @@
 #   Step 2: Bronze ingestion (parquet → DuckDB bronze tables)
 #   Step 3: Silver merge (ALL sources — bronze → silver deduplicated tables)
 #   Step 4: Data quality checks (YAML-driven, warnings only)
-#   Step 5: Daily summary + embedding generation
-#   Step 6: Correlation computation (metric relationships)
-#   Step 7: Patient profile refresh (baselines + demographics)
-#   Step 8: Anomaly detection + notifications (ntfy.sh)
+#   Step 5: Gold views (local BI layer — silver → gold tables)
+#   Step 6: Daily summary + embedding generation
+#   Step 7: Correlation computation (metric relationships)
+#   Step 8: Patient profile refresh (baselines + demographics)
+#   Step 9: Anomaly detection + notifications (ntfy.sh)
 #
 # Usage:
 #   ./scripts/daily_sync.sh              (manual run)
@@ -54,6 +55,27 @@ fi
 
 mkdir -p "${LOG_DIR}"
 
+# --- Lock (mkdir-based, atomic, macOS-compatible) ---
+LOCK_DIR="/tmp/health_pipeline.lock.d"
+if ! mkdir "${LOCK_DIR}" 2>/dev/null; then
+    # Check if stale (older than 1 hour)
+    if [[ -d "${LOCK_DIR}" ]]; then
+        lock_age=$(( $(date +%s) - $(stat -f %m "${LOCK_DIR}") ))
+        if [[ ${lock_age} -gt 3600 ]]; then
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')] Removing stale lock (${lock_age}s old)" | tee -a "${LOG_FILE}"
+            rmdir "${LOCK_DIR}" 2>/dev/null || true
+            if ! mkdir "${LOCK_DIR}" 2>/dev/null; then
+                echo "[$(date '+%Y-%m-%d %H:%M:%S')] Lock still held — exiting" | tee -a "${LOG_FILE}"
+                exit 0
+            fi
+        else
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')] Another pipeline run in progress (${lock_age}s) — exiting" | tee -a "${LOG_FILE}"
+            exit 0
+        fi
+    fi
+fi
+trap 'rmdir "${LOCK_DIR}" 2>/dev/null' EXIT
+
 # --- Logging ---
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "${LOG_FILE}"
@@ -93,9 +115,9 @@ MERGE_ERRORS=0
 log "=== Daily Health Sync Starting [env: ${HEALTH_ENV}] ==="
 
 # =========================================================================
-# Step 1/8: Fetch data from all API sources
+# Step 1/9: Fetch data from all API sources
 # =========================================================================
-log "Step 1/8: Fetching data from API sources..."
+log "Step 1/9: Fetching data from API sources..."
 
 # 1a: Oura (required — primary wearable)
 log "  1a: Oura..."
@@ -141,20 +163,20 @@ else
     log "  1d: WARNING — Weather fetch failed (continuing)"
 fi
 
-log "Step 1/8: Fetch complete (${FETCH_OK} ok, ${FETCH_WARN} warnings)"
+log "Step 1/9: Fetch complete (${FETCH_OK} ok, ${FETCH_WARN} warnings)"
 
 # =========================================================================
-# Step 2/8: Bronze ingestion (read parquet → DuckDB bronze tables)
+# Step 2/9: Bronze ingestion (read parquet → DuckDB bronze tables)
 # =========================================================================
-log "Step 2/8: Running bronze ingestion..."
+log "Step 2/9: Running bronze ingestion..."
 cd "${PLATFORM_ROOT}"
 "${VENV_PYTHON}" -m health_platform.transformation_logic.ingestion_engine >> "${LOG_FILE}" 2>&1
-log "Step 2/8: Bronze ingestion complete"
+log "Step 2/9: Bronze ingestion complete"
 
 # =========================================================================
-# Step 3/8: Silver merge (ALL sources — bronze → silver deduplicated)
+# Step 3/9: Silver merge (ALL sources — bronze → silver deduplicated)
 # =========================================================================
-log "Step 3/8: Running silver merges..."
+log "Step 3/9: Running silver merges..."
 MERGE_DIR="${PLATFORM_ROOT}/health_platform/transformation_logic/dbt/merge"
 cd "${MERGE_DIR}"
 
@@ -170,12 +192,12 @@ for sql_file in silver/merge_*.sql; do
     fi
 done
 
-log "Step 3/8: Silver merge complete (${MERGE_COUNT} succeeded, ${MERGE_ERRORS} failed)"
+log "Step 3/9: Silver merge complete (${MERGE_COUNT} succeeded, ${MERGE_ERRORS} failed)"
 
 # =========================================================================
-# Step 4/8: Data quality checks (warnings only — never stops pipeline)
+# Step 4/9: Data quality checks (warnings only — never stops pipeline)
 # =========================================================================
-log "Step 4/8: Running data quality checks..."
+log "Step 4/9: Running data quality checks..."
 DQ_EXIT=0
 DQ_OUTPUT=$("${VENV_PYTHON}" "${REPO_ROOT}/scripts/run_quality_checks.py" 2>&1) || DQ_EXIT=$?
 log "${DQ_OUTPUT}"
@@ -183,13 +205,22 @@ if [[ ${DQ_EXIT} -ne 0 ]]; then
     log "  WARNING: Data quality issues detected"
     notify "Health DQ Warning" "${DQ_OUTPUT}" "high"
 fi
-log "Step 4/8: Data quality checks complete"
+log "Step 4/9: Data quality checks complete"
 
 # =========================================================================
-# Step 5/8: Generate daily summary + embedding for yesterday
+# Step 5/9: Gold views (local BI layer)
+# =========================================================================
+log "Step 5/9: Refreshing gold views..."
+cd "${PLATFORM_ROOT}"
+"${VENV_PYTHON}" "${REPO_ROOT}/scripts/create_gold_views.py" >> "${LOG_FILE}" 2>&1 || \
+    log "  WARNING: Gold view refresh failed (non-critical)"
+log "Step 5/9: Gold views complete"
+
+# =========================================================================
+# Step 6/9: Generate daily summary + embedding for yesterday
 # =========================================================================
 # (yesterday because today's data may still be incomplete)
-log "Step 5/8: Generating daily summary..."
+log "Step 6/9: Generating daily summary..."
 cd "${PLATFORM_ROOT}"
 "${VENV_AI_PYTHON}" -c "
 import duckdb
@@ -211,7 +242,7 @@ finally:
     con.close()
 " >> "${LOG_FILE}" 2>&1 || log "  WARNING: Summary generation failed (non-critical)"
 
-log "Step 5/8: Daily summary complete"
+log "Step 6/9: Daily summary complete"
 
 # --- Generate embedding for the new summary ---
 log "  Generating embedding for yesterday's summary..."
@@ -232,9 +263,9 @@ finally:
 " >> "${LOG_FILE}" 2>&1 || log "  WARNING: Embedding generation failed (non-critical)"
 
 # =========================================================================
-# Step 6/8: Correlation computation
+# Step 7/9: Correlation computation
 # =========================================================================
-log "Step 6/8: Computing metric correlations..."
+log "Step 7/9: Computing metric correlations..."
 cd "${PLATFORM_ROOT}"
 "${VENV_AI_PYTHON}" -c "
 import duckdb
@@ -251,12 +282,12 @@ finally:
     con.close()
 " >> "${LOG_FILE}" 2>&1 || log "  WARNING: Correlation computation failed (non-critical)"
 
-log "Step 6/8: Correlations complete"
+log "Step 7/9: Correlations complete"
 
 # =========================================================================
-# Step 7/8: Patient profile refresh (baselines + demographics)
+# Step 8/9: Patient profile refresh (baselines + demographics)
 # =========================================================================
-log "Step 7/8: Refreshing patient profile..."
+log "Step 8/9: Refreshing patient profile..."
 cd "${PLATFORM_ROOT}"
 "${VENV_AI_PYTHON}" -c "
 import duckdb
@@ -274,12 +305,12 @@ finally:
     con.close()
 " >> "${LOG_FILE}" 2>&1 || log "  WARNING: Profile refresh failed (non-critical)"
 
-log "Step 7/8: Patient profile refresh complete"
+log "Step 8/9: Patient profile refresh complete"
 
 # =========================================================================
-# Step 8/8: Anomaly detection + notifications
+# Step 9/9: Anomaly detection + notifications
 # =========================================================================
-log "Step 8/8: Running anomaly detection..."
+log "Step 9/9: Running anomaly detection..."
 cd "${PLATFORM_ROOT}"
 "${VENV_AI_PYTHON}" -c "
 import duckdb
@@ -306,7 +337,7 @@ finally:
     con.close()
 " >> "${LOG_FILE}" 2>&1 || log "  WARNING: Anomaly detection failed (non-critical)"
 
-log "Step 8/8: Anomaly detection complete"
+log "Step 9/9: Anomaly detection complete"
 
 # =========================================================================
 # Done
