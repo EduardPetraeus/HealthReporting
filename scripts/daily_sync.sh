@@ -173,6 +173,21 @@ done
 log "Step 3/8: Silver merge complete (${MERGE_COUNT} succeeded, ${MERGE_ERRORS} failed)"
 
 # =========================================================================
+# Step 3b: Food context sync (discover new foods + regenerate YAML)
+# =========================================================================
+log "Step 3b: Syncing food context..."
+cd "${PLATFORM_ROOT}"
+FOOD_OUTPUT=$("${VENV_PYTHON}" -m health_platform.scripts.sync_food_context 2>&1) || true
+log "${FOOD_OUTPUT}"
+if echo "${FOOD_OUTPUT}" | grep -q "(0 new discovered)"; then
+    log "Step 3b: Food context up to date"
+else
+    NEW_FOODS=$(echo "${FOOD_OUTPUT}" | sed -n 's/.*(\([0-9]*\) new discovered).*/\1/p')
+    log "Step 3b: ${NEW_FOODS} new foods discovered — check Numbers file"
+    notify "New Foods Discovered" "${NEW_FOODS} new food items need descriptions in food_context.numbers" "default"
+fi
+
+# =========================================================================
 # Step 4/8: Data quality checks (warnings only — never stops pipeline)
 # =========================================================================
 log "Step 4/8: Running data quality checks..."
