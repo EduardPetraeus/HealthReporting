@@ -1,13 +1,17 @@
-"""Sync food context between CSV (human-editable) and YAML (AI-readable).
+"""Sync food context between Numbers (human-editable) and YAML (AI-readable).
 
 Two operations:
-1. Discover new foods from silver.daily_meal not yet in CSV → append rows
-2. Generate food_context.yml from CSV (CSV is source of truth)
+1. Discover new foods from silver.daily_meal not yet in Numbers → append rows to CSV
+2. Generate food_context.yml from Numbers file (Numbers is source of truth)
+
+The human edits food_context.numbers in Apple Numbers.
+This script reads it, discovers new foods, exports a CSV for Numbers to re-import,
+and generates the YAML that the MCP tool reads.
 
 Usage:
     python sync_food_context.py              # both: discover + generate
-    python sync_food_context.py --discover   # only add new foods to CSV
-    python sync_food_context.py --generate   # only regenerate YAML from CSV
+    python sync_food_context.py --discover   # only add new foods (writes CSV for import)
+    python sync_food_context.py --generate   # only regenerate YAML from Numbers
 """
 
 from __future__ import annotations
@@ -18,10 +22,14 @@ from pathlib import Path
 
 import duckdb
 import yaml
+from numbers_parser import Document
 
+NUMBERS_PATH = Path("/Users/Shared/data_lake/manual/food_context.numbers")
 CSV_PATH = Path("/Users/Shared/data_lake/manual/food_context.csv")
 YAML_PATH = Path(__file__).resolve().parents[1] / "contracts" / "food_context.yml"
 MIN_OCCURRENCES = 5  # only add foods logged at least this many times
+
+COLUMNS = ["lifesum_name", "times_logged", "description", "ingredients", "notes"]
 
 
 def get_db_path() -> str:
@@ -32,8 +40,34 @@ def get_db_path() -> str:
     return f"/Users/Shared/data_lake/database/health_dw_{env}.db"
 
 
+def read_numbers() -> list[dict]:
+    """Read food context from Numbers file."""
+    if not NUMBERS_PATH.exists():
+        print(f"WARNING: {NUMBERS_PATH} not found, falling back to CSV")
+        return read_csv()
+
+    doc = Document(str(NUMBERS_PATH))
+    table = doc.sheets[0].tables[0]
+
+    rows = []
+    for row_idx in range(1, table.num_rows):
+        name = table.cell(row_idx, 0).value or ""
+        if not name:
+            continue
+        rows.append(
+            {
+                "lifesum_name": str(name),
+                "times_logged": str(table.cell(row_idx, 1).value or "0"),
+                "description": str(table.cell(row_idx, 2).value or ""),
+                "ingredients": str(table.cell(row_idx, 3).value or ""),
+                "notes": str(table.cell(row_idx, 4).value or ""),
+            }
+        )
+    return rows
+
+
 def read_csv() -> list[dict]:
-    """Read existing CSV rows."""
+    """Read existing CSV rows (fallback if Numbers not available)."""
     if not CSV_PATH.exists():
         return []
     with open(CSV_PATH, newline="", encoding="utf-8") as f:
@@ -41,16 +75,15 @@ def read_csv() -> list[dict]:
 
 
 def write_csv(rows: list[dict]) -> None:
-    """Write rows back to CSV."""
-    fieldnames = ["lifesum_name", "times_logged", "description", "ingredients", "notes"]
+    """Write rows to CSV (for re-import into Numbers if new foods discovered)."""
     with open(CSV_PATH, "w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=fieldnames)
+        w = csv.DictWriter(f, fieldnames=COLUMNS)
         w.writeheader()
         w.writerows(rows)
 
 
-def discover_new_foods(rows: list[dict]) -> list[dict]:
-    """Query silver.daily_meal for foods not yet in CSV."""
+def discover_new_foods(rows: list[dict]) -> tuple[list[dict], int]:
+    """Query silver.daily_meal for foods not yet in the spreadsheet."""
     existing_names = {r["lifesum_name"] for r in rows}
 
     con = duckdb.connect(get_db_path(), read_only=True)
@@ -96,17 +129,21 @@ def discover_new_foods(rows: list[dict]) -> list[dict]:
 
 
 def generate_yaml(rows: list[dict]) -> None:
-    """Generate food_context.yml from CSV rows."""
+    """Generate food_context.yml from rows."""
     foods = []
     for row in rows:
+        desc = row.get("description", "") or ""
+        if desc == "None":
+            desc = ""
+
         entry = {
             "lifesum_name": row["lifesum_name"],
-            "description": row.get("description", "") or "",
+            "description": desc,
         }
 
-        # Parse ingredients (semicolon-separated in CSV)
+        # Parse ingredients (semicolon-separated)
         raw_ingredients = row.get("ingredients", "") or ""
-        if raw_ingredients.strip():
+        if raw_ingredients.strip() and raw_ingredients != "None":
             entry["ingredients"] = [
                 i.strip() for i in raw_ingredients.split(";") if i.strip()
             ]
@@ -114,7 +151,7 @@ def generate_yaml(rows: list[dict]) -> None:
             entry["ingredients"] = []
 
         notes = row.get("notes", "") or ""
-        if notes.strip():
+        if notes.strip() and notes != "None":
             entry["notes"] = notes.strip()
 
         foods.append(entry)
@@ -124,12 +161,11 @@ def generate_yaml(rows: list[dict]) -> None:
         "foods": foods,
     }
 
-    # Write with a header comment
     header = (
         "# Food Context — maps Lifesum food item names to descriptions\n"
         "# AI loads this to understand what non-obvious foods actually contain\n"
-        "# AUTO-GENERATED from /Users/Shared/data_lake/manual/food_context.csv\n"
-        "# Do not edit manually — edit the CSV instead, then run sync_food_context.py\n"
+        "# AUTO-GENERATED from /Users/Shared/data_lake/manual/food_context.numbers\n"
+        "# Do not edit manually — edit the Numbers file, then run sync_food_context.py\n"
     )
 
     with open(YAML_PATH, "w", encoding="utf-8") as f:
@@ -140,7 +176,7 @@ def generate_yaml(rows: list[dict]) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Sync food context CSV ↔ YAML")
+    parser = argparse.ArgumentParser(description="Sync food context Numbers → YAML")
     parser.add_argument(
         "--discover", action="store_true", help="Only discover new foods"
     )
@@ -151,18 +187,28 @@ def main() -> None:
     do_discover = args.discover or (not args.discover and not args.generate)
     do_generate = args.generate or (not args.discover and not args.generate)
 
-    rows = read_csv()
+    rows = read_numbers()
+    print(f"Read {len(rows)} foods from Numbers")
 
     if do_discover:
         rows, new_count = discover_new_foods(rows)
         write_csv(rows)
         print(f"CSV: {len(rows)} total foods ({new_count} new discovered)")
+        if new_count > 0:
+            print(
+                f"  → Open {CSV_PATH} in Numbers and copy new rows to your .numbers file"
+            )
 
     if do_generate:
-        if not rows:
-            rows = read_csv()
         generate_yaml(rows)
-        print(f"YAML: generated {YAML_PATH.name} with {len(rows)} entries")
+        filled = sum(
+            1
+            for r in rows
+            if (r.get("description") or "").strip() and r["description"] != "None"
+        )
+        print(
+            f"YAML: generated {YAML_PATH.name} with {len(rows)} entries ({filled} with descriptions)"
+        )
 
 
 if __name__ == "__main__":

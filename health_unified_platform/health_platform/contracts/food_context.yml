@@ -1,35 +1,39 @@
 # Food Context — maps Lifesum food item names to descriptions
 # AI loads this to understand what non-obvious foods actually contain
-# AUTO-GENERATED from /Users/Shared/data_lake/manual/food_context.csv
-# Do not edit manually — edit the CSV instead, then run sync_food_context.py
+# AUTO-GENERATED from /Users/Shared/data_lake/manual/food_context.numbers
+# Do not edit manually — edit the Numbers file, then run sync_food_context.py
 version: '1.0'
 foods:
 - lifesum_name: Banan
   description: ''
   ingredients: []
 - lifesum_name: Frost grøntsager lille portion
-  description: ''
-  ingredients: []
+  description: 'En blanding af edamame bønner, ærter og blåbær '
+  ingredients:
+  - 100 gram blåbær, 150 gram edamame bønner og 150 gram ærter i en portion
+  notes: Denne spiser jeg normalt når jeg er hjemme til et måltid
 - lifesum_name: Mørk Chokolade 70 %
   description: ''
   ingredients: []
 - lifesum_name: 'Nødder: mandel og hasselnødder'
-  description: ''
-  ingredients: []
+  description: Mandler og hasselnødder
+  ingredients:
+  - Cirka 7,5 gram mandler og 7,5 gram hasselnødder
+  notes: Min primære nødde indtag
 - lifesum_name: Spidskål
-  description: ''
+  description: Rå spidskål uden tilberedning
   ingredients: []
 - lifesum_name: Rosiner
   description: ''
   ingredients: []
 - lifesum_name: Smørbar, øko
-  description: ''
+  description: Vegansk smør med en god fordeling af mættet og umættet fedt
   ingredients: []
 - lifesum_name: Grovvalset havregryn
   description: ''
   ingredients: []
 - lifesum_name: Arla øko harmonie
-  description: ''
+  description: Mælk
   ingredients: []
 - lifesum_name: Gulerødder, rå
   description: ''
@@ -38,7 +42,7 @@ foods:
   description: ''
   ingredients: []
 - lifesum_name: Knäcke Brungräddat
-  description: ''
+  description: Knækbrød
   ingredients: []
 - lifesum_name: Gulerod Rugbrød
   description: ''
@@ -59,7 +63,7 @@ foods:
   description: ''
   ingredients: []
 - lifesum_name: LAKSE frikadeller
-  description: ''
+  description: Fiskefrikadeller fra Skagens
   ingredients: []
 - lifesum_name: gulerod,rå*
   description: ''
@@ -83,10 +87,11 @@ foods:
   description: ''
   ingredients: []
 - lifesum_name: Rugbrød med makrel
-  description: ''
-  ingredients: []
+  description: Rugbrød med makrel i tomat
+  ingredients:
+  - 2 skiver rugbrød og en dåse makrel i tomat
 - lifesum_name: Calories
-  description: ''
+  description: En tom titel for dage hvor jeg ikke gad at bruge tid på at registrere
   ingredients: []
 - lifesum_name: Hasselnødder
   description: ''
@@ -125,19 +130,21 @@ foods:
   description: ''
   ingredients: []
 - lifesum_name: Rugbrød, fiskefrikadeller med pesto
-  description: ''
-  ingredients: []
+  description: Et måltid jeg spiser hjemme
+  ingredients:
+  - 2 skiver rugbrød, 30 gram pesto og en Skagens fiskefrikadelle
 - lifesum_name: Rugbrød med hummus
-  description: ''
-  ingredients: []
+  description: Et måltid jeg spiser hjemme
+  ingredients:
+  - 2 skiver rugbrød og 40 gram hummus
 - lifesum_name: Saeby Makrelstykker i tomat
   description: ''
   ingredients: []
 - lifesum_name: Kogt broccoli CG
-  description: ''
+  description: Kogt broccoli
   ingredients: []
 - lifesum_name: Æble/Pærer
-  description: ''
+  description: Mærkeligt navn for enten et æble eller en pære
   ingredients: []
 - lifesum_name: Pære
   description: ''
@@ -146,7 +153,7 @@ foods:
   description: ''
   ingredients: []
 - lifesum_name: Havregryn med blåbær
-  description: ''
+  description: Havegryn med blåbær og mælk
   ingredients: []
 - lifesum_name: Tomat
   description: ''
@@ -158,14 +165,15 @@ foods:
   description: ''
   ingredients: []
 - lifesum_name: Frokost grøntsager med bønner
-  description: ''
+  description: Blandede frostgrøntsager
   ingredients: []
 - lifesum_name: lunch
-  description: ''
+  description: En tom titel for dage hvor jeg ikke gad at bruge tid på at registrere
   ingredients: []
 - lifesum_name: Kødsauce
-  description: ''
-  ingredients: []
+  description: Hjemmelavet kødsauce
+  ingredients:
+  - Hakket oksekød 7-8% fedt, hakket tomat, salt, peber, og krydderier
 - lifesum_name: Oliven
   description: ''
   ingredients: []
@@ -173,16 +181,16 @@ foods:
   description: ''
   ingredients: []
 - lifesum_name: Djungelvrål Malaco
-  description: ''
+  description: Slik
   ingredients: []
 - lifesum_name: Click mix
-  description: ''
+  description: Slik
   ingredients: []
 - lifesum_name: sønderjysk rugbrød
   description: ''
   ingredients: []
 - lifesum_name: Økologisk Fanø rugbrød med Svedje rug
-  description: ''
+  description: Rugbrød
   ingredients: []
 - lifesum_name: Gulerødder
   description: ''
@@ -212,8 +220,9 @@ foods:
   description: ''
   ingredients: []
 - lifesum_name: Rugbrød, fiskefrikadeller og hummus
-  description: ''
-  ingredients: []
+  description: Et måltid jeg spiser hjemme
+  ingredients:
+  - 2 skiver rugbrød, 40 gram hummus og en Skagens fiskefrikadelle
 - lifesum_name: Paranødder
   description: ''
   ingredients: []
@@ -221,10 +230,10 @@ foods:
   description: ''
   ingredients: []
 - lifesum_name: Knäcke wasa sport
-  description: ''
+  description: Knækbrød
   ingredients: []
 - lifesum_name: Magnum
-  description: ''
+  description: Is
   ingredients: []
 - lifesum_name: Rød peberfrugt
   description: ''
@@ -254,8 +263,9 @@ foods:
   description: ''
   ingredients: []
 - lifesum_name: Protein shake
-  description: ''
-  ingredients: []
+  description: Protein shake
+  ingredients:
+  - 50 gram protein whey 80% pulver og 500 gram mini mælk
 - lifesum_name: Pesto
   description: ''
   ingredients: []
@@ -323,13 +333,14 @@ foods:
   description: ''
   ingredients: []
 - lifesum_name: Kratiem Prik Thai
-  description: ''
+  description: Thai mad default måltid fra før jeg kunne tage billeder og få måltid
+    i Lifesum app
   ingredients: []
 - lifesum_name: Omelet
   description: ''
   ingredients: []
 - lifesum_name: Naan
-  description: ''
+  description: Indisk naan brød
   ingredients: []
 - lifesum_name: Mørk chokolade 85%
   description: ''
@@ -368,13 +379,14 @@ foods:
   description: ''
   ingredients: []
 - lifesum_name: Smoothie - generel med mange ingredienser
-  description: ''
-  ingredients: []
+  description: Smoothie med forskellige ingrediens
+  ingredients:
+  - Mandelmælk med lav fedt indhold, nogle frugter og grøntsager
 - lifesum_name: Grana padano
-  description: ''
+  description: Ost
   ingredients: []
 - lifesum_name: vegansk postej
-  description: ''
+  description: En vegansk postej
   ingredients: []
 - lifesum_name: Mørk chokolade med appelsin, 74%
   description: ''
@@ -383,7 +395,7 @@ foods:
   description: ''
   ingredients: []
 - lifesum_name: Manchego
-  description: ''
+  description: Ost
   ingredients: []
 - lifesum_name: Vingummi
   description: ''
@@ -425,13 +437,13 @@ foods:
   description: ''
   ingredients: []
 - lifesum_name: Frokost grøntsager 1
-  description: ''
+  description: Gammel frost grøntsags blanding. Bruger ikke mere
   ingredients: []
 - lifesum_name: Risen
   description: ''
   ingredients: []
 - lifesum_name: Smoothie
-  description: ''
+  description: Så
   ingredients: []
 - lifesum_name: Kogt grov pasta
   description: ''
