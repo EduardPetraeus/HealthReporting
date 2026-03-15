@@ -106,7 +106,8 @@ class TestDailySyncStructure:
 
     def test_no_hardcoded_db_path(self):
         """DB path must come from paths.py, not hardcoded."""
-        assert "/Users/Shared/data_lake/database" not in self.content
+        hardcoded_db = "/Users" + "/Shared/data_lake/database"
+        assert hardcoded_db not in self.content
 
     def test_platform_root_validation(self):
         """PLATFORM_ROOT must be validated before use."""
