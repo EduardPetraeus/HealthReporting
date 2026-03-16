@@ -107,14 +107,29 @@ def main() -> None:
                 continue
 
         # personal_info has no date range — always refresh
-        logger.info("personal_info: fetching...")
-        personal_info = client.fetch_personal_info()
-        write_records(
-            [personal_info], "personal_info", date_field="", source_env=SOURCE_ENV
-        )
-        audit.log_table(
-            "oura.personal_info", "WRITE_PARQUET", rows_after=1, status="success"
-        )
+        try:
+            logger.info("personal_info: fetching...")
+            personal_info = client.fetch_personal_info()
+            write_records(
+                [personal_info],
+                "personal_info",
+                date_field="",
+                source_env=SOURCE_ENV,
+            )
+            audit.log_table(
+                "oura.personal_info",
+                "WRITE_PARQUET",
+                rows_after=1,
+                status="success",
+            )
+        except Exception as exc:
+            logger.warning(f"personal_info: API error, skipping — {exc}")
+            audit.log_table(
+                "oura.personal_info",
+                "WRITE_PARQUET",
+                rows_after=0,
+                status="skipped",
+            )
 
     logger.info("Oura pipeline complete")
 

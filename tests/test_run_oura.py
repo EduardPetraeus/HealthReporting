@@ -151,3 +151,22 @@ class TestPerEndpointErrorHandling:
         ]
         assert len(skipped_calls) == 1
         assert "vo2_max" in skipped_calls[0].args[0]
+
+    def test_personal_info_failure_does_not_crash(self, mock_pipeline):
+        """A failure in personal_info should not crash the pipeline."""
+        client = mock_pipeline["client"]
+        client.fetch_personal_info.side_effect = Exception("connection refused")
+
+        main()
+
+        # All dated endpoints still ran successfully
+        client.fetch_daily_sleep.assert_called_once()
+
+        audit = mock_pipeline["audit"]
+        skipped_calls = [
+            call
+            for call in audit.log_table.call_args_list
+            if call.kwargs.get("status") == "skipped"
+            or (len(call.args) > 3 and call.args[3] == "skipped")
+        ]
+        assert any("personal_info" in c.args[0] for c in skipped_calls)
