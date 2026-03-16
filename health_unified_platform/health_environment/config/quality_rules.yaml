@@ -273,6 +273,11 @@ tables:
     unique: [business_key_hash]
     row_count: { min_rows: 1 }
 
+  oura_session:
+    not_null: [business_key_hash, sk_date, id]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
   oura_sleep:
     not_null: [business_key_hash, sk_date]
     unique: [business_key_hash]

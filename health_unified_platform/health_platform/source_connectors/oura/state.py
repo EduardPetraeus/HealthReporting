@@ -15,6 +15,7 @@ logger = get_logger("oura.state")
 
 STATE_FILE = Path.home() / ".config" / "health_reporting" / "oura_state.json"
 DEFAULT_LOOKBACK_DAYS = 90
+STALE_THRESHOLD_DAYS = 365
 
 
 def load_state() -> dict:
@@ -40,7 +41,16 @@ def get_start_date(endpoint: str, state: dict) -> date:
     """
     last_fetched = state.get(endpoint)
     if last_fetched:
-        return date.fromisoformat(last_fetched) + timedelta(days=1)
+        last_date = date.fromisoformat(last_fetched)
+        days_since = (date.today() - last_date).days
+        if days_since > STALE_THRESHOLD_DAYS:
+            logger.warning(
+                "Stale state for endpoint '%s': last fetched %s (%d days ago)",
+                endpoint,
+                last_fetched,
+                days_since,
+            )
+        return last_date + timedelta(days=1)
     return date.today() - timedelta(days=DEFAULT_LOOKBACK_DAYS)
 
 
