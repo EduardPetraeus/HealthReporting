@@ -83,7 +83,18 @@ def main() -> None:
                 continue
 
             logger.info(f"{endpoint_name}: fetching {start_date} -> {END_DATE}...")
-            records = getattr(client, method_name)(start_date, END_DATE)
+            try:
+                records = getattr(client, method_name)(start_date, END_DATE)
+            except Exception as exc:
+                logger.warning(f"{endpoint_name}: API error, skipping — {exc}")
+                audit.log_table(
+                    f"oura.{endpoint_name}",
+                    "WRITE_PARQUET",
+                    rows_after=0,
+                    status="skipped",
+                )
+                continue
+
             logger.info(f"  Fetched {len(records):,} records.")
             records = _normalize_records(endpoint_name, records)
             write_records(records, endpoint_name, date_field, source_env=SOURCE_ENV)
@@ -98,13 +109,29 @@ def main() -> None:
 
         # personal_info has no date range — always refresh
         logger.info("personal_info: fetching...")
-        personal_info = client.fetch_personal_info()
-        write_records(
-            [personal_info], "personal_info", date_field="", source_env=SOURCE_ENV
-        )
-        audit.log_table(
-            "oura.personal_info", "WRITE_PARQUET", rows_after=1, status="success"
-        )
+        try:
+            personal_info = client.fetch_personal_info()
+        except Exception as exc:
+            logger.warning(f"personal_info: API error, skipping — {exc}")
+            audit.log_table(
+                "oura.personal_info",
+                "WRITE_PARQUET",
+                rows_after=0,
+                status="skipped",
+            )
+        else:
+            write_records(
+                [personal_info],
+                "personal_info",
+                date_field="",
+                source_env=SOURCE_ENV,
+            )
+            audit.log_table(
+                "oura.personal_info",
+                "WRITE_PARQUET",
+                rows_after=1,
+                status="success",
+            )
 
     logger.info("Oura pipeline complete")
 
