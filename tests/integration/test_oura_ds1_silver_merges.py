@@ -2,7 +2,7 @@
 
 Validates silver tables created from Oura bronze sources (API + CSV):
 - oura_vo2_max, oura_tag, oura_rest_mode_period, oura_ring_configuration,
-  oura_sleep, cardiovascular_age, daily_resilience, enhanced_tag, daily_stress
+  oura_session, oura_sleep, cardiovascular_age, daily_resilience, enhanced_tag, daily_stress
 
 For each merge:
 - Table exists after merge and has rows
@@ -156,6 +156,50 @@ MERGE_CONFIGS = {
                 color VARCHAR, design VARCHAR,
                 firmware_version VARCHAR, hardware_type VARCHAR,
                 set_up_at TIMESTAMP, size INTEGER,
+                business_key_hash VARCHAR, row_hash VARCHAR,
+                load_datetime TIMESTAMP, update_datetime TIMESTAMP
+            )
+        """,
+    },
+    "oura_session": {
+        "sql": "merge_oura_session.sql",
+        "bronze": "bronze.stg_oura_session",
+        "silver": "silver.oura_session",
+        "bronze_ddl": """
+            CREATE TABLE bronze.stg_oura_session (
+                year INTEGER, month VARCHAR, day VARCHAR,
+                id VARCHAR,
+                start_datetime VARCHAR, end_datetime VARCHAR,
+                type VARCHAR, mood VARCHAR,
+                heart_rate VARCHAR, heart_rate_variability VARCHAR,
+                motion_count VARCHAR,
+                _ingested_at_1 TIMESTAMP
+            )
+        """,
+        "bronze_insert": """
+            INSERT INTO bronze.stg_oura_session VALUES
+                (2026, '3', '1', 'ses-001',
+                 '2026-03-01T08:00:00+00:00', '2026-03-01T08:15:00+00:00',
+                 'breathing', 'good',
+                 '{"interval": 5, "items": [60, 62]}',
+                 '{"interval": 5, "items": [45, 48]}',
+                 '{"interval": 5, "items": [0, 1]}',
+                 '2026-03-01 10:00:00'),
+                (2026, '3', '2', 'ses-002',
+                 '2026-03-02T19:00:00+00:00', '2026-03-02T19:20:00+00:00',
+                 'meditation', 'relaxed',
+                 '{"interval": 5, "items": [55, 58]}',
+                 '{"interval": 5, "items": [50, 52]}',
+                 '{"interval": 5, "items": [0, 0]}',
+                 '2026-03-02 10:00:00')
+        """,
+        "silver_ddl": """
+            CREATE TABLE silver.oura_session (
+                sk_date INTEGER, day DATE, id VARCHAR,
+                start_datetime TIMESTAMP, end_datetime TIMESTAMP,
+                type VARCHAR, mood VARCHAR,
+                heart_rate VARCHAR, heart_rate_variability VARCHAR,
+                motion_count VARCHAR,
                 business_key_hash VARCHAR, row_hash VARCHAR,
                 load_datetime TIMESTAMP, update_datetime TIMESTAMP
             )
