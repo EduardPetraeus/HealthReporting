@@ -82,19 +82,29 @@ def main() -> None:
                 logger.info(f"{endpoint_name}: already up to date, skipping.")
                 continue
 
-            logger.info(f"{endpoint_name}: fetching {start_date} -> {END_DATE}...")
-            records = getattr(client, method_name)(start_date, END_DATE)
-            logger.info(f"  Fetched {len(records):,} records.")
-            records = _normalize_records(endpoint_name, records)
-            write_records(records, endpoint_name, date_field, source_env=SOURCE_ENV)
-            update_state(endpoint_name, END_DATE, state)
+            try:
+                logger.info(f"{endpoint_name}: fetching {start_date} -> {END_DATE}...")
+                records = getattr(client, method_name)(start_date, END_DATE)
+                logger.info(f"  Fetched {len(records):,} records.")
+                records = _normalize_records(endpoint_name, records)
+                write_records(records, endpoint_name, date_field, source_env=SOURCE_ENV)
+                update_state(endpoint_name, END_DATE, state)
 
-            audit.log_table(
-                f"oura.{endpoint_name}",
-                "WRITE_PARQUET",
-                rows_after=len(records),
-                status="success",
-            )
+                audit.log_table(
+                    f"oura.{endpoint_name}",
+                    "WRITE_PARQUET",
+                    rows_after=len(records),
+                    status="success",
+                )
+            except Exception as exc:
+                logger.warning(f"{endpoint_name}: API error, skipping — {exc}")
+                audit.log_table(
+                    f"oura.{endpoint_name}",
+                    "WRITE_PARQUET",
+                    rows_after=0,
+                    status="skipped",
+                )
+                continue
 
         # personal_info has no date range — always refresh
         logger.info("personal_info: fetching...")
