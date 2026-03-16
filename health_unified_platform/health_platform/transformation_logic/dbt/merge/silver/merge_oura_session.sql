@@ -8,13 +8,16 @@
 CREATE OR REPLACE TABLE silver.oura_session__staging AS
 WITH deduped AS (
     SELECT *,
-        make_date(year::INTEGER, month::VARCHAR::INTEGER, day::VARCHAR::INTEGER) AS full_date,
+        COALESCE(
+            TRY_CAST(make_date(year::INTEGER, TRY_CAST(month AS INTEGER), TRY_CAST(day AS INTEGER)) AS DATE),
+            TRY_CAST(day AS DATE)
+        ) AS full_date,
         ROW_NUMBER() OVER (PARTITION BY id ORDER BY _ingested_at_1 DESC) AS rn
     FROM bronze.stg_oura_session
-    WHERE day IS NOT NULL
+    WHERE day IS NOT NULL AND id IS NOT NULL
 )
 SELECT
-    (year::INTEGER * 10000 + month::VARCHAR::INTEGER * 100 + day::VARCHAR::INTEGER)::INTEGER AS sk_date,
+    (year::INTEGER * 10000 + TRY_CAST(month AS INTEGER) * 100 + TRY_CAST(day AS INTEGER))::INTEGER AS sk_date,
     full_date                              AS day,
     id,
     TRY_CAST(start_datetime AS TIMESTAMP)  AS start_datetime,

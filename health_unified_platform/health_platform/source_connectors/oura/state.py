@@ -41,7 +41,8 @@ def get_start_date(endpoint: str, state: dict) -> date:
     """
     last_fetched = state.get(endpoint)
     if last_fetched:
-        days_since = (date.today() - date.fromisoformat(last_fetched)).days
+        last_date = date.fromisoformat(last_fetched)
+        days_since = (date.today() - last_date).days
         if days_since > STALE_THRESHOLD_DAYS:
             logger.warning(
                 "Stale state for endpoint '%s': last fetched %s (%d days ago)",
@@ -49,7 +50,7 @@ def get_start_date(endpoint: str, state: dict) -> date:
                 last_fetched,
                 days_since,
             )
-        return date.fromisoformat(last_fetched) + timedelta(days=1)
+        return last_date + timedelta(days=1)
     return date.today() - timedelta(days=DEFAULT_LOOKBACK_DAYS)
 
 
