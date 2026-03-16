@@ -50,7 +50,13 @@ def _write_partition(
     ]
     if empty_struct_cols:
         table = table.drop(empty_struct_cols)
-        logger.warning("Dropped empty struct columns: %s", empty_struct_cols)
+        logger.warning(
+            "Dropped %d empty struct column(s) from %s/%s: %s",
+            len(empty_struct_cols),
+            endpoint,
+            partition_date,
+            empty_struct_cols,
+        )
     pq.write_table(table, path / "data.parquet", compression="snappy")
     logger.info("Written %s rows -> %s/data.parquet", f"{len(df):,}", path)
 

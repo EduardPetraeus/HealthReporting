@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import os
 from datetime import date, timedelta
-from pathlib import Path
 
 from auth import get_access_token
 from client import WithingsClient
@@ -24,6 +23,7 @@ from health_platform.source_connectors.withings.state import (
 )
 from health_platform.utils.audit_logger import AuditLogger
 from health_platform.utils.logging_config import get_logger
+from health_platform.utils.paths import get_data_lake_root
 
 logger = get_logger("run_withings")
 
@@ -33,30 +33,7 @@ END_DATE = date.today()
 FULL_LOAD_START = date(2020, 1, 1)
 DELTA_DAYS = 30
 
-# Resolve Withings-specific data lake root
-_CONFIG_PATH = (
-    Path(__file__).resolve().parents[2]
-    / "health_environment"
-    / "config"
-    / "environment_config.yaml"
-)
-
-
-def _resolve_withings_root() -> Path:
-    """Resolve data lake root for Withings (withings/raw instead of oura/raw)."""
-    try:
-        import yaml
-
-        with open(_CONFIG_PATH) as f:
-            cfg = yaml.safe_load(f)
-        return Path(cfg["paths"]["data_lake_root"]) / "withings" / "raw"
-    except Exception:
-        from health_platform.utils.paths import get_data_lake_root
-
-        return get_data_lake_root() / "withings" / "raw"
-
-
-WITHINGS_DATA_ROOT = _resolve_withings_root()
+WITHINGS_DATA_ROOT = get_data_lake_root() / "withings" / "raw"
 
 # (endpoint_name, client_method, date_field_in_response)
 ENDPOINTS: list[tuple[str, str, str]] = [
