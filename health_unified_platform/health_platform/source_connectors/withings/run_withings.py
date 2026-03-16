@@ -51,7 +51,9 @@ def _resolve_withings_root() -> Path:
             cfg = yaml.safe_load(f)
         return Path(cfg["paths"]["data_lake_root"]) / "withings" / "raw"
     except Exception:
-        return Path.home() / "health_data_lake" / "withings" / "raw"
+        from health_platform.utils.paths import get_data_lake_root
+
+        return get_data_lake_root() / "withings" / "raw"
 
 
 WITHINGS_DATA_ROOT = _resolve_withings_root()
@@ -81,7 +83,8 @@ def main() -> None:
         for endpoint_name, method_name, date_field in ENDPOINTS:
             if endpoint_name in state:
                 start_date = max(
-                    date.fromisoformat(state[endpoint_name]) - timedelta(days=DELTA_DAYS),
+                    date.fromisoformat(state[endpoint_name])
+                    - timedelta(days=DELTA_DAYS),
                     FULL_LOAD_START,
                 )
             else:
