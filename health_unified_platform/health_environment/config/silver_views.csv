@@ -1,29 +1,54 @@
-table_name,type,logical_key,current_sources,source_priority
-daily_sleep,single_source,id|day,oura,oura
-daily_activity,single_source,id|day,oura,oura
-daily_readiness,single_source,day,oura,oura
-heart_rate,multi_source,timestamp,oura|apple_health,oura>apple_health
-oura_heart_rate,single_source,timestamp,oura,oura
-blood_pressure,single_source,datetime,withings,withings
-blood_oxygen,single_source,day,oura,oura
-weight,multi_source,datetime,withings|apple_health|lifesum,withings>apple_health>lifesum
-daily_meal,single_source,date|meal_type|title,lifesum,lifesum
-daily_annotations,single_source,manual_key,manual,manual
-step_count,single_source,startDate,apple_health,apple_health
-daily_stress,single_source,day,oura,oura
-workout,single_source,id,oura,oura
-daily_spo2,single_source,day,oura,oura
-body_temperature,multi_source,timestamp,apple_health|withings|oura,withings>apple_health>oura
-resting_heart_rate,single_source,date,apple_health,apple_health
-water_intake,single_source,timestamp,apple_health,apple_health
-daily_walking_gait,single_source,date,apple_health,apple_health
-mindful_session,single_source,timestamp,apple_health,apple_health
-respiratory_rate,single_source,timestamp,apple_health,apple_health
-toothbrushing,single_source,timestamp,apple_health,apple_health
-supplement_log,single_source,supplement_name|start_date,manual_yaml,manual_yaml
-lab_results,multi_source,test_id|marker_name,manual_yaml|pdf_parsed|sundhed_dk,sundhed_dk>pdf_parsed>manual_yaml
-daily_energy_by_source,single_source,date|energy_type,apple_health,apple_health
-hrv,multi_source,timestamp,apple_health|oura,oura>apple_health
-vo2_max,multi_source,date,apple_health|oura,oura>apple_health
-daily_resilience,single_source,day,oura,oura
-dim_date,single_source,date_key,generated,generated
+table_name,category,type,table_business_key,view_logical_key,current_sources,source_priority,grain,status,notes
+heart_rate,Vitals,multi_source,timestamp|source_name,timestamp,oura|apple_health,oura>apple_health,Per reading,active,1.3M rows
+resting_heart_rate,Vitals,single_source,date,date,apple_health,apple_health,Daily,active,Apple restingheartrate
+hrv,Vitals,multi_source,timestamp|source_name,timestamp,apple_health|oura,oura>apple_health,Per reading,active,heartratevariabilitysdnn
+blood_pressure_v2,Vitals,multi_source,datetime|source_name,datetime,withings|apple_health,withings>apple_health,Per reading,active,Apple+Withings unified. PR #109
+blood_oxygen,Vitals,single_source,day,day,oura,oura,Per reading,active_empty,daily_spo2 has daily data
+body_temperature,Vitals,multi_source,timestamp|source_name,timestamp,apple_health|withings|oura,withings>apple_health>oura,Per reading,active,167 rows
+respiratory_rate,Vitals,single_source,timestamp,timestamp,apple_health,apple_health,Per reading,active,
+vo2_max,Vitals,multi_source,date|source_name,date,apple_health|oura,oura>apple_health,Per reading,active,Apple 454 rows
+hr_recovery,Vitals,single_source,datetime,datetime,apple_health,apple_health,Per workout end,active,heartraterecoveryoneminute (98 rows)
+cardiovascular_age,Vitals,single_source,date,date,oura_csv,oura_csv,Daily,active,dailycardiovascularage (691 rows)
+pulse_wave_velocity,Vitals,single_source,date,date,withings,withings,Per reading,active,Arteriel stivhed. PR #109
+ecg_session,Vitals,single_source,date,date,withings,withings,Per session,active,Metadata only. PR #109
+daily_spo2,Vitals,single_source,day,day,oura,oura,Daily,active,91 rows
+blood_pressure,Vitals,single_source,datetime,datetime,withings,withings,Per reading,legacy,Withings-only — see blood_pressure_v2
+oura_heart_rate,Vitals,single_source,timestamp,timestamp,oura,oura,Per reading,legacy,Oura-specific subset of heart_rate
+body_measurement,Body,multi_source,datetime|source_name,datetime,withings|apple_health,withings>apple_health,Per measurement,active,Unified: weight fat bone muscle hydration BMI
+weight,Body,multi_source,datetime|source_name,datetime,withings|apple_health|lifesum,withings>apple_health>lifesum,Per measurement,legacy,Subset of body_measurement
+body_fat,Body,single_source,date,date,lifesum,lifesum,Per measurement,active,Lifesum bodyfat
+body_measures,Body,single_source,date|measure_type,date|measure_type,lifesum,lifesum,Per measurement,planned,Waist chest etc. (bodymeasures.csv)
+daily_sleep,Sleep,single_source,id|day,id|day,oura,oura,Daily,active,Oura scores + 7 contributors
+sleep_session,Sleep,multi_source,bedtime_start|source_name,bedtime_start,oura|withings,oura>withings,Per night session,active,Unified: duration stages HR HRV efficiency snoring
+sleep_recommendation,Sleep,single_source,day,day,oura_csv,oura_csv,Daily,active,Optimal bedtime (1171 rows)
+daily_activity,Activity,single_source,id|day,id|day,oura,oura,Daily,active,Oura scores + contributors
+daily_energy_by_source,Activity,single_source,date|energy_type,date|energy_type,apple_health,apple_health,Daily per source,active,Active + basal energy aggregated
+step_count,Activity,single_source,startDate,startDate,apple_health,apple_health,Per event,active,591K rows
+exercise_time,Activity,single_source,startDate,startDate,apple_health,apple_health,Per session,active,appleexercisetime (148K rows)
+stand_time,Activity,single_source,startDate,startDate,apple_health,apple_health,Per hour/event,active,applestandtime (155K rows)
+distance,Activity,single_source,startDate,startDate,apple_health,apple_health,Per session,active,walkingrunning + cycling (679K rows)
+flights_climbed,Activity,single_source,startDate,startDate,apple_health,apple_health,Per event,active,flightsclimbed (24K rows)
+running_speed,Activity,single_source,startDate,startDate,apple_health,apple_health,Per sample,active,runningspeed (83K rows)
+physical_effort,Activity,single_source,startDate,startDate,apple_health,apple_health,Per sample,active,physicaleffort (198K rows)
+workout,Workout,multi_source,id|source_name,id,oura|strava|lifesum|withings,strava>oura>withings>lifesum,Per session,active,Unified workout table
+strava_activity,Workout,single_source,activity_id,activity_id,strava,strava,Per session,active_empty,Merge into unified workout table
+daily_readiness,Recovery,single_source,day,day,oura,oura,Daily,active,Scores + 9 contributors
+daily_stress,Recovery,single_source,day,day,oura,oura,Daily,active,Daily stress summary
+daytime_stress,Recovery,single_source,date,date,oura_csv,oura_csv,Daily,active,Daily avg/max stress from 79K rows
+daily_resilience,Recovery,single_source,day,day,oura_csv,oura_csv,Daily,active,Score + contributors (795 rows)
+skin_temperature,Recovery,single_source,date,date,oura_csv,oura_csv,Daily,active,avg min max trend from 1.7M raw readings
+daily_walking_gait,Mobility,single_source,date,date,apple_health,apple_health,Daily,active,Speed step_length asymmetry double_support
+six_min_walk,Mobility,single_source,datetime,datetime,apple_health,apple_health,Per test,active,Clinical fitness test (171 rows)
+mindful_session,Mindfulness,single_source,timestamp,timestamp,apple_health,apple_health,Per session,active,35 rows
+toothbrushing,Hygiene,single_source,timestamp,timestamp,apple_health,apple_health,Per event,active,243 rows
+hand_washing,Hygiene,single_source,startDate,startDate,apple_health,apple_health,Per event,active,handwashingevent (6.7K rows)
+water_intake,Nutrition,single_source,timestamp,timestamp,apple_health,apple_health,Per event,active,610 rows
+daily_meal,Nutrition,single_source,date|meal_type|title,date|meal_type|title,lifesum,lifesum,Per food item,active,12.8K rows. ONLY nutrition source
+audio_exposure,Environment,single_source,date,date,apple_health,apple_health,Daily,active,Environmental + headphone dB summary
+daily_weather,Environment,single_source,date,date,open_meteo,open_meteo,Daily,active,20+ weather metrics
+lab_results,Clinical,multi_source,test_id|marker_name|source_name,test_id|marker_name,manual_yaml|pdf_parsed|sundhed_dk,sundhed_dk>pdf_parsed>manual_yaml,Per marker,active,97 rows
+supplement_log,Clinical,single_source,supplement_name|start_date,supplement_name|start_date,manual_yaml,manual_yaml,Per supplement,active,8 rows
+daily_annotations,Clinical,single_source,manual_key,manual_key,manual,manual,Per annotation,active,Manual annotations
+personal_info,Meta,single_source,id,id,oura,oura,SCD1 (1 row),active,User profile
+enhanced_tag,Meta,single_source,id,id,oura_csv,oura_csv,Per tag,active,enhancedtag (39 rows). PR #109
+dim_date,Meta,single_source,date_key,date_key,generated,generated,Daily,active,Generated date dimension
