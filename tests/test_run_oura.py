@@ -10,8 +10,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 from requests.exceptions import HTTPError
 
-# run_oura.py uses bare imports (from auth import ...) that only resolve
-# when the oura connector directory is on sys.path.
+# run_oura.py uses bare imports (from auth import ...) requiring the oura
+# connector directory on sys.path. This cannot be solved by editable install
+# alone because auth/client/state/writer are sibling files, not packages.
 _OURA_DIR = str(
     Path(__file__).resolve().parents[1]
     / "health_unified_platform"
