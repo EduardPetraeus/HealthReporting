@@ -41,6 +41,22 @@ def _write_partition(
     path = _partition_path(endpoint, partition_date, root=root)
     path.mkdir(parents=True, exist_ok=True)
     table = pa.Table.from_pandas(df, preserve_index=False)
+    # Drop columns with empty struct types (no child fields) — PyArrow
+    # cannot write these to Parquet (e.g. Withings heart_list 'bloodpressure').
+    empty_struct_cols = [
+        field.name
+        for field in table.schema
+        if pa.types.is_struct(field.type) and field.type.num_fields == 0
+    ]
+    if empty_struct_cols:
+        table = table.drop(empty_struct_cols)
+        logger.warning(
+            "Dropped %d empty struct column(s) from %s/%s: %s",
+            len(empty_struct_cols),
+            endpoint,
+            partition_date,
+            empty_struct_cols,
+        )
     pq.write_table(table, path / "data.parquet", compression="snappy")
     logger.info("Written %s rows -> %s/data.parquet", f"{len(df):,}", path)
 
