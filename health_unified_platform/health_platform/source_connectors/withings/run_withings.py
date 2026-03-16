@@ -41,7 +41,6 @@ ENDPOINTS: list[tuple[str, str, str]] = [
     ("blood_pressure", "fetch_blood_pressure", "datetime"),
     ("temperature", "fetch_temperature", "datetime"),
     ("activity", "fetch_activity", "date"),
-    ("intraday_activity", "fetch_intraday_activity", "datetime"),
     ("workouts", "fetch_workouts", "date"),
     ("sleep_summary", "fetch_sleep_summary", "date"),
     ("sleep_raw", "fetch_sleep_raw", "startdate"),
