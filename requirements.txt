@@ -14,7 +14,7 @@ dbt-duckdb==1.10.0
 dbt-extractor==0.6.0
 dbt-protos==1.0.431
 dbt-semantic-interfaces==0.9.0
-deepdiff==8.6.1
+deepdiff==8.6.2
 duckdb==1.4.4
 idna==3.11
 importlib_metadata==8.7.1
