@@ -9,6 +9,7 @@ Returns JSON-serializable dicts/lists for JavaScript consumption.
 from __future__ import annotations
 
 import json
+import subprocess
 import threading
 import uuid
 from datetime import date, datetime, timedelta
@@ -122,23 +123,15 @@ class DesktopAPI:
     # ------------------------------------------------------------------
 
     def chat(self, question: str) -> str:
-        """Send a health question to Claude and stream the response.
+        """Send a health question to Claude CLI and return the response.
 
-        Gathers health data context, builds multi-turn message history,
-        streams from Claude API, and pushes chunks to the frontend via
-        evaluate_js(). Persists both user question and AI response.
+        Gathers health data context, builds a prompt with system instructions,
+        calls the `claude` CLI via subprocess, and pushes the response to the
+        frontend via evaluate_js(). Persists both user question and AI response.
         """
-        import anthropic
         from health_platform.api.chat_engine import SYSTEM_PROMPT
-        from health_platform.utils.keychain import get_secret
 
         self._save_chat_message("user", question)
-
-        api_key = get_secret("ANTHROPIC_API_KEY")
-        if not api_key:
-            error_msg = "ANTHROPIC_API_KEY not found in keychain."
-            self._save_chat_message("assistant", error_msg)
-            return error_msg
 
         try:
             tools = self._get_tools()
@@ -153,29 +146,39 @@ class DesktopAPI:
             f"<user_question>\n{safe_question}\n</user_question>"
         )
 
-        messages = self._build_message_history(user_message)
+        prompt = f"{SYSTEM_PROMPT}\n\n{user_message}"
 
-        client = anthropic.Anthropic(api_key=api_key)
         full_response = ""
-
         try:
-            with client.messages.stream(
-                model="claude-sonnet-4-20250514",
-                max_tokens=1024,
-                system=SYSTEM_PROMPT,
-                messages=messages,
-            ) as stream:
-                for text in stream.text_stream:
-                    full_response += text
-                    if self._window:
-                        escaped = json.dumps(text)
-                        self._window.evaluate_js(f"appendStreamChunk({escaped})")
+            process = subprocess.Popen(
+                ["claude", "-p", "--model", "sonnet"],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            stdout, stderr = process.communicate(input=prompt)
+
+            if process.returncode != 0:
+                full_response = (
+                    f"Error: Claude CLI failed — {stderr.strip() or 'unknown error'}"
+                )
+                logger.error("Claude CLI error (rc=%d): %s", process.returncode, stderr)
+            else:
+                full_response = stdout
+        except FileNotFoundError:
+            full_response = (
+                "Error: claude CLI not found. "
+                "Install it with: npm install -g @anthropic-ai/claude-code"
+            )
+            logger.error("Claude CLI not found on PATH")
         except Exception as exc:
-            logger.error("Claude API error: %s", exc)
-            if not full_response:
-                full_response = f"Error: {exc}"
+            full_response = f"Error: {exc}"
+            logger.error("Claude CLI unexpected error: %s", exc)
 
         if self._window:
+            escaped = json.dumps(full_response)
+            self._window.evaluate_js(f"appendStreamChunk({escaped})")
             self._window.evaluate_js("finishStream()")
 
         self._save_chat_message("assistant", full_response)
