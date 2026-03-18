@@ -16,6 +16,9 @@ FASTAPI_PLIST = LAUNCHAGENTS_DIR / "com.health.fastapi.plist"
 DAILY_SYNC_PLIST = LAUNCHAGENTS_DIR / "com.health.daily-sync.plist"
 
 
+@pytest.mark.skipif(
+    not FASTAPI_PLIST.exists(), reason="launchd plists only exist on deploy target"
+)
 class TestFastapiPlistEnvVars:
     """Verify com.health.fastapi.plist has all required env vars."""
 
