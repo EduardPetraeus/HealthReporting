@@ -652,3 +652,39 @@ sources:
     source_type: "parquet"
     target_schema: "bronze"
     target_table: "stg_sundhed_dk_appointments"
+
+  # daily-stoic (local DuckDB app — habits, focus, reflections, quotes)
+  - name: "daily_stoic_focus"
+    # Daily focus text — one entry per day
+    relative_path: "daily_stoic/focus/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_daily_stoic_focus"
+
+  - name: "daily_stoic_habit_definitions"
+    # Habit catalog — names, types, goals, active status
+    relative_path: "daily_stoic/habit_definitions/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_daily_stoic_habit_definitions"
+
+  - name: "daily_stoic_habits"
+    # Daily habit completions — date + habit_id + done flag
+    relative_path: "daily_stoic/habits/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_daily_stoic_habits"
+
+  - name: "daily_stoic_quotes"
+    # Pre-seeded stoic quotes — one per day (2026-2030)
+    relative_path: "daily_stoic/quotes/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_daily_stoic_quotes"
+
+  - name: "daily_stoic_reflections"
+    # Daily reflections — free text, one per day
+    relative_path: "daily_stoic/reflections/*.parquet"
+    source_type: "parquet"
+    target_schema: "bronze"
+    target_table: "stg_daily_stoic_reflections"

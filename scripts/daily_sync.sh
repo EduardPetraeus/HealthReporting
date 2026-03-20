@@ -2,7 +2,7 @@
 # daily_sync.sh — Automated health data refresh (every 3 hours)
 #
 # Pipeline:
-#   Step 1: Fetch data from all API sources (Oura, Withings, Strava, Weather)
+#   Step 1: Fetch data from all API sources (Oura, Withings, Strava, Weather, daily-stoic)
 #   Step 2: Bronze ingestion (parquet → DuckDB bronze tables)
 #   Step 3: Silver merge (ALL sources — bronze → silver deduplicated tables)
 #   Step 4: Data quality checks (YAML-driven, warnings only)
@@ -11,6 +11,7 @@
 #   Step 7: Correlation computation (metric relationships)
 #   Step 8: Patient profile refresh (baselines + demographics)
 #   Step 9: Anomaly detection + notifications (ntfy.sh)
+#   Step 10: Backup daily-stoic DuckDB to iCloud
 #
 # Usage:
 #   ./scripts/daily_sync.sh              (manual run)
@@ -115,9 +116,9 @@ MERGE_ERRORS=0
 log "=== Daily Health Sync Starting [env: ${HEALTH_ENV}] ==="
 
 # =========================================================================
-# Step 1/9: Fetch data from all API sources
+# Step 1/10: Fetch data from all API sources
 # =========================================================================
-log "Step 1/9: Fetching data from API sources..."
+log "Step 1/10: Fetching data from API sources..."
 
 # 1a: Oura (required — primary wearable)
 log "  1a: Oura..."
@@ -163,20 +164,31 @@ else
     log "  1d: WARNING — Weather fetch failed (continuing)"
 fi
 
-log "Step 1/9: Fetch complete (${FETCH_OK} ok, ${FETCH_WARN} warnings)"
+# 1e: daily-stoic (local DuckDB — habits, focus, reflections)
+log "  1e: daily-stoic..."
+cd "${PLATFORM_ROOT}/health_platform/source_connectors/daily_stoic"
+if "${VENV_PYTHON}" run_daily_stoic.py >> "${LOG_FILE}" 2>&1; then
+    FETCH_OK=$((FETCH_OK + 1))
+    log "  1e: daily-stoic extract complete"
+else
+    FETCH_WARN=$((FETCH_WARN + 1))
+    log "  1e: WARNING — daily-stoic extract failed (continuing)"
+fi
+
+log "Step 1/10: Fetch complete (${FETCH_OK} ok, ${FETCH_WARN} warnings)"
 
 # =========================================================================
-# Step 2/9: Bronze ingestion (read parquet → DuckDB bronze tables)
+# Step 2/10: Bronze ingestion (read parquet → DuckDB bronze tables)
 # =========================================================================
-log "Step 2/9: Running bronze ingestion..."
+log "Step 2/10: Running bronze ingestion..."
 cd "${PLATFORM_ROOT}"
 "${VENV_PYTHON}" -m health_platform.transformation_logic.ingestion_engine >> "${LOG_FILE}" 2>&1
-log "Step 2/9: Bronze ingestion complete"
+log "Step 2/10: Bronze ingestion complete"
 
 # =========================================================================
-# Step 3/9: Silver merge (ALL sources — bronze → silver deduplicated)
+# Step 3/10: Silver merge (ALL sources — bronze → silver deduplicated)
 # =========================================================================
-log "Step 3/9: Running silver merges..."
+log "Step 3/10: Running silver merges..."
 MERGE_DIR="${PLATFORM_ROOT}/health_platform/transformation_logic/dbt/merge"
 cd "${MERGE_DIR}"
 
@@ -192,7 +204,7 @@ for sql_file in silver/merge_*.sql; do
     fi
 done
 
-log "Step 3/9: Silver merge complete (${MERGE_COUNT} succeeded, ${MERGE_ERRORS} failed)"
+log "Step 3/10: Silver merge complete (${MERGE_COUNT} succeeded, ${MERGE_ERRORS} failed)"
 
 # =========================================================================
 # Step 3b: Food context sync (discover new foods + regenerate YAML)
@@ -210,9 +222,9 @@ else
 fi
 
 # =========================================================================
-# Step 4/9: Data quality checks (warnings only — never stops pipeline)
+# Step 4/10: Data quality checks (warnings only — never stops pipeline)
 # =========================================================================
-log "Step 4/9: Running data quality checks..."
+log "Step 4/10: Running data quality checks..."
 DQ_EXIT=0
 DQ_OUTPUT=$("${VENV_PYTHON}" "${REPO_ROOT}/scripts/run_quality_checks.py" 2>&1) || DQ_EXIT=$?
 log "${DQ_OUTPUT}"
@@ -220,22 +232,22 @@ if [[ ${DQ_EXIT} -ne 0 ]]; then
     log "  WARNING: Data quality issues detected"
     notify "Health DQ Warning" "${DQ_OUTPUT}" "high"
 fi
-log "Step 4/9: Data quality checks complete"
+log "Step 4/10: Data quality checks complete"
 
 # =========================================================================
-# Step 5/9: Gold views (local BI layer)
+# Step 5/10: Gold views (local BI layer)
 # =========================================================================
-log "Step 5/9: Refreshing gold views..."
+log "Step 5/10: Refreshing gold views..."
 cd "${PLATFORM_ROOT}"
 "${VENV_PYTHON}" "${REPO_ROOT}/scripts/create_gold_views.py" >> "${LOG_FILE}" 2>&1 || \
     log "  WARNING: Gold view refresh failed (non-critical)"
-log "Step 5/9: Gold views complete"
+log "Step 5/10: Gold views complete"
 
 # =========================================================================
-# Step 6/9: Generate daily summary + embedding for yesterday
+# Step 6/10: Generate daily summary + embedding for yesterday
 # =========================================================================
 # (yesterday because today's data may still be incomplete)
-log "Step 6/9: Generating daily summary..."
+log "Step 6/10: Generating daily summary..."
 cd "${PLATFORM_ROOT}"
 "${VENV_AI_PYTHON}" -c "
 import duckdb
@@ -257,7 +269,7 @@ finally:
     con.close()
 " >> "${LOG_FILE}" 2>&1 || log "  WARNING: Summary generation failed (non-critical)"
 
-log "Step 6/9: Daily summary complete"
+log "Step 6/10: Daily summary complete"
 
 # --- Generate embedding for the new summary ---
 log "  Generating embedding for yesterday's summary..."
@@ -278,9 +290,9 @@ finally:
 " >> "${LOG_FILE}" 2>&1 || log "  WARNING: Embedding generation failed (non-critical)"
 
 # =========================================================================
-# Step 7/9: Correlation computation
+# Step 7/10: Correlation computation
 # =========================================================================
-log "Step 7/9: Computing metric correlations..."
+log "Step 7/10: Computing metric correlations..."
 cd "${PLATFORM_ROOT}"
 "${VENV_AI_PYTHON}" -c "
 import duckdb
@@ -297,12 +309,12 @@ finally:
     con.close()
 " >> "${LOG_FILE}" 2>&1 || log "  WARNING: Correlation computation failed (non-critical)"
 
-log "Step 7/9: Correlations complete"
+log "Step 7/10: Correlations complete"
 
 # =========================================================================
-# Step 8/9: Patient profile refresh (baselines + demographics)
+# Step 8/10: Patient profile refresh (baselines + demographics)
 # =========================================================================
-log "Step 8/9: Refreshing patient profile..."
+log "Step 8/10: Refreshing patient profile..."
 cd "${PLATFORM_ROOT}"
 "${VENV_AI_PYTHON}" -c "
 import duckdb
@@ -320,12 +332,12 @@ finally:
     con.close()
 " >> "${LOG_FILE}" 2>&1 || log "  WARNING: Profile refresh failed (non-critical)"
 
-log "Step 8/9: Patient profile refresh complete"
+log "Step 8/10: Patient profile refresh complete"
 
 # =========================================================================
-# Step 9/9: Anomaly detection + notifications
+# Step 9/10: Anomaly detection + notifications
 # =========================================================================
-log "Step 9/9: Running anomaly detection..."
+log "Step 9/10: Running anomaly detection..."
 cd "${PLATFORM_ROOT}"
 "${VENV_AI_PYTHON}" -c "
 import duckdb
@@ -352,7 +364,21 @@ finally:
     con.close()
 " >> "${LOG_FILE}" 2>&1 || log "  WARNING: Anomaly detection failed (non-critical)"
 
-log "Step 9/9: Anomaly detection complete"
+log "Step 9/10: Anomaly detection complete"
+
+# =========================================================================
+# Step 10: Backup daily-stoic DuckDB to iCloud
+# =========================================================================
+HEALTH_BACKUP_DIR="${HEALTH_BACKUP_DIR:-${HOME}/Library/Mobile Documents/com~apple~CloudDocs/sundhedsdata}"
+# Resolve to absolute path via data lake root
+STOIC_SOURCE=$("${VENV_PYTHON}" -c "from health_platform.utils.paths import get_data_lake_root; print(get_data_lake_root() / 'daily-stoic' / 'daily-stoic.duckdb')")
+if [[ -f "${STOIC_SOURCE}" ]]; then
+    mkdir -p "${HEALTH_BACKUP_DIR}"
+    cp "${STOIC_SOURCE}" "${HEALTH_BACKUP_DIR}/daily-stoic.duckdb"
+    log "Step 10: daily-stoic backup complete -> ${HEALTH_BACKUP_DIR}"
+else
+    log "Step 10: WARNING — daily-stoic.duckdb not found at ${STOIC_SOURCE}"
+fi
 
 # =========================================================================
 # Done
