@@ -407,3 +407,35 @@ tables:
     not_null: [business_key_hash, referral_date, receiving_clinic]
     unique: [business_key_hash]
     row_count: { min_rows: 1 }
+
+  # =====================================================================
+  # Daily Stoic
+  # =====================================================================
+
+  daily_stoic_focus:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    freshness: { column: day, max_hours: 49 }
+    row_count: { min_rows: 1 }
+
+  daily_stoic_habits:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    freshness: { column: day, max_hours: 49 }
+    row_count: { min_rows: 1 }
+
+  daily_stoic_reflections:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    freshness: { column: day, max_hours: 49 }
+    row_count: { min_rows: 1 }
+
+  stoic_quotes:
+    not_null: [business_key_hash, sk_date]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
+
+  habit_definitions:
+    not_null: [business_key_hash]
+    unique: [business_key_hash]
+    row_count: { min_rows: 1 }
