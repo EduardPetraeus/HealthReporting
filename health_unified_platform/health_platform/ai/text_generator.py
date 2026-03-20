@@ -188,12 +188,29 @@ def generate_daily_summary(con, day: date) -> str:
         if kg is not None:
             parts.append(f"Weight {kg:.1f} kg.")
 
+    # --- Focus (daily-stoic) ---
+    focus = _query_row(con, "silver.daily_stoic_focus", "day", day)
+    if focus:
+        text = focus.get("focus_text") or ""
+        if text:
+            parts.append(f"Focus: {text[:100]}.")
+
+    # --- Reflections (daily-stoic) ---
+    reflection = _query_row(con, "silver.daily_stoic_reflections", "day", day)
+    if reflection:
+        text = reflection.get("reflection_text") or ""
+        if text:
+            parts.append(f"Reflection: {text[:100]}.")
+
+    # --- Habits (daily-stoic) ---
+    habits = _query_habits_summary(con, day)
+    if habits:
+        parts.append(habits)
+
     # --- Resting HR (from heart_rate table, daily min) ---
     rhr = _query_resting_hr(con, day)
     if rhr is not None:
         parts.append(f"Resting HR {int(rhr)} bpm.")
-    else:
-        parts.append("Resting HR stable.")
 
     # --- Anomalies ---
     anomalies = _detect_anomalies(con, day)
@@ -238,6 +255,26 @@ def _query_resting_hr(con, day: date) -> float | None:
         row = con.execute(sql, [day]).fetchone()
         return row[0] if row and row[0] is not None else None
     except Exception:
+        return None
+
+
+def _query_habits_summary(con, day: date) -> str | None:
+    """Return a habits summary string for a given day, or None."""
+    sql = """
+        SELECT
+            COUNT(*) AS total,
+            SUM(CASE WHEN done THEN 1 ELSE 0 END) AS completed
+        FROM silver.daily_stoic_habits
+        WHERE day = ?
+    """
+    try:
+        row = con.execute(sql, [day]).fetchone()
+        if row is None or row[0] == 0:
+            return None
+        total, completed = row
+        return f"Habits: {completed}/{total} completed."
+    except Exception as exc:
+        logger.debug("Could not query habits for %s: %s", day, exc)
         return None
 
 

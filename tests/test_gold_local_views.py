@@ -456,9 +456,9 @@ class TestGoldSqlFilesExist:
             assert (GOLD_SQL_DIR / filename).exists(), f"Missing: {filename}"
 
     def test_file_count(self):
-        """Exactly 20 SQL files in gold_local."""
+        """Exactly 22 SQL files in gold_local."""
         sql_files = list(GOLD_SQL_DIR.glob("*.sql"))
-        assert len(sql_files) == 20
+        assert len(sql_files) == 22
 
 
 # ---------------------------------------------------------------------------

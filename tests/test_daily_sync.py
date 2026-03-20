@@ -44,16 +44,17 @@ class TestDailySyncStructure:
         )
         assert result.returncode == 0, f"Syntax error: {result.stderr}"
 
-    def test_has_nine_steps(self):
-        assert "Step 1/9" in self.content
-        assert "Step 2/9" in self.content
-        assert "Step 3/9" in self.content
-        assert "Step 4/9" in self.content
-        assert "Step 5/9" in self.content
-        assert "Step 6/9" in self.content
-        assert "Step 7/9" in self.content
-        assert "Step 8/9" in self.content
-        assert "Step 9/9" in self.content
+    def test_has_ten_steps(self):
+        assert "Step 1/10" in self.content
+        assert "Step 2/10" in self.content
+        assert "Step 3/10" in self.content
+        assert "Step 4/10" in self.content
+        assert "Step 5/10" in self.content
+        assert "Step 6/10" in self.content
+        assert "Step 7/10" in self.content
+        assert "Step 8/10" in self.content
+        assert "Step 9/10" in self.content
+        assert "Step 10/10" in self.content
 
     def test_fetches_oura(self):
         assert "run_oura.py" in self.content
