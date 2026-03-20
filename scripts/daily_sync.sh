@@ -367,7 +367,7 @@ finally:
 log "Step 9/10: Anomaly detection complete"
 
 # =========================================================================
-# Step 10: Backup daily-stoic DuckDB to iCloud
+# Step 10/10: Backup daily-stoic DuckDB to iCloud
 # =========================================================================
 HEALTH_BACKUP_DIR="${HEALTH_BACKUP_DIR:-${HOME}/Library/Mobile Documents/com~apple~CloudDocs/sundhedsdata}"
 # Resolve to absolute path via data lake root
@@ -375,9 +375,9 @@ STOIC_SOURCE=$("${VENV_PYTHON}" -c "from health_platform.utils.paths import get_
 if [[ -f "${STOIC_SOURCE}" ]]; then
     mkdir -p "${HEALTH_BACKUP_DIR}"
     cp "${STOIC_SOURCE}" "${HEALTH_BACKUP_DIR}/daily-stoic.duckdb"
-    log "Step 10: daily-stoic backup complete -> ${HEALTH_BACKUP_DIR}"
+    log "Step 10/10: daily-stoic backup complete -> ${HEALTH_BACKUP_DIR}"
 else
-    log "Step 10: WARNING — daily-stoic.duckdb not found at ${STOIC_SOURCE}"
+    log "Step 10/10: WARNING — daily-stoic.duckdb not found at ${STOIC_SOURCE}"
 fi
 
 # =========================================================================
