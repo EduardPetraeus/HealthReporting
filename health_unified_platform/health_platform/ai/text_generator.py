@@ -193,14 +193,14 @@ def generate_daily_summary(con, day: date) -> str:
     if focus:
         text = focus.get("focus_text") or ""
         if text:
-            parts.append(f"Focus: {text[:100]}.")
+            parts.append(f"Focus: {text}.")
 
     # --- Reflections (daily-stoic) ---
     reflection = _query_row(con, "silver.daily_stoic_reflections", "day", day)
     if reflection:
         text = reflection.get("reflection_text") or ""
         if text:
-            parts.append(f"Reflection: {text[:100]}.")
+            parts.append(f"Reflection: {text}.")
 
     # --- Habits (daily-stoic) ---
     habits = _query_habits_summary(con, day)
