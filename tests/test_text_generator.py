@@ -296,22 +296,19 @@ class TestDailyStoicSectionsInSummary:
         assert "Memento mori" in summary
         con.close()
 
-    def test_focus_text_truncated_at_100_chars(self):
-        """Focus text longer than 100 characters is truncated in the summary."""
+    def test_focus_text_included_in_full(self):
+        """Focus text is included in full without truncation."""
         from datetime import date
 
         from health_platform.ai.text_generator import generate_daily_summary
 
         con = self._base_db()
-        # Use two distinct halves so truncation is unambiguous
         long_text = "X" * 100 + "Z" * 50
         con.execute(
             f"INSERT INTO silver.daily_stoic_focus VALUES ('2026-03-01', '{long_text}')"
         )
         summary = generate_daily_summary(con, date(2026, 3, 1))
-        # First 100 chars (all X) must be present; the Z suffix must be absent
-        assert "X" * 100 in summary
-        assert "Z" not in summary
+        assert long_text in summary
         con.close()
 
     def test_no_focus_row_omits_focus_section(self):
