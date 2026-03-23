@@ -57,7 +57,7 @@ def bronze_db():
             unit VARCHAR,
             start_date TIMESTAMP,
             end_date TIMESTAMP,
-            source_name VARCHAR,
+            source_system VARCHAR,
             device VARCHAR,
             load_datetime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             source_file VARCHAR
@@ -168,7 +168,7 @@ class TestNullRateCalculations:
                     * 100.0 / COUNT(*), 1
                 ) AS value_null_pct,
                 ROUND(
-                    SUM(CASE WHEN source_name IS NULL THEN 1 ELSE 0 END)
+                    SUM(CASE WHEN source_system IS NULL THEN 1 ELSE 0 END)
                     * 100.0 / COUNT(*), 1
                 ) AS source_null_pct
             FROM bronze.stg_apple_health_heart_rate

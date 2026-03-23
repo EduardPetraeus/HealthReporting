@@ -23,7 +23,7 @@ SELECT
     TRY_CAST(frequency AS INTEGER) AS frequency_hz,
     TRY_CAST(duration AS INTEGER) AS duration_s,
     wearposition,
-    'withings' AS source_name,
+    'withings' AS source_system,
     md5(
         coalesce(cast(date AS VARCHAR), '') || '||' || 'withings'
     ) AS business_key_hash,
@@ -51,18 +51,18 @@ WHEN MATCHED AND target.row_hash <> src.row_hash THEN
     frequency_hz      = src.frequency_hz,
     duration_s        = src.duration_s,
     wearposition      = src.wearposition,
-    source_name       = src.source_name,
+    source_system       = src.source_system,
     row_hash          = src.row_hash,
     update_datetime   = current_timestamp
 
 WHEN NOT MATCHED THEN
   INSERT (
     sk_date, timestamp, ecg_type, frequency_hz, duration_s, wearposition,
-    source_name, business_key_hash, row_hash, load_datetime, update_datetime
+    source_system, business_key_hash, row_hash, load_datetime, update_datetime
   )
   VALUES (
     src.sk_date, src.timestamp, src.ecg_type, src.frequency_hz, src.duration_s, src.wearposition,
-    src.source_name, src.business_key_hash, src.row_hash, current_timestamp, current_timestamp
+    src.source_system, src.business_key_hash, src.row_hash, current_timestamp, current_timestamp
   );
 
 -- Step 3: Drop staging table

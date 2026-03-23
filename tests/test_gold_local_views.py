@@ -190,7 +190,7 @@ def gold_db():
         """
         CREATE TABLE silver.resting_heart_rate (
             sk_date INTEGER, date DATE, resting_hr_bpm INTEGER,
-            source_name VARCHAR
+            source_system VARCHAR
         )
     """
     )
@@ -242,7 +242,7 @@ def gold_db():
         """
         CREATE TABLE silver.water_intake (
             sk_date INTEGER, timestamp TIMESTAMP,
-            water_ml DOUBLE, source_name VARCHAR
+            water_ml DOUBLE, source_system VARCHAR
         )
     """
     )
@@ -322,7 +322,7 @@ def gold_db():
         CREATE TABLE silver.heart_rate (
             sk_date INTEGER, sk_time VARCHAR,
             timestamp TIMESTAMP, bpm INTEGER,
-            source_name VARCHAR
+            source_system VARCHAR
         )
     """
     )
@@ -358,7 +358,7 @@ def gold_db():
     con.execute(
         """
         CREATE TABLE silver.step_count (
-            sk_date INTEGER, source_name VARCHAR, steps INTEGER
+            sk_date INTEGER, source_system VARCHAR, steps INTEGER
         )
     """
     )
@@ -829,7 +829,7 @@ class TestLegacyViews:
         row = gold_db.execute(
             "SELECT reading_count, avg_bpm "
             "FROM gold.daily_heart_rate_summary "
-            "WHERE day = '2026-03-01' AND source_name = 'all'"
+            "WHERE day = '2026-03-01' AND source_system = 'all'"
         ).fetchone()
         assert row[0] == 3  # 3 readings on day 1
         assert row[1] is not None

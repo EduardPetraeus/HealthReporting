@@ -17,7 +17,7 @@ select
     null::varchar    as tag_type_code,
     null::varchar    as custom_tag_name,
     null::varchar    as comment,
-    null::varchar    as source_name,
+    null::varchar    as source_system,
     null::varchar    as business_key_hash,
     null::varchar    as row_hash,
     null::timestamp  as load_datetime,

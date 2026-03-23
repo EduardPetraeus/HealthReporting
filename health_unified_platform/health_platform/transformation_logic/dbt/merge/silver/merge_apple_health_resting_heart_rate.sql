@@ -1,7 +1,7 @@
 -- merge_apple_health_resting_heart_rate.sql
 -- Per-source merge: Apple Health -> silver.resting_heart_rate
 -- Daily resting heart rate, one row per date
--- Shared table: source_name in BK for future Oura data (A6)
+-- Shared table: source_system in BK for future Oura data (A6)
 --
 -- Usage: python run_merge.py silver/merge_apple_health_resting_heart_rate.sql
 
@@ -22,7 +22,7 @@ SELECT
     (year(startDate) * 10000 + month(startDate) * 100 + day(startDate))::INTEGER AS sk_date,
     startDate::DATE AS date,
     value::DOUBLE AS resting_hr_bpm,
-    'apple_health' AS source_name,
+    'apple_health' AS source_system,
     md5(
         coalesce(cast(startDate::DATE AS VARCHAR), '') || '||' || 'apple_health'
     ) AS business_key_hash,
@@ -44,17 +44,17 @@ WHEN MATCHED AND target.row_hash <> src.row_hash THEN
     sk_date           = src.sk_date,
     date              = src.date,
     resting_hr_bpm    = src.resting_hr_bpm,
-    source_name       = src.source_name,
+    source_system       = src.source_system,
     row_hash          = src.row_hash,
     update_datetime   = current_timestamp
 
 WHEN NOT MATCHED THEN
   INSERT (
-    sk_date, date, resting_hr_bpm, source_name,
+    sk_date, date, resting_hr_bpm, source_system,
     business_key_hash, row_hash, load_datetime, update_datetime
   )
   VALUES (
-    src.sk_date, src.date, src.resting_hr_bpm, src.source_name,
+    src.sk_date, src.date, src.resting_hr_bpm, src.source_system,
     src.business_key_hash, src.row_hash, current_timestamp, current_timestamp
   );
 

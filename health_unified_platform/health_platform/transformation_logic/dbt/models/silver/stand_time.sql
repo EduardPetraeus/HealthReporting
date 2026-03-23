@@ -13,7 +13,7 @@ select
     null::date       as date,
     null::double     as stand_minutes,
     null::integer    as stand_hours,
-    null::varchar    as source_name,
+    null::varchar    as source_system,
     null::varchar    as business_key_hash,
     null::varchar    as row_hash,
     null::timestamp  as load_datetime,

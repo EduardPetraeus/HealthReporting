@@ -1,7 +1,7 @@
 -- merge_apple_health_vo2_max.sql
 -- Per-source merge: Apple Health -> silver.vo2_max
 -- VO2 Max cardio fitness estimate, daily grain
--- Shared table: source_name in BK for future Oura data (A6)
+-- Shared table: source_system in BK for future Oura data (A6)
 --
 -- Usage: python run_merge.py silver/merge_apple_health_vo2_max.sql
 
@@ -22,7 +22,7 @@ SELECT
     (year(startDate) * 10000 + month(startDate) * 100 + day(startDate))::INTEGER AS sk_date,
     startDate::DATE AS date,
     value::DOUBLE AS vo2_max_ml_kg_min,
-    'apple_health' AS source_name,
+    'apple_health' AS source_system,
     md5(
         coalesce(cast(startDate::DATE AS VARCHAR), '') || '||' || 'apple_health'
     ) AS business_key_hash,
@@ -44,17 +44,17 @@ WHEN MATCHED AND target.row_hash <> src.row_hash THEN
     sk_date              = src.sk_date,
     date                 = src.date,
     vo2_max_ml_kg_min    = src.vo2_max_ml_kg_min,
-    source_name          = src.source_name,
+    source_system          = src.source_system,
     row_hash             = src.row_hash,
     update_datetime      = current_timestamp
 
 WHEN NOT MATCHED THEN
   INSERT (
-    sk_date, date, vo2_max_ml_kg_min, source_name,
+    sk_date, date, vo2_max_ml_kg_min, source_system,
     business_key_hash, row_hash, load_datetime, update_datetime
   )
   VALUES (
-    src.sk_date, src.date, src.vo2_max_ml_kg_min, src.source_name,
+    src.sk_date, src.date, src.vo2_max_ml_kg_min, src.source_system,
     src.business_key_hash, src.row_hash, current_timestamp, current_timestamp
   );
 

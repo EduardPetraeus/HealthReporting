@@ -344,7 +344,7 @@ def seeded_db(memory_db):
         """
         CREATE TABLE silver.heart_rate (
             sk_date INTEGER, sk_time VARCHAR,
-            timestamp TIMESTAMP, bpm INTEGER, source_name VARCHAR,
+            timestamp TIMESTAMP, bpm INTEGER, source_system VARCHAR,
             business_key_hash VARCHAR, row_hash VARCHAR,
             load_datetime TIMESTAMP, update_datetime TIMESTAMP
         )
@@ -352,7 +352,7 @@ def seeded_db(memory_db):
     )
     con.execute(
         """
-        INSERT INTO silver.heart_rate (sk_date, timestamp, bpm, source_name)
+        INSERT INTO silver.heart_rate (sk_date, timestamp, bpm, source_system)
         VALUES
             (20260301, '2026-03-01 03:00:00', 52, 'Oura Ring'),
             (20260301, '2026-03-01 12:00:00', 78, 'Apple Watch'),

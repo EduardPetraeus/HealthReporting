@@ -11,7 +11,7 @@
 select
     null::integer    as sk_date,
     null::date       as date,
-    null::varchar    as source_name,
+    null::varchar    as source_system,
     null::double     as active_energy_kcal,
     null::double     as basal_energy_kcal,
     null::double     as total_energy_kcal,

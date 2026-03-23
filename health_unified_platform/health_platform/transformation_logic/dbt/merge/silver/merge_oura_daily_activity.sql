@@ -47,6 +47,7 @@ SELECT
     contributors.stay_active::INTEGER                 AS contributor_stay_active,
     contributors.training_frequency::INTEGER          AS contributor_training_frequency,
     contributors.training_volume::INTEGER             AS contributor_training_volume,
+    'oura'                                            AS source_system,
     md5(full_date::VARCHAR)                           AS business_key_hash,
     md5(
         coalesce(cast(score AS VARCHAR), '')                              || '||' ||
@@ -97,6 +98,7 @@ WHEN MATCHED AND target.row_hash <> src.row_hash THEN UPDATE SET
     contributor_stay_active        = src.contributor_stay_active,
     contributor_training_frequency = src.contributor_training_frequency,
     contributor_training_volume    = src.contributor_training_volume,
+    source_system                  = src.source_system,
     row_hash                       = src.row_hash,
     update_datetime                = current_timestamp
 
@@ -111,7 +113,7 @@ WHEN NOT MATCHED THEN INSERT (
     contributor_meet_daily_targets, contributor_move_every_hour,
     contributor_recovery_time, contributor_stay_active,
     contributor_training_frequency, contributor_training_volume,
-    business_key_hash, row_hash, load_datetime, update_datetime
+    source_system, business_key_hash, row_hash, load_datetime, update_datetime
 ) VALUES (
     src.sk_date, src.day, src.activity_score, src.timestamp, src.steps, src.total_calories, src.active_calories,
     src.target_calories, src.average_met_minutes, src.equivalent_walking_distance,
@@ -123,7 +125,7 @@ WHEN NOT MATCHED THEN INSERT (
     src.contributor_meet_daily_targets, src.contributor_move_every_hour,
     src.contributor_recovery_time, src.contributor_stay_active,
     src.contributor_training_frequency, src.contributor_training_volume,
-    src.business_key_hash, src.row_hash, current_timestamp, current_timestamp
+    src.source_system, src.business_key_hash, src.row_hash, current_timestamp, current_timestamp
 );
 
 DROP TABLE IF EXISTS silver.daily_activity__staging;
