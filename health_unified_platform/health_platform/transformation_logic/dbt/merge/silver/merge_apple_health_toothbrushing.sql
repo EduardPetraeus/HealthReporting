@@ -22,7 +22,7 @@ SELECT
     startDate::TIMESTAMP AS timestamp,
     strptime(endDate, '%Y-%m-%d %H:%M:%S %z')::TIMESTAMP AS end_timestamp,
     duration_seconds,
-    sourceName AS source_name,
+    sourceName AS source_system,
     md5(
         coalesce(cast(startDate AS VARCHAR), '') || '||' || coalesce(sourceName, '')
     ) AS business_key_hash,
@@ -48,7 +48,7 @@ WHEN MATCHED AND target.row_hash <> src.row_hash THEN
     timestamp         = src.timestamp,
     end_timestamp     = src.end_timestamp,
     duration_seconds  = src.duration_seconds,
-    source_name       = src.source_name,
+    source_system       = src.source_system,
     business_key_hash = src.business_key_hash,
     row_hash          = src.row_hash,
     update_datetime   = current_timestamp
@@ -60,7 +60,7 @@ WHEN NOT MATCHED THEN
     timestamp,
     end_timestamp,
     duration_seconds,
-    source_name,
+    source_system,
     business_key_hash,
     row_hash,
     load_datetime,
@@ -72,7 +72,7 @@ WHEN NOT MATCHED THEN
     src.timestamp,
     src.end_timestamp,
     src.duration_seconds,
-    src.source_name,
+    src.source_system,
     src.business_key_hash,
     src.row_hash,
     current_timestamp,

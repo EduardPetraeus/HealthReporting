@@ -46,7 +46,7 @@ SELECT
     avg_db,
     max_db,
     sample_count,
-    'apple_health' AS source_name,
+    'apple_health' AS source_system,
     md5(
         coalesce(cast(date AS VARCHAR), '') || '||' ||
         exposure_type
@@ -74,17 +74,17 @@ WHEN MATCHED AND target.row_hash <> src.row_hash THEN
     avg_db            = src.avg_db,
     max_db            = src.max_db,
     sample_count      = src.sample_count,
-    source_name       = src.source_name,
+    source_system       = src.source_system,
     row_hash          = src.row_hash,
     update_datetime   = current_timestamp
 
 WHEN NOT MATCHED THEN
   INSERT (
-    sk_date, date, exposure_type, avg_db, max_db, sample_count, source_name,
+    sk_date, date, exposure_type, avg_db, max_db, sample_count, source_system,
     business_key_hash, row_hash, load_datetime, update_datetime
   )
   VALUES (
-    src.sk_date, src.date, src.exposure_type, src.avg_db, src.max_db, src.sample_count, src.source_name,
+    src.sk_date, src.date, src.exposure_type, src.avg_db, src.max_db, src.sample_count, src.source_system,
     src.business_key_hash, src.row_hash, current_timestamp, current_timestamp
   );
 

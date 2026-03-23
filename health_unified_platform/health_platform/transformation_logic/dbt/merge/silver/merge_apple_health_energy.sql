@@ -1,6 +1,6 @@
 -- merge_apple_health_energy.sql
 -- Per-source merge: Apple Health -> silver.daily_energy_by_source
--- One row per date + source_name. Keeps sources separate to prevent double-counting.
+-- One row per date + source_system. Keeps sources separate to prevent double-counting.
 --
 -- Sources:
 --   bronze.stg_apple_health_active_energy_burned
@@ -13,7 +13,7 @@ CREATE OR REPLACE TABLE silver.daily_energy_by_source__staging AS
 WITH active_daily AS (
     SELECT
         startDate::DATE            AS date,
-        sourceName                 AS source_name,
+        sourceName                 AS source_system,
         SUM(value::DOUBLE)         AS active_energy_kcal,
         COUNT(*)                   AS active_sessions
     FROM bronze.stg_apple_health_active_energy_burned
@@ -24,7 +24,7 @@ WITH active_daily AS (
 basal_daily AS (
     SELECT
         startDate::DATE            AS date,
-        sourceName                 AS source_name,
+        sourceName                 AS source_system,
         SUM(value::DOUBLE)         AS basal_energy_kcal
     FROM bronze.stg_apple_health_basal_energy_burned
     WHERE startDate IS NOT NULL
@@ -34,13 +34,13 @@ basal_daily AS (
 combined AS (
     SELECT
         coalesce(a.date, b.date)               AS date,
-        coalesce(a.source_name, b.source_name) AS source_name,
+        coalesce(a.source_system, b.source_system) AS source_system,
         a.active_energy_kcal,
         a.active_sessions,
         b.basal_energy_kcal
     FROM active_daily a
     FULL OUTER JOIN basal_daily b
-        ON a.date = b.date AND a.source_name = b.source_name
+        ON a.date = b.date AND a.source_system = b.source_system
 )
 SELECT
     -- Surrogate date key
@@ -48,7 +48,7 @@ SELECT
 
     -- Business columns
     date,
-    source_name,
+    source_system,
     ROUND(active_energy_kcal, 3)                                  AS active_energy_kcal,
     ROUND(basal_energy_kcal, 3)                                   AS basal_energy_kcal,
     ROUND(coalesce(active_energy_kcal, 0)
@@ -58,7 +58,7 @@ SELECT
     -- Business key: one row per date + source
     md5(
         coalesce(cast(date AS VARCHAR), '') || '||' ||
-        coalesce(source_name, '')
+        coalesce(source_system, '')
     )                                                             AS business_key_hash,
 
     -- Row hash: change detection
@@ -81,7 +81,7 @@ WHEN MATCHED AND target.row_hash <> src.row_hash THEN
   UPDATE SET
     sk_date              = src.sk_date,
     date                 = src.date,
-    source_name          = src.source_name,
+    source_system          = src.source_system,
     active_energy_kcal   = src.active_energy_kcal,
     basal_energy_kcal    = src.basal_energy_kcal,
     total_energy_kcal    = src.total_energy_kcal,
@@ -91,13 +91,13 @@ WHEN MATCHED AND target.row_hash <> src.row_hash THEN
 
 WHEN NOT MATCHED THEN
   INSERT (
-    sk_date, date, source_name,
+    sk_date, date, source_system,
     active_energy_kcal, basal_energy_kcal, total_energy_kcal,
     active_sessions, business_key_hash, row_hash,
     load_datetime, update_datetime
   )
   VALUES (
-    src.sk_date, src.date, src.source_name,
+    src.sk_date, src.date, src.source_system,
     src.active_energy_kcal, src.basal_energy_kcal, src.total_energy_kcal,
     src.active_sessions, src.business_key_hash, src.row_hash,
     current_timestamp, current_timestamp

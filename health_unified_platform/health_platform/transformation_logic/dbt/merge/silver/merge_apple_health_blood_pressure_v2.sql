@@ -31,7 +31,7 @@ SELECT
     ROUND(systolic_mmhg, 1) AS systolic_mmhg,
     ROUND(diastolic_mmhg, 1) AS diastolic_mmhg,
     NULL::DOUBLE AS pulse_bpm,
-    'apple_health' AS source_name,
+    'apple_health' AS source_system,
     md5(coalesce(cast(startDate AS VARCHAR), '') || '||' || 'apple_health') AS business_key_hash,
     md5(cast(startDate AS VARCHAR) || '||' || cast(systolic_mmhg AS VARCHAR) || '||' || cast(diastolic_mmhg AS VARCHAR)) AS row_hash,
     current_timestamp AS load_datetime
@@ -44,10 +44,10 @@ ON target.business_key_hash = src.business_key_hash
 WHEN MATCHED AND target.row_hash <> src.row_hash THEN
   UPDATE SET sk_date=src.sk_date, sk_time=src.sk_time, timestamp=src.timestamp,
     systolic_mmhg=src.systolic_mmhg, diastolic_mmhg=src.diastolic_mmhg, pulse_bpm=src.pulse_bpm,
-    source_name=src.source_name, row_hash=src.row_hash, update_datetime=current_timestamp
+    source_system=src.source_system, row_hash=src.row_hash, update_datetime=current_timestamp
 WHEN NOT MATCHED THEN
-  INSERT (sk_date, sk_time, timestamp, systolic_mmhg, diastolic_mmhg, pulse_bpm, source_name, business_key_hash, row_hash, load_datetime, update_datetime)
-  VALUES (src.sk_date, src.sk_time, src.timestamp, src.systolic_mmhg, src.diastolic_mmhg, src.pulse_bpm, src.source_name, src.business_key_hash, src.row_hash, current_timestamp, current_timestamp);
+  INSERT (sk_date, sk_time, timestamp, systolic_mmhg, diastolic_mmhg, pulse_bpm, source_system, business_key_hash, row_hash, load_datetime, update_datetime)
+  VALUES (src.sk_date, src.sk_time, src.timestamp, src.systolic_mmhg, src.diastolic_mmhg, src.pulse_bpm, src.source_system, src.business_key_hash, src.row_hash, current_timestamp, current_timestamp);
 
 -- Step 3: Drop staging table
 DROP TABLE IF EXISTS silver.blood_pressure_v2__staging;

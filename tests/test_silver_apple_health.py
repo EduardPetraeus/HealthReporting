@@ -5,7 +5,7 @@ Validates all 15 new silver tables created in A3:
 - No null business_key_hash
 - No duplicate business_key_hash
 - sk_date within valid range (20100101-20261231)
-- source_name populated (shared tables only)
+- source_system populated (shared tables only)
 """
 
 from __future__ import annotations
@@ -110,14 +110,14 @@ class TestSkDateRange:
 
 
 class TestSourceNamePopulated:
-    """Verify source_name is populated in all tables."""
+    """Verify source_system is populated in all tables."""
 
     @pytest.mark.parametrize("table", ALL_TABLES)
-    def test_source_name_not_null(self, db, table):
+    def test_source_system_not_null(self, db, table):
         null_count = db.execute(
-            f"SELECT COUNT(*) FROM silver.{table} WHERE source_name IS NULL"
+            f"SELECT COUNT(*) FROM silver.{table} WHERE source_system IS NULL"
         ).fetchone()[0]
-        assert null_count == 0, f"silver.{table} has {null_count} null source_name"
+        assert null_count == 0, f"silver.{table} has {null_count} null source_system"
 
 
 class TestSimpleEventColumns:
@@ -189,7 +189,7 @@ class TestBodyMeasurement:
 
     def test_has_multiple_sources(self, db):
         sources = db.execute(
-            "SELECT COUNT(DISTINCT source_name) FROM silver.body_measurement"
+            "SELECT COUNT(DISTINCT source_system) FROM silver.body_measurement"
         ).fetchone()[0]
         assert sources >= 2, f"Expected multiple sources, got {sources}"
 

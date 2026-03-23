@@ -22,7 +22,7 @@ class TestBaseConnectorABC:
 
         class IncompleteConnector(BaseConnector):
             @property
-            def source_name(self) -> str:
+            def source_system(self) -> str:
                 return "incomplete"
 
             def authenticate(self) -> None:
@@ -48,8 +48,8 @@ class TestOuraClientImplementsBaseConnector:
     def test_isinstance_check(self, client):
         assert isinstance(client, BaseConnector)
 
-    def test_source_name_returns_oura(self, client):
-        assert client.source_name == "oura"
+    def test_source_system_returns_oura(self, client):
+        assert client.source_system == "oura"
 
     def test_get_endpoints_returns_expected(self, client):
         endpoints = client.get_endpoints()

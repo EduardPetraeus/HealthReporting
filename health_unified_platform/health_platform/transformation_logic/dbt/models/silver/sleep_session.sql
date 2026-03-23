@@ -28,7 +28,7 @@ select
     null::integer    as readiness_score,
     null::double     as snoring_min,
     null::integer    as snoring_episodes,
-    null::varchar    as source_name,
+    null::varchar    as source_system,
     null::varchar    as business_key_hash,
     null::varchar    as row_hash,
     null::timestamp  as load_datetime,
