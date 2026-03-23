@@ -43,7 +43,7 @@ COMMENT ON COLUMN silver.body_temperature.sk_date IS 'Surrogate date key in YYYY
 COMMENT ON COLUMN silver.body_temperature.sk_time IS 'Surrogate time key as HH:MM string.';
 COMMENT ON COLUMN silver.body_temperature.timestamp IS 'UTC timestamp of the temperature measurement.';
 COMMENT ON COLUMN silver.body_temperature.temperature_degc IS 'Body temperature in degrees Celsius. Normal core range: 36.1-37.2C. Skin temperature from wearables is typically 1-2C lower. Deviations can indicate illness, ovulation, or circadian phase.';
-COMMENT ON COLUMN silver.body_temperature.source_name IS 'Name of the device or app that produced the reading (e.g., Oura skin temp, manual thermometer).';
+COMMENT ON COLUMN silver.body_temperature.source_system IS 'Name of the device or app that produced the reading (e.g., Oura skin temp, manual thermometer).';
 COMMENT ON COLUMN silver.body_temperature.business_key_hash IS 'MD5/SHA hash of the natural business key columns.';
 COMMENT ON COLUMN silver.body_temperature.row_hash IS 'MD5/SHA hash of all non-key columns for change detection.';
 COMMENT ON COLUMN silver.body_temperature.load_datetime IS 'Timestamp when this row was first loaded into the silver layer.';
@@ -106,7 +106,7 @@ COMMENT ON TABLE silver.daily_energy_by_source IS 'Daily energy expenditure brok
 
 COMMENT ON COLUMN silver.daily_energy_by_source.sk_date IS 'Surrogate date key in YYYYMMDD integer format.';
 COMMENT ON COLUMN silver.daily_energy_by_source.date IS 'Calendar date for this energy summary.';
-COMMENT ON COLUMN silver.daily_energy_by_source.source_name IS 'Name of the source device or app reporting energy data (e.g., Apple Watch, Oura, Strava).';
+COMMENT ON COLUMN silver.daily_energy_by_source.source_system IS 'Name of the source device or app reporting energy data (e.g., Apple Watch, Oura, Strava).';
 COMMENT ON COLUMN silver.daily_energy_by_source.active_energy_kcal IS 'Active energy burned as reported by this source. Unit: kilocalories. Excludes basal metabolic rate.';
 COMMENT ON COLUMN silver.daily_energy_by_source.basal_energy_kcal IS 'Basal (resting) energy expenditure as estimated by this source. Unit: kilocalories.';
 COMMENT ON COLUMN silver.daily_energy_by_source.total_energy_kcal IS 'Total energy expenditure (active + basal) as reported by this source. Unit: kilocalories.';
@@ -247,7 +247,7 @@ COMMENT ON COLUMN silver.heart_rate.sk_date IS 'Surrogate date key in YYYYMMDD i
 COMMENT ON COLUMN silver.heart_rate.sk_time IS 'Surrogate time key as HH:MM string.';
 COMMENT ON COLUMN silver.heart_rate.timestamp IS 'UTC timestamp of the heart rate measurement.';
 COMMENT ON COLUMN silver.heart_rate.bpm IS 'Heart rate in beats per minute. Resting: 60-100 bpm (athletes: 40-60). Max HR ~220 minus age. Source: optical PPG sensor on wearable.';
-COMMENT ON COLUMN silver.heart_rate.source_name IS 'Name of the device that produced the reading (e.g., Oura, Apple Watch).';
+COMMENT ON COLUMN silver.heart_rate.source_system IS 'Name of the device that produced the reading (e.g., Oura, Apple Watch).';
 COMMENT ON COLUMN silver.heart_rate.business_key_hash IS 'MD5/SHA hash of the natural business key columns.';
 COMMENT ON COLUMN silver.heart_rate.row_hash IS 'MD5/SHA hash of all non-key columns for change detection.';
 COMMENT ON COLUMN silver.heart_rate.load_datetime IS 'Timestamp when this row was first loaded into the silver layer.';
@@ -263,7 +263,7 @@ COMMENT ON COLUMN silver.mindful_session.sk_time IS 'Surrogate time key as HH:MM
 COMMENT ON COLUMN silver.mindful_session.timestamp IS 'UTC timestamp when the mindfulness session started.';
 COMMENT ON COLUMN silver.mindful_session.end_timestamp IS 'UTC timestamp when the mindfulness session ended.';
 COMMENT ON COLUMN silver.mindful_session.duration_seconds IS 'Duration of the mindfulness session. Unit: seconds. Typical range: 300-1800 seconds (5-30 minutes). Research suggests 10+ minutes yields measurable HRV benefits.';
-COMMENT ON COLUMN silver.mindful_session.source_name IS 'Name of the app or device that recorded the session (e.g., Headspace, Apple Watch Mindfulness).';
+COMMENT ON COLUMN silver.mindful_session.source_system IS 'Name of the app or device that recorded the session (e.g., Headspace, Apple Watch Mindfulness).';
 COMMENT ON COLUMN silver.mindful_session.business_key_hash IS 'MD5/SHA hash of the natural business key columns.';
 COMMENT ON COLUMN silver.mindful_session.row_hash IS 'MD5/SHA hash of all non-key columns for change detection.';
 COMMENT ON COLUMN silver.mindful_session.load_datetime IS 'Timestamp when this row was first loaded into the silver layer.';
@@ -294,7 +294,7 @@ COMMENT ON COLUMN silver.respiratory_rate.sk_time IS 'Surrogate time key as HH:M
 COMMENT ON COLUMN silver.respiratory_rate.timestamp IS 'UTC timestamp when the respiratory rate measurement started.';
 COMMENT ON COLUMN silver.respiratory_rate.end_timestamp IS 'UTC timestamp when the respiratory rate measurement ended.';
 COMMENT ON COLUMN silver.respiratory_rate.breaths_per_min IS 'Respiratory rate. Unit: breaths per minute. Normal adult resting: 12-20 breaths/min. Elevated rates (>20) at rest may indicate stress, fever, or respiratory issues.';
-COMMENT ON COLUMN silver.respiratory_rate.source_name IS 'Name of the device that measured respiratory rate (e.g., Oura Ring, Apple Watch).';
+COMMENT ON COLUMN silver.respiratory_rate.source_system IS 'Name of the device that measured respiratory rate (e.g., Oura Ring, Apple Watch).';
 COMMENT ON COLUMN silver.respiratory_rate.business_key_hash IS 'MD5/SHA hash of the natural business key columns.';
 COMMENT ON COLUMN silver.respiratory_rate.row_hash IS 'MD5/SHA hash of all non-key columns for change detection.';
 COMMENT ON COLUMN silver.respiratory_rate.load_datetime IS 'Timestamp when this row was first loaded into the silver layer.';
@@ -311,7 +311,7 @@ COMMENT ON COLUMN silver.step_count.timestamp IS 'UTC timestamp for the start of
 COMMENT ON COLUMN silver.step_count.end_timestamp IS 'UTC timestamp for the end of the step counting interval.';
 COMMENT ON COLUMN silver.step_count.duration_seconds IS 'Duration of the step counting interval. Unit: seconds.';
 COMMENT ON COLUMN silver.step_count.step_count IS 'Number of steps recorded during the interval. Cadence (steps/min) can be derived: step_count / (duration_seconds / 60). Walking cadence ~100-130 steps/min, running ~150-190.';
-COMMENT ON COLUMN silver.step_count.source_name IS 'Name of the device that counted steps (e.g., iPhone, Apple Watch, Oura).';
+COMMENT ON COLUMN silver.step_count.source_system IS 'Name of the device that counted steps (e.g., iPhone, Apple Watch, Oura).';
 COMMENT ON COLUMN silver.step_count.business_key_hash IS 'MD5/SHA hash of the natural business key columns.';
 COMMENT ON COLUMN silver.step_count.row_hash IS 'MD5/SHA hash of all non-key columns for change detection.';
 COMMENT ON COLUMN silver.step_count.load_datetime IS 'Timestamp when this row was first loaded into the silver layer.';
@@ -327,7 +327,7 @@ COMMENT ON COLUMN silver.toothbrushing.sk_time IS 'Surrogate time key as HH:MM s
 COMMENT ON COLUMN silver.toothbrushing.timestamp IS 'UTC timestamp when the toothbrushing session started.';
 COMMENT ON COLUMN silver.toothbrushing.end_timestamp IS 'UTC timestamp when the toothbrushing session ended.';
 COMMENT ON COLUMN silver.toothbrushing.duration_seconds IS 'Duration of the brushing session. Unit: seconds. Dentist recommendation: 120 seconds (2 minutes) minimum.';
-COMMENT ON COLUMN silver.toothbrushing.source_name IS 'Name of the device or app that detected the brushing session.';
+COMMENT ON COLUMN silver.toothbrushing.source_system IS 'Name of the device or app that detected the brushing session.';
 COMMENT ON COLUMN silver.toothbrushing.business_key_hash IS 'MD5/SHA hash of the natural business key columns.';
 COMMENT ON COLUMN silver.toothbrushing.row_hash IS 'MD5/SHA hash of all non-key columns for change detection.';
 COMMENT ON COLUMN silver.toothbrushing.load_datetime IS 'Timestamp when this row was first loaded into the silver layer.';
@@ -342,7 +342,7 @@ COMMENT ON COLUMN silver.water_intake.sk_date IS 'Surrogate date key in YYYYMMDD
 COMMENT ON COLUMN silver.water_intake.sk_time IS 'Surrogate time key as HH:MM string.';
 COMMENT ON COLUMN silver.water_intake.timestamp IS 'UTC timestamp when the water intake was logged.';
 COMMENT ON COLUMN silver.water_intake.water_ml IS 'Volume of water consumed. Unit: milliliters. Daily target varies by body weight; general guideline: 30-40 ml per kg body weight. Source: manual logging app.';
-COMMENT ON COLUMN silver.water_intake.source_name IS 'Name of the app used to log the water intake.';
+COMMENT ON COLUMN silver.water_intake.source_system IS 'Name of the app used to log the water intake.';
 COMMENT ON COLUMN silver.water_intake.business_key_hash IS 'MD5/SHA hash of the natural business key columns.';
 COMMENT ON COLUMN silver.water_intake.row_hash IS 'MD5/SHA hash of all non-key columns for change detection.';
 COMMENT ON COLUMN silver.water_intake.load_datetime IS 'Timestamp when this row was first loaded into the silver layer.';
