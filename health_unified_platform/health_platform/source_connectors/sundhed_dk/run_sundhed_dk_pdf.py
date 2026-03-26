@@ -137,7 +137,10 @@ def main() -> None:
     # Summary counters
     summary: list[dict] = []
 
-    with AuditLogger("run_sundhed_dk_pdf", "extract", "sundhed_dk") as audit:
+    pipeline_run_id = os.environ.get("PIPELINE_RUN_ID")
+    with AuditLogger(
+        "run_sundhed_dk_pdf", "extract", "sundhed_dk", pipeline_run_id=pipeline_run_id
+    ) as audit:
         for section_name, subdir, parser_fn, endpoint, date_field in sections:
             section_dir = downloads_root / subdir
             logger.info("Processing section: %s (dir: %s)", section_name, section_dir)

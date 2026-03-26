@@ -39,7 +39,10 @@ ENDPOINTS: list[tuple[str, str, str]] = [
 def main() -> None:
     logger.info(f"Strava pipeline starting [env: {SOURCE_ENV}]")
 
-    with AuditLogger("run_strava", "extract", "strava") as audit:
+    pipeline_run_id = os.environ.get("PIPELINE_RUN_ID")
+    with AuditLogger(
+        "run_strava", "extract", "strava", pipeline_run_id=pipeline_run_id
+    ) as audit:
         access_token = get_access_token()
         client = StravaClient(access_token)
         state = load_state()
