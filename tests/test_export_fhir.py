@@ -202,7 +202,7 @@ def export_db(tmp_path):
         """
         CREATE TABLE silver.heart_rate (
             sk_date INTEGER, sk_time VARCHAR,
-            timestamp TIMESTAMP, bpm INTEGER, source_name VARCHAR,
+            timestamp TIMESTAMP, bpm INTEGER, source_system VARCHAR,
             business_key_hash VARCHAR, row_hash VARCHAR,
             load_datetime TIMESTAMP, update_datetime TIMESTAMP
         )

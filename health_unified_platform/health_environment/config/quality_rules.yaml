@@ -439,3 +439,26 @@ tables:
     not_null: [business_key_hash]
     unique: [business_key_hash]
     row_count: { min_rows: 1 }
+
+  # =====================================================================
+  # Audit — Pipeline observability checks
+  # =====================================================================
+
+  audit_pipeline_freshness:
+    _schema: audit
+    _table: job_runs
+    freshness:
+      column: end_time
+      max_hours: 25
+      filter: "status IN ('success', 'failed', 'error')"
+    description: "No completed pipeline run in more than 25 hours"
+
+  audit_hung_pipeline:
+    _schema: audit
+    _table: job_runs
+    custom_sql: |
+      SELECT COUNT(*) = 0
+      FROM audit.job_runs
+      WHERE status = 'running'
+      AND start_time < NOW() - INTERVAL 4 HOURS
+    description: "Pipeline stuck in running for more than 4 hours"

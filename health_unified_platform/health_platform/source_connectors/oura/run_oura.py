@@ -65,7 +65,10 @@ def _normalize_records(endpoint_name: str, records: list[dict]) -> list[dict]:
 def main() -> None:
     logger.info(f"Oura pipeline starting [env: {SOURCE_ENV}]")
 
-    with AuditLogger("run_oura", "extract", "oura") as audit:
+    pipeline_run_id = os.environ.get("PIPELINE_RUN_ID")
+    with AuditLogger(
+        "run_oura", "extract", "oura", pipeline_run_id=pipeline_run_id
+    ) as audit:
         access_token = get_access_token()
         client = OuraClient(access_token)
         state = load_state()

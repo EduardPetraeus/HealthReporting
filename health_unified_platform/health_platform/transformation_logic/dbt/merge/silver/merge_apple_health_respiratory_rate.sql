@@ -22,7 +22,7 @@ SELECT
     startDate::TIMESTAMP   AS timestamp,
     strptime(endDate, '%Y-%m-%d %H:%M:%S %z')::TIMESTAMP AS end_timestamp,
     value::DOUBLE          AS breaths_per_min,
-    sourceName             AS source_name,
+    sourceName             AS source_system,
     md5(
         coalesce(cast(startDate AS VARCHAR), '') || '||' ||
         coalesce(sourceName, '')
@@ -48,19 +48,19 @@ WHEN MATCHED AND target.row_hash <> src.row_hash THEN
     timestamp       = src.timestamp,
     end_timestamp   = src.end_timestamp,
     breaths_per_min = src.breaths_per_min,
-    source_name     = src.source_name,
+    source_system     = src.source_system,
     row_hash        = src.row_hash,
     update_datetime = current_timestamp
 
 WHEN NOT MATCHED THEN
   INSERT (
     sk_date, sk_time, timestamp, end_timestamp,
-    breaths_per_min, source_name,
+    breaths_per_min, source_system,
     business_key_hash, row_hash, load_datetime, update_datetime
   )
   VALUES (
     src.sk_date, src.sk_time, src.timestamp, src.end_timestamp,
-    src.breaths_per_min, src.source_name,
+    src.breaths_per_min, src.source_system,
     src.business_key_hash, src.row_hash, current_timestamp, current_timestamp
   );
 

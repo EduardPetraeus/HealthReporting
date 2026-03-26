@@ -21,7 +21,7 @@ SELECT
     lpad(hour(startDate::TIMESTAMP)::VARCHAR, 2, '0') || lpad(minute(startDate::TIMESTAMP)::VARCHAR, 2, '0') AS sk_time,
     startDate::TIMESTAMP   AS timestamp,
     value::DOUBLE          AS water_ml,
-    sourceName             AS source_name,
+    sourceName             AS source_system,
     md5(
         coalesce(cast(startDate AS VARCHAR), '') || '||' ||
         coalesce(sourceName, '')
@@ -46,18 +46,18 @@ WHEN MATCHED AND target.row_hash <> src.row_hash THEN
     sk_time         = src.sk_time,
     timestamp       = src.timestamp,
     water_ml        = src.water_ml,
-    source_name     = src.source_name,
+    source_system     = src.source_system,
     row_hash        = src.row_hash,
     update_datetime = current_timestamp
 
 WHEN NOT MATCHED THEN
   INSERT (
     sk_date, sk_time, timestamp, water_ml,
-    source_name, business_key_hash, row_hash, load_datetime, update_datetime
+    source_system, business_key_hash, row_hash, load_datetime, update_datetime
   )
   VALUES (
     src.sk_date, src.sk_time, src.timestamp, src.water_ml,
-    src.source_name, src.business_key_hash, src.row_hash, current_timestamp, current_timestamp
+    src.source_system, src.business_key_hash, src.row_hash, current_timestamp, current_timestamp
   );
 
 -- Step 3: Drop staging table

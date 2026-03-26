@@ -36,6 +36,7 @@ select
     null::integer    as contributor_stay_active,
     null::integer    as contributor_training_frequency,
     null::integer    as contributor_training_volume,
+    null::varchar    as source_system,
     null::varchar    as business_key_hash,
     null::varchar    as row_hash,
     null::timestamp  as load_datetime,

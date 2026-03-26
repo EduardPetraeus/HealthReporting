@@ -15,7 +15,7 @@ select
     null::integer    as frequency_hz,
     null::integer    as duration_s,
     null::varchar    as wearposition,
-    null::varchar    as source_name,
+    null::varchar    as source_system,
     null::varchar    as business_key_hash,
     null::varchar    as row_hash,
     null::timestamp  as load_datetime,

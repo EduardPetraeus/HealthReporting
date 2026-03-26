@@ -39,7 +39,7 @@ SELECT
     startDate::TIMESTAMP AS timestamp,
     ROUND(value::DOUBLE / 1000.0, 4) AS distance_km,
     distance_type,
-    sourceName AS source_name,
+    sourceName AS source_system,
     md5(
         coalesce(cast(startDate AS VARCHAR), '') || '||' ||
         coalesce(sourceName, '') || '||' ||
@@ -66,18 +66,18 @@ WHEN MATCHED AND target.row_hash <> src.row_hash THEN
     timestamp         = src.timestamp,
     distance_km       = src.distance_km,
     distance_type     = src.distance_type,
-    source_name       = src.source_name,
+    source_system       = src.source_system,
     business_key_hash = src.business_key_hash,
     row_hash          = src.row_hash,
     update_datetime   = current_timestamp
 
 WHEN NOT MATCHED THEN
   INSERT (
-    sk_date, sk_time, timestamp, distance_km, distance_type, source_name,
+    sk_date, sk_time, timestamp, distance_km, distance_type, source_system,
     business_key_hash, row_hash, load_datetime, update_datetime
   )
   VALUES (
-    src.sk_date, src.sk_time, src.timestamp, src.distance_km, src.distance_type, src.source_name,
+    src.sk_date, src.sk_time, src.timestamp, src.distance_km, src.distance_type, src.source_system,
     src.business_key_hash, src.row_hash, current_timestamp, current_timestamp
   );
 

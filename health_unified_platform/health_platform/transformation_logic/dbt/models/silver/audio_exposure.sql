@@ -15,7 +15,7 @@ select
     null::double     as avg_db,
     null::double     as max_db,
     null::integer    as sample_count,
-    null::varchar    as source_name,
+    null::varchar    as source_system,
     null::varchar    as business_key_hash,
     null::varchar    as row_hash,
     null::timestamp  as load_datetime,

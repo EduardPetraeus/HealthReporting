@@ -40,7 +40,7 @@ SELECT
     date,
     ROUND(stand_minutes, 1) AS stand_minutes,
     coalesce(stand_hours, 0) AS stand_hours,
-    'apple_health' AS source_name,
+    'apple_health' AS source_system,
     md5(
         coalesce(cast(date AS VARCHAR), '') || '||' || 'apple_health'
     ) AS business_key_hash,
@@ -62,17 +62,17 @@ WHEN MATCHED AND target.row_hash <> src.row_hash THEN
     date              = src.date,
     stand_minutes     = src.stand_minutes,
     stand_hours       = src.stand_hours,
-    source_name       = src.source_name,
+    source_system       = src.source_system,
     row_hash          = src.row_hash,
     update_datetime   = current_timestamp
 
 WHEN NOT MATCHED THEN
   INSERT (
-    sk_date, date, stand_minutes, stand_hours, source_name,
+    sk_date, date, stand_minutes, stand_hours, source_system,
     business_key_hash, row_hash, load_datetime, update_datetime
   )
   VALUES (
-    src.sk_date, src.date, src.stand_minutes, src.stand_hours, src.source_name,
+    src.sk_date, src.date, src.stand_minutes, src.stand_hours, src.source_system,
     src.business_key_hash, src.row_hash, current_timestamp, current_timestamp
   );
 

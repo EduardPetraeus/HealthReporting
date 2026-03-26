@@ -28,7 +28,7 @@ class TestSleepSession:
 
     def test_has_two_sources(self, db):
         sources = db.execute(
-            "SELECT DISTINCT source_name FROM silver.sleep_session ORDER BY 1"
+            "SELECT DISTINCT source_system FROM silver.sleep_session ORDER BY 1"
         ).fetchall()
         source_list = [s[0] for s in sources]
         assert (
@@ -75,14 +75,14 @@ class TestSleepSession:
     def test_oura_has_readiness(self, db):
         count = db.execute(
             "SELECT COUNT(*) FROM silver.sleep_session "
-            "WHERE source_name = 'oura' AND readiness_score IS NOT NULL"
+            "WHERE source_system = 'oura' AND readiness_score IS NOT NULL"
         ).fetchone()[0]
         assert count > 0, "No Oura rows with readiness_score"
 
     def test_withings_has_snoring(self, db):
         count = db.execute(
             "SELECT COUNT(*) FROM silver.sleep_session "
-            "WHERE source_name = 'withings' AND snoring_min IS NOT NULL"
+            "WHERE source_system = 'withings' AND snoring_min IS NOT NULL"
         ).fetchone()[0]
         assert count > 0, "No Withings rows with snoring_min"
 
@@ -92,7 +92,7 @@ class TestSleepSession:
             "SELECT COUNT(*) FROM ("
             "  SELECT business_key_hash FROM silver.sleep_session "
             "  GROUP BY business_key_hash "
-            "  HAVING COUNT(DISTINCT source_name) > 1"
+            "  HAVING COUNT(DISTINCT source_system) > 1"
             ")"
         ).fetchone()[0]
         assert overlap == 0, f"{overlap} business keys shared across sources"
@@ -103,7 +103,7 @@ class TestBloodPressureV2:
 
     def test_has_two_sources(self, db):
         sources = db.execute(
-            "SELECT DISTINCT source_name FROM silver.blood_pressure_v2 ORDER BY 1"
+            "SELECT DISTINCT source_system FROM silver.blood_pressure_v2 ORDER BY 1"
         ).fetchall()
         source_list = [s[0] for s in sources]
         assert len(source_list) >= 2, f"Expected 2+ sources, got {source_list}"
@@ -111,14 +111,14 @@ class TestBloodPressureV2:
     def test_withings_has_pulse(self, db):
         count = db.execute(
             "SELECT COUNT(*) FROM silver.blood_pressure_v2 "
-            "WHERE source_name = 'withings' AND pulse_bpm IS NOT NULL"
+            "WHERE source_system = 'withings' AND pulse_bpm IS NOT NULL"
         ).fetchone()[0]
         assert count > 0, "No Withings rows with pulse_bpm"
 
     def test_apple_pulse_null(self, db):
         non_null = db.execute(
             "SELECT COUNT(*) FROM silver.blood_pressure_v2 "
-            "WHERE source_name = 'apple_health' AND pulse_bpm IS NOT NULL"
+            "WHERE source_system = 'apple_health' AND pulse_bpm IS NOT NULL"
         ).fetchone()[0]
         assert (
             non_null == 0
@@ -149,14 +149,14 @@ class TestBodyMeasurement:
     def test_withings_has_fat_mass(self, db):
         count = db.execute(
             "SELECT COUNT(*) FROM silver.body_measurement "
-            "WHERE source_name = 'withings' AND fat_mass_kg IS NOT NULL"
+            "WHERE source_system = 'withings' AND fat_mass_kg IS NOT NULL"
         ).fetchone()[0]
         assert count > 0, "No Withings rows with fat_mass_kg"
 
     def test_withings_has_bone_mass(self, db):
         count = db.execute(
             "SELECT COUNT(*) FROM silver.body_measurement "
-            "WHERE source_name = 'withings' AND bone_mass_kg IS NOT NULL"
+            "WHERE source_system = 'withings' AND bone_mass_kg IS NOT NULL"
         ).fetchone()[0]
         assert count > 0, "No Withings rows with bone_mass_kg"
 
