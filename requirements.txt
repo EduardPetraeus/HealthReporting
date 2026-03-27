@@ -13,7 +13,7 @@ dbt-core==1.10.19
 dbt-duckdb==1.10.0
 dbt-extractor==0.6.0
 dbt-protos==1.0.431
-dbt-semantic-interfaces==0.9.0
+dbt-semantic-interfaces==0.10.5
 deepdiff==8.6.1
 duckdb==1.4.4
 idna==3.11
