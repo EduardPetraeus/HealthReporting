@@ -37,7 +37,7 @@ pathspec==0.12.1
 protobuf==6.33.5
 pyarrow==21.0.0
 pydantic==2.12.5
-pydantic_core==2.41.5
+pydantic_core==2.42.0
 python-dateutil==2.9.0.post0
 python-slugify==8.0.4
 pytimeparse==1.1.8
