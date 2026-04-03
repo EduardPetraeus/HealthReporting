@@ -36,7 +36,7 @@ TABLES = [
 
 def _source_path() -> Path:
     """Return the path to the daily-stoic DuckDB file."""
-    return get_data_lake_root() / "daily-stoic" / "daily-stoic.duckdb"
+    return Path.home() / "Dagbog" / "daily-stoic.duckdb"
 
 
 def _output_path(table_name: str) -> Path:

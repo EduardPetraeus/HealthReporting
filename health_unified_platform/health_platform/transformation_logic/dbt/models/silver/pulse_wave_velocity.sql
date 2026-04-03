@@ -12,7 +12,7 @@ select
     null::integer    as sk_date,
     null::timestamp  as timestamp,
     null::double     as pwv_m_per_s,
-    null::varchar    as source_name,
+    null::varchar    as source_system,
     null::varchar    as business_key_hash,
     null::varchar    as row_hash,
     null::timestamp  as load_datetime,

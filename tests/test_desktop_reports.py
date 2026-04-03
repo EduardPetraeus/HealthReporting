@@ -128,7 +128,7 @@ def report_db(tmp_path):
         """
         CREATE TABLE silver.heart_rate (
             sk_date INTEGER, sk_time VARCHAR,
-            timestamp TIMESTAMP, bpm INTEGER, source_name VARCHAR,
+            timestamp TIMESTAMP, bpm INTEGER, source_system VARCHAR,
             business_key_hash VARCHAR, row_hash VARCHAR,
             load_datetime TIMESTAMP, update_datetime TIMESTAMP
         )
@@ -138,13 +138,13 @@ def report_db(tmp_path):
         sk = int(d.strftime("%Y%m%d"))
         resting = random.randint(48, 65)
         con.execute(
-            "INSERT INTO silver.heart_rate (sk_date, timestamp, bpm, source_name) VALUES (?, ?, ?, ?)",
+            "INSERT INTO silver.heart_rate (sk_date, timestamp, bpm, source_system) VALUES (?, ?, ?, ?)",
             [sk, f"{d} 03:00:00", resting, "Oura Ring"],
         )
         for hour in [10, 14, 18]:
             bpm = random.randint(62, 90)
             con.execute(
-                "INSERT INTO silver.heart_rate (sk_date, timestamp, bpm, source_name) VALUES (?, ?, ?, ?)",
+                "INSERT INTO silver.heart_rate (sk_date, timestamp, bpm, source_system) VALUES (?, ?, ?, ?)",
                 [sk, f"{d} {hour:02d}:00:00", bpm, "Apple Watch"],
             )
 

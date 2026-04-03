@@ -100,7 +100,10 @@ def run_ingestion():
     logger.info(f"Starting ingestion engine [env: {active_env}]")
     logger.info(f"Target database: {db_file}")
 
-    with AuditLogger("ingestion_engine", "bronze", "multi_source") as audit:
+    pipeline_run_id = os.environ.get("PIPELINE_RUN_ID")
+    with AuditLogger(
+        "ingestion_engine", "bronze", "multi_source", pipeline_run_id=pipeline_run_id
+    ) as audit:
         # establish_connection_to_duckdb
         con = duckdb.connect(str(db_file))
 

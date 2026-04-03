@@ -14,7 +14,7 @@ select
     null::timestamp  as timestamp,
     null::double     as distance_km,
     null::varchar    as distance_type,
-    null::varchar    as source_name,
+    null::varchar    as source_system,
     null::varchar    as business_key_hash,
     null::varchar    as row_hash,
     null::timestamp  as load_datetime,

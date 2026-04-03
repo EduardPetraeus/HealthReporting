@@ -138,7 +138,10 @@ def main() -> None:
         page = browser.launch_and_authenticate()
         scraper = SundhedDkScraper(page)
 
-        with AuditLogger("run_sundhed_dk", "extract", "sundhed_dk") as audit:
+        pipeline_run_id = os.environ.get("PIPELINE_RUN_ID")
+        with AuditLogger(
+            "run_sundhed_dk", "extract", "sundhed_dk", pipeline_run_id=pipeline_run_id
+        ) as audit:
             for section_name, parser_fn, date_field in sections:
                 logger.info("Processing section: %s", section_name)
 

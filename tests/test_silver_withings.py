@@ -111,6 +111,6 @@ class TestWithingsBodyTemperatureFeed:
 
     def test_withings_body_temp_rows(self, db):
         count = db.execute(
-            "SELECT COUNT(*) FROM silver.body_temperature WHERE source_name = 'withings'"
+            "SELECT COUNT(*) FROM silver.body_temperature WHERE source_system = 'withings'"
         ).fetchone()[0]
         assert count > 0, "No Withings rows in silver.body_temperature"

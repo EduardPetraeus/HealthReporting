@@ -37,7 +37,7 @@ SELECT
     NULL::INTEGER AS readiness_score,
     ROUND(TRY_CAST("Snoring (s)" AS DOUBLE) / 60.0, 1) AS snoring_min,
     TRY_CAST("Snoring episodes" AS INTEGER) AS snoring_episodes,
-    'withings' AS source_name,
+    'withings' AS source_system,
     md5(
         coalesce(cast("from" AS VARCHAR), '') || '||' || 'withings'
     ) AS business_key_hash,
@@ -80,7 +80,7 @@ WHEN MATCHED AND target.row_hash <> src.row_hash THEN
     readiness_score   = src.readiness_score,
     snoring_min       = src.snoring_min,
     snoring_episodes  = src.snoring_episodes,
-    source_name       = src.source_name,
+    source_system       = src.source_system,
     row_hash          = src.row_hash,
     update_datetime   = current_timestamp
 
@@ -89,13 +89,13 @@ WHEN NOT MATCHED THEN
     sk_date, date, bedtime_start, bedtime_end, total_sleep_min, deep_sleep_min, rem_sleep_min,
     light_sleep_min, awake_min, efficiency, latency_min, avg_hr, min_hr, max_hr, avg_hrv,
     lowest_hr, readiness_score, snoring_min, snoring_episodes,
-    source_name, business_key_hash, row_hash, load_datetime, update_datetime
+    source_system, business_key_hash, row_hash, load_datetime, update_datetime
   )
   VALUES (
     src.sk_date, src.date, src.bedtime_start, src.bedtime_end, src.total_sleep_min, src.deep_sleep_min, src.rem_sleep_min,
     src.light_sleep_min, src.awake_min, src.efficiency, src.latency_min, src.avg_hr, src.min_hr, src.max_hr, src.avg_hrv,
     src.lowest_hr, src.readiness_score, src.snoring_min, src.snoring_episodes,
-    src.source_name, src.business_key_hash, src.row_hash, current_timestamp, current_timestamp
+    src.source_system, src.business_key_hash, src.row_hash, current_timestamp, current_timestamp
   );
 
 -- Step 3: Drop staging table

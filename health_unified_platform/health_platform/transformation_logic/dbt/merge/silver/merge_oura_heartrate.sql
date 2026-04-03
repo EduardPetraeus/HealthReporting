@@ -1,6 +1,6 @@
 -- merge_oura_heartrate.sql
 -- Per-source merge: Oura API -> silver.heart_rate
--- Business key: timestamp + source_name (per-minute readings)
+-- Business key: timestamp + source_system (per-minute readings)
 --
 -- Usage: python run_merge.py silver/merge_oura_heartrate.sql
 
@@ -16,7 +16,7 @@ SELECT
     lpad(hour(timestamp::TIMESTAMP)::VARCHAR, 2, '0') || lpad(minute(timestamp::TIMESTAMP)::VARCHAR, 2, '0')       AS sk_time,
     timestamp::TIMESTAMP              AS timestamp,
     bpm::INTEGER                      AS bpm,
-    source                            AS source_name,
+    source                            AS source_system,
     md5(
         coalesce(timestamp, '') || '||' || coalesce(source, '')
     )                                 AS business_key_hash,
@@ -37,15 +37,15 @@ WHEN MATCHED AND target.row_hash <> src.row_hash THEN UPDATE SET
     sk_time         = src.sk_time,
     timestamp       = src.timestamp,
     bpm             = src.bpm,
-    source_name     = src.source_name,
+    source_system     = src.source_system,
     row_hash        = src.row_hash,
     update_datetime = current_timestamp
 
 WHEN NOT MATCHED THEN INSERT (
-    sk_date, sk_time, timestamp, bpm, source_name,
+    sk_date, sk_time, timestamp, bpm, source_system,
     business_key_hash, row_hash, load_datetime, update_datetime
 ) VALUES (
-    src.sk_date, src.sk_time, src.timestamp, src.bpm, src.source_name,
+    src.sk_date, src.sk_time, src.timestamp, src.bpm, src.source_system,
     src.business_key_hash, src.row_hash, current_timestamp, current_timestamp
 );
 

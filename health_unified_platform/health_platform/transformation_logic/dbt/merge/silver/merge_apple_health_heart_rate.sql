@@ -21,7 +21,7 @@ SELECT
     lpad(hour(startDate)::VARCHAR, 2, '0') || lpad(minute(startDate)::VARCHAR, 2, '0') AS sk_time,
     startDate::TIMESTAMP AS timestamp,
     value::INTEGER AS bpm,
-    sourceName AS source_name,
+    sourceName AS source_system,
     md5(
         coalesce(cast(startDate AS VARCHAR), '') || '||' || coalesce(sourceName, '')
     ) AS business_key_hash,
@@ -43,7 +43,7 @@ WHEN MATCHED AND target.row_hash <> src.row_hash THEN
     sk_time           = src.sk_time,
     timestamp         = src.timestamp,
     bpm               = src.bpm,
-    source_name        = src.source_name,
+    source_system        = src.source_system,
     business_key_hash = src.business_key_hash,
     row_hash          = src.row_hash,
     update_datetime   = current_timestamp
@@ -54,7 +54,7 @@ WHEN NOT MATCHED THEN
     sk_time,
     timestamp,
     bpm,
-    source_name,
+    source_system,
     business_key_hash,
     row_hash,
     load_datetime,
@@ -65,7 +65,7 @@ WHEN NOT MATCHED THEN
     src.sk_time,
     src.timestamp,
     src.bpm,
-    src.source_name,
+    src.source_system,
     src.business_key_hash,
     src.row_hash,
     current_timestamp,

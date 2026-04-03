@@ -47,6 +47,8 @@ fi
 # Resolve data lake root and DB path via paths.py (cross-platform)
 HEALTH_DB_PATH=$("${VENV_PYTHON}" -c "from health_platform.utils.paths import get_db_path; print(get_db_path())")
 export HEALTH_DB_PATH
+PIPELINE_RUN_ID=$(uuidgen | tr '[:upper:]' '[:lower:]')
+export PIPELINE_RUN_ID
 
 # Validate NTFY_TOPIC (only allow safe chars for URL)
 if [[ -n "${NTFY_TOPIC}" && ! "${NTFY_TOPIC}" =~ ^[a-zA-Z0-9_-]+$ ]]; then

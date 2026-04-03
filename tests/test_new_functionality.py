@@ -580,7 +580,7 @@ class TestValidationResult:
         assert vr.fail_count == 1
         assert vr.total == 3
 
-    def test_summary_contains_source_name(self):
+    def test_summary_contains_source_system(self):
         vr = ValidationResult("Blood Panel")
         vr.add("count", "PASS", "10", "10")
         summary = vr.summary()

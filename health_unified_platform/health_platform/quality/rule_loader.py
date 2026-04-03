@@ -78,6 +78,11 @@ def _validate_rules(tables: dict[str, Any]) -> None:
                 f"Table '{table_name}' rules must be a dict, got {type(checks).__name__}"
             )
         for check_type, check_value in checks.items():
+            if check_type.startswith("_") or check_type in {
+                "description",
+                "custom_sql",
+            }:
+                continue  # metadata/annotation keys, not check types
             if check_type not in _VALID_CHECK_TYPES:
                 raise ValueError(
                     f"Unknown check type '{check_type}' for table '{table_name}'. "
