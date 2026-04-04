@@ -2,8 +2,8 @@
 # convert_withings_csv.sh
 # Converts Withings CSV exports (comma-delimited) to parquet files.
 # CSV data goes to _csv/ subdirectories to avoid column conflicts with API parquet.
-# Source: /Users/Shared/data_lake/withings/csv/
-# Target: /Users/Shared/data_lake/withings/raw/{endpoint}_csv/
+# Source: ${HOME}/data/data_lake/withings/csv/
+# Target: ${HOME}/data/data_lake/withings/raw/{endpoint}_csv/
 #
 # Usage: bash scripts/convert_withings_csv.sh
 
@@ -14,8 +14,8 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 CONVERTER="${REPO_ROOT}/health_unified_platform/health_platform/source_connectors/csv_to_parquet.py"
 PYTHON="${REPO_ROOT}/.venv/bin/python"
 
-SOURCE_DIR="/Users/Shared/data_lake/withings/csv"
-TARGET_BASE="/Users/Shared/data_lake/withings/raw"
+SOURCE_DIR="${HOME}/data/data_lake/withings/csv"
+TARGET_BASE="${HOME}/data/data_lake/withings/raw"
 
 # Parallel arrays (bash 3.2 compatible) — csv_filename:endpoint_name
 CSV_FILES="weight.csv bp.csv sleep.csv body_temperature.csv signal.csv pwv.csv activities.csv"

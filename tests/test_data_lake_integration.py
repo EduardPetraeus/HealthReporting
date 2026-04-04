@@ -2,7 +2,7 @@
 Integration tests: API sources → parquet in data lake → bronze config alignment.
 
 Validates that:
-1. All API source writers resolve to /Users/Shared/data_lake (canonical root)
+1. All API source writers resolve to ~/data/data_lake (canonical root)
 2. Parquet files exist on disk for each active source
 3. sources_config.yaml relative_paths match actual data lake structure
 4. Parquet files are readable and contain expected metadata columns
@@ -22,7 +22,7 @@ pytestmark = pytest.mark.integration
 
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 
-CANONICAL_ROOT = Path("/Users/Shared/data_lake")
+CANONICAL_ROOT = Path.home() / "data" / "data_lake"
 LEGACY_FALLBACK = Path.home() / "health_data_lake"
 
 SOURCES_CONFIG = (
@@ -48,7 +48,7 @@ def sources_config() -> list[dict]:
 
 
 class TestPathResolution:
-    """All writers must resolve to /Users/Shared/data_lake."""
+    """All writers must resolve to ~/data/data_lake."""
 
     def test_data_lake_root_is_canonical(self):
         root = get_data_lake_root()

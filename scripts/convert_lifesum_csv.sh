@@ -14,8 +14,8 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd -P)"
 PLATFORM_ROOT="${REPO_ROOT}/health_unified_platform"
 VENV_PYTHON="${REPO_ROOT}/.venv/bin/python3"
 
-CSV_DIR="/Users/Shared/data_lake/lifesum/csv"
-PARQUET_DIR="/Users/Shared/data_lake/lifesum/parquet"
+CSV_DIR="${HOME}/data/data_lake/lifesum/csv"
+PARQUET_DIR="${HOME}/data/data_lake/lifesum/parquet"
 
 export PYTHONPATH="${PLATFORM_ROOT}"
 

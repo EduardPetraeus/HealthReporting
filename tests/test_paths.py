@@ -66,7 +66,9 @@ class TestPlatformDefaults:
             with patch(
                 "health_platform.utils.paths.platform.system", return_value="Darwin"
             ):
-                assert _platform_default_data_lake() == "/Users/Shared/data_lake"
+                assert _platform_default_data_lake() == str(
+                    Path.home() / "data" / "data_lake"
+                )
 
     def test_linux_default(self):
         from health_platform.utils.paths import _platform_default_data_lake

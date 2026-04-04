@@ -15,7 +15,7 @@ from health_platform.utils.paths import get_db_path
 # Mark all tests as integration (require DuckDB with data)
 pytestmark = pytest.mark.integration
 
-PARQUET_BASE = Path("/Users/Shared/data_lake/lifesum/parquet")
+PARQUET_BASE = Path.home() / "data" / "data_lake" / "lifesum" / "parquet"
 
 
 @pytest.fixture(scope="module")

@@ -25,7 +25,7 @@ def _platform_default_data_lake() -> str:
     """Return the platform-appropriate default data lake root."""
     system = platform.system()
     if system == "Darwin":
-        return "/Users/Shared/data_lake"
+        return str(Path.home() / "data" / "data_lake")
     elif system == "Linux":
         xdg = os.environ.get("XDG_DATA_HOME", str(Path.home() / ".local" / "share"))
         return str(Path(xdg) / "health-platform" / "data_lake")
