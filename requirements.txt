@@ -8,7 +8,7 @@ click==8.1.8
 colorama==0.4.6
 daff==1.4.2
 dbt-adapters==1.17.3
-dbt-common==1.34.1
+dbt-common==1.34.2
 dbt-core==1.10.19
 dbt-duckdb==1.10.0
 dbt-extractor==0.6.0
