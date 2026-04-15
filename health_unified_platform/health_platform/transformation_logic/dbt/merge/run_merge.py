@@ -23,6 +23,13 @@ from health_platform.utils.path_resolver import get_project_root
 logger = get_logger("run_merge")
 
 _BRONZE_TABLE_RE = re.compile(r"\bFROM\s+(bronze\.stg_\w+)", re.IGNORECASE)
+_MERGE_TARGET_RE = re.compile(r"\bMERGE\s+INTO\s+([\w]+\.[\w]+)", re.IGNORECASE)
+
+
+def _extract_target_table(sql: str) -> str | None:
+    """Extract the silver target table from a MERGE SQL file, e.g. 'silver.daily_sleep'."""
+    match = _MERGE_TARGET_RE.search(sql)
+    return match.group(1) if match else None
 
 
 def load_config() -> dict:
@@ -92,8 +99,15 @@ def main():
     sql = sql_path.read_text()
     statements = split_statements(sql)
 
-    with AuditLogger("run_merge", "silver", source_system) as audit:
+    pipeline_run_id = os.environ.get("PIPELINE_RUN_ID")
+    target_table = _extract_target_table(sql)
+
+    with AuditLogger(
+        "run_merge", "silver", source_system, pipeline_run_id=pipeline_run_id
+    ) as audit:
         con = duckdb.connect(db_path)
+        rows_before = None
+        rows_after = None
         try:
             # Guard: skip merge if the bronze source table does not exist
             bronze_table = _extract_bronze_table(sql)
@@ -117,6 +131,11 @@ def main():
                     )
                     return
 
+            if target_table:
+                rows_before = con.execute(
+                    f"SELECT COUNT(*) FROM {target_table}"
+                ).fetchone()[0]
+
             for i, stmt in enumerate(statements, 1):
                 first_line = stmt.lstrip().split("\n")[0][:80]
                 logger.info(f"[{i}/{len(statements)}] {first_line}...")
@@ -124,10 +143,27 @@ def main():
                 if result and result.description:
                     rows = result.fetchall()
                     logger.debug(f"  -> {len(rows)} rows returned")
+
+            if target_table and rows_before is not None:
+                rows_after = con.execute(
+                    f"SELECT COUNT(*) FROM {target_table}"
+                ).fetchone()[0]
         finally:
             con.close()
 
-        audit.log_table(sql_path.stem, "MERGE", status="success")
+        rows_changed = (
+            (rows_after - rows_before)
+            if (rows_before is not None and rows_after is not None)
+            else None
+        )
+        audit.log_table(
+            sql_path.stem,
+            "MERGE",
+            rows_before=rows_before,
+            rows_after=rows_after,
+            rows_changed=rows_changed,
+            status="success",
+        )
 
     logger.info("Done.")
 

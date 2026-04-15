@@ -56,6 +56,11 @@ class TestYamlParsing:
         tables = load_rules(RULES_PATH)
         for table_name, checks in tables.items():
             for check_type in checks:
+                if check_type.startswith("_") or check_type in {
+                    "description",
+                    "custom_sql",
+                }:
+                    continue  # metadata/annotation keys, not check types
                 assert (
                     check_type in _VALID_CHECK_TYPES
                 ), f"Unknown check type '{check_type}' in table '{table_name}'"
@@ -86,12 +91,13 @@ class TestColumnConventions:
         tables = load_rules(RULES_PATH)
         valid_date_columns = {"day", "datetime", "timestamp", "load_datetime"}
         for table_name, checks in tables.items():
+            if "_schema" in checks:
+                continue  # audit observability entries use different column conventions
             if "freshness" in checks:
                 col = checks["freshness"].get("column", "load_datetime")
-                assert col in valid_date_columns, (
-                    f"Table '{table_name}' freshness column '{col}' "
-                    f"not in {valid_date_columns}"
-                )
+                assert (
+                    col in valid_date_columns
+                ), f"Table '{table_name}' freshness column '{col}' not in {valid_date_columns}"
 
 
 class TestSchemaValidation:

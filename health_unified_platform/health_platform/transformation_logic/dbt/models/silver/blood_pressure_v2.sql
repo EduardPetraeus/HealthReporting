@@ -16,7 +16,7 @@ select
     null::double     as systolic_mmhg,
     null::double     as diastolic_mmhg,
     null::double     as pulse_bpm,
-    null::varchar    as source_name,
+    null::varchar    as source_system,
     null::varchar    as business_key_hash,
     null::varchar    as row_hash,
     null::timestamp  as load_datetime,

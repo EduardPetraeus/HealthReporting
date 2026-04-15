@@ -5,7 +5,7 @@ Validates 6 new silver tables created from Oura CSV exports:
 - No null business_key_hash
 - No duplicate business_key_hash
 - sk_date within valid range (20100101-20261231)
-- source_name is 'oura'
+- source_system is 'oura'
 - Domain-specific validations (age range, temp range, sample counts)
 """
 
@@ -83,16 +83,16 @@ class TestOuraCsvSkDateRange:
 
 
 class TestOuraCsvSourceName:
-    """Verify source_name is 'oura' for all Oura CSV tables."""
+    """Verify source_system is 'oura' for all Oura CSV tables."""
 
     @pytest.mark.parametrize("table", OURA_CSV_TABLES)
     def test_source_is_oura(self, db, table):
         non_oura = db.execute(
-            f"SELECT COUNT(*) FROM silver.{table} WHERE source_name != 'oura'"
+            f"SELECT COUNT(*) FROM silver.{table} WHERE source_system != 'oura'"
         ).fetchone()[0]
         assert (
             non_oura == 0
-        ), f"silver.{table} has {non_oura} rows with source_name != 'oura'"
+        ), f"silver.{table} has {non_oura} rows with source_system != 'oura'"
 
 
 class TestCardiovascularAge:

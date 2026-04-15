@@ -15,7 +15,7 @@ select
     null::timestamp  as end_timestamp,
     null::double     as duration_seconds,
     null::integer    as step_count,
-    null::varchar    as source_name,
+    null::varchar    as source_system,
     null::varchar    as business_key_hash,
     null::varchar    as row_hash,
     null::timestamp  as load_datetime,

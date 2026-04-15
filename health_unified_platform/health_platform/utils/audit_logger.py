@@ -62,12 +62,20 @@ class AuditLogger:
     and audit.table_runs, using the appropriate backend.
     """
 
-    def __init__(self, job_name: str, job_type: str, source_system: str):
+    def __init__(
+        self,
+        job_name: str,
+        job_type: str,
+        source_system: str,
+        pipeline_run_id: str | None = None,
+    ):
         """
         Args:
-            job_name:      Name of the script/notebook (e.g. 'ingestion_engine')
-            job_type:      Layer being processed: 'bronze', 'silver', 'gold', 'extract'
-            source_system: Source identifier (e.g. 'apple_health', 'oura')
+            job_name:        Name of the script/notebook (e.g. 'ingestion_engine')
+            job_type:        Layer being processed: 'bronze', 'silver', 'gold', 'extract'
+            source_system:   Source identifier (e.g. 'apple_health', 'oura')
+            pipeline_run_id: UUID from daily_sync.sh linking all jobs in one pipeline run.
+                             None for manual/ad-hoc runs.
         """
         self.job_name = job_name
         self.job_type = job_type
@@ -75,6 +83,7 @@ class AuditLogger:
         self.env = os.environ.get("HEALTH_ENV", "dev")
 
         self.job_id = str(uuid.uuid4())
+        self.pipeline_run_id = pipeline_run_id
         self.start_time: Optional[datetime] = None
         self._con: Any = None  # duckdb connection (local only)
 
@@ -233,8 +242,9 @@ class AuditLogger:
         con.execute(
             """
             INSERT INTO audit.job_runs (
-                job_id, job_name, job_type, source_system, env, start_time, status
-            ) VALUES (?, ?, ?, ?, ?, ?, 'running')
+                job_id, job_name, job_type, source_system, env, start_time, status,
+                pipeline_run_id
+            ) VALUES (?, ?, ?, ?, ?, ?, 'running', ?)
             """,
             [
                 self.job_id,
@@ -243,6 +253,7 @@ class AuditLogger:
                 self.source_system,
                 self.env,
                 self.start_time,
+                self.pipeline_run_id,
             ],
         )
 

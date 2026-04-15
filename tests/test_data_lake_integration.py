@@ -2,7 +2,7 @@
 Integration tests: API sources → parquet in data lake → bronze config alignment.
 
 Validates that:
-1. All API source writers resolve to /Users/Shared/data_lake (canonical root)
+1. All API source writers resolve to ~/data/data_lake (canonical root)
 2. Parquet files exist on disk for each active source
 3. sources_config.yaml relative_paths match actual data lake structure
 4. Parquet files are readable and contain expected metadata columns
@@ -22,7 +22,7 @@ pytestmark = pytest.mark.integration
 
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 
-CANONICAL_ROOT = Path("/Users/Shared/data_lake")
+CANONICAL_ROOT = Path.home() / "data" / "data_lake"
 LEGACY_FALLBACK = Path.home() / "health_data_lake"
 
 SOURCES_CONFIG = (
@@ -48,7 +48,7 @@ def sources_config() -> list[dict]:
 
 
 class TestPathResolution:
-    """All writers must resolve to /Users/Shared/data_lake."""
+    """All writers must resolve to ~/data/data_lake."""
 
     def test_data_lake_root_is_canonical(self):
         root = get_data_lake_root()
@@ -130,7 +130,7 @@ class TestSourcesConfigAlignment:
     """sources_config.yaml relative_paths must match data on disk."""
 
     @pytest.mark.parametrize(
-        "source_name,relative_path",
+        "source_system,relative_path",
         [
             ("strava_activities", "strava/raw/activities/**/*.parquet"),
             ("strava_athlete_stats", "strava/raw/athlete_stats/**/*.parquet"),
@@ -145,16 +145,16 @@ class TestSourcesConfigAlignment:
         ],
     )
     def test_config_entry_matches_disk(
-        self, sources_config, source_name: str, relative_path: str
+        self, sources_config, source_system: str, relative_path: str
     ):
         """Verify each config entry exists and its glob resolves to files."""
         # Find entry in config
-        entry = next((s for s in sources_config if s["name"] == source_name), None)
+        entry = next((s for s in sources_config if s["name"] == source_system), None)
         assert (
             entry is not None
-        ), f"Source '{source_name}' missing from sources_config.yaml"
+        ), f"Source '{source_system}' missing from sources_config.yaml"
         assert entry["relative_path"] == relative_path, (
-            f"Path mismatch for {source_name}: "
+            f"Path mismatch for {source_system}: "
             f"config={entry['relative_path']}, expected={relative_path}"
         )
 
@@ -165,7 +165,7 @@ class TestSourcesConfigAlignment:
             pytest.skip(f"{full_path} not yet populated")
         files = list(full_path.rglob("*.parquet"))
         assert len(files) > 0, (
-            f"Config entry '{source_name}' glob resolves to 0 files at "
+            f"Config entry '{source_system}' glob resolves to 0 files at "
             f"{CANONICAL_ROOT / relative_path}"
         )
 

@@ -5,7 +5,7 @@
 # variables, then copies the result to ~/Library/LaunchAgents/.
 #
 # Usage:
-#   DATA_LAKE_ROOT=/Users/Shared/data_lake REPO_ROOT=/path/to/HealthReporting \
+#   DATA_LAKE_ROOT=$HOME/data/data_lake REPO_ROOT=/path/to/HealthReporting \
 #     bash scripts/launchd/install.sh
 
 set -euo pipefail
@@ -13,7 +13,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 TARGET_DIR="$HOME/Library/LaunchAgents"
 
-: "${DATA_LAKE_ROOT:?Set DATA_LAKE_ROOT (e.g. /Users/Shared/data_lake)}"
+: "${DATA_LAKE_ROOT:?Set DATA_LAKE_ROOT (e.g. $HOME/data/data_lake)}"
 : "${REPO_ROOT:?Set REPO_ROOT (e.g. path to HealthReporting checkout)}"
 
 mkdir -p "$TARGET_DIR"

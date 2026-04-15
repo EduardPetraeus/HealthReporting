@@ -30,7 +30,7 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd -P)"
 PLATFORM_ROOT="${REPO_ROOT}/health_unified_platform"
 VENV_PYTHON="${REPO_ROOT}/.venv/bin/python3"
 VENV_AI_PYTHON="${REPO_ROOT}/.venv-ai/bin/python3"
-LOG_DIR="${HEALTH_LOG_DIR:-/Users/Shared/data_lake/logs/daily_sync}"
+LOG_DIR="${HEALTH_LOG_DIR:-${HOME}/data/data_lake/logs/daily_sync}"
 LOG_FILE="${LOG_DIR}/$(date +%Y-%m-%d).log"
 HEALTH_ENV="${HEALTH_ENV:-dev}"
 NTFY_TOPIC="${NTFY_TOPIC:-}"
@@ -47,6 +47,8 @@ fi
 # Resolve data lake root and DB path via paths.py (cross-platform)
 HEALTH_DB_PATH=$("${VENV_PYTHON}" -c "from health_platform.utils.paths import get_db_path; print(get_db_path())")
 export HEALTH_DB_PATH
+PIPELINE_RUN_ID=$(uuidgen | tr '[:upper:]' '[:lower:]')
+export PIPELINE_RUN_ID
 
 # Validate NTFY_TOPIC (only allow safe chars for URL)
 if [[ -n "${NTFY_TOPIC}" && ! "${NTFY_TOPIC}" =~ ^[a-zA-Z0-9_-]+$ ]]; then

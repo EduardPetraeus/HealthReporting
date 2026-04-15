@@ -6,6 +6,7 @@ Usage:   python csv_to_parquet.py --input <csv_path> --output <output_dir> [opti
 """
 
 import argparse
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -84,7 +85,10 @@ def main():
     logger.debug(f"Source name: {source_name}")
     logger.debug(f"Compression: {compression or 'none'}")
 
-    with AuditLogger("csv_to_parquet", "extract", source_name) as audit:
+    pipeline_run_id = os.environ.get("PIPELINE_RUN_ID")
+    with AuditLogger(
+        "csv_to_parquet", "extract", source_name, pipeline_run_id=pipeline_run_id
+    ) as audit:
         # Read CSV
         try:
             df = pd.read_csv(

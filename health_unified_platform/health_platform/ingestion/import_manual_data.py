@@ -19,6 +19,7 @@ Usage:
 from __future__ import annotations
 
 import hashlib
+import os
 
 import duckdb
 import yaml
@@ -61,7 +62,9 @@ def ensure_tables(con: duckdb.DuckDBPyConnection) -> None:
             sql = schema_file.read_text()
             for stmt in sql.split(";"):
                 lines = [
-                    line for line in stmt.strip().splitlines() if not line.strip().startswith("--")
+                    line
+                    for line in stmt.strip().splitlines()
+                    if not line.strip().startswith("--")
                 ]
                 cleaned = "\n".join(lines).strip()
                 if cleaned:
@@ -403,7 +406,9 @@ def _merge_via_staging(
 ) -> None:
     """Generic staging-table MERGE for small static tables."""
     if target_table not in _ALLOWED_MERGE_TARGETS:
-        raise ValueError(f"Merge target '{target_table}' is not in the allowed table list")
+        raise ValueError(
+            f"Merge target '{target_table}' is not in the allowed table list"
+        )
     staging = f"{target_table}__staging"
     con.execute(f"DROP TABLE IF EXISTS {staging}")
     con.execute(f"CREATE TABLE {staging} AS SELECT * FROM {target_table} WHERE false")
@@ -437,7 +442,9 @@ def _merge_via_staging(
     con.execute(f"DROP TABLE IF EXISTS {staging}")
 
 
-def import_patient_demographics(con: duckdb.DuckDBPyConnection, audit: AuditLogger) -> int:
+def import_patient_demographics(
+    con: duckdb.DuckDBPyConnection, audit: AuditLogger
+) -> int:
     """Import patient demographics YAML into 5 silver tables."""
     if not DEMOGRAPHICS_FILE.exists():
         logger.warning(f"Demographics file not found: {DEMOGRAPHICS_FILE}")
@@ -524,7 +531,9 @@ def import_patient_demographics(con: duckdb.DuckDBPyConnection, audit: AuditLogg
     for item in data.get("vaccinations", []):
         vaccine = item["vaccine"]
         bk = md5_hash(vaccine)
-        rh = md5_hash(item.get("coverage", ""), str(item.get("year", "")), item.get("notes", ""))
+        rh = md5_hash(
+            item.get("coverage", ""), str(item.get("year", "")), item.get("notes", "")
+        )
         vax_rows.append(
             (
                 vaccine,
@@ -658,7 +667,10 @@ def update_patient_profile(con: duckdb.DuckDBPyConnection) -> None:
         ).fetchall()
 
         for report_name, result_summary, platform_relevance in genetic_rows:
-            key = "genetic_" + report_name.lower().replace(" ", "_").replace("-", "_")[:40]
+            key = (
+                "genetic_"
+                + report_name.lower().replace(" ", "_").replace("-", "_")[:40]
+            )
             description = platform_relevance or report_name
             _upsert_profile(
                 con,
@@ -970,7 +982,9 @@ def update_health_graph(con: duckdb.DuckDBPyConnection) -> None:
             desc = f"Supplement targeting {target}." if target else "Active supplement."
             if dose_str:
                 desc = f"{dose_str}. {desc}"
-            nodes.append((node_id, "supplement", name, desc, "supplement_log", "supplement_name"))
+            nodes.append(
+                (node_id, "supplement", name, desc, "supplement_log", "supplement_name")
+            )
     except Exception as exc:
         logger.warning("Could not read supplements for health graph: %s", exc)
 
@@ -985,7 +999,9 @@ def update_health_graph(con: duckdb.DuckDBPyConnection) -> None:
             desc = notes or f"Family history: {relation} with {condition}"
             if fh_status:
                 desc += f" ({fh_status})"
-            nodes.append((node_id, "family_history", label, desc, "family_history", "relation"))
+            nodes.append(
+                (node_id, "family_history", label, desc, "family_history", "relation")
+            )
     except Exception as exc:
         logger.warning("Could not read family history for health graph: %s", exc)
 
@@ -1234,7 +1250,10 @@ def main() -> None:
         ensure_schemas(con)
         ensure_tables(con)
 
-        with AuditLogger("import_manual_data", "silver", "manual") as audit:
+        pipeline_run_id = os.environ.get("PIPELINE_RUN_ID")
+        with AuditLogger(
+            "import_manual_data", "silver", "manual", pipeline_run_id=pipeline_run_id
+        ) as audit:
             lab_count = import_lab_results(con, audit)
             supp_count = import_supplements(con, audit)
             gen_count = import_genetic_profile(con, audit)

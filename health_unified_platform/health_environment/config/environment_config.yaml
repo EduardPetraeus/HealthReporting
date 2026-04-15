@@ -3,13 +3,13 @@
 
 paths:
   # The root directory for all health data (raw, silver, gold)
-  data_lake_root: "/Users/Shared/data_lake"
-  
+  data_lake_root: "${HOME}/data/data_lake"
+
   # Centralized location for all execution logs inside the data lake
-  log_root: "/Users/Shared/data_lake/logs"
-  
+  log_root: "${HOME}/data/data_lake/logs"
+
   # The central folder for database files, kept outside the code base
-  db_root: "/Users/Shared/data_lake/database"
+  db_root: "${HOME}/data/data_lake/database"
 
 defaults:
   # The default execution environment (e.g., dev, prd)

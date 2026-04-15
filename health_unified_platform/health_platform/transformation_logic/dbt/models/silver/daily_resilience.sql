@@ -15,7 +15,7 @@ select
     null::double     as daytime_recovery,
     null::double     as stress,
     null::varchar    as level,
-    null::varchar    as source_name,
+    null::varchar    as source_system,
     null::varchar    as business_key_hash,
     null::varchar    as row_hash,
     null::timestamp  as load_datetime,

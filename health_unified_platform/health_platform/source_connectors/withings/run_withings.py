@@ -50,7 +50,10 @@ ENDPOINTS: list[tuple[str, str, str]] = [
 def main() -> None:
     logger.info(f"Withings pipeline starting [env: {SOURCE_ENV}]")
 
-    with AuditLogger("run_withings", "extract", "withings") as audit:
+    pipeline_run_id = os.environ.get("PIPELINE_RUN_ID")
+    with AuditLogger(
+        "run_withings", "extract", "withings", pipeline_run_id=pipeline_run_id
+    ) as audit:
         access_token = get_access_token()
         client = WithingsClient(access_token)
         state = load_state()
