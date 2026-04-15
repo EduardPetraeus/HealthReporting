@@ -55,7 +55,6 @@ typing_extensions==4.15.0
 tzdata==2025.3
 urllib3==2.6.3
 zipp==3.23.0
-black==26.3.1
 filelock>=3.20.3
 # AI-native data model dependencies
 mcp>=1.0.0
